@@ -1,0 +1,44 @@
+{
+  "editors": [
+    {
+      "id": "github-copilot",
+      "name": "GitHub Copilot",
+      "description": "VS Code GitHub Copilot Chat Agent 模式",
+      "skillFormat": "SKILL.md with YAML frontmatter (applyTo: glob)",
+      "installPath": ".vscode/",
+      "headerFile": "headers/github-copilot.txt"
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "description": "Cursor AI 编辑器 .mdc 规则文件",
+      "skillFormat": ".mdc files with YAML frontmatter (globs:)",
+      "installPath": ".cursor/rules/",
+      "headerFile": "headers/cursor-mdc.txt"
+    },
+    {
+      "id": "windsurf",
+      "name": "Windsurf",
+      "description": "Windsurf AI 编辑器规则文件",
+      "skillFormat": "Plain markdown, no frontmatter",
+      "installPath": ".windsurf/rules/",
+      "headerFile": "headers/windsurf.txt"
+    },
+    {
+      "id": "kiro",
+      "name": "Kiro",
+      "description": "Kiro AI 编辑器 steering 文档",
+      "skillFormat": "Markdown with YAML frontmatter (inclusion: manual)",
+      "installPath": ".kiro/steering/",
+      "headerFile": "headers/kiro.txt"
+    },
+    {
+      "id": "trae",
+      "name": "Trae",
+      "description": "Trae AI 编辑器规则文件",
+      "skillFormat": "Markdown with description frontmatter",
+      "installPath": ".trae/rules/",
+      "headerFile": "headers/trae.txt"
+    }
+  ]
+}

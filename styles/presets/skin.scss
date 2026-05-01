@@ -1,0 +1,14 @@
+// styles/presets/skin.scss — 化妆模式（老项目专用）
+// 包含：L0 tokens + L1 element + L2 vendors（不包含 L3 layouts，避免冲击老项目布局）
+//
+// 适用场景：
+//   - 老项目已有自己的 layout / 容器 class
+//   - 不想引入新的 .list-page / .tree-list 骨架
+//   - 只想"化个妆"统一控件视觉
+//
+// 使用：
+//   @use '@agile-team/wk-skills-ui/styles/presets/skin' as *;
+
+@forward '../tokens/index';
+@forward '../element/index';
+@forward '../vendors/index';

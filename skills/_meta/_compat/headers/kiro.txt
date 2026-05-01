@@ -1,0 +1,4 @@
+---
+inclusion: manual
+description: {SKILL_DESCRIPTION}
+---

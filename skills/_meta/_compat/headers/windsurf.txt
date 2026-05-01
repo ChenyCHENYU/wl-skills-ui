@@ -1,0 +1,5 @@
+# {SKILL_NAME}
+
+<!-- Windsurf 规则文件：直接放入 .windsurf/rules/ 目录，无需 frontmatter -->
+<!-- 文件名建议：wk-skills-{skill-id}.md -->
+

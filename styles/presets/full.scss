@@ -1,0 +1,12 @@
+// styles/presets/full.scss — 完整接入预设（默认推荐 / 新项目）
+// 包含：L0 tokens + L1 element + L2 vendors + L3 layouts
+//
+// 使用：
+//   @use '@agile-team/wk-skills-ui/styles' as *;
+//   // 等价于：
+//   @use '@agile-team/wk-skills-ui/styles/presets/full' as *;
+
+@forward '../tokens/index';
+@forward '../element/index';
+@forward '../vendors/index';
+@forward '../layouts/index';

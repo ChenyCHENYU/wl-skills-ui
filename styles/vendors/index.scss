@@ -1,0 +1,17 @@
+// styles/vendors/index.scss — Vendors 层（L2 化妆层）汇总
+//
+// 加载顺序：从最高优先级到兜底（同选择器特异性下，后加载会覆盖前面）
+// 优先级约定（v3 团队规范）：
+//   Base*  >  jh-*  >  C_*/c_*  >  custom wrappers
+// → 但 SCSS 加载顺序里我们反过来：兜底先加载，让高优先级覆盖
+
+@forward './_portal';            // 弹层/popper 通用（基础设施层）
+@forward './_ag-grid';           // AG Grid 完整主题
+@forward './_custom-wrappers';   // 兜底：野路子自封装
+@forward './_c-components';      // C_/c_ 前缀
+@forward './_jh-tree';           // jh-tree
+@forward './_jh-pagination';     // jh-pagination
+@forward './_jh-drag-col';       // jh-drag-col（含左树右表骨架）
+@forward './_base-query-toolbar';// BaseQuery / BaseToolbar
+@forward './_base-components';   // Base* 通用（操作按钮组、徽标、tag）
+@forward './_base-table';        // BaseTable（最高优先级）

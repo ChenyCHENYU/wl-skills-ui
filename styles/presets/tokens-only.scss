@@ -1,0 +1,7 @@
+// styles/presets/tokens-only.scss — 仅设计令牌
+// 适用：只想引入色板/间距/圆角变量，自己控制所有控件样式
+// 注：本文件目前为空（tokens 通过 design/tokens/base.css 注入到 :root）
+// 仅 SCSS 工程链需要时使用：
+//   @use '@agile-team/wk-skills-ui/styles/presets/tokens-only' as *;
+
+@forward '../tokens/index';

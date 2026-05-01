@@ -1,0 +1,19 @@
+// styles/layouts/_form-dialog.scss — 表单弹窗骨架（el-dialog 内部一致性）
+// 适用：所有 add/edit/view 模式的弹窗
+//
+// 【DOM 约定】el-dialog 内部 .form-dialog__body / .form-dialog__footer
+
+.form-dialog {
+  &__body {
+    padding: 0 8px;
+    .el-form-item {
+      margin-bottom: 12px;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}

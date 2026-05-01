@@ -1,0 +1,5 @@
+---
+description: {SKILL_DESCRIPTION}
+globs: {APPLY_GLOB}
+alwaysApply: false
+---

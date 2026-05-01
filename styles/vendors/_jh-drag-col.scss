@@ -1,0 +1,63 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 左树右表布局 + 拖拽分割条 — wl-ui-safe 统一设计规范
+// 适用：所有 jh-drag-col 左树右表结构页面
+// 维护：只改这一个文件，全项目生效
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// ── 拖拽分割条 — 极简细线 + grip dots ────────────────────────────────────────
+html .drag-col-container > .slider-col {
+  background: linear-gradient(
+    to right,
+    transparent 4px,
+    var(--el-border-color-light) 4px,
+    var(--el-border-color-light) 5px,
+    transparent 5px
+  ) !important;
+  transition: background 0.2s !important;
+
+  &::before { display: none !important; }
+
+  &::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 4px !important;
+    height: 4px !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    border-radius: 50% !important;
+    background-color: var(--el-border-color) !important;
+    box-shadow: 0 -8px 0 var(--el-border-color), 0 8px 0 var(--el-border-color) !important;
+    transition: background-color 0.2s, box-shadow 0.2s !important;
+    opacity: 0.6;
+  }
+
+  &:hover {
+    background: linear-gradient(
+      to right,
+      rgba(67, 104, 255, 0.06) 3px,
+      var(--el-color-primary) 3px,
+      var(--el-color-primary) 7px,
+      rgba(67, 104, 255, 0.06) 7px
+    ) !important;
+
+    &::after {
+      background-color: var(--el-color-primary) !important;
+      box-shadow: 0 -8px 0 var(--el-color-primary), 0 8px 0 var(--el-color-primary) !important;
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    background: linear-gradient(
+      to right,
+      rgba(67, 104, 255, 0.1) 2.5px,
+      var(--el-color-primary) 2.5px,
+      var(--el-color-primary) 7.5px,
+      rgba(67, 104, 255, 0.1) 7.5px
+    ) !important;
+  }
+}

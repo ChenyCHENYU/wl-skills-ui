@@ -1,0 +1,7 @@
+// styles/element/index.scss — Element Plus 覆盖层汇总
+// 前置：design/tokens/base.css 必须最先在 index.html 中加载
+
+@forward './pagination';
+@forward './form';
+@forward './table';
+@forward './dialog';

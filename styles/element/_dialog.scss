@@ -1,0 +1,10 @@
+// styles/element/_dialog.scss — el-dialog / el-message-box 覆盖
+
+.el-message-box .el-message-box__status {
+  top: 12px !important;
+}
+
+// jh-ui dialog.scss 标题色为硬编码 #262626，覆盖为 Token
+html .el-dialog__title {
+  color: var(--el-text-color-primary);
+}

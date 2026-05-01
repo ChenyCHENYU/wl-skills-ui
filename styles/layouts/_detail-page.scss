@@ -1,0 +1,27 @@
+// styles/layouts/_detail-page.scss — 详情页骨架（描述列表 + 卡片）
+
+.detail-page {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__header {
+    background: var(--el-bg-color, #fff);
+    padding: 16px;
+    border-radius: var(--el-border-radius-base, 4px);
+  }
+
+  &__section {
+    background: var(--el-bg-color, #fff);
+    padding: 16px;
+    border-radius: var(--el-border-radius-base, 4px);
+
+    > h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 12px;
+      color: var(--el-text-color-primary);
+    }
+  }
+}

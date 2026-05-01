@@ -1,0 +1,81 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 分页器统一样式 — wl-ui-safe 设计规范
+// 适用：el-pagination / jh-pagination
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.el-pagination {
+  font-size: 12px;
+  gap: 2px;
+
+  // 页码按钮
+  .el-pager .number {
+    border-radius: 4px !important;
+    font-size: 12px;
+    min-width: 26px;
+    height: 26px;
+    line-height: 26px;
+    transition: background-color 0.12s, color 0.12s;
+
+    &:hover {
+      color: var(--el-color-primary) !important;
+      background-color: rgba(67, 104, 255, 0.06) !important;
+    }
+
+    // 当前页 → 品牌蓝填充
+    &.is-active {
+      background-color: var(--el-color-primary) !important;
+      color: #ffffff !important;
+      border-radius: 4px !important;
+      font-weight: 600;
+    }
+  }
+
+  // 省略号
+  .el-pager .more {
+    font-size: 12px;
+    min-width: 26px;
+    height: 26px;
+    line-height: 26px;
+    border-radius: 4px !important;
+  }
+
+  // 上/下一页按钮
+  .btn-prev,
+  .btn-next {
+    border-radius: 4px !important;
+    min-width: 26px;
+    height: 26px;
+    line-height: 26px;
+    transition: background-color 0.12s, color 0.12s;
+
+    &:hover:not(:disabled) {
+      color: var(--el-color-primary) !important;
+      background-color: rgba(67, 104, 255, 0.06) !important;
+    }
+
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
+  // "共 X 条" 文字
+  .el-pagination__total {
+    font-size: 12px;
+    color: var(--el-text-color-regular);
+  }
+
+  // 每页条数选择
+  .el-pagination__sizes .el-select__wrapper {
+    font-size: 12px;
+    height: 26px;
+    border-radius: 4px !important;
+  }
+
+  // 跳页输入框
+  .el-pagination__jump {
+    font-size: 12px;
+
+    .el-input__wrapper {
+      border-radius: 4px !important;
+      height: 26px;
+    }
+    .el-input__inner { font-size: 12px; }
+  }
+}

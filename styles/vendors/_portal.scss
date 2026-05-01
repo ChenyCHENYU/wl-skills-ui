@@ -1,0 +1,114 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// wk-skills-ui — Portal / 远程 public 模块视觉增强（可选模块）
+// 来源：wl-safe src/assets/style/element.scss 中 .portal-* 段落
+// 仅当业务系统嵌入了相同的 jh4j-cloud-ui-public Portal 模块时引入
+// 用法： @use 'wk-skills-ui/dist/portal.scss';
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// 主背景：双径向渐变替换纯灰
+html body .portal-main {
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(67, 104, 255, 0.09) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 85%, rgba(99, 102, 241, 0.07) 0%, transparent 45%),
+    #eef0f8 !important;
+}
+
+// 顶栏：毛玻璃效果
+html body .portal-header {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 1px 16px rgba(67, 104, 255, 0.08) !important;
+  border-bottom: 1px solid rgba(67, 104, 255, 0.07) !important;
+}
+
+// 平台标题：蓝紫渐变文字
+html body .portal-text {
+  background: linear-gradient(135deg, #4368ff 0%, #6366f1 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  font-weight: 700 !important;
+}
+
+// 左侧 banner 图：加圆角+阴影
+html body .portal-bg {
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 32px rgba(67, 104, 255, 0.12) !important;
+}
+
+// 综合待办卡片：玻璃质感
+html body .portal-zh {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(67, 104, 255, 0.12) !important;
+  box-shadow: 0 8px 32px rgba(67, 104, 255, 0.1) !important;
+  overflow: hidden !important;
+}
+
+// 通知待办 Tab 激活下划线
+html body .portal-tabs .el-tabs__active-bar {
+  background: linear-gradient(90deg, #4368ff 0%, #6366f1 100%) !important;
+}
+html body .portal-tabs .el-tabs__item.is-active {
+  color: #4368ff !important;
+  font-weight: 600 !important;
+}
+html body .portal-tabs .el-tabs__item:hover {
+  color: #4368ff !important;
+}
+
+// 子系统区域卡片：玻璃质感
+html body .portal-mainBottom .portal-content,
+html body .portal-mainMiddle {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(67, 104, 255, 0.12) !important;
+  box-shadow: 0 8px 32px rgba(67, 104, 255, 0.1) !important;
+  overflow: hidden !important;
+}
+
+// 子系统图标卡：悬停上浮动效
+html body .portal-childrenSystem {
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  cursor: pointer !important;
+
+  &:hover {
+    transform: translateY(-8px) scale(1.08) !important;
+  }
+
+  &:hover .children-name {
+    color: var(--el-color-primary, #4368ff) !important;
+    font-weight: 600 !important;
+  }
+}
+
+// 区块标题左竖线：蓝紫渐变
+html body .portal-line {
+  background: linear-gradient(180deg, #4368ff 0%, #6366f1 100%) !important;
+  border-radius: 2px !important;
+}
+
+// 区块标题文字
+html body .portal-font {
+  color: var(--el-text-color-primary, #303133) !important;
+  font-weight: 600 !important;
+}
+
+// 消息数量角标：主色背景
+html body .portal-tabs-label .num {
+  background: var(--el-color-primary, #4368ff) !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+}
+
+// 消息行 hover
+html body .portal-tabs-row:hover {
+  color: var(--el-color-primary, #4368ff) !important;
+}

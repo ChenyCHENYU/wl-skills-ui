@@ -1,0 +1,33 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// styles/layouts/_tree-list.scss — 左树右表骨架（不含 jh-drag-col 实现）
+// 适用：左侧组织/分类树 + 右侧数据列表的双栏页面
+//
+// 【DOM 结构约定】
+//   <div class="tree-list">
+//     <div class="tree-list__aside">  左树
+//     <div class="tree-list__main">   右侧 list-page
+//
+// 注：使用 jh-drag-col 的项目，其样式由 vendors/_jh-drag-col.scss 提供，
+//     本文件仅提供基础 flex 骨架，二者可叠加使用。
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+.tree-list {
+  display: flex;
+  height: 100%;
+  gap: 12px;
+
+  &__aside {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--el-bg-color, #fff);
+    border-radius: var(--el-border-radius-base, 4px);
+    padding: 12px;
+    overflow: auto;
+  }
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+}

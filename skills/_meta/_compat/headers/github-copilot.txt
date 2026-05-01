@@ -1,0 +1,5 @@
+---
+description: |
+  {SKILL_DESCRIPTION}
+applyTo: "{APPLY_GLOB}"
+---

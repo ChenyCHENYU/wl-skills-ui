@@ -1,0 +1,6 @@
+// styles/presets/element-only.scss — 仅 Element Plus 对齐预设
+// 包含：L0 tokens + L1 element
+// 适用：只用原生 Element Plus、没有自封装的小型项目
+
+@forward '../tokens/index';
+@forward '../element/index';

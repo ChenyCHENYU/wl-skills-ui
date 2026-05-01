@@ -1,0 +1,22 @@
+// styles/element/_form.scss — el-form / el-input 覆盖
+
+.el-form-item--small {
+  margin-bottom: 8px;
+}
+
+// 解决 el-form-item 出现错误提示时底部 margin 增加的问题
+.is-error.el-form-item--small {
+  margin-bottom: 18px !important;
+}
+
+// ── 全局输入框圆角统一（6px，与搜索区保持一致）──────────────────────────────
+.el-input__wrapper {
+  border-radius: 6px;
+}
+.el-select .el-select__wrapper {
+  border-radius: 6px;
+}
+.el-date-editor.el-input__wrapper,
+.el-date-editor .el-input__wrapper {
+  border-radius: 6px;
+}

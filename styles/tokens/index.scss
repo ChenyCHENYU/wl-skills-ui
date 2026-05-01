@@ -1,0 +1,7 @@
+// styles/tokens/index.scss — Design Tokens（L0）转发到 design/tokens
+// 注：tokens 是 CSS 变量，物理位置在 design/tokens/base.css；
+// SCSS 工程统一通过 @use 'wk-skills-ui/design/tokens' 加载 CSS。
+// 此处保留一个 SCSS 入口便于未来扩展 SCSS 变量层（$wk-spacing-* 等）。
+
+// 当前阶段：tokens 仅以 CSS 变量形式提供，本文件为空占位。
+// 用户应在 index.html <link rel="stylesheet" href=".../design/tokens/base.css">

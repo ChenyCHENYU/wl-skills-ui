@@ -1,0 +1,34 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// styles/vendors/_c-components.scss — C_*/c_* 前缀组件覆盖
+// 适用：未来团队约定以 C_/c_ 开头的项目自封装组件
+// 优先级：v3 化妆模式中第三优先（Base > jh > C_/c_ > custom）
+//
+// 【识别规则】
+//   - 标签：<C_Form> / <C_Table> / <c-form> / <c-table> ...
+//   - 类名：.c-form / .c-table / [class^='c-'] / [class^='C_']
+//   - 文件路径：通常在 src/components/C*/ 或 src/business/c-*/
+//
+// 【填充指引】
+//   未来当具体的 C_* 组件确定下来时，在本文件按 element-plus 控件的视觉
+//   规范追加覆盖；保持选择器精确（带 .c- 前缀），避免污染。
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// ── 占位：保持表头/输入框/按钮统一 ───────────────────────────────────────────
+.c-form,
+[class^='c-form'],
+[class^='C_Form'] {
+  // el-form-item 间距对齐（已由 element/_form.scss 提供，这里补封装层 wrapper）
+  .el-form-item {
+    margin-bottom: 12px;
+  }
+}
+
+.c-table,
+[class^='c-table'],
+[class^='C_Table'] {
+  .el-table__header-wrapper th {
+    background-color: var(--wk-table-header-bg, #f5f7fa) !important;
+  }
+}
+
+// ── 扩展位（按需追加） ───────────────────────────────────────────────────────

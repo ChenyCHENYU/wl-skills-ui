@@ -1,0 +1,41 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// styles/vendors/_base-table.scss — BaseTable / <base-table> 系列封装组件覆盖
+// 适用：所有以 Base 前缀的表格类封装（BaseTable / BaseDataTable / BaseList...）
+// 优先级：v3 化妆模式中 Base* 组件最优先（团队约定主流封装）
+//
+// 【识别规则（供 scanner / AI 使用）】
+//   - 标签：<BaseTable> / <base-table> / <BaseDataTable>
+//   - 类名：.base-table-wrapper / .base-table-container / .base-table-* 
+//   - props：通常包含 columns / data / hook / renderType
+//
+// 【设计语言】对齐 Element Plus el-table 的视觉规范（参见 element/_table.scss）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// 容器层 — 与页面边距对齐
+.base-table-wrapper,
+.base-table-container,
+[class^='base-table-'],
+[class*=' base-table-'] {
+  background: var(--el-bg-color, #fff);
+  border-radius: var(--el-border-radius-base, 4px);
+  overflow: hidden;
+}
+
+// 表头颜色对齐（防 BaseTable 内部 el-table 没继承到全局覆盖）
+.base-table-wrapper {
+  .el-table__header-wrapper th,
+  .el-table th.el-table__cell {
+    background-color: var(--wk-table-header-bg, #f5f7fa) !important;
+    color: var(--wk-table-header-color, #303133);
+    font-weight: 500;
+  }
+
+  // 操作按钮组复用 .ops-icons 类
+  .el-button.is-text + .el-button.is-text {
+    margin-left: 4px;
+  }
+}
+
+// ── 扩展位 ────────────────────────────────────────────────────────────────────
+// 当业务侧 BaseTable 有更多结构性 class（如 base-table__toolbar / base-table__footer），
+// 在这里继续追加，不要污染全局选择器。

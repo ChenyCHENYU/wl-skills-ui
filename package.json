@@ -1,0 +1,86 @@
+{
+  "name": "@agile-team/wk-skills-ui",
+  "version": "1.3.0",
+  "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 项目通用化妆/原生双模式（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
+  "type": "module",
+  "main": "./es/index.js",
+  "exports": {
+    ".": {
+      "import": "./es/index.js",
+      "types": "./es/index.d.ts"
+    },
+    "./runtime": {
+      "import": "./es/index.js",
+      "types": "./es/index.d.ts"
+    },
+    "./runtime/common-preset": {
+      "import": "./es/common-preset.js",
+      "types": "./es/common-preset.d.ts"
+    },
+    "./styles": "./styles/index.scss",
+    "./styles/*": "./styles/*",
+    "./design/tokens": "./design/tokens/index.css",
+    "./design/tokens/*": "./design/tokens/*",
+    "./dist": "./dist/index.scss",
+    "./dist/tokens.css": "./dist/tokens.css",
+    "./dist/portal.scss": "./dist/portal.scss",
+    "./dist/*": "./dist/*",
+    "./standards/*": "./standards/*",
+    "./skills/*": "./skills/*",
+    "./templates/*": "./templates/*",
+    "./SKILL.md": "./SKILL.md"
+  },
+  "bin": {
+    "wk-ui": "bin/wk-ui.js",
+    "wk-scan": "scanner/index.mjs"
+  },
+  "scripts": {
+    "build": "tsup",
+    "prepare": "tsup",
+    "scan": "node scanner/index.mjs scan",
+    "check": "node scanner/index.mjs check",
+    "fix": "node scanner/index.mjs fix",
+    "all": "node scanner/index.mjs all"
+  },
+  "files": [
+    "dist",
+    "es",
+    "scanner",
+    "standards",
+    "styles",
+    "design",
+    "skills",
+    "templates",
+    "bin",
+    "SKILL.md",
+    "README.md"
+  ],
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "typescript": "^5.4.0"
+  },
+  "peerDependencies": {
+    "vue": ">=3.2",
+    "element-plus": ">=2.2",
+    "@element-plus/icons-vue": ">=2.0"
+  },
+  "peerDependenciesMeta": {
+    "@element-plus/icons-vue": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "element-plus",
+    "ag-grid",
+    "design-tokens",
+    "ui-alignment",
+    "linter",
+    "copilot-skill"
+  ],
+  "license": "UNLICENSED"
+}

@@ -1,0 +1,413 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 通用组件样式 — wl-ui-safe 统一设计规范
+// 包含：操作按钮组、状态标签、徽标、兼容旧按钮
+// 适用：所有 AG Grid 单元格内的交互组件
+// 维护：只改这一个文件，全项目生效
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// ── 操作列图标按钮组 ──────────────────────────────────────────────────────────
+// 用法（Vue h 函数）：
+//   import { renderOps } from '@/util/ag-cell-renders';
+//   defaultSlot: ({ row }) => renderOps([
+//     { type: 'view', onClick: () => modal.open(row.id, 'view') },
+//     { type: 'edit', onClick: () => modal.open(row.id, 'edit') },
+//     { type: 'del',  onClick: () => handleDel(row.id) },
+//     { type: 'chip', label: '流程', onClick: () => showLog(row) },
+//     { type: 'link', label: '维护排查标准', onClick: () => openStd(row) },
+//   ])
+.jh-op-group {
+  display: flex;
+  gap: 4px;            // 宽松 4px，不紧凑
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+// ── 第一层：纯图标按钮（26×26px，hover 变语义色）──────────────────────────
+.jh-op-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background: transparent;
+  transition: background-color 0.13s ease, color 0.13s ease;
+  flex-shrink: 0;
+
+  svg { width: 14px; height: 14px; }
+  &:active { opacity: 0.6; transform: scale(0.92); }
+
+  // 查看 — hover 蓝
+  &.jh-op-view {
+    color: #C0C4CC;
+    &:hover { color: #2563EB; background: rgba(37, 99, 235, 0.09); }
+  }
+  // 编辑 — hover 翠绿
+  &.jh-op-edit {
+    color: #C0C4CC;
+    &:hover { color: #059669; background: rgba(5, 150, 105, 0.09); }
+  }
+  // 删除/作废 — hover 红
+  &.jh-op-del {
+    color: #C0C4CC;
+    &:hover { color: #DC2626; background: rgba(220, 38, 38, 0.09); }
+  }
+  // 记录 — hover 靛蓝
+  &.jh-op-log {
+    color: #C0C4CC;
+    &:hover { color: #4F46E5; background: rgba(79, 70, 229, 0.09); }
+  }
+  // 审核 — hover 翠绿
+  &.jh-op-ok {
+    color: #C0C4CC;
+    &:hover { color: #059669; background: rgba(5, 150, 105, 0.09); }
+  }
+  // 提交 — hover 主色
+  &.jh-op-send {
+    color: #C0C4CC;
+    &:hover { color: var(--el-color-primary, #4368ff); background: rgba(67, 104, 255, 0.09); }
+  }
+  // 保存（内联表格用）— hover 翠绿
+  &.jh-op-save {
+    color: #C0C4CC;
+    &:hover { color: #059669; background: rgba(5, 150, 105, 0.09); }
+    &:disabled { opacity: 0.45; cursor: not-allowed; }
+  }
+  // 取消（内联表格用）— hover 中灰
+  &.jh-op-cancel {
+    color: #C0C4CC;
+    &:hover { color: #6B7280; background: rgba(107, 114, 128, 0.10); }
+  }
+}
+
+// ── 竖分隔线（图标组与文字组之间）────────────────────────────────────────────
+.jh-op-sep {
+  display: inline-block;
+  width: 1px;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.10);
+  flex-shrink: 0;
+  margin: 0 1px;
+}
+
+// ── 第二层：胶囊按钮（图标+短文字，圆角胶囊，半通用操作）────────────────────
+// 视觉：极轻灰底 → hover 淡蓝底+主色文字，圆润胶囊感
+.jh-op-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 8px 0 6px;
+  border-radius: 99px;
+  border: none;
+  background: rgba(0, 0, 0, 0.04);
+  color: #6B7280;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  white-space: nowrap;
+  transition: background 0.13s, color 0.13s;
+  flex-shrink: 0;
+
+  svg { width: 12px; height: 12px; flex-shrink: 0; }
+  &:hover {
+    background: rgba(67, 104, 255, 0.10);
+    color: var(--el-color-primary, #4368ff);
+  }
+  &:active { opacity: 0.65; transform: scale(0.96); }
+}
+
+// ── 第三层：文字按钮（业务专属长名称）────────────────────────────────────────
+// 设计原则：纯文字链接风格，无边框无背景，靠颜色区分"动作"和"状态标签"
+// 状态标签 = 有颜色填充的矩形框；动作按钮 = 只有颜色的文字（点击语义）
+// 参考：Ant Design Button type="link"、GitHub table inline action
+.jh-op-link {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--el-color-primary, #4368ff);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  transition: background 0.13s, color 0.13s;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(67, 104, 255, 0.08);
+    color: var(--el-color-primary, #4368ff);
+  }
+  &:active { opacity: 0.55; }
+}
+
+// ── 状态标签 — 精致小标签（GitHub/Linear label 风格）────────────────────────
+// 实色填充 + 轻柔圆角 + 克制字号
+.ag-cell .el-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 20px !important;
+  line-height: 1 !important;
+  padding: 0 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  border-radius: 4px !important;
+  border: none !important;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+
+  &.el-tag--danger  { background: #DC2626 !important; color: #fff !important; }
+  &.el-tag--warning { background: #EA580C !important; color: #fff !important; }
+  &.el-tag--success { background: #059669 !important; color: #fff !important; }
+  &.el-tag--info    { background: #4F46E5 !important; color: #fff !important; }
+
+  // type="" 时无修饰类
+  &:not(.el-tag--danger):not(.el-tag--warning):not(.el-tag--success):not(.el-tag--info) {
+    background: #4F46E5 !important;
+    color: #fff !important;
+  }
+}
+
+// ── 数值型徽标（考核基数/评分等）────────────────────────────────────────────
+.jh-count-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(103, 194, 58, 0.08);
+  color: #3e8a1f;
+  border-radius: 4px;
+  font-family: 'SFMono-Regular', 'Consolas', 'Monaco', monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border: 1px solid rgba(103, 194, 58, 0.22);
+  white-space: nowrap;
+}
+
+// ── 风险点编号徽标 ────────────────────────────────────────────────────────────
+.jh-riskno-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(99, 102, 241, 0.08);
+  color: #4338CA;
+  border-radius: 4px;
+  font-family: 'SFMono-Regular', 'Consolas', 'Monaco', monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ── 评价级别圆形徽标 ──────────────────────────────────────────────────────────
+// 颜色通过 Vue 内联 style 传入 --lv-bg / --lv-color
+.jh-rating-lv {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--lv-bg, rgba(107, 114, 128, 0.12));
+  color: var(--lv-color, #374151);
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+// ── jh-cell-tag：轻量纯 CSS 状态标签（供 ag-cell-renders.ts 的 renderTagSlot 使用）────
+// 无需引入 Element Plus el-tag，适合 ag grid defaultSlot 渲染
+.jh-cell-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1;
+
+  &--success { background: rgba(5, 150, 105, 0.12); color: #065F46; }
+  &--warning { background: rgba(245, 158, 11, 0.12); color: #78350F; }
+  &--danger  { background: rgba(220, 38, 38, 0.12);  color: #991B1B; }
+  &--info    { background: rgba(99, 102, 241, 0.10); color: #3730A3; }
+  &--default { background: rgba(99, 102, 241, 0.10); color: #3730A3; }
+}
+
+// ── 兼容旧 el-button 操作列（其他页面渐进迁移）──────────────────────────────.ag-cell .el-button + .el-button { margin-left: 4px; }
+
+.ag-cell .el-button.el-button--link,
+.ag-cell .el-button.el-button--text {
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  font-size: 12px !important;
+  transition: background-color 0.15s, color 0.15s;
+
+  &:not(.el-button--danger):hover {
+    background-color: rgba(67, 104, 255, 0.08) !important;
+    color: var(--el-color-primary) !important;
+  }
+}
+
+.ag-cell .el-button.el-button--danger.is-link,
+.ag-cell .el-button.el-button--danger.el-button--text {
+  color: var(--el-color-danger);
+  &:hover {
+    color: var(--el-color-danger) !important;
+    background-color: rgba(245, 108, 108, 0.08) !important;
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FullScreenDialog — 全屏/关闭按钮尺寸对齐 + 弹窗底部按钮风格
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// 让 El Plus 自带关闭按钮（headerbtn）视觉与自定义全屏按钮完全对齐
+.el-dialog__headerbtn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 24px !important;
+  height: 24px !important;
+  // jh-ui header: padding 11.5px, content 24px → total ~47px
+  // 24px 按钮垂直居中: (47 - 24) / 2 ≈ 12px  (headerbtn position:absolute 相对 .el-dialog，不是 header)
+  top: 12px !important;
+  right: 14px !important;
+  border-radius: 6px !important;
+  transition: background-color 0.15s !important;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .el-dialog__close {
+    font-size: 14px !important;
+    color: rgba(0, 0, 0, 0.55) !important;
+    line-height: 1 !important;
+  }
+
+  &:hover .el-dialog__close {
+    color: rgba(0, 0, 0, 0.88) !important;
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ElMessageBox 确认弹窗按钮 — 与 dialog-footer 保持统一圆角风格
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.el-message-box__btns {
+  .el-button {
+    height: 30px;
+    padding: 0 16px;
+    font-size: 13px;
+    border-radius: 6px !important;
+    font-weight: 500;
+
+    &:not(.el-button--primary):not(.el-button--danger) {
+      border-color: rgba(0, 0, 0, 0.15);
+      color: #374151;
+      background: #fff;
+      &:hover {
+        border-color: var(--el-color-primary);
+        color: var(--el-color-primary);
+        background: rgba(67, 104, 255, 0.04);
+      }
+    }
+  }
+}
+
+// 底部按钮：与设计风格统一（紧凑、圆角、精致）
+.el-dialog {
+  .dialog-footer {
+    .el-button {
+      height: 30px;
+      padding: 0 16px;
+      font-size: 13px;
+      border-radius: 6px;
+      font-weight: 500;
+      // 默认(取消/关闭)：细边框灰色风格
+      &:not(.el-button--primary):not(.el-button--danger) {
+        border-color: rgba(0, 0, 0, 0.15);
+        color: #374151;
+        background: #fff;
+        &:hover {
+          border-color: var(--el-color-primary);
+          color: var(--el-color-primary);
+          background: rgba(67, 104, 255, 0.04);
+        }
+      }
+    }
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// el-textarea 编辑模式精致化
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.el-textarea {
+  .el-textarea__inner {
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    line-height: 1.65 !important;
+    padding: 7px 10px !important;
+    resize: vertical !important;         // 只允许垂直拉伸，不允许水平
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:hover:not(:focus) {
+      border-color: var(--el-border-color-hover, #c0c4cc) !important;
+    }
+    &:focus {
+      border-color: var(--el-color-primary) !important;
+      box-shadow: 0 0 0 2px rgba(67, 104, 255, 0.12) !important;
+    }
+  }
+
+  // 字数统计：更小、更淡、不遮挡内容
+  .el-input__count {
+    font-size: 10px !important;
+    color: #c0c4cc !important;
+    background: transparent !important;
+    line-height: 1 !important;
+    bottom: 5px !important;
+    right: 8px !important;
+    padding: 0 !important;
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MenuDivider 分区标题分割线 — 颜色 Token 化
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.menu-divider-color-block,
+.menu-divider__indicator,
+[class*="menu-divider"] [class*="indicator"],
+[class*="menu-divider"] [class*="line-left"] {
+  background-color: var(--el-color-primary) !important;
+}
+[class*="menu-divider"] [class*="line"],
+[class*="menu-divider"] hr {
+  border-color: var(--el-border-color-light) !important;
+  background-color: var(--el-border-color-light) !important;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// BaseTree / el-tree 通用修复
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// el-tree 的节点内容区 white-space:nowrap 会撑出宽度，
+// 但实际内容并未溢出容器，出现横向滚动条体验很差 → 裁掉即可
+.el-tree {
+  overflow-x: hidden !important;
+}

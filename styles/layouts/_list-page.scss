@@ -1,0 +1,47 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// styles/layouts/_list-page.scss — 标准列表页骨架
+// 适用：搜索区 + 工具栏 + 表格 + 分页 的经典 CRUD 列表页
+//
+// 【DOM 结构约定】
+//   <div class="list-page">
+//     <div class="list-page__search">  搜索区（el-form inline）
+//     <div class="list-page__toolbar"> 工具栏（新增/导入/导出按钮）
+//     <div class="list-page__table">   表格区（BaseTable / el-table）
+//     <div class="list-page__pager">   分页区（el-pagination）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+.list-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 12px;
+  gap: 12px;
+  background: var(--el-bg-color-page, #f5f7fa);
+
+  &__search {
+    background: var(--el-bg-color, #fff);
+    padding: 12px 16px 0;
+    border-radius: var(--el-border-radius-base, 4px);
+  }
+
+  &__toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 0 4px;
+  }
+
+  &__table {
+    flex: 1;
+    min-height: 0;
+    background: var(--el-bg-color, #fff);
+    border-radius: var(--el-border-radius-base, 4px);
+    overflow: hidden;
+  }
+
+  &__pager {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 0;
+  }
+}

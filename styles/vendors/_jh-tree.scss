@@ -1,0 +1,194 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// el-tree / jh-tree 全局样式 — wl-ui-safe 统一设计规范
+//
+// 【根因确认】
+//   jh-drag-col 渲染出 .drag-left（来源确认：common-core drag-col.vue）
+//   BaseTree 渲染 .base-tree，内部经过 el-scrollbar 多层后才是 jh-tree
+//   中间层 class 名称（.left-tree-box 等）在运行时版本中可能不存在
+//   → 选择器只依赖 .drag-left 这一个确定父级，不写任何中间 class
+//
+// 【策略：最短可靠路径 + 通配覆盖】
+//   .drag-left .el-tree-node__content:hover → 背景色
+//   .drag-left .el-tree-node__content:hover * → 文字色（通配，覆盖所有子元素）
+//   .drag-left .el-tree-node.is-current > .el-tree-node__content → 选中
+//   !important 确保胜过 jh-tree scoped 规则（后者不用 !important）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// ── 面板容器 ──────────────────────────────────────────────────────────────────
+.drag-left > div {
+  background-color: #f7f8fb;
+  padding: 10px 0;
+  border-radius: 4px 0 0 4px;
+  border-right: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+// ── 搜索框（BaseTree 内置搜索）───────────────────────────────────────────────
+.drag-left .base-tree-search-box {
+  padding: 0 10px 8px;
+
+  .el-input__wrapper {
+    border-radius: 6px;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px var(--el-border-color) inset;
+    transition: box-shadow 0.18s;
+    &:hover  { box-shadow: 0 0 0 1px var(--el-border-color-darker) inset; }
+    &.is-focus { box-shadow: 0 0 0 1.5px var(--el-color-primary) inset !important; }
+  }
+
+  .el-input__inner {
+    font-size: 13px;
+    color: var(--el-text-color-regular);
+    &::placeholder { color: var(--el-text-color-placeholder); }
+  }
+
+  .el-input__prefix-inner .el-icon { color: var(--el-text-color-placeholder); }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// jh-tree 核心颜色覆盖（已修正：不依赖 .left-tree-box 等中间层 class）
+// 直接使用 .drag-left 作为唯一父级锚点
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── 树节点宽度 ────────────────────────────────────────────────────────────────
+.drag-left .el-tree-node {
+  white-space: normal !important;
+  overflow: visible !important;
+  width: 100%;
+}
+.drag-left .el-tree-node__children { width: 100%; }
+.drag-left .el-tree { background: transparent; width: 100%; }
+
+// ── 行基础 ────────────────────────────────────────────────────────────────────
+.drag-left .el-tree-node__content {
+  position: relative;
+  width: 100% !important;
+  height: 32px;
+  line-height: 32px;
+  font-size: 13px;
+  box-sizing: border-box !important;
+  padding-right: 12px;
+  transition: background-color 0.12s ease, color 0.12s ease;
+  user-select: none;
+  background-color: transparent !important;
+
+  // ── 左侧圆点装饰（仅 hover 时显示，选中时隐藏）────────────────────────────
+  &::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--el-color-primary);
+    transform: translateY(-50%) scale(0);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease;
+  }
+
+  // ── Hover（非选中行）──────────────────────────────────────────────────────
+  &:hover {
+    background-color: rgba(67, 104, 255, 0.07) !important;
+
+    &::before { transform: translateY(-50%) scale(1); opacity: 0.55; }
+
+    // 通配覆盖所有子元素（包括 menu-tree-node background:#f0f3ff）
+    * {
+      color: var(--el-color-primary) !important;
+      background-color: transparent !important;
+      background: transparent !important;
+    }
+
+    // 叶子展开图标保持透明
+    > .el-tree-node__expand-icon.is-leaf { color: transparent !important; }
+  }
+}
+
+// 键盘 focus → 去除 jh-tree 的 background:#addaff
+.drag-left .el-tree-node:focus > .el-tree-node__content {
+  background-color: transparent !important;
+  outline: none;
+}
+
+// ── 选中状态 ──────────────────────────────────────────────────────────────────
+.drag-left .el-tree-node.is-current > .el-tree-node__content {
+  background-color: rgba(67, 104, 255, 0.10) !important;
+  box-shadow: inset 3px 0 0 var(--el-color-primary) !important;
+  font-weight: 500;
+  color: var(--el-color-primary) !important;
+
+  // 选中时圆点不显示
+  &::before {
+    transform: translateY(-50%) scale(0) !important;
+    opacity: 0 !important;
+  }
+
+  // ① 通配覆盖 — 确保所有子孙文字同色（左右一致）
+  // background/background-color 同时清除，防止 jh-tree scoped 的 background: #f0f3ff 残留
+  * {
+    color: var(--el-color-primary) !important;
+    background-color: transparent !important;
+    background: transparent !important;
+  }
+
+  // ② 精确覆盖 jh-tree scoped 选中态规则
+  .menu-tree-node,
+  .menu-title,
+  .el-tree-node__label,
+  span,
+  div {
+    color: var(--el-color-primary) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+
+  > .el-tree-node__expand-icon.is-leaf { color: transparent !important; }
+
+  // hover 时加深一点
+  &:hover { background-color: rgba(67, 104, 255, 0.15) !important; }
+}
+
+// ── 展开/折叠图标 ─────────────────────────────────────────────────────────────
+.drag-left .el-tree-node__expand-icon {
+  font-size: 11px;
+  padding: 9px 7px;
+  flex-shrink: 0;
+  transition: color 0.12s, transform 0.18s ease;
+
+  &.is-leaf { color: transparent !important; pointer-events: none; cursor: default; }
+}
+
+// ── 树滚动条 ──────────────────────────────────────────────────────────────────
+.drag-left .base-tree .el-scrollbar__wrap {
+  overflow-y: auto !important;
+  overflow-x: auto !important;
+  padding-right: 0 !important;
+
+  &::-webkit-scrollbar        { width: 4px; height: 4px; }
+  &::-webkit-scrollbar-corner { background: transparent; }
+  &::-webkit-scrollbar-track  { background: transparent; }
+  &::-webkit-scrollbar-thumb  { background: transparent; border-radius: 2px; }
+}
+
+.drag-left .base-tree:hover .el-scrollbar__wrap::-webkit-scrollbar-thumb       { background: rgba(0, 0, 0, 0.12); }
+.drag-left .base-tree:hover .el-scrollbar__wrap::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.25); }
+
+// ── 兜底：当 BaseTree 内部不是 el-scrollbar 而是直接出现原生滚动条时 ─────
+//   覆盖范围：.drag-left 内所有可能的滚动容器（.base-tree、.jh-tree、.el-tree、
+//   以及 .left-tree-box / .left-content 等任意中间层），统一为 4px 极细滚动条，
+//   颜色与表格保持一致（rgba 0.12 / hover 0.25）。
+//   仅 hover 容器时才显示 thumb，避免静态视觉噪声。
+.drag-left {
+  // 所有子级滚动容器（包含 :hover 子树）都统一为 4px、透明轨道
+  *::-webkit-scrollbar        { width: 4px !important; height: 4px !important; }
+  *::-webkit-scrollbar-track  { background: transparent !important; }
+  *::-webkit-scrollbar-corner { background: transparent !important; }
+  *::-webkit-scrollbar-thumb  {
+    background: transparent !important;
+    border-radius: 2px !important;
+  }
+
+  &:hover *::-webkit-scrollbar-thumb       { background: rgba(0, 0, 0, 0.12) !important; }
+  &:hover *::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.25) !important; }
+}

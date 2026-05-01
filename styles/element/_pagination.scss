@@ -1,0 +1,16 @@
+// styles/element/_pagination.scss — el-pagination 精致化覆盖
+
+.el-pagination {
+  --el-pagination-button-width: 24px;
+  --el-pagination-button-height: 24px;
+  --el-pagination-button-font-size: 12px;
+
+  .el-input__wrapper {
+    height: 24px;
+  }
+
+  // jh-ui pagination.scss 中激活页码边框为硬编码色，此处用变量覆盖
+  .el-pager li.is-active {
+    border-color: var(--el-color-primary) !important;
+  }
+}

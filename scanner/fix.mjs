@@ -58,7 +58,7 @@ function fixTemplateAttrs(content) {
     `<(${Object.keys(FIXES)
       .sort((a, b) => b.length - a.length)
       .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-      .join("|")})\\b`,
+      .join("|")})(?=\\s|>|/>)`,
     "g",
   );
   let result = "";

@@ -21,7 +21,7 @@
  *   }
  *
  * 如需某列不走自动逻辑，手写 defaultNode/defaultSlot 即可覆盖自动配置：
- *   { label: '风险分级', name: 'riskLevel', defaultNode: ({ row }) => myCustomRender(row) }
+ *   { label: '风险分级', name: 'riskLevel', defaultNode: ({ row }: { row: any }) => myCustomRender(row) }
  *
  * 新增全局字段映射 → 只改本文件的 COLUMN_AUTO_MAP，全项目所有页面立即生效。
  */
@@ -54,108 +54,115 @@ const COLUMN_AUTO_MAP: Record<string, Partial<TableColumnDesc<any>>> = {
   enableStatus: {
     width: 80,
     fixed: "right",
-    defaultNode: ({ row }) => renderEnableStatus(row.enableStatus)
+    defaultNode: ({ row }: { row: any }) =>
+      renderEnableStatus(row.enableStatus),
   },
 
   // ── 审批状态 ─────────────────────────────────────────────────────────────
   approvalStatus: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderAuditStatus(row.approvalStatus)
+    defaultNode: ({ row }: { row: any }) =>
+      renderAuditStatus(row.approvalStatus),
   },
 
   // ── 核实状态 ─────────────────────────────────────────────────────────────
   verifyStatus: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderVerifyStatus(row.verifyStatus)
+    defaultNode: ({ row }: { row: any }) =>
+      renderVerifyStatus(row.verifyStatus),
   },
 
   // ── 风险分级（aq_risk_level 字典：1重大/2较大/3一般/4低）──────────────────
   riskLevel: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderRiskLevel(row.riskLevel)
+    defaultNode: ({ row }: { row: any }) => renderRiskLevel(row.riskLevel),
   },
 
   // ── 风险编号：蓝色圆角徽标 ───────────────────────────────────────────────
   riskNo: {
-    defaultSlot: ({ row }) => renderBadge(row.riskNo)
+    defaultSlot: ({ row }: { row: any }) => renderBadge(row.riskNo),
   },
 
   // ── 检查表编号：蓝色圆角徽标 ─────────────────────────────────────────────
   checkNo: {
-    defaultSlot: ({ row }) => renderBadge(row.checkNo)
+    defaultSlot: ({ row }: { row: any }) => renderBadge(row.checkNo),
   },
 
   // ── 评价级别（LEC/MES 等）：彩色圆形徽标 ────────────────────────────────
   ratingLevel: {
     width: 80,
-    defaultSlot: ({ row }) => renderRatingLevel(row.ratingLevel)
+    defaultSlot: ({ row }: { row: any }) => renderRatingLevel(row.ratingLevel),
   },
 
   // ── 排查/检查任务状态（aq_task_check_status / aq_check_info_status）────────
   taskStatus: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderTaskStatus(row.taskStatus)
+    defaultNode: ({ row }: { row: any }) => renderTaskStatus(row.taskStatus),
   },
 
   // ── 计划状态（aq_plan_status: 1=启用, 0=停用）────────────────────────────
   planStatus: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderPlanStatus(row.planStatus)
+    defaultNode: ({ row }: { row: any }) => renderPlanStatus(row.planStatus),
   },
 
   // ── 排查/检查结果（aq_handle_result: 1=正常, 2=异常）────────────────────
   flagNormal: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderFlagNormal(row.flagNormal)
+    defaultNode: ({ row }: { row: any }) => renderFlagNormal(row.flagNormal),
   },
 
   // ── 隐患状态（aq_risk_status）────────────────────────────────────────────
   riskStatus: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderRiskStatus(row.riskStatus)
+    defaultNode: ({ row }: { row: any }) => renderRiskStatus(row.riskStatus),
   },
 
   // ── 整改状态（aq_correct_status）──────────────────────────────────────────
   correctStatus: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderCorrectStatus(row.correctStatus)
+    defaultNode: ({ row }: { row: any }) =>
+      renderCorrectStatus(row.correctStatus),
   },
 
   // ── 危险作业票状态（permitStatus: 1=草稿, 2=待审批, 3=作业中, 4=已完工, 5=已撤销）──
   permitStatus: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderPermitStatus(row.permitStatus)
+    defaultNode: ({ row }: { row: any }) =>
+      renderPermitStatus(row.permitStatus),
   },
 
   // ── 培训状态（trainStatus: 1=未完成, 2=已完成）────────────────────────────
   trainStatus: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderTrainStatus(row.trainStatus)
+    defaultNode: ({ row }: { row: any }) => renderTrainStatus(row.trainStatus),
   },
 
   // ── 证书状态（credentialStatus: 1=有效, 2=即将过期, 3=已过期）──────────────
   credentialStatus: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderCredentialStatus(row.credentialStatus)
+    defaultNode: ({ row }: { row: any }) =>
+      renderCredentialStatus(row.credentialStatus),
   },
 
   // ── 题库状态（unifyQuestionStatus: 1=草稿, 2=已发布, 3=已停用）──────────────
   unifyQuestionStatus: {
     width: 90,
     fixed: "right",
-    defaultNode: ({ row }) => renderQuestionStatus(row.unifyQuestionStatus)
-  }
+    defaultNode: ({ row }: { row: any }) =>
+      renderQuestionStatus(row.unifyQuestionStatus),
+  },
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -165,9 +172,9 @@ export function defineColumns<T = any>(
   columns: TableColumnDesc<T>[]
 ): TableColumnDesc<T>[] {
   return columns.map((col) => {
-    // 多选列：统一宽度 42px（页面已手写 width 时不覆盖）
+    // 多选列：统一宽度 55px（页面已手写 width 时不覆盖）
     if ((col as any).type === "selection" && !(col as any).width) {
-      return { width: 42, ...(col as any) } as unknown as TableColumnDesc<T>;
+      return { width: 55, ...(col as any) } as unknown as TableColumnDesc<T>;
     }
     if (!col.name) return col;
     const auto = COLUMN_AUTO_MAP[col.name as string];

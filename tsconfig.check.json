@@ -7,11 +7,12 @@
     "jsx": "preserve",
     "strict": true,
     "skipLibCheck": true,
-    "declaration": true,
-    "declarationMap": false,
-    "outDir": "./es",
-    "rootDir": "./runtime",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@jhlc/*": ["./types/jhlc"]
+    },
     "typeRoots": ["./types", "./node_modules/@types"]
   },
-  "include": ["runtime/**/*"]
+  "include": ["runtime/**/*", "reference/**/*", "types/**/*"]
 }

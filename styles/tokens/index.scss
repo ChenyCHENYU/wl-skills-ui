@@ -1,7 +1,79 @@
-// styles/tokens/index.scss — Design Tokens（L0）转发到 design/tokens
-// 注：tokens 是 CSS 变量，物理位置在 design/tokens/base.css；
-// SCSS 工程统一通过 @use 'wk-skills-ui/design/tokens' 加载 CSS。
-// 此处保留一个 SCSS 入口便于未来扩展 SCSS 变量层（$wk-spacing-* 等）。
+// styles/tokens/index.scss — L0 设计令牌（SCSS 入口）
+//
+// 注意：设计令牌的主体由 design/tokens/base.css 提供（通过 <link> 在 index.html 加载）。
+// 本文件提供 SCSS 变量映射层，让用户可在 SCSS 中使用 $wk-* 变量进行运算和覆盖。
 
-// 当前阶段：tokens 仅以 CSS 变量形式提供，本文件为空占位。
-// 用户应在 index.html <link rel="stylesheet" href=".../design/tokens/base.css">
+// ── 颜色 ──────────────────────────────────────────────────────────────────────
+$wk-color-primary: var(--el-color-primary) !default;
+$wk-color-success: var(--el-color-success) !default;
+$wk-color-warning: var(--el-color-warning) !default;
+$wk-color-danger: var(--el-color-danger) !default;
+$wk-color-error: var(--el-color-error) !default;
+$wk-color-info: var(--el-color-info) !default;
+
+$wk-color-primary-light-9: var(--el-color-primary-light-9) !default;
+$wk-color-primary-light-8: var(--el-color-primary-light-8) !default;
+$wk-color-primary-light-7: var(--el-color-primary-light-7) !default;
+$wk-color-primary-light-6: var(--el-color-primary-light-6) !default;
+$wk-color-primary-light-5: var(--el-color-primary-light-5) !default;
+$wk-color-primary-light-4: var(--el-color-primary-light-4) !default;
+$wk-color-primary-light-3: var(--el-color-primary-light-3) !default;
+$wk-color-primary-light-2: var(--el-color-primary-light-2) !default;
+$wk-color-primary-light-1: var(--el-color-primary-light-1) !default;
+
+// ── 文字 ──────────────────────────────────────────────────────────────────────
+$wk-text-color-primary: var(--el-text-color-primary) !default;
+$wk-text-color-regular: var(--el-text-color-regular) !default;
+$wk-text-color-secondary: var(--el-text-color-secondary) !default;
+$wk-text-color-placeholder: var(--el-text-color-placeholder) !default;
+$wk-text-color-disabled: var(--el-text-color-disabled) !default;
+
+// ── 边框 ──────────────────────────────────────────────────────────────────────
+$wk-border-color: var(--el-border-color) !default;
+$wk-border-color-light: var(--el-border-color-light) !default;
+$wk-border-color-lighter: var(--el-border-color-lighter) !default;
+$wk-border-color-dark: var(--el-border-color-dark) !default;
+$wk-border-color-darker: var(--el-border-color-darker) !default;
+
+// ── 填充 ──────────────────────────────────────────────────────────────────────
+$wk-fill-color: var(--el-fill-color) !default;
+$wk-fill-color-light: var(--el-fill-color-light) !default;
+$wk-fill-color-lighter: var(--el-fill-color-lighter) !default;
+$wk-fill-color-dark: var(--el-fill-color-dark) !default;
+$wk-fill-color-darker: var(--el-fill-color-darker) !default;
+$wk-fill-color-blank: var(--el-fill-color-blank) !default;
+
+// ── 字号 ──────────────────────────────────────────────────────────────────────
+$wk-font-size-extra-large: var(--el-font-size-extra-large) !default;
+$wk-font-size-large: var(--el-font-size-large) !default;
+$wk-font-size-medium: var(--el-font-size-medium) !default;
+$wk-font-size-base: var(--el-font-size-base) !default;
+$wk-font-size-small: var(--el-font-size-small) !default;
+$wk-font-size-extra-small: var(--el-font-size-extra-small) !default;
+
+// ── 圆角 ──────────────────────────────────────────────────────────────────────
+$wk-border-radius-base: var(--el-border-radius-base) !default;
+$wk-border-radius-small: var(--el-border-radius-small) !default;
+$wk-border-radius-round: var(--el-border-radius-round) !default;
+$wk-border-radius-circle: var(--el-border-radius-circle) !default;
+
+// ── 阴影 ──────────────────────────────────────────────────────────────────────
+$wk-box-shadow: var(--el-box-shadow) !default;
+$wk-box-shadow-light: var(--el-box-shadow-light) !default;
+$wk-box-shadow-lighter: var(--el-box-shadow-lighter) !default;
+$wk-box-shadow-dark: var(--el-box-shadow-dark) !default;
+
+// ── 间距 ──────────────────────────────────────────────────────────────────────
+$wk-padding: var(--el-padding) !default;
+$wk-padding-large: var(--el-padding-large) !default;
+$wk-padding-small: var(--el-padding-small) !default;
+
+// ── 组件尺寸 ──────────────────────────────────────────────────────────────────
+$wk-component-size-small: var(--el-component-size-small) !default;
+$wk-component-size-default: var(--el-component-size-default) !default;
+$wk-component-size-large: var(--el-component-size-large) !default;
+
+// ── 侧边栏 ────────────────────────────────────────────────────────────────────
+$wk-sidebar-bg: var(--el-sidebar-bg) !default;
+$wk-sidebar-bg-active: var(--el-sidebar-bg-active) !default;
+$wk-sidebar-width: var(--el-sidebar-width) !default;

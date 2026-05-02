@@ -11,6 +11,7 @@
  */
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { TOKEN_MAP } from "./rules/_shared.mjs";
 
 const FIXES = {
   'el-input':        [{ attr: 'size', value: 'small' }],
@@ -18,24 +19,6 @@ const FIXES = {
   'el-date-picker':  [{ attr: 'style', value: 'width:100%' }],
   'el-table':        [{ attr: 'empty-text', value: '暂无数据' }],
   'el-table-column': [{ attr: 'align', value: 'center' }],
-};
-
-const TOKEN_MAP = {
-  '#409eff': 'var(--el-color-primary)',
-  '#4368ff': 'var(--el-color-primary)',
-  '#3a7afe': 'var(--el-color-primary)',
-  '#002a8f': 'var(--el-color-primary)',
-  '#1890ff': 'var(--el-color-primary)',
-  '#fb2323': 'var(--el-color-danger)',
-  '#f56c6c': 'var(--el-color-danger)',
-  '#bb2d3f': 'var(--el-color-danger)',
-  '#f5222d': 'var(--el-color-danger)',
-  '#0cc859': 'var(--el-color-success)',
-  '#67c23a': 'var(--el-color-success)',
-  '#52c41a': 'var(--el-color-success)',
-  '#ffaf27': 'var(--el-color-warning)',
-  '#e6a23c': 'var(--el-color-warning)',
-  '#faad14': 'var(--el-color-warning)',
 };
 
 function parseTag(content, pos, tagName) {

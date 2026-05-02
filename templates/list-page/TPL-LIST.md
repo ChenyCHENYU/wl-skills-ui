@@ -133,5 +133,5 @@ async function handleDel(id: string) {
 
 1. `BaseTable` 需替换为项目实际使用的表格组件
 2. `usePageHook` 需替换为项目实际的分页 Hook
-3. `enableStatus` 字段在 `installSafePreset()` 后自动渲染为彩色 Tag，无需手写 defaultNode
+3. `enableStatus` 字段在 `installCommonPreset()` 后自动渲染为彩色 Tag，无需手写 defaultNode
 4. 工具栏按钮必须带 `icon`（R005 规则）

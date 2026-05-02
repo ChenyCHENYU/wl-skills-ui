@@ -5,7 +5,7 @@
  * 实现"按需安装、互不干扰"的插件化架构。
  *
  * 使用方式：
- *   import { createPreset } from 'wk-skills-ui/runtime';
+ *   import { createPreset } from '@agile-team/wk-skills-ui/runtime';
  *   const myPreset = createPreset('my-biz', () => {
  *     registerColumnAutoMaps({ myField: { ... } });
  *   });

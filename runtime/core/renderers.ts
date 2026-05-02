@@ -50,16 +50,46 @@ export const RATING_LEVEL_COLORS: Record<
   string,
   { bg: string; color: string }
 > = {
-  一: { bg: "rgba(16,185,129,0.14)", color: "#065F46" },
-  二: { bg: "rgba(59,130,246,0.14)", color: "#1E40AF" },
-  三: { bg: "rgba(245,158,11,0.14)", color: "#78350F" },
-  四: { bg: "rgba(249,115,22,0.14)", color: "#9A3412" },
-  五: { bg: "rgba(239,68,68,0.14)", color: "#991B1B" },
-  "1": { bg: "rgba(16,185,129,0.14)", color: "#065F46" },
-  "2": { bg: "rgba(59,130,246,0.14)", color: "#1E40AF" },
-  "3": { bg: "rgba(245,158,11,0.14)", color: "#78350F" },
-  "4": { bg: "rgba(249,115,22,0.14)", color: "#9A3412" },
-  "5": { bg: "rgba(239,68,68,0.14)", color: "#991B1B" },
+  一: {
+    bg: "var(--wk-rating-lv1-bg, rgba(16,185,129,0.14))",
+    color: "var(--wk-rating-lv1-color, #065F46)",
+  },
+  二: {
+    bg: "var(--wk-rating-lv2-bg, rgba(59,130,246,0.14))",
+    color: "var(--wk-rating-lv2-color, #1E40AF)",
+  },
+  三: {
+    bg: "var(--wk-rating-lv3-bg, rgba(245,158,11,0.14))",
+    color: "var(--wk-rating-lv3-color, #78350F)",
+  },
+  四: {
+    bg: "var(--wk-rating-lv4-bg, rgba(249,115,22,0.14))",
+    color: "var(--wk-rating-lv4-color, #9A3412)",
+  },
+  五: {
+    bg: "var(--wk-rating-lv5-bg, rgba(239,68,68,0.14))",
+    color: "var(--wk-rating-lv5-color, #991B1B)",
+  },
+  "1": {
+    bg: "var(--wk-rating-lv1-bg, rgba(16,185,129,0.14))",
+    color: "var(--wk-rating-lv1-color, #065F46)",
+  },
+  "2": {
+    bg: "var(--wk-rating-lv2-bg, rgba(59,130,246,0.14))",
+    color: "var(--wk-rating-lv2-color, #1E40AF)",
+  },
+  "3": {
+    bg: "var(--wk-rating-lv3-bg, rgba(245,158,11,0.14))",
+    color: "var(--wk-rating-lv3-color, #78350F)",
+  },
+  "4": {
+    bg: "var(--wk-rating-lv4-bg, rgba(249,115,22,0.14))",
+    color: "var(--wk-rating-lv4-color, #9A3412)",
+  },
+  "5": {
+    bg: "var(--wk-rating-lv5-bg, rgba(239,68,68,0.14))",
+    color: "var(--wk-rating-lv5-color, #991B1B)",
+  },
 };
 
 // ── 渲染函数 ─────────────────────────────────────────────────────────────────
@@ -127,7 +157,7 @@ export function renderDangerText(
   if (value === null || value === undefined || value === "") return null;
   return h(
     "span",
-    { style: { color: "#f56c6c", fontWeight: 500 } },
+    { style: { color: "var(--el-color-danger)", fontWeight: 500 } },
     String(value),
   );
 }
@@ -138,8 +168,8 @@ export function renderRatingLevel(
 ): VNode | null {
   if (!value) return null;
   const clr = RATING_LEVEL_COLORS[value] ?? {
-    bg: "rgba(107,114,128,0.12)",
-    color: "#374151",
+    bg: "var(--wk-rating-fallback-bg, rgba(107,114,128,0.12))",
+    color: "var(--wk-rating-fallback-color, #374151)",
   };
   return h(
     "span",

@@ -336,9 +336,9 @@ npx wk-scan check --project [项目根目录]
 
 对于**全新业务系统**，使用本方案可让所有业务页面从第一行代码就符合风格标准，彻底无需事后补丁。
 
-### 8.1 两步接入
+> 详细接入步骤见 [README — 快速开始](../README.md#快速开始)，以下仅列核心要点。
 
-**Step 1：通过包接入（推荐）**
+### 核心三步
 
 ```bash
 pnpm add @agile-team/wk-skills-ui
@@ -350,21 +350,16 @@ pnpm add @agile-team/wk-skills-ui
 ```
 
 ```scss
-// 新项目（完整接入）：
 @use '@agile-team/wk-skills-ui/styles' as *;
-// 老项目（化妆模式，不动布局）：
-// @use '@agile-team/wk-skills-ui/styles/presets/skin' as *;
 ```
 
 ```ts
 // src/main.ts
 import { installCommonPreset } from '@agile-team/wk-skills-ui/runtime/common-preset';
-installCommonPreset(); // 注册通用业务枚举到 COLUMN_AUTO_MAP
+installCommonPreset();
 ```
 
-> 老项目化妆模式：`npx wk-ui init --mode skin`；新项目原生模式：`npx wk-ui init --mode native`
-
-**Step 2：所有列定义用 `defineColumns()` 包裹**
+### 列定义用 defineColumns() 包裹
 
 ```typescript
 // 每个业务文件 columnsDef() 末尾：

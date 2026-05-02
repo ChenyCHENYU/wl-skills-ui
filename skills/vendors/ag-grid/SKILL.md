@@ -67,15 +67,15 @@ columnsDef(): TableColumnDesc<any>[] {
 
 | 字段名               | 渲染效果       | 需调用                       |
 | -------------------- | -------------- | ---------------------------- |
-| `enableStatus`       | 启用/停用 Tag  | `installSafePreset()` 后自动 |
-| `riskLevel`          | 风险分级 Tag   | `installSafePreset()` 后自动 |
+| `enableStatus`       | 启用/停用 Tag  | `installCommonPreset()` 后自动 |
+| `riskLevel`          | 风险分级 Tag   | `installCommonPreset()` 后自动 |
 | `permitStatus`       | 作业票状态 Tag | 同上                         |
 | `trainStatus`        | 培训状态 Tag   | 同上                         |
 | `credentialStatus`   | 证书状态 Tag   | 同上                         |
 | `riskNo` / `checkNo` | 蓝色编号徽标   | 同上                         |
 | `ratingLevel`        | 彩色评级徽标   | 同上                         |
 
-完整列表见 `runtime/core/registry.ts` + `runtime/presets/safe.ts`。
+完整列表见 `runtime/core/registry.ts` + `runtime/presets/common.ts`。
 
 ---
 

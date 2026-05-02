@@ -9,10 +9,7 @@
       "import": "./es/index.js",
       "types": "./es/index.d.ts"
     },
-    "./runtime": {
-      "import": "./es/index.js",
-      "types": "./es/index.d.ts"
-    },
+    "./runtime": "./",
     "./runtime/common-preset": {
       "import": "./es/common-preset.js",
       "types": "./es/common-preset.d.ts"
@@ -35,8 +32,9 @@
     "wk-scan": "scanner/index.mjs"
   },
   "scripts": {
-    "build": "tsup",
-    "prepare": "tsup",
+    "build": "tsup && npm run sync:tokens",
+    "prepare": "tsup && npm run sync:tokens",
+    "sync:tokens": "node -e \"import('fs').then(fs=>fs.copyFileSync('design/tokens/base.css','dist/tokens.css'))\"",
     "scan": "node scanner/index.mjs scan",
     "check": "node scanner/index.mjs check",
     "fix": "node scanner/index.mjs fix",
@@ -52,12 +50,22 @@
     "skills",
     "templates",
     "bin",
+    "reference",
+    "examples",
     "SKILL.md",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": [
+    "*.css",
+    "*.scss"
   ],
   "devDependencies": {
     "tsup": "^8.3.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vue": "^3.4.0",
+    "element-plus": "^2.7.0",
+    "@element-plus/icons-vue": "^2.3.0"
   },
   "peerDependencies": {
     "vue": ">=3.2",

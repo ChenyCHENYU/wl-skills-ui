@@ -170,25 +170,25 @@ if (subcommand === "init") {
   console.log(`# wk-skills-ui 接入指引
 
 1. 安装依赖：
-   pnpm add wk-skills-ui
+   pnpm add @agile-team/wk-skills-ui
 
 2. 在 index.html <head> 最先加载 tokens.css：
-   <link rel="stylesheet" href="/node_modules/wk-skills-ui/dist/tokens.css" />
+   <link rel="stylesheet" href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css" />
 
 3. 在全局 SCSS 入口（如 src/assets/style/main.scss）追加：
-   @use 'wk-skills-ui/dist' as *;
-   // 可选 portal 视觉增强：@use 'wk-skills-ui/dist/portal.scss';
+   @use '@agile-team/wk-skills-ui/styles' as *;
+   // 化妆模式：@use '@agile-team/wk-skills-ui/styles/presets/skin' as *;
 
 4. 在 src/main.ts 中注册 runtime（可选，仅当业务侧用到 defineColumns）：
-   import { installCommonPreset } from 'wk-skills-ui/runtime/common-preset';
+   import { installCommonPreset } from '@agile-team/wk-skills-ui/runtime/common-preset';
    installCommonPreset();
 
 5. 业务列定义改用 defineColumns：
-   import { defineColumns, renderOps } from 'wk-skills-ui/runtime';
+   import { defineColumns, renderOps } from '@agile-team/wk-skills-ui/runtime';
 
 6. 验证：
-   npx wk-scan check --project .
-   npx wk-scan scan --target src
+   npx wk-ui check --project .
+   npx wk-ui scan --target src
 `);
   process.exit(0);
 }

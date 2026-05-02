@@ -60,7 +60,7 @@ wk-skills-ui/
 │   └── spec/                     # 设计规范文档（color / typography / spacing）
 │
 ├── styles/                       # L1+L2+L3 SCSS 实现
-│   ├── tokens/                   # SCSS 变量层（占位，未来扩展）
+│   ├── tokens/                   # SCSS 变量映射层（$wk-* → CSS 变量）
 │   ├── element/                  # L1 Element Plus 控件对齐
 │   │   ├── _table.scss
 │   │   ├── _form.scss
@@ -111,6 +111,7 @@ wk-skills-ui/
 │   │   ├── table.mjs             # R001 R002 R003 R014
 │   │   ├── form.mjs              # R006 R007 R008
 │   │   ├── button.mjs            # R004 R005 R015
+│   │   ├── tag.mjs               # R009 R010 R012
 │   │   ├── dialog.mjs            # R011
 │   │   ├── color.mjs             # R016 R017 R018
 │   │   └── index.mjs             # 聚合 + addRules() 插件机制
@@ -415,7 +416,10 @@ export const myRules = [{
 | R006 | L1 | element | 表单控件缺 `size="small"` |
 | R007 | L1 | element | el-date-picker 缺 `width:100%` |
 | R008 | L1 | element | label-width ≥ 150px |
+| R009 | L1 | element | 状态字段纯文本渲染 |
+| R010 | L1 | element | 分类字段缺 `effect="plain"` |
 | R011 | L1 | element | 分页器位置错误 |
+| R012 | L1 | element | 弹窗内 el-table 缺 `empty-text` |
 | R013 | L4 | runtime | columnsDef 用旧格式 `operations: []` |
 | R014 | L1 | element | selection 列缺 header-align |
 | R015 | L1 | element | modal 内表格按钮非 link |
@@ -436,10 +440,10 @@ export const myRules = [{
 | 阶段 | 目标 |
 |---|---|
 | **当前 v1.3** | 五层架构 + 双模式 + 4 大 vendor + 4 个 flows + scanner 元数据 |
-| **v0.4** | layouts SKILL 完整化 + ops/audit ops/migrate 落地 |
-| **v0.5** | 拿到首个内部组件源码 → 把 vendors/_base-table.scss 平迁到 BaseTable.vue |
-| **v0.6** | 多业务 preset 矩阵（safe / hr / asset / ops 等） |
-| **v1.0** | 稳定接口冻结，正式标记 stable |
+| **v1.4** | layouts SKILL 完整化 + ops/audit ops/migrate 落地 |
+| **v1.5** | 拿到首个内部组件源码 → 把 vendors/_base-table.scss 平迁到 BaseTable.vue |
+| **v1.6** | 多业务 preset 矩阵（safe / hr / asset / ops 等） |
+| **v2.0** | 稳定接口冻结，正式标记 stable |
 
 ---
 
@@ -471,4 +475,4 @@ node scanner/index.mjs scan --target reference
 
 ## License
 
-MIT © Agile Team
+UNLICENSED — 内部专用，未经授权不得外传

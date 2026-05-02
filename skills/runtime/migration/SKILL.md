@@ -30,7 +30,7 @@ pnpm add @agile-team/wk-skills-ui
 ```html
 <link
   rel="stylesheet"
-  href="/node_modules/@agile-team/wk-skills-ui/dist/tokens.css"
+  href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css"
 />
 ```
 
@@ -51,11 +51,11 @@ pnpm add @agile-team/wk-skills-ui
 在 `src/main.ts` 中（`app.mount` 之前）：
 
 ```typescript
-import { installSafePreset } from "@agile-team/wk-skills-ui/runtime/safe-preset";
-installSafePreset();
+import { installCommonPreset } from "@agile-team/wk-skills-ui/runtime/common-preset";
+installCommonPreset();
 ```
 
-这会把所有 wl-safe 业务字段（riskLevel / permitStatus / trainStatus 等）
+这会把所有通用业务字段（riskLevel / permitStatus / trainStatus 等）
 注册进 COLUMN_AUTO_MAP，之后使用 `defineColumns()` 包裹的列定义会自动渲染。
 
 ### Step 5 — 迁移 columnsDef
@@ -103,4 +103,4 @@ npx wk-ui check --project .
 | 旧版 ag-cell-renders.ts 冲突  | 删除本地文件，全部改用 package import             |
 | SCSS `@use` vs `@import` 冲突 | 统一改为 `@use`，避免重复引入                     |
 | ElTagType 类型报错            | 确保 element-plus ≥ 2.2，不使用已废弃的 `""` type |
-| defineColumns 自动映射未生效  | 确认 `installSafePreset()` 在 `mount` 前调用      |
+| defineColumns 自动映射未生效  | 确认 `installCommonPreset()` 在 `mount` 前调用      |

@@ -17,8 +17,7 @@ src/
 ## 全局入口 (src/styles/index.scss)
 
 ```scss
-// 1. wk-skills-ui 设计 token（必须最先）
-@import "@agile-team/wk-skills-ui/dist/tokens.css";
+// 1. wk-skills-ui 设计 token（必须在 index.html <link> 加载 design/tokens/base.css）
 
 // 2. wk-skills-ui 样式重置
 @use "@agile-team/wk-skills-ui/styles" as *;

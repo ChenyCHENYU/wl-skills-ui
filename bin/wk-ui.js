@@ -335,7 +335,7 @@ function scaffoldPreset(name) {
   }
   const template = `/**
  * runtime/presets/${name}.ts — ${name} 业务预设
- * 使用：import { install${capitalize(name)}Preset } from 'wk-skills-ui/runtime/presets/${name}';
+ * 使用：import { install${capitalize(name)}Preset } from '@agile-team/wk-skills-ui/runtime/presets/${name}';
  */
 import type { TagMapItem } from '../core/types';
 import { renderTagNode } from '../core/renderers';

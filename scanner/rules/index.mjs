@@ -15,6 +15,7 @@ import { formRules } from "./form.mjs";
 import { buttonRules } from "./button.mjs";
 import { colorRules } from "./color.mjs";
 import { dialogRules } from "./dialog.mjs";
+import { tagRules } from "./tag.mjs";
 
 export const BUILT_IN_RULES = [
   ...tableRules,
@@ -22,6 +23,7 @@ export const BUILT_IN_RULES = [
   ...buttonRules,
   ...colorRules,
   ...dialogRules,
+  ...tagRules,
 ];
 
 const _externalRules = [];

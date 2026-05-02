@@ -69,7 +69,7 @@ export const MY_STATUS_MAP = {
 ## 动态字典（后端配置时）
 
 ```typescript
-import { renderDictClassifyTag } from '@agile-team/wk-skills-ui/runtime/safe-preset';
+import { renderDictClassifyTag } from '@agile-team/wk-skills-ui/runtime/common-preset';
 
 // 只需定义颜色映射，label 由字典动态获取
 export const TRAIN_LEVEL_COLOR_MAP: Record<string, string> = {
@@ -87,9 +87,9 @@ export const TRAIN_LEVEL_COLOR_MAP: Record<string, string> = {
 
 ---
 
-## wl-safe 业务预设（已内置，无需重新定义）
+## 通用业务预设（已内置，无需重新定义）
 
-`installSafePreset()` 后通过 `defineColumns()` 自动生效：
+`installCommonPreset()` 后通过 `defineColumns()` 自动生效：
 
 | 字段名             | 渲染         | 常量                    |
 | ------------------ | ------------ | ----------------------- |

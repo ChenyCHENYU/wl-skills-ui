@@ -4,9 +4,32 @@ All notable changes to **@agile-team/wk-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.0] - 2025-05
+
+### Added
+
+- **快照回退机制**：`wk-scan fix` 自动在修复前创建快照，支持 `wk-scan snapshot rollback` 一键回退
+- **快照管理命令**：`snapshot list / rollback / diff / clean`，完整的快照生命周期管理
+- **豁免配置系统**：`.wk-exempt.json` 配置文件，支持路径级和规则级豁免（大屏/地图/流程等）
+- **结构化报告增强**：报告新增豁免统计、规范覆盖率、回退命令提示
+- **security 预设**：`runtime/presets/security.ts` 安防业务状态映射（违章/车辆/出入/布控/报警）
+- **security SCSS 预设**：`styles/presets/security.scss` 安防品牌色覆盖（#002a8f 主色系）
+- **operations 迁移指南**：`examples/migration-operations-to-renderOps.md` 完整迁移示例
+- **豁免配置模板**：`examples/wk-exempt.example.json` 默认豁免路径清单
+- CLI 新增参数：`--exempt`（豁免配置）、`--no-snapshot`（跳过快照）、`--id`（指定快照）、`--keep`（清理保留数）
+
+### Changed
+
+- `fix.mjs` 重构为两遍扫描：先收集再写入，支持原子化快照
+- `report.mjs` 摘要新增实际检查文件数、豁免文件数、规范覆盖率百分比
+- `index.mjs` 支持 `snapshot` 子命令
+- `wk-ui.js` CLI help 更新为 v1.4，补充 snapshot 和 exempt 用法
+- `package.json` exports 新增 `./runtime/presets/security` 和 `./runtime/presets/*`
+
 ## [1.3.1] - 2025-05
 
 ### Fixed
+
 - 全局包名/路径统一为 `@agile-team/wk-skills-ui`（scanner init、integration check、SKILL.md、模板、标准文档、runtime 注释）
 - `installSafePreset` / `safe-preset` 全部修正为 `installCommonPreset` / `common-preset`
 - `renderDangerText` 硬编码 `#f56c6c` → `var(--el-color-danger)`
@@ -27,6 +50,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `reference/ag-cell-renders.ts` ElTag type 属性类型断言修复
 
 ### Added
+
 - Scanner 规则 R009（状态字段纯文本渲染）、R010（分类 Tag 缺 effect="plain"）、R012（弹窗内 el-table 缺 empty-text）
 - SCSS 变量映射层 `$wk-*`（`styles/tokens/index.scss`）
 - 构建脚本 `sync:tokens` 自动同步 `dist/tokens.css`
@@ -36,6 +60,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - CHANGELOG.md
 
 ### Changed
+
 - `examples/quickstart.md` 删除（与 README 重复）
 - SKILL.md 第八节精简（改为引用 README）
 - README.md 规范表补充 R009/R010/R012，目录结构更新

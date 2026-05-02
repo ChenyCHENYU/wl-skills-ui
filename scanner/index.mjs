@@ -11,6 +11,10 @@
  *   wk-scan fix --target <path> --dry-run
  *   wk-scan all --project <path>          # 接入检查 + 风格扫描 + 报告
  *   wk-scan init                          # 打印接入指引
+ *   wk-scan snapshot list                  # 列出快照
+ *   wk-scan snapshot rollback [--id <id>]  # 回退到快照（默认最新）
+ *   wk-scan snapshot diff [--id <id>]      # 查看快照与当前差异
+ *   wk-scan snapshot clean [--keep <N>]    # 清理旧快照
  *
  * 兼容旧用法：
  *   wk-scan --target <path>               # 等价于 scan
@@ -23,9 +27,23 @@ const rules = getRules();
 import { generateReport } from "./report.mjs";
 import { checkIntegration } from "./integration.mjs";
 import { runFix } from "./fix.mjs";
+import {
+  listSnapshots,
+  rollbackSnapshot,
+  diffSnapshot,
+  cleanSnapshots,
+} from "./snapshot.mjs";
+import { loadExemptConfig } from "./exempt.mjs";
 
 const args = process.argv.slice(2);
-const SUBCOMMANDS = new Set(["scan", "check", "fix", "all", "init"]);
+const SUBCOMMANDS = new Set([
+  "scan",
+  "check",
+  "fix",
+  "all",
+  "init",
+  "snapshot",
+]);
 let subcommand = "scan";
 if (args.length > 0 && SUBCOMMANDS.has(args[0])) {
   subcommand = args.shift();
@@ -44,6 +62,10 @@ const { values } = parseArgs({
     layer: { type: "string", default: "" },
     vendor: { type: "string", default: "" },
     mode: { type: "string", default: "" },
+    id: { type: "string", default: "" },
+    keep: { type: "string", default: "5" },
+    "no-snapshot": { type: "boolean", default: false },
+    exempt: { type: "string", default: "" },
   },
   strict: false,
 });
@@ -97,18 +119,30 @@ function checkScriptOps(content, relPath) {
   return issues;
 }
 
-function runScan(targetDir, excludeDirs) {
+function runScan(targetDir, excludeDirs, exemptConfig) {
   const allIssues = [];
+  const exemptedIssues = [];
   let fileCount = 0;
+  let exemptFileCount = 0;
+  const exempt = exemptConfig || { isExempt: () => false };
+
   for (const filePath of walkVue(targetDir, excludeDirs)) {
     fileCount++;
     const content = readFileSync(filePath, "utf8");
     const { text: template, lineOffset } = extractTemplate(content);
     const relPath = relative(targetDir, filePath).replace(/\\/g, "/");
 
+    // 整文件豁免
+    if (exempt.isExempt(relPath)) {
+      exemptFileCount++;
+      continue;
+    }
+
+    const fileIssues = [];
+
     for (const rule of rules) {
       if (typeof rule.check === "function") {
-        allIssues.push(...rule.check(template, relPath, lineOffset));
+        fileIssues.push(...rule.check(template, relPath, lineOffset));
       }
     }
 
@@ -116,7 +150,7 @@ function runScan(targetDir, excludeDirs) {
     if (styleBlock) {
       for (const rule of rules) {
         if (typeof rule.checkStyle === "function") {
-          allIssues.push(
+          fileIssues.push(
             ...rule.checkStyle(styleBlock.text, relPath, styleBlock.lineOffset),
           );
         }
@@ -127,7 +161,7 @@ function runScan(targetDir, excludeDirs) {
     if (scriptBlock) {
       for (const rule of rules) {
         if (typeof rule.checkScript === "function") {
-          allIssues.push(
+          fileIssues.push(
             ...rule.checkScript(
               scriptBlock.text,
               relPath,
@@ -138,9 +172,18 @@ function runScan(targetDir, excludeDirs) {
       }
     }
 
-    allIssues.push(...checkScriptOps(content, relPath));
+    fileIssues.push(...checkScriptOps(content, relPath));
+
+    // 规则级豁免过滤
+    for (const issue of fileIssues) {
+      if (exempt.isExempt(relPath, issue.rule)) {
+        exemptedIssues.push({ ...issue, exempted: true });
+      } else {
+        allIssues.push(issue);
+      }
+    }
   }
-  return { allIssues, fileCount };
+  return { allIssues, exemptedIssues, fileCount, exemptFileCount };
 }
 
 // ── 公共：按 layer / vendor / mode 过滤 ─────────────────────────────────────
@@ -211,12 +254,58 @@ if (subcommand === "check") {
   process.exit(values["fail-on-error"] && hasError ? 1 : 0);
 }
 
+if (subcommand === "snapshot") {
+  const projectRoot = resolve(values.project);
+  const sub = args[0] || "list";
+  if (sub === "list") {
+    const snaps = listSnapshots(projectRoot);
+    if (snaps.length === 0) {
+      console.log("暂无快照。");
+      process.exit(0);
+    }
+    console.log(`# 快照列表（共 ${snaps.length} 个）\n`);
+    for (const s of snaps) {
+      console.log(
+        `  ${s.id}  ${s.createdAt}  ${s.command}  ${s.totalFiles} 个文件  ${s.targetDir}`,
+      );
+    }
+  } else if (sub === "rollback") {
+    const result = rollbackSnapshot(
+      projectRoot,
+      values.id || undefined,
+      values["dry-run"],
+    );
+    const mode = values["dry-run"] ? "[DRY-RUN] " : "";
+    console.log(
+      `${mode}回退快照 ${result.snapshotId}：还原 ${result.restoredFiles.length} 个文件`,
+    );
+    if (result.skippedFiles.length > 0) {
+      console.log(`  跳过（文件已删除）：${result.skippedFiles.join(", ")}`);
+    }
+    for (const f of result.restoredFiles) console.log(`  ✔ ${f}`);
+  } else if (sub === "diff") {
+    const diffs = diffSnapshot(projectRoot, values.id || undefined);
+    for (const d of diffs) {
+      const icon =
+        d.status === "changed" ? "🔸" : d.status === "unchanged" ? "✅" : "❌";
+      console.log(`  ${icon} ${d.file} — ${d.status}`);
+    }
+  } else if (sub === "clean") {
+    const removed = cleanSnapshots(projectRoot, parseInt(values.keep) || 5);
+    console.log(`清理完成，删除 ${removed} 个旧快照。`);
+  }
+  process.exit(0);
+}
+
 if (subcommand === "fix") {
   const targetDir = resolve(values.target);
+  const projectRoot = resolve(values.project);
   const result = runFix({
     target: targetDir,
     exclude: excludeDirs,
     dryRun: values["dry-run"],
+    projectRoot,
+    noSnapshot: values["no-snapshot"],
   });
   const mode = values["dry-run"] ? "[DRY-RUN] " : "";
   console.log(
@@ -226,6 +315,12 @@ if (subcommand === "fix") {
     a.file.localeCompare(b.file),
   )) {
     console.log(`  ${file}: ${changes} 处`);
+  }
+  if (result.snapshotId) {
+    console.log(`\n📸 已创建快照: ${result.snapshotId}`);
+    console.log(
+      `   回退命令: npx wk-scan snapshot rollback --id ${result.snapshotId}`,
+    );
   }
   if (values["dry-run"])
     console.log(
@@ -241,10 +336,21 @@ if (subcommand === "all") {
       ? join(projectRoot, "src")
       : resolve(values.target);
   const integration = checkIntegration(projectRoot);
-  const { allIssues, fileCount } = runScan(targetDir, excludeDirs);
+  const exemptConfig = loadExemptConfig(
+    projectRoot,
+    values.exempt || undefined,
+  );
+  const { allIssues, exemptedIssues, fileCount, exemptFileCount } = runScan(
+    targetDir,
+    excludeDirs,
+    exemptConfig,
+  );
   const filtered = applyFilters(allIssues);
   const report = generateReport(filtered, fileCount, values.output, {
     integration,
+    exemptFileCount,
+    exemptedIssueCount: exemptedIssues.length,
+    exemptPaths: exemptConfig.exemptPaths,
   });
   if (values.outFile) {
     writeFileSync(values.outFile, report, "utf8");
@@ -261,9 +367,22 @@ if (subcommand === "all") {
 // 默认：scan（兼容旧用法）
 {
   const targetDir = resolve(values.target);
-  const { allIssues, fileCount } = runScan(targetDir, excludeDirs);
+  const projectRoot = resolve(values.project);
+  const exemptConfig = loadExemptConfig(
+    projectRoot,
+    values.exempt || undefined,
+  );
+  const { allIssues, exemptedIssues, fileCount, exemptFileCount } = runScan(
+    targetDir,
+    excludeDirs,
+    exemptConfig,
+  );
   const filtered = applyFilters(allIssues);
-  const report = generateReport(filtered, fileCount, values.output);
+  const report = generateReport(filtered, fileCount, values.output, {
+    exemptFileCount,
+    exemptedIssueCount: exemptedIssues.length,
+    exemptPaths: exemptConfig.exemptPaths,
+  });
   if (values.outFile) {
     writeFileSync(values.outFile, report, "utf8");
     console.error(`[wk-scan] 报告已写入: ${values.outFile}`);

@@ -1,0 +1,30 @@
+{
+  "exemptPaths": [
+    "src/views/**/big-screen/**",
+    "src/views/**/dashboard/**",
+    "src/views/**/map-view/**",
+    "src/views/**/topology/**",
+    "src/views/**/flow-designer/**",
+    "src/views/**/report-designer/**",
+    "src/views/**/chart/**",
+    "src/views/**/3d/**",
+    "src/views/**/canvas/**"
+  ],
+  "exemptRules": {
+    "R016": ["src/views/**/big-screen/**"],
+    "R017": ["src/views/**/big-screen/**"]
+  },
+  "exemptCategories": [
+    "dashboard",
+    "big-screen",
+    "map",
+    "chart",
+    "topology",
+    "flow-designer",
+    "3d",
+    "canvas",
+    "report-designer",
+    "rich-editor"
+  ],
+  "description": "大屏、地图、图谱、流程设计器等强个性化页面豁免风格统一扫描"
+}

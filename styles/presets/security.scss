@@ -1,0 +1,37 @@
+// styles/presets/security.scss — 安防模块样式预设
+// 基于 skin 模式（L0 + L1 + L2），额外覆盖 security 品牌主色
+//
+// 适用场景：
+//   - wl-ui-security 项目接入 skills-ui
+//   - 主色 #002a8f，安防模块独立配色
+//   - 不包含 L3 layouts（security 已有自己的页面骨架）
+//
+// 使用：
+//   @use '@agile-team/wk-skills-ui/styles/presets/security' as *;
+
+@forward '../tokens/index';
+@forward '../element/index';
+@forward '../vendors/index';
+
+// ── security 品牌色覆盖 ─────────────────────────────────────────────────────
+// 通过 CSS 变量覆盖 Element Plus 主色系
+:root {
+  --el-color-primary: #002a8f;
+  --el-color-primary-light-1: #1a3f9f;
+  --el-color-primary-light-2: #3354af;
+  --el-color-primary-light-3: #4d69bf;
+  --el-color-primary-light-4: #667fcf;
+  --el-color-primary-light-5: #8094c7;
+  --el-color-primary-light-6: #99a9d7;
+  --el-color-primary-light-7: #b3bee7;
+  --el-color-primary-light-8: #ccd3f0;
+  --el-color-primary-light-9: #e6e9f8;
+  --el-color-primary-dark-2: #002272;
+
+  --el-color-danger: #bb2d3f;
+  --el-color-danger-light-3: #d16b78;
+  --el-color-danger-light-5: #dd969f;
+  --el-color-danger-light-7: #e8c0c5;
+  --el-color-danger-light-8: #f0d5d9;
+  --el-color-danger-light-9: #f7eaec;
+}

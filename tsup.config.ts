@@ -1,9 +1,10 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: {
     index: "runtime/core/index.ts",
-    'common-preset': 'runtime/presets/common.ts',
+    "common-preset": "runtime/presets/common.ts",
+    "presets/security": "runtime/presets/security.ts",
   },
   format: ["esm"],
   dts: true,

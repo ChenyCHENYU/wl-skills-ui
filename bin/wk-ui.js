@@ -56,6 +56,7 @@ const SUBCOMMANDS = new Set([
   "fix",
   "all",
   "add-preset",
+  "snapshot",
 ]);
 let subcommand = "help";
 
@@ -66,7 +67,7 @@ if (rawArgs.length > 0 && SUBCOMMANDS.has(rawArgs[0])) {
 }
 
 // 非 init 子命令：直接委托给 scanner/index.mjs
-const SCANNER_CMDS = new Set(["scan", "check", "fix", "all"]);
+const SCANNER_CMDS = new Set(["scan", "check", "fix", "all", "snapshot"]);
 if (SCANNER_CMDS.has(subcommand)) {
   const scannerBin = join(PKG_ROOT, "scanner", "index.mjs");
   try {
@@ -109,7 +110,9 @@ if (subcommand === "init") {
   const mode = values.mode === "skin" ? "skin" : "native";
 
   console.log(`\n[wk-ui init] 目标项目：${projectRoot}`);
-  console.log(`[wk-ui init] 模式：${mode === "skin" ? "化妆 (skin)" : "原生 (native)"}`);
+  console.log(
+    `[wk-ui init] 模式：${mode === "skin" ? "化妆 (skin)" : "原生 (native)"}`,
+  );
   if (dryRun) console.log("[wk-ui init] DRY-RUN 模式：不实际写入文件\n");
 
   // 1. 检测编辑器
@@ -303,9 +306,7 @@ function installStyleSetup({ projectRoot, mode = "native", dryRun }) {
         );
       }
     } else {
-      console.log(
-        `  ✅ tokens 已存在 → ${relative(projectRoot, htmlFile)}`,
-      );
+      console.log(`  ✅ tokens 已存在 → ${relative(projectRoot, htmlFile)}`);
     }
   }
 
@@ -375,7 +376,7 @@ function capitalize(s) {
 // ── 帮助信息 ──────────────────────────────────────────────────────────────────
 function printHelp() {
   console.log(`
-wk-ui — @agile-team/wk-skills-ui 统一 CLI v1.3
+wk-ui — @agile-team/wk-skills-ui 统一 CLI v1.4
 
 用法：
   wk-ui init   [--project <path>] [--editor <editor>] [--mode native|skin]
@@ -384,9 +385,15 @@ wk-ui — @agile-team/wk-skills-ui 统一 CLI v1.3
 
   wk-ui scan   --target <src> [--layer L0,L1,L2] [--vendor base-table,jh]
                               [--mode skin|native] [--outFile report.md]
+                              [--exempt <config.json>]
   wk-ui check  --project <项目根目录>
-  wk-ui fix    --target <src目录> [--dry-run]
+  wk-ui fix    --target <src目录> [--dry-run] [--no-snapshot]
   wk-ui all    --project <项目根目录> [--outFile report.md]
+
+  wk-ui snapshot list     [--project .]           列出所有快照
+  wk-ui snapshot rollback [--id <id>] [--dry-run]  回退到快照（默认最新）
+  wk-ui snapshot diff     [--id <id>]              查看快照与当前差异
+  wk-ui snapshot clean    [--keep <N>]             清理旧快照
 
   wk-ui add-preset <name>   脚手架一个新的业务预设文件
 
@@ -397,7 +404,9 @@ wk-ui — @agile-team/wk-skills-ui 统一 CLI v1.3
                   scan: skin(只看L0/L1/L2) | native(全量)
   --layer         scan 过滤：L0/L1/L2/L3/L4（逗号分隔）
   --vendor        scan 过滤：element/base-table/jh-components/...（逗号分隔）
+  --exempt        豁免配置文件路径（默认 .wk-exempt.json）
   --dry-run       预览模式，不实际写入文件
+  --no-snapshot   fix 时跳过快照创建
   --skills-only   仅安装 skill 文件，不处理 index.html
 
 示例：
@@ -405,6 +414,8 @@ wk-ui — @agile-team/wk-skills-ui 统一 CLI v1.3
   npx wk-ui init --mode skin --project /path/to/legacy-project
   npx wk-ui scan --target src --mode skin --outFile report.md
   npx wk-ui scan --target src --layer L0,L1
+  npx wk-ui fix --target src                     # 自动创建快照 + 修复
+  npx wk-ui snapshot rollback                     # 一键回退最近修复
   npx wk-ui add-preset my-biz
 `);
 }

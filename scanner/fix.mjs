@@ -9,28 +9,31 @@
  *   - el-table: 缺 empty-text="暂无数据"        → 添加
  *   - <style>/<template> 内可映射 hex 颜色      → 替换为 var(--el-color-*)
  */
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { readFileSync, writeFileSync, readdirSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
+import { createSnapshot } from "./snapshot.mjs";
 import { TOKEN_MAP } from "./rules/_shared.mjs";
 
 const FIXES = {
-  'el-input':        [{ attr: 'size', value: 'small' }],
-  'el-select':       [{ attr: 'size', value: 'small' }],
-  'el-date-picker':  [{ attr: 'style', value: 'width:100%' }],
-  'el-table':        [{ attr: 'empty-text', value: '暂无数据' }],
-  'el-table-column': [{ attr: 'align', value: 'center' }],
+  "el-input": [{ attr: "size", value: "small" }],
+  "el-select": [{ attr: "size", value: "small" }],
+  "el-date-picker": [{ attr: "style", value: "width:100%" }],
+  "el-table": [{ attr: "empty-text", value: "暂无数据" }],
+  "el-table-column": [{ attr: "align", value: "center" }],
 };
 
 function parseTag(content, pos, tagName) {
   let i = pos + tagName.length + 1;
-  let inSingle = false, inDouble = false;
+  let inSingle = false,
+    inDouble = false;
   while (i < content.length) {
     const ch = content[i];
     if (ch === '"' && !inSingle) inDouble = !inDouble;
     else if (ch === "'" && !inDouble) inSingle = !inSingle;
     else if (!inSingle && !inDouble) {
-      if (content.slice(i, i + 2) === '/>') return { text: content.slice(pos, i + 2), end: i + 2 };
-      if (ch === '>') return { text: content.slice(pos, i + 1), end: i + 1 };
+      if (content.slice(i, i + 2) === "/>")
+        return { text: content.slice(pos, i + 2), end: i + 2 };
+      if (ch === ">") return { text: content.slice(pos, i + 1), end: i + 1 };
     }
     i++;
   }
@@ -39,18 +42,26 @@ function parseTag(content, pos, tagName) {
 
 function addAttrIfMissing(tagText, tagName, attr, value) {
   // 已存在（含动态绑定 :attr=）则跳过
-  const re = new RegExp(`:?${attr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*=`);
+  const re = new RegExp(
+    `:?${attr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*=`,
+  );
   if (re.test(tagText)) return { text: tagText, changed: false };
-  const newTag = tagText.replace(`<${tagName}`, `<${tagName} ${attr}="${value}"`);
+  const newTag = tagText.replace(
+    `<${tagName}`,
+    `<${tagName} ${attr}="${value}"`,
+  );
   return { text: newTag, changed: true };
 }
 
 function fixTemplateAttrs(content) {
   const tagPattern = new RegExp(
-    `<(${Object.keys(FIXES).sort((a, b) => b.length - a.length).map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`,
-    'g'
+    `<(${Object.keys(FIXES)
+      .sort((a, b) => b.length - a.length)
+      .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+      .join("|")})\\b`,
+    "g",
   );
-  let result = '';
+  let result = "";
   let pos = 0;
   let changes = 0;
   let m;
@@ -58,7 +69,10 @@ function fixTemplateAttrs(content) {
   while (true) {
     tagPattern.lastIndex = pos;
     m = tagPattern.exec(content);
-    if (!m) { result += content.slice(pos); break; }
+    if (!m) {
+      result += content.slice(pos);
+      break;
+    }
     result += content.slice(pos, m.index);
     const tagName = m[1];
     let { text, end } = parseTag(content, m.index, tagName);
@@ -76,13 +90,16 @@ function fixTemplateAttrs(content) {
 function fixHexColors(content) {
   let changes = 0;
   // 匹配 <style> 块和 template 中的 color="" / style="" 属性
-  let result = content.replace(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g, (match) => {
-    const hex = match.toLowerCase();
-    const repl = TOKEN_MAP[hex];
-    if (!repl) return match;
-    changes++;
-    return repl;
-  });
+  let result = content.replace(
+    /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g,
+    (match) => {
+      const hex = match.toLowerCase();
+      const repl = TOKEN_MAP[hex];
+      if (!repl) return match;
+      changes++;
+      return repl;
+    },
+  );
   // 但仅在 <style> 块和 attribute 值中替换太激进，需要限制：
   // 改为：只替换出现在 <style>...</style> 内、color="..."、style="..."、:style="..." 中
   // 重新实现：
@@ -91,20 +108,32 @@ function fixHexColors(content) {
 
   // Style 块内
   result = result.replace(/<style[^>]*>([\s\S]*?)<\/style>/g, (full, body) => {
-    const newBody = body.replace(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g, (match) => {
-      const hex = match.toLowerCase();
-      if (TOKEN_MAP[hex]) { changes++; return TOKEN_MAP[hex]; }
-      return match;
-    });
+    const newBody = body.replace(
+      /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g,
+      (match) => {
+        const hex = match.toLowerCase();
+        if (TOKEN_MAP[hex]) {
+          changes++;
+          return TOKEN_MAP[hex];
+        }
+        return match;
+      },
+    );
     return full.replace(body, newBody);
   });
 
   // template 中的 color="#xxx" / color='#xxx'
-  result = result.replace(/(\bcolor\s*=\s*)(["'])(#[0-9a-fA-F]{3,8})\2/g, (full, pre, q, hex) => {
-    const lo = hex.toLowerCase();
-    if (TOKEN_MAP[lo]) { changes++; return `${pre}${q}${TOKEN_MAP[lo]}${q}`; }
-    return full;
-  });
+  result = result.replace(
+    /(\bcolor\s*=\s*)(["'])(#[0-9a-fA-F]{3,8})\2/g,
+    (full, pre, q, hex) => {
+      const lo = hex.toLowerCase();
+      if (TOKEN_MAP[lo]) {
+        changes++;
+        return `${pre}${q}${TOKEN_MAP[lo]}${q}`;
+      }
+      return full;
+    },
+  );
 
   return { content: result, changes };
 }
@@ -112,9 +141,9 @@ function fixHexColors(content) {
 function* walkVue(dir, excludes) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     if (e.isDirectory()) {
-      if (excludes.some(x => e.name === x)) continue;
+      if (excludes.some((x) => e.name === x)) continue;
       yield* walkVue(join(dir, e.name), excludes);
-    } else if (e.name.endsWith('.vue')) {
+    } else if (e.name.endsWith(".vue")) {
       yield join(dir, e.name);
     }
   }
@@ -122,25 +151,66 @@ function* walkVue(dir, excludes) {
 
 /**
  * 执行修复
- * @param {object} opts { target, exclude, dryRun }
- * @returns {{ totalFiles: number, changedFiles: Array<{file, changes}>, totalChanges: number }}
+ * @param {object} opts { target, exclude, dryRun, projectRoot, noSnapshot }
+ * @returns {{ totalFiles, changedFiles, totalChanges, snapshotId? }}
  */
-export function runFix({ target, exclude = ['node_modules', 'dist', '.git', 'SelectPopupCom'], dryRun = false }) {
+export function runFix({
+  target,
+  exclude = ["node_modules", "dist", ".git", "SelectPopupCom"],
+  dryRun = false,
+  projectRoot,
+  noSnapshot = false,
+}) {
   const changedFiles = [];
+  const changedAbsPaths = [];
   let totalChanges = 0;
   let totalFiles = 0;
+
+  // 第一遍：收集所有需要改动的文件及其内容
+  const pending = [];
   for (const filePath of walkVue(target, exclude)) {
     totalFiles++;
-    const original = readFileSync(filePath, 'utf8');
+    const original = readFileSync(filePath, "utf8");
     let content = original;
     let changes = 0;
-    const r1 = fixTemplateAttrs(content); content = r1.content; changes += r1.changes;
-    const r2 = fixHexColors(content);     content = r2.content; changes += r2.changes;
+    const r1 = fixTemplateAttrs(content);
+    content = r1.content;
+    changes += r1.changes;
+    const r2 = fixHexColors(content);
+    content = r2.content;
+    changes += r2.changes;
     if (changes > 0 && content !== original) {
-      if (!dryRun) writeFileSync(filePath, content, 'utf8');
-      changedFiles.push({ file: relative(target, filePath).replace(/\\/g, '/'), changes });
-      totalChanges += changes;
+      pending.push({ filePath, content, changes });
+      changedAbsPaths.push(filePath);
     }
   }
-  return { totalFiles, changedFiles, totalChanges };
+
+  // 创建快照（fix 前保存原始内容）
+  let snapshotId = null;
+  if (!dryRun && !noSnapshot && changedAbsPaths.length > 0) {
+    const root = projectRoot || resolve(target, "..");
+    try {
+      const snap = createSnapshot({
+        projectRoot: root,
+        targetDir: target,
+        filePaths: changedAbsPaths,
+        command: "fix",
+      });
+      snapshotId = snap.id;
+    } catch {
+      /* snapshot 失败不阻断 fix */
+    }
+  }
+
+  // 第二遍：写入文件
+  for (const { filePath, content, changes } of pending) {
+    if (!dryRun) writeFileSync(filePath, content, "utf8");
+    changedFiles.push({
+      file: relative(target, filePath).replace(/\\/g, "/"),
+      changes,
+    });
+    totalChanges += changes;
+  }
+
+  return { totalFiles, changedFiles, totalChanges, snapshotId };
 }

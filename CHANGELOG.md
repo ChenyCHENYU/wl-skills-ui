@@ -4,6 +4,39 @@ All notable changes to **@agile-team/wk-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.5] - 2026-05
+
+### Fixed
+
+- `styles/element/_dialog.scss`：`.dialog-header-fullscreen-icon .svg-icon` font-size 调整为 12px，与 EP 关闭按钮视觉大小匹配
+
+## [1.4.4] - 2026-05
+
+### Fixed
+
+- `styles/element/_dialog.scss`：移除 `.dialog-header-fullscreen-icon` 容器的 `width/height: 32px`，该约束会改变容器右边界导致 `right` 定位偏移
+
+## [1.4.3] - 2026-05
+
+### Added
+
+- `styles/element/_dialog.scss`：新增 `.dialog-header-fullscreen-icon` 覆盖规则，适配 `@jhlc/common-core` `DialogComponent`（jh-dialog）的全屏按钮，`position: absolute; right: 44px; top: 16px`，颜色/hover 与 EP 关闭按钮统一
+
+## [1.4.2] - 2026-05
+
+### Added
+
+- `reference/ag-cell-renders.ts`：`renderOps` 对 `show=false` 的图标按钮改为 `visibility: hidden` 占位，确保同列不同行按钮上下对齐
+- `styles/element/_dialog.scss`：新增 EP 原生 fullscreen prop 场景的 headerbtn 间距收紧规则（`.el-dialog__headerbtn { right:8px }`）
+
+## [1.4.1] - 2026-05
+
+### Added
+
+- `styles/presets/security.scss`：security 品牌色预设（`#002a8f` 主色完整梯度 + danger 色系），基于 skin 模式（L0+L1+L2）
+- `runtime/presets/security.ts`：`installSecurityPreset()`，安防业务状态字典映射（违章/车辆/出入/布控/报警）
+- `examples/migration-operations-to-renderOps.md`：`operations: []` → `defaultSlot + renderOps` 完整迁移示例
+
 ## [1.4.0] - 2025-05
 
 ### Added

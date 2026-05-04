@@ -12,6 +12,7 @@ import {
   renderEnableStatus,
   renderAuditStatus,
   renderVerifyStatus,
+  renderDictClassifyTag,
 } from "./renderers";
 
 const COLUMN_AUTO_MAP: Record<string, Partial<ColumnLike>> = {};
@@ -54,12 +55,24 @@ export function defineColumns<T extends ColumnLike>(columns: T[]): T[] {
   return columns.map((col) => {
     const fieldName = col.name ?? col.label ?? "";
     const preset = COLUMN_AUTO_MAP[fieldName];
-    if (!preset) return col;
     const hasRenderer =
       col.defaultNode !== undefined || col.defaultSlot !== undefined;
     if (hasRenderer) return col;
+    if (!preset && isDictColumn(col)) {
+      return {
+        ...col,
+        defaultSlot: ({ row }) =>
+          renderDictClassifyTag(row?.[fieldName], String(col.logicValue)),
+      };
+    }
+    if (!preset) return col;
     return { ...preset, ...col };
   });
+}
+
+function isDictColumn(col: ColumnLike): boolean {
+  const logicType = String(col.logicType ?? "").toLowerCase();
+  return Boolean(col.logicValue) && logicType.includes("dict");
 }
 
 // ── 内置注册：通用字段 ────────────────────────────────────────────────────────

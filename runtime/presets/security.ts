@@ -18,7 +18,11 @@
  *   本预设不硬编码主色，所有颜色走 Element Plus 语义色（primary/success/warning/danger/info）
  */
 import type { TagMapItem } from "../core/types";
-import { renderTagNode, renderClassifyTag } from "../core/renderers";
+import {
+  renderTagNode,
+  renderClassifyTag,
+  registerDictColorMaps,
+} from "../core/renderers";
 import { registerColumnAutoMaps } from "../core/registry";
 
 // ── 违章处理状态 ─────────────────────────────────────────────────────────────
@@ -67,8 +71,50 @@ export const ALARM_STATUS_MAP: Record<string | number, TagMapItem> = {
 export const renderAlarmStatus = (v: string | number | null | undefined) =>
   renderTagNode(v, ALARM_STATUS_MAP);
 
+// ── 安防字典配色注册 ─────────────────────────────────────────────────────────
+// 状态类 dictKey → 语义配色（success=正向终态, danger=负向, warning=中间, info=初始）
+// 等级类 dictKey → 梯度配色（danger→warning→primary→success，由重到轻）
+// 分类/方式/来源类 → 不注册，走 renderDictClassifyTag 自动轮转
+const SECURITY_DICT_COLORS: Record<string, Record<string, string>> = {
+  // ─ 状态类 ─
+  warningEventStatus: {
+    "0": "danger",
+    "1": "warning",
+    "2": "success",
+    "3": "info",
+  },
+  spExitPermitStatus: {
+    "0": "info",
+    "1": "warning",
+    "2": "success",
+    "3": "danger",
+  },
+  spVisitorStatus: {
+    "0": "info",
+    "1": "warning",
+    "2": "success",
+    "3": "danger",
+  },
+  // ─ 等级/严重度类 ─
+  alarmFristType: {
+    "1": "danger",
+    "2": "warning",
+    "3": "primary",
+    "4": "info",
+  },
+  alarmSecondType: {
+    "1": "danger",
+    "2": "warning",
+    "3": "primary",
+    "4": "info",
+  },
+  // ─ 二态类（启用/禁用） ─
+  areaRuleType: { "1": "success", "2": "warning", "3": "info" },
+};
+
 // ── 一键安装 ─────────────────────────────────────────────────────────────────
 export function installSecurityPreset(): void {
+  registerDictColorMaps(SECURITY_DICT_COLORS);
   registerColumnAutoMaps({
     violationStatus: {
       width: 90,

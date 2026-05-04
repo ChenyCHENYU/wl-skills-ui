@@ -134,6 +134,88 @@ export function renderClassifyTag(
   );
 }
 
+// ── 字典驱动 Tag ─────────────────────────────────────────────────────────────
+//
+// 配色规则（优先级从高到低）：
+//   1. 调用方显式传入 typeColorMap  →  使用显式配色（状态/等级列需注册语义色）
+//   2. DICT_COLOR_REGISTRY[dictKey]  →  使用该 dictKey 已注册的配色方案
+//   3. 自动轮转                      →  按 value 序号轮转 AUTO_TAG_PALETTE
+//
+// 语义约定：
+//   状态列（*Status）  → 必须语义配色：success=正向终态, danger=负向, warning=中间, info=初始
+//   等级列（*Level/*Grade）→ 必须梯度配色：danger→warning→primary→success（由重到轻）
+//   分类列（*Type/*Category）→ 自动轮转即可，颜色仅辅助视觉扫描
+//   方式/来源列（*Mode/*Src）→ 自动轮转即可
+//
+const AUTO_TAG_PALETTE = ["", "success", "warning", "info"] as const;
+// "" = primary（Element Plus 默认蓝），与 common-preset 中 TagMapItem.type="" 含义一致
+
+type DictResolver = (
+  dictKey: string,
+  value: string | number,
+) => string | undefined;
+
+let dictResolver: DictResolver | null = null;
+
+/** 注入字典查询函数（解耦 Store 依赖） */
+export function setDictResolver(fn: DictResolver): void {
+  dictResolver = fn;
+}
+
+// ── 字典配色注册表 ───────────────────────────────────────────────────────────────
+const DICT_COLOR_REGISTRY: Record<string, Record<string, string>> = {};
+
+/** 注册单个 dictKey 的配色方案 */
+export function registerDictColorMap(
+  dictKey: string,
+  colorMap: Record<string, string>,
+): void {
+  DICT_COLOR_REGISTRY[dictKey] = colorMap;
+}
+
+/** 批量注册 dictKey 配色方案 */
+export function registerDictColorMaps(
+  maps: Record<string, Record<string, string>>,
+): void {
+  Object.assign(DICT_COLOR_REGISTRY, maps);
+}
+
+/** 自动轮转配色：按 value 数值序号从 AUTO_TAG_PALETTE 取色 */
+function autoTagType(value: string | number): string {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isNaN(n) && n > 0) {
+    return AUTO_TAG_PALETTE[(n - 1) % AUTO_TAG_PALETTE.length];
+  }
+  // 非数字 value 用简单 hash 轮转
+  let hash = 0;
+  for (let i = 0; i < String(value).length; i++) {
+    hash = ((hash << 5) - hash + String(value).charCodeAt(i)) | 0;
+  }
+  return AUTO_TAG_PALETTE[Math.abs(hash) % AUTO_TAG_PALETTE.length];
+}
+
+/** 渲染动态字典分类 Tag，适用于 logicType=dict 的类型/来源/方式/规则类型等列 */
+export function renderDictClassifyTag(
+  value: string | number | null | undefined,
+  dictKey: string,
+  typeColorMap?: Record<string, string>,
+): VNode | null {
+  if (value === null || value === undefined || value === "") return null;
+  let label = String(value);
+  if (dictResolver) {
+    const resolved = dictResolver(dictKey, value);
+    if (resolved) label = resolved;
+  }
+  // 配色优先级：显式 typeColorMap > DICT_COLOR_REGISTRY > 自动轮转
+  const colorMap = typeColorMap ?? DICT_COLOR_REGISTRY[dictKey];
+  const tagType = (colorMap?.[String(value)] ?? autoTagType(value)) as any;
+  return h(
+    ElTag,
+    { type: tagType, size: "small", effect: "plain" },
+    () => label,
+  );
+}
+
 /** 蓝色圆角徽标（编号类） */
 export function renderBadge(
   value: string | number | null | undefined,

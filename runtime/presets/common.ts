@@ -14,8 +14,7 @@
  *
  * 自定义：如需扩展自己业务的字段映射，运行 `npx wk-ui add-preset <name>` 脚手架一份。
  */
-import { h, type VNode } from "vue";
-import { ElTag } from "element-plus";
+import type { VNode } from "vue";
 import type { TagMapItem } from "../core/types";
 import {
   renderTagNode,
@@ -24,6 +23,12 @@ import {
   renderRatingLevel,
 } from "../core/renderers";
 import { registerColumnAutoMaps } from "../core/registry";
+export {
+  setDictResolver,
+  renderDictClassifyTag,
+  registerDictColorMap,
+  registerDictColorMaps,
+} from "../core/renderers";
 
 // ── 风险分级 ─────────────────────────────────────────────────────────────────
 export const RISK_LEVEL_MAP: Record<string | number, TagMapItem> = {
@@ -138,37 +143,6 @@ export const DRILL_TYPE_COLOR_MAP: Record<string, string> = {
   "1": "info",
   "2": "warning",
 };
-
-// ── 字典驱动 Tag ─────────────────────────────────────────────────────────────
-type DictResolver = (
-  dictKey: string,
-  value: string | number,
-) => string | undefined;
-let dictResolver: DictResolver | null = null;
-
-/** 注入字典查询函数（解耦 Store 依赖） */
-export function setDictResolver(fn: DictResolver): void {
-  dictResolver = fn;
-}
-
-export function renderDictClassifyTag(
-  value: string | number | null | undefined,
-  dictKey: string,
-  typeColorMap?: Record<string, string>,
-): VNode | null {
-  if (value === null || value === undefined || value === "") return null;
-  let label = String(value);
-  if (dictResolver) {
-    const resolved = dictResolver(dictKey, value);
-    if (resolved) label = resolved;
-  }
-  const tagType = (typeColorMap?.[String(value)] ?? "") as any;
-  return h(
-    ElTag,
-    { type: tagType, size: "small", effect: "plain" },
-    () => label,
-  );
-}
 
 // ── 一键安装 ─────────────────────────────────────────────────────────────────
 /** 把通用业务字段映射批量注册到核心 COLUMN_AUTO_MAP（main.ts 调用一次） */

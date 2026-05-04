@@ -335,6 +335,18 @@
 // 注意：selector 用 el-dialog__footer 而非 .dialog-footer，确保 jh-dialog 等
 // 直接在 #footer slot 放 el-button（无 wrapper class）时也能命中
 .el-dialog__footer {
+  .base-toolbar-box {
+    justify-content: flex-end !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border-bottom: 0 !important;
+
+    .base-toolbar-content {
+      justify-content: flex-end !important;
+      gap: 8px !important;
+    }
+  }
+
   .el-button {
     height: 28px !important;
     padding: 0 14px !important;

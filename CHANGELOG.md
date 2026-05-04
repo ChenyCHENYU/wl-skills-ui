@@ -4,6 +4,17 @@ All notable changes to **@agile-team/wk-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.6] - 2026-05
+
+### Fixed
+
+- `styles/vendors/_base-components.scss`：弹窗底部按钮选择器由 `.el-dialog .dialog-footer .el-button` 改为 `.el-dialog__footer .el-button`，确保 `jh-dialog` 直接在 `#footer` slot 放置按钮时也能命中；高度 30→28px，与内容密度匹配
+- `styles/vendors/_base-components.scss`：`.el-message-box__btns .el-button` 高度同步降至 28px
+
+### Added
+
+- `templates/ui-optimization-report/TPL-UI-OPTIM-REPORT.md`：UI 风格优化记录报告结构化模板，含十二章节、R001~R016 规范对照、编号列 R016 防漏规则
+
 ## [1.4.5] - 2026-05
 
 ### Fixed

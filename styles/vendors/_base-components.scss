@@ -312,8 +312,8 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 .el-message-box__btns {
   .el-button {
-    height: 30px;
-    padding: 0 16px;
+    height: 28px;
+    padding: 0 14px;
     font-size: 13px;
     border-radius: 6px !important;
     font-weight: 500;
@@ -332,24 +332,24 @@
 }
 
 // 底部按钮：与设计风格统一（紧凑、圆角、精致）
-.el-dialog {
-  .dialog-footer {
-    .el-button {
-      height: 30px;
-      padding: 0 16px;
-      font-size: 13px;
-      border-radius: 6px;
-      font-weight: 500;
-      // 默认(取消/关闭)：细边框灰色风格
-      &:not(.el-button--primary):not(.el-button--danger) {
-        border-color: rgba(0, 0, 0, 0.15);
-        color: #374151;
-        background: #fff;
-        &:hover {
-          border-color: var(--el-color-primary);
-          color: var(--el-color-primary);
-          background: rgba(67, 104, 255, 0.04);
-        }
+// 注意：selector 用 el-dialog__footer 而非 .dialog-footer，确保 jh-dialog 等
+// 直接在 #footer slot 放 el-button（无 wrapper class）时也能命中
+.el-dialog__footer {
+  .el-button {
+    height: 28px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    // 默认(取消/关闭)：细边框灰色风格
+    &:not(.el-button--primary):not(.el-button--danger) {
+      border-color: rgba(0, 0, 0, 0.15) !important;
+      color: #374151 !important;
+      background: #fff !important;
+      &:hover {
+        border-color: var(--el-color-primary) !important;
+        color: var(--el-color-primary) !important;
+        background: rgba(67, 104, 255, 0.04) !important;
       }
     }
   }

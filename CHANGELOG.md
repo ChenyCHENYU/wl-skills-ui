@@ -4,6 +4,20 @@ All notable changes to **@agile-team/wk-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.7] - 2026-05
+
+### Added
+
+- `scanner/rules/tag.mjs`：新增 **R017** — 脚本式 `columnsDef` 中编号/工号/证件号列缺少 `renderBadge` 检测（`checkScript` 钩子）
+- `scanner/rules/tag.mjs`：新增 **R018** — 脚本式 `columnsDef` 中 `logicType:dict` 列缺少 `defaultSlot`/`renderDictClassifyTag` 检测（`checkScript` 钩子）
+- `scanner/rules/tag.mjs`：R009 补全 `checkScript` — 状态/分类列（label 含"状态/级别/类型"）纯文本渲染检测扩展到脚本式列定义
+
+### Fixed
+
+- `SKILL.md`：规则定义章节补充 R017/R018 条目，含 diff 示例和判断原则
+- `SKILL.md`：9.4 迁移规则补充中文 label 关键字表（编号/工号/证件号码 → `renderBadge`），解答"证件号码是否需要 badge"疑问
+- 修复 scanner 盲区：此前扫描器仅检测 `<el-table-column>` 模板写法，对 `columnsDef()` 脚本式列定义完全失效，导致安全模块 66 处编号列、13 处状态列遗漏
+
 ## [1.4.6] - 2026-05
 
 ### Fixed

@@ -77,7 +77,7 @@ npx wk-scan check --project [项目根目录]
 
 ---
 
-## 三、规则定义（R001—R018）
+## 三、规则定义（R001—R020）
 
 ### Category A：表格（el-table / AG Grid）
 
@@ -247,6 +247,37 @@ npx wk-scan check --project [项目根目录]
 + background: var(--el-color-danger);
 ```
 **已覆盖颜色**：`#409eff/#3a7afe/#4368ff`→primary，`#fb2323/#f56c6c`→danger，`#0cc859/#67c23a`→success，`#ffaf27/#e6a23c`→warning，`#ecf5ff`→primary-light-9
+
+#### R017 — 编号/工号/证件号列缺少 renderBadge【高危】
+**检测**：`columnsDef()` / `columns` 数组中，label 含“编号”“工号”“证件号”但没有 `renderBadge` / `defaultSlot`（脚本式列定义）  
+**标准**：所有标识符类字段（射5类）必须使用 `renderBadge(row.xxx)`，包括：  
+- label 含“编号”：门岗编号、主机编号、通道编号…  
+- label 含“工号”：上报人工号、处置人工号…  
+- label 含“证件号”：证件号码、驾驶员证件号码、车主证件号码…  
+```diff
+- { label: "工号", name: "userNo", minWidth: 100 }
++ { label: "工号", name: "userNo", minWidth: 100,
++   defaultSlot: ({ row }) => renderBadge(row.userNo) }
+- { label: "证件号码", name: "identityNo", minWidth: 180 }
++ { label: "证件号码", name: "identityNo", minWidth: 180,
++   defaultSlot: ({ row }) => renderBadge(row.identityNo) }
+```
+> **答疑解惑：证件号码要用 badge 吗？** 是的。证件号码是唧18位的唯一标识字符串，badge 的等宽字体让长串数字更易辨识，视觉上传达“这是个标识码”的语义。
+
+#### R018 — `logicType:dict` 列缺少 defaultSlot【高危】
+**检测**：`columnsDef()` / `columns` 中某列有 `logicType: BusLogicDataType.dict`，但没有 `defaultSlot` / `renderTag` / `renderDictClassifyTag`（脚本式列定义）  
+**标准**：`logicType:dict` 仅提供字符串渲染，必须换为标签渲染：  
+```diff
+- { name: "trainLevel", label: "培训级别",
+-   logicType: BusLogicDataType.dict, logicValue: "trainLevel" }
++ { name: "trainLevel", label: "培训级别", width: 100,
++   defaultSlot: ({ row }) => renderDictClassifyTag(row.trainLevel, 'trainLevel', TYPE_MAP) }
+- { name: "authStatus", label: "权限状态",
+-   logicType: BusLogicDataType.dict, logicValue: "authStatus" }
++ { name: "authStatus", label: "权限状态", width: 100,
++   defaultSlot: ({ row }) => renderDictClassifyTag(row.authStatus, 'authStatus') }
+```
+**判断原则**：字段名含 `Type/Level/Kind` → `renderDictClassifyTag`（分类）；含 `Status/State/Flag` → `renderTagNode`（状态）
 
 ---
 
@@ -542,6 +573,18 @@ import { renderDictClassifyTag, TRAIN_LEVEL_TYPE_MAP } from "@/util/ag-cell-rend
 - 字段名含 `Type/Level/Kind/Class/Category` → **分类类** → `renderDictClassifyTag`
 - 字段名含 `Status/State/Flag` → **状态类** → `renderXxxStatus` 或 `renderTagNode`
 - 字段名含 `No/Code/Id`（非主键） → **编号类** → `renderBadge`
+
+> **补充说明：以下 label 含“中文关键字”的字段同样适用 `renderBadge`，字段名不含 No/Code 也不例外：**
+>
+> | label 关键字 | 典型字段名 | 正确处理 |
+> |---|---|---|
+> | 编号 | `gateCode`, `hostCode`, `passagewayCode` | `renderBadge` |
+> | 工号 | `userNo`, `workNo`, `employeeNo` | `renderBadge` |
+> | 证件号码 | `identityNo`, `idCardNo`, `certNo` | `renderBadge` |
+> | 设备编号/车牌号 | `deviceCode`, `carNo` | `renderBadge` |
+> | 驾驶员证件号码 | `driverIdNo` | `renderBadge` |
+>
+> **采用 `renderBadge` 而非普通文本的原因**：等宽字体让长串数字（如 18 位身份证）更易辨识，蓝色边框视觉传达“标识符”语义。
 
 ### 9.5 selection 列对齐（嵌套 el-table 同样适用）
 

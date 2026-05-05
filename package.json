@@ -1,6 +1,6 @@
 {
   "name": "@agile-team/wk-skills-ui",
-  "version": "1.4.8",
+  "version": "1.5.0",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 项目通用化妆/原生双模式（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
   "main": "./es/index.js",
@@ -38,12 +38,15 @@
   },
   "scripts": {
     "build": "tsup && npm run sync:tokens",
-    "prepare": "tsup && npm run sync:tokens",
+    "prepare": "npm run build",
     "sync:tokens": "node -e \"import('fs').then(fs=>fs.copyFileSync('design/tokens/base.css','dist/tokens.css'))\"",
     "scan": "node scanner/index.mjs scan",
     "check": "node scanner/index.mjs check",
     "fix": "node scanner/index.mjs fix",
-    "all": "node scanner/index.mjs all"
+    "all": "node scanner/index.mjs all",
+    "standards:init": "npx @robot-admin/git-standards init",
+    "cz": "git-cz",
+    "lint": "eslint ."
   },
   "files": [
     "dist",
@@ -55,6 +58,7 @@
     "skills",
     "templates",
     "bin",
+    "mcp",
     "reference",
     "examples",
     "SKILL.md",
@@ -66,16 +70,27 @@
     "*.scss"
   ],
   "devDependencies": {
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
+    "@element-plus/icons-vue": "^2.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
+    "@vue/eslint-config-typescript": "^14.7.0",
+    "commitizen": "^4.3.1",
+    "cz-customizable": "^7.5.4",
+    "element-plus": "^2.7.0",
+    "eslint": "^10.3.0",
+    "eslint-plugin-vue": "^10.9.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "tsup": "^8.3.0",
     "typescript": "^5.4.0",
-    "vue": "^3.4.0",
-    "element-plus": "^2.7.0",
-    "@element-plus/icons-vue": "^2.3.0"
+    "vue": "^3.4.0"
   },
   "peerDependencies": {
-    "vue": ">=3.2",
+    "@element-plus/icons-vue": ">=2.0",
     "element-plus": ">=2.2",
-    "@element-plus/icons-vue": ">=2.0"
+    "vue": ">=3.2"
   },
   "peerDependenciesMeta": {
     "@element-plus/icons-vue": {
@@ -95,5 +110,18 @@
     "linter",
     "copilot-skill"
   ],
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-customizable"
+    },
+    "cz-customizable": {
+      "config": ".cz-config.cjs"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,vue}": [
+      "eslint --fix --no-cache"
+    ]
+  }
 }

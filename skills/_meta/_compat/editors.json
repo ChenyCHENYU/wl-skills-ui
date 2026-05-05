@@ -5,7 +5,7 @@
       "name": "GitHub Copilot",
       "description": "VS Code GitHub Copilot Chat Agent 模式",
       "skillFormat": "SKILL.md with YAML frontmatter (applyTo: glob)",
-      "installPath": ".vscode/",
+      "installPath": ".github/instructions/wk-skills/",
       "headerFile": "headers/github-copilot.txt"
     },
     {
@@ -39,6 +39,38 @@
       "skillFormat": "Markdown with description frontmatter",
       "installPath": ".trae/rules/",
       "headerFile": "headers/trae.txt"
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "description": "Claude Code 项目规则文件",
+      "skillFormat": "Plain markdown",
+      "installPath": "./",
+      "headerFile": "headers/claude-code.txt"
+    },
+    {
+      "id": "cline",
+      "name": "Cline",
+      "description": "Cline 规则文件",
+      "skillFormat": "Plain markdown",
+      "installPath": "./",
+      "headerFile": "headers/cline.txt"
+    },
+    {
+      "id": "agents-generic",
+      "name": "Generic Agents",
+      "description": "AGENTS.md 通用代理协议",
+      "skillFormat": "Plain markdown",
+      "installPath": "./",
+      "headerFile": "headers/agents.txt"
+    },
+    {
+      "id": "qoder",
+      "name": "Qoder",
+      "description": "Qoder IDE 规则文件",
+      "skillFormat": "Markdown with description frontmatter",
+      "installPath": ".qoder/rules/",
+      "headerFile": "headers/qoder.txt"
     }
   ]
 }

@@ -278,6 +278,11 @@ npx wk-ui scan --target src --mode skin --outFile audit.md
 ```bash
 wk-ui init    [--project .] [--editor <e>] [--mode native|skin]
                             [--dry-run] [--skills-only]
+wk-ui update  [--project .] [--force] [--dry-run]
+wk-ui diff    [--project .]
+wk-ui clean   [--project .] [--dry-run]
+wk-ui doctor  [--project .]
+wk-ui prompts
 wk-ui scan    --target src  [--layer L0,L1,L2] [--vendor base-table,jh]
                             [--mode skin|native] [--outFile report.md]
 wk-ui check   --project .
@@ -286,7 +291,18 @@ wk-ui all     --project .
 wk-ui add-preset <name>     # 脚手架新业务 preset
 ```
 
-支持的 AI 编辑器：`github-copilot` / `cursor` / `windsurf` / `kiro` / `trae`（自动检测）
+支持的 AI 编辑器：`github-copilot` / `cursor` / `windsurf` / `kiro` / `trae` / `claude-code` / `cline` / `agents-generic` / `qoder`（自动检测）
+
+`init/update` 会同时写入：
+
+- AI Skill 规则文件
+- `.github/wk-skills-ui/TRIGGER_PROMPTS.md` 触发提示
+- `.mcp.json` 中的 `wk-skills-ui` MCP Server 配置
+- `.wk-skills-ui-manifest.json` 安装清单，供 `update/diff/clean/doctor` 使用
+
+> 可选桥接：如项目也安装了 `@agile-team/wl-skills-kit`，两者保持独立分工，不互相强依赖。kit 负责编码规范/页面生成/菜单字典权限，wk-skills-ui 负责 UI 风格/化妆层/Runtime 渲染。
+
+> 规范插件建议：项目可执行 `npx @robot-admin/git-standards init` 接入 ESLint/Prettier/Husky/提交规范，形成代码质量闭环。
 
 ---
 

@@ -4,6 +4,17 @@ All notable changes to **@agile-team/wk-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.0] - 2026-05
+
+### Added
+
+- `wk-ui update/diff/clean/doctor/prompts`：补齐安装生命周期管理、安装清单、差异检查、清理与体检能力
+- `wk-ui init/update`：安装 AI Skill 时同步写入 `.github/wk-skills-ui/TRIGGER_PROMPTS.md` 触发提示与 `.mcp.json` MCP 配置
+- `mcp/server.js`：新增 `wk-skills-ui` MCP Server，提供 `wks_ui_check`、`wks_ui_scan`、`wks_ui_fix_dry_run`、`wks_ui_skill_prompt`
+- 多编辑器适配扩展：新增 `claude-code`、`cline`、`agents-generic`、`qoder`
+- 可选桥接提醒：检测/提示 `@agile-team/wl-skills-kit`，保持两包独立分工、不强耦合
+- 规范插件提醒：建议业务项目执行 `npx @robot-admin/git-standards init` 接入代码质量与提交规范闭环
+
 ## [1.4.7] - 2026-05
 
 ### Added

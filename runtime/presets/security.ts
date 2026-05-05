@@ -18,11 +18,7 @@
  *   本预设不硬编码主色，所有颜色走 Element Plus 语义色（primary/success/warning/danger/info）
  */
 import type { TagMapItem } from "../core/types";
-import {
-  renderTagNode,
-  renderClassifyTag,
-  registerDictColorMaps,
-} from "../core/renderers";
+import { renderTagNode, registerDictColorMaps } from "../core/renderers";
 import { registerColumnAutoMaps } from "../core/registry";
 
 // ── 违章处理状态 ─────────────────────────────────────────────────────────────

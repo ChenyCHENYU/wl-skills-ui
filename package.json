@@ -1,6 +1,6 @@
 {
   "name": "@agile-team/wk-skills-ui",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 项目通用化妆/原生双模式（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
   "main": "./es/index.js",

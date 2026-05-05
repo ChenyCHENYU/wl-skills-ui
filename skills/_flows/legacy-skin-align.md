@@ -15,7 +15,17 @@ applyTo: "**/*.{vue,scss,html}"
 - "legacy-skin 流程跑一下"
 - "skin mode 接入"
 
-## 执行步骤（AI 严格按序）
+## 执行步骤
+
+### Phase 0 — 安装/更新 Skill 与 MCP 配置
+```bash
+npx wk-ui init --project . --mode skin
+npx wk-ui doctor --project .
+```
+
+该命令会写入 AI 编辑器规则、触发提示、`.mcp.json` 和 `.wk-skills-ui-manifest.json`。已安装项目可改用 `npx wk-ui update --project .`。
+
+（AI 严格按序）
 
 ### Phase 1 — 接入 tokens
 1. 检查 `index.html`，在 `<head>` 内追加：

@@ -4,6 +4,14 @@ All notable changes to **@agile-team/wk-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.1] - 2026-05-05
+
+### Changed
+
+- 更新 README、SKILL、Flow 与多编辑器兼容文档，补齐 manifest 生命周期、MCP、触发提示和规范插件说明
+- 明确 `wl-skills-kit` 可选桥接边界：两包可组合提醒，但不互相强依赖
+- 同步发布文档到 1.5.x 现状，避免旧版 CLI 和编辑器路径误导使用者
+
 ## [1.5.0] - 2026-05
 
 ### Added

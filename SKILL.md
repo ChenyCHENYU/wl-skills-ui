@@ -8,6 +8,25 @@ applyTo: "**/*.vue"
 
 # UI 风格对齐 Skill
 
+## 快速触发与生命周期命令
+
+```bash
+# 安装/更新 AI Skill、触发提示、MCP 配置和 manifest
+npx wk-ui init --project . --mode native
+npx wk-ui update --project .
+
+# 查看差异、体检、清理
+npx wk-ui diff --project .
+npx wk-ui doctor --project .
+npx wk-ui clean --project . --dry-run
+
+# 输出 AI 触发提示
+npx wk-ui prompts
+```
+
+可选编辑器：`github-copilot`、`cursor`、`windsurf`、`kiro`、`trae`、`claude-code`、`cline`、`agents-generic`、`qoder`。修复前优先使用 `--dry-run` 或 MCP 工具 `wks_ui_fix_dry_run`。
+
+
 ## 一、适用场景
 - 新业务系统首次接入统一风格标准（推荐先走「新系统快速接入方案」，见第八节）
 - 已有系统定期合规检查
@@ -21,13 +40,13 @@ applyTo: "**/*.vue"
 
 ```bash
 # 推荐：一站式（接入完整性 + 风格扫描 + 报告）
-npx wk-scan all --project [项目根目录] --outFile /tmp/scan-result.md
+npx wk-ui all --project [项目根目录] --outFile /tmp/scan-result.md
 
 # 单独风格扫描
-npx wk-scan scan --target [项目src目录] --outFile /tmp/scan-result.md
+npx wk-ui scan --target [项目src目录] --outFile /tmp/scan-result.md
 
 # 单独接入完整性检查
-npx wk-scan check --project [项目根目录]
+npx wk-ui check --project [项目根目录]
 ```
 
 > 包未安装时也可：`node [SKILL_ROOT]/scanner/index.mjs all --project ...`
@@ -66,7 +85,7 @@ npx wk-scan check --project [项目根目录]
 ### Phase 4 — 修复
 
 按确认范围：
-- A 类（attr 缺失 / hex 颜色）→ `npx wk-scan fix --target [src] [--dry-run]`
+- A 类（attr 缺失 / hex 颜色）→ `npx wk-ui fix --target [src] [--dry-run]`
 - B 类（结构改造，如 R004/R013/R015）→ AI 逐文件编辑
 
 每修复一个文件，输出该文件的修改摘要（改了什么、改了几处）。

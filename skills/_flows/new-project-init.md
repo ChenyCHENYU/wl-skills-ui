@@ -17,6 +17,16 @@ applyTo: "**/*.{vue,ts,scss,html}"
 
 ## 执行步骤
 
+### Phase 0 — 安装/更新 Skill 与 MCP 配置
+```bash
+npx wk-ui init --project . --mode native
+npx wk-ui doctor --project .
+```
+
+该命令会写入 AI 编辑器规则、触发提示、`.mcp.json` 和 `.wk-skills-ui-manifest.json`。已安装项目可改用 `npx wk-ui update --project .`。
+
+
+
 ### Phase 1 — 安装包
 ```bash
 pnpm add @agile-team/wk-skills-ui

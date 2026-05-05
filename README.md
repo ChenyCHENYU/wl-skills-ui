@@ -123,7 +123,7 @@ wk-skills-ui/
 │   ├── _meta/
 │   │   ├── _registry.md          # Skills 总索引
 │   │   ├── _detection.md         # vendor / layout 识别速查表
-│   │   └── _compat/              # 多编辑器适配（5 大 AI 编辑器）
+│   │   └── _compat/              # 多编辑器适配（Copilot/Cursor/Windsurf/Kiro/Trae/Claude/Cline/Agents/Qoder）
 │   ├── _flows/                   # ⭐ 组合流程（一句话跑全套）
 │   │   ├── new-project-init.md   # 新项目从零接入
 │   │   ├── legacy-skin-align.md  # 老项目化妆对齐 ⭐ 杀手级
@@ -161,7 +161,7 @@ wk-skills-ui/
 │   └── engineering/              # 工程规范（import 顺序 / 命名 / SCSS 结构）
 │
 ├── bin/                          # CLI
-│   └── wk-ui.js                  # 统一入口（init / scan / fix / add-preset）
+│   └── wk-ui.js                  # 统一入口（init/update/diff/clean/doctor/prompts/scan/fix/add-preset）
 │
 ├── dist/                         # 构建产物 + 兼容重定向
 │   ├── tokens.css                # = design/tokens/base.css
@@ -188,6 +188,19 @@ yarn add @agile-team/wk-skills-ui
 ```
 
 要求：Node ≥ 18，Vue ≥ 3.2，Element Plus ≥ 2.2。
+
+---
+
+## 版本亮点
+
+当前小版本重点补齐 AI Skill 的安装、更新、清理和编辑器集成体验：
+
+- `wk-ui init/update` 会安装 Skill、触发提示、MCP 配置和 manifest 清单
+- `wk-ui diff/clean/doctor/prompts` 覆盖升级前对比、卸载清理、环境体检和提示词查看
+- 内置 `wk-skills-ui` MCP Server，供 AI 编辑器调用扫描、检查和 dry-run 修复
+- 支持 GitHub Copilot、Cursor、Windsurf、Kiro、Trae、Claude Code、Cline、Qoder、通用 Agents
+- 与 `@agile-team/wl-skills-kit` 只做可选桥接提醒，不建立强依赖
+- 接入 `@robot-admin/git-standards`，仓库维护和业务项目均可复用提交/检查规范
 
 ---
 
@@ -258,7 +271,23 @@ npx wk-ui init --mode skin
 npx wk-ui scan --target src --mode skin --outFile audit.md
 ```
 
-### 场景 C — 仅 CI 检查
+### 场景 C — AI 编辑器 / MCP 接入
+
+```bash
+# 安装或更新 Skill 到当前业务项目
+npx wk-ui init --project . --editor auto
+npx wk-ui update --project .
+
+# 查看 AI 触发提示
+npx wk-ui prompts
+
+# 体检安装结果和 MCP/规范插件提示
+npx wk-ui doctor --project .
+```
+
+安装后会写入 `.github/wk-skills-ui/TRIGGER_PROMPTS.md`、`.mcp.json` 和 `.wk-skills-ui-manifest.json`。支持的编辑器可以单独指定，例如 `--editor claude-code`、`--editor cline`、`--editor agents-generic`、`--editor qoder`。
+
+### 场景 D — 仅 CI 检查
 
 ```json
 // package.json
@@ -455,10 +484,8 @@ export const myRules = [{
 
 | 阶段 | 目标 |
 |---|---|
-| **当前 v1.3** | 五层架构 + 双模式 + 4 大 vendor + 4 个 flows + scanner 元数据 |
-| **v1.4** | layouts SKILL 完整化 + ops/audit ops/migrate 落地 |
-| **v1.5** | 拿到首个内部组件源码 → 把 vendors/_base-table.scss 平迁到 BaseTable.vue |
-| **v1.6** | 多业务 preset 矩阵（safe / hr / asset / ops 等） |
+| **v1.5.x** | 生命周期 CLI + manifest + MCP + 多编辑器适配 + 规范插件接入 |
+| **v1.6** | 多业务 preset 矩阵（safe / hr / asset / ops 等）和更多 MCP 辅助工具 |
 | **v2.0** | 稳定接口冻结，正式标记 stable |
 
 ---
@@ -469,6 +496,7 @@ export const myRules = [{
 git clone git@github.com:ChenyCHENYU/wl-skills-ui.git
 cd wl-skills-ui
 pnpm install
+pnpm lint
 pnpm build
 node scanner/index.mjs scan --target reference
 ```

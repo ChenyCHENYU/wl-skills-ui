@@ -33,9 +33,10 @@ export interface ColumnLike {
 
 /** renderOps：预设图标按钮 */
 export interface OpPreset {
-  type: "view" | "edit" | "del" | "log" | "ok" | "send";
+  type: "view" | "edit" | "del" | "danger" | "log" | "ok" | "send";
+  label?: string;
   title?: string;
-  show?: boolean;
+  show?: boolean | (() => boolean);
   onClick: (e: MouseEvent) => void;
 }
 
@@ -44,7 +45,7 @@ export interface OpChip {
   type: "chip";
   label: string;
   icon?: import("vue").Component;
-  show?: boolean;
+  show?: boolean | (() => boolean);
   onClick: (e: MouseEvent) => void;
 }
 
@@ -52,7 +53,7 @@ export interface OpChip {
 export interface OpLink {
   type: "link";
   label: string;
-  show?: boolean;
+  show?: boolean | (() => boolean);
   onClick: (e: MouseEvent) => void;
 }
 

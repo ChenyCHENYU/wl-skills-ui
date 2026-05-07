@@ -42,10 +42,10 @@
 
 ### 两种运行模式
 
-| 模式 | 适用 | 包含层 | 接入方式 |
-|---|---|---|---|
-| **Native（原生）** | 新项目、能完全可控的项目 | L0+L1+L2+L3+L4 | `@use '.../styles' as *;` + `installCommonPreset()` |
-| **Skin（化妆）** | 老项目、第三方封装无源码 | L0+L1+L2 | `@use '.../styles/presets/skin' as *;`（不动业务代码）|
+| 模式               | 适用                     | 包含层         | 接入方式                                               |
+| ------------------ | ------------------------ | -------------- | ------------------------------------------------------ |
+| **Native（原生）** | 新项目、能完全可控的项目 | L0+L1+L2+L3+L4 | `@use '.../styles' as *;` + `installCommonPreset()`    |
+| **Skin（化妆）**   | 老项目、第三方封装无源码 | L0+L1+L2       | `@use '.../styles/presets/skin' as *;`（不动业务代码） |
 
 ---
 
@@ -204,6 +204,23 @@ yarn add @agile-team/wk-skills-ui
 
 ---
 
+## 与 wl-skills-kit 的协同闭环
+
+`wk-skills-ui` 与 `wl-skills-kit` 不强耦合，但可以互相配合形成“先统一视觉，再按团队规范渐进修复”的闭环：
+
+- `wk-skills-ui` 负责整体设计体系、tokens、样式风格、化妆层和 UI runtime；无论项目是 kit 最佳写法、纯 Element Plus、老旧 `Base*` 封装，还是其他基于 Element Plus 的封装，都应尽量覆盖成统一视觉风格。
+- `wl-skills-kit` 负责 AI 生成页面和前端工作流必须遵守的团队规范、最佳实践、业务模板、mock、api.md、菜单/字典/权限同步等，不直接负责样式体系。
+- `wk-ui scan/check` 先识别项目中的多种 UI 写法并给出风格/结构结论；如果需要从“样式统一”进一步升级为“团队最佳实践写法”，再提示使用 `wl-skills-kit` 按扫描结论进行规范化重构。
+- 即使暂不重构，`wk-skills-ui` 的 Skin/Native 样式覆盖也应继续生效，保证老项目和非标准写法至少获得统一视觉。
+
+当页面由 `wl-skills-kit` 生成或重构时，推荐最终页面骨架保持：
+
+```text
+AbstractPageQueryHook + BaseQuery + BaseToolbar + BaseTable(render-type="agGrid", cid) + jh-pagination
+```
+
+---
+
 ## 快速开始
 
 ### 场景 A — 新项目（Native Mode）
@@ -216,36 +233,45 @@ npx wk-ui init --mode native
 ```html
 <!-- 2. index.html -->
 <head>
-  <link rel="stylesheet" href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css" />
+  <link
+    rel="stylesheet"
+    href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css"
+  />
 </head>
 ```
 
 ```scss
 // 3. src/styles/index.scss
-@use '@agile-team/wk-skills-ui/styles' as *;
+@use "@agile-team/wk-skills-ui/styles" as *;
 ```
 
 ```ts
 // 4. src/main.ts
-import { installCommonPreset } from '@agile-team/wk-skills-ui/runtime/common-preset';
+import { installCommonPreset } from "@agile-team/wk-skills-ui/runtime/common-preset";
 installCommonPreset();
 ```
 
 ```vue
 <!-- 5. 业务代码用 runtime API（参考 templates/list-page/） -->
 <script setup>
-import { defineColumns, renderOps } from '@agile-team/wk-skills-ui/runtime';
+import { defineColumns, renderOps } from "@agile-team/wk-skills-ui/runtime";
 
 const columns = defineColumns([
-  { type: 'index', label: '序号', width: 60, align: 'center' },
-  { name: 'name', label: '名称', minWidth: 150 },
-  { name: 'enableStatus', label: '状态', width: 90 },     // ← 自动渲染 Tag（已注册）
-  { label: '操作', width: 120, fixed: 'right', align: 'center',
-    defaultSlot: ({ row }) => renderOps([
-      { type: 'view', onClick: () => modal.value.view(row.id) },
-      { type: 'edit', onClick: () => modal.value.edit(row.id) },
-      { type: 'del',  onClick: () => handleDel(row.id) },
-    ]) },
+  { type: "index", label: "序号", width: 60, align: "center" },
+  { name: "name", label: "名称", minWidth: 150 },
+  { name: "enableStatus", label: "状态", width: 90 }, // ← 自动渲染 Tag（已注册）
+  {
+    label: "操作",
+    width: 120,
+    fixed: "right",
+    align: "center",
+    defaultSlot: ({ row }) =>
+      renderOps([
+        { type: "view", onClick: () => modal.value.view(row.id) },
+        { type: "edit", onClick: () => modal.value.edit(row.id) },
+        { type: "del", onClick: () => handleDel(row.id) },
+      ]),
+  },
 ]);
 </script>
 ```
@@ -259,7 +285,7 @@ npx wk-ui init --mode skin
 
 ```scss
 // 2. 仅引入 skin preset（不引入 layouts，避免冲击老布局）
-@use '@agile-team/wk-skills-ui/styles/presets/skin' as *;
+@use "@agile-team/wk-skills-ui/styles/presets/skin" as *;
 ```
 
 ```bash
@@ -295,7 +321,7 @@ npx wk-ui doctor --project .
   "scripts": {
     "ui:check": "wk-ui check --project .",
     "ui:audit": "wk-ui scan --target src --outFile ui-audit.md",
-    "ui:fix":   "wk-ui fix --target src --dry-run"
+    "ui:fix": "wk-ui fix --target src --dry-run"
   }
 }
 ```
@@ -380,7 +406,7 @@ npx wk-ui add-preset my-biz
 
 ```ts
 // main.ts
-import { installMyBizPreset } from '@agile-team/wk-skills-ui/runtime/presets/my-biz';
+import { installMyBizPreset } from "@agile-team/wk-skills-ui/runtime/presets/my-biz";
 installMyBizPreset();
 ```
 
@@ -403,33 +429,97 @@ installMyBizPreset();
 
 ```js
 // scanner/rules/my-rule.mjs
-export const myRules = [{
-  id: 'R200',
-  category: 'vendor-base-table',  // 自动 layer=L2 / vendor=base-table
-  severity: 'warning',
-  name: '...',
-  check(template, file, lineOffset) { /* return issue[] */ },
-}];
+export const myRules = [
+  {
+    id: "R200",
+    category: "vendor-base-table", // 自动 layer=L2 / vendor=base-table
+    severity: "warning",
+    name: "...",
+    check(template, file, lineOffset) {
+      /* return issue[] */
+    },
+  },
+];
 
 // scanner/rules/index.mjs 中追加 import + addRules
 ```
 
 ---
 
+## Element Plus 组件族样式管控
+
+`wk-skills-ui` 的核心是样式绝对管控。加载 `styles`、`styles/presets/skin` 或 `styles/presets/element-only` 后，会统一覆盖首批 B 端高频 Element Plus 组件族：
+
+| 组件族       | 覆盖标签                                                   | 典型场景                         |
+| ------------ | ---------------------------------------------------------- | -------------------------------- |
+| card         | `el-card`                                                  | 列表容器、详情卡片、统计卡片     |
+| tabs         | `el-tabs` `el-tab-pane`                                    | 详情页 Tab、配置页 Tab、主从切换 |
+| descriptions | `el-descriptions`                                          | 详情页字段展示、只读信息区       |
+| tree         | `el-tree`                                                  | 左树右表、组织树、区域树         |
+| drawer       | `el-drawer`                                                | 抽屉详情、抽屉编辑               |
+| upload       | `el-upload`                                                | 附件上传、图片上传、文件列表     |
+| steps        | `el-steps` `el-step`                                       | 审批流、流程状态                 |
+| overlay      | `el-popover` `el-tooltip` `el-dropdown`                    | 辅助说明、溢出提示、更多操作     |
+| navigation   | `el-menu` `el-breadcrumb`                                  | 导航、面包屑                     |
+| feedback     | `el-empty` `el-result` `el-alert` `el-badge` `el-timeline` | 空状态、异常状态、提示反馈       |
+
+扫描器会在 JSON/Markdown 报告中输出 `componentCoverage`、`recommendedSkills`、`recommendations` 和 `kitBridge`，用于 AI 自动判断下一步是继续由 `wk-skills-ui` 做 Skin/Native 视觉统一，还是桥接 `wl-skills-kit` 做页面结构规范化。
+
+同时会识别以下 B 端组合业务场景：
+
+| 场景                | 识别含义                     |
+| ------------------- | ---------------------------- |
+| `query-table`       | 查询区 + 表格                |
+| `toolbar-actions`   | 工具栏 / 批量操作栏          |
+| `tree-table`        | 左树右表                     |
+| `dialog-form`       | 弹窗表单                     |
+| `drawer-detail`     | 抽屉详情 / 抽屉编辑          |
+| `detail-card`       | 详情卡片                     |
+| `tab-workbench`     | Tab 工作台 / Tab 详情        |
+| `attachment-upload` | 附件上传                     |
+| `process-flow`      | 流程 / 审批                  |
+| `feedback-state`    | 空状态 / 异常状态 / 反馈提示 |
+
+---
+
+## AI/MCP 智能引导
+
+| MCP Tool                | 作用                                                       |
+| ----------------------- | ---------------------------------------------------------- |
+| `wks_ui_check`          | 检查 tokens/styles/runtime 接入完整性                      |
+| `wks_ui_scan`           | 扫描 UI 风格偏差，输出 Markdown 或 JSON                    |
+| `wks_ui_fix_dry_run`    | 预览自动修复，不实际写入                                   |
+| `wks_ui_skill_prompt`   | 输出 AI 触发提示                                           |
+| `wks_ui_route_intent`   | 根据自然语言识别 UI 治理意图并推荐 flow/tool/skill         |
+| `wks_ui_recommend_flow` | 根据扫描 JSON 推荐 nextActions 和 `wl-skills-kit` 桥接动作 |
+
+推荐智能体流程：
+
+```text
+用户自然语言
+  → wks_ui_route_intent
+  → wks_ui_scan --output json
+  → wks_ui_recommend_flow
+  → 先保证样式统一
+  → 如需规范化，再桥接 wl-skills-kit validate-page / doctor-ui
+```
+
+---
+
 ## Runtime API 概览
 
-| API | 说明 |
-|---|---|
-| `defineColumns(cols)` | 列定义，自动应用 `COLUMN_AUTO_MAP` |
-| `renderOps(items)` | 操作列图标按钮组（view/edit/del/log/ok/send 预设）|
-| `renderTagNode(v, map)` | 状态 Tag 渲染 |
-| `renderClassifyTag(v, map)` | 分类 Tag 渲染 |
-| `renderBadge(v)` / `renderCountBadge(v)` | 编号 / 计数徽标 |
-| `renderRatingLevel(v)` | 评级颜色 |
-| `registerColumnAutoMap(field, config)` | 注册新字段自动渲染 |
-| `installCommonPreset()` | 安装通用业务预设 |
-| `setDictResolver(fn)` | 解耦动态字典查询 |
-| `createPreset(config)` / `installPreset(config)` | 自定义 preset 工厂 |
+| API                                              | 说明                                               |
+| ------------------------------------------------ | -------------------------------------------------- |
+| `defineColumns(cols)`                            | 列定义，自动应用 `COLUMN_AUTO_MAP`                 |
+| `renderOps(items)`                               | 操作列图标按钮组（view/edit/del/log/ok/send 预设） |
+| `renderTagNode(v, map)`                          | 状态 Tag 渲染                                      |
+| `renderClassifyTag(v, map)`                      | 分类 Tag 渲染                                      |
+| `renderBadge(v)` / `renderCountBadge(v)`         | 编号 / 计数徽标                                    |
+| `renderRatingLevel(v)`                           | 评级颜色                                           |
+| `registerColumnAutoMap(field, config)`           | 注册新字段自动渲染                                 |
+| `installCommonPreset()`                          | 安装通用业务预设                                   |
+| `setDictResolver(fn)`                            | 解耦动态字典查询                                   |
+| `createPreset(config)` / `installPreset(config)` | 自定义 preset 工厂                                 |
 
 ---
 
@@ -437,11 +527,11 @@ export const myRules = [{
 
 详见 `design/spec/`：
 
-| 维度 | 文档 |
-|---|---|
-| 颜色 | [design/spec/color.md](design/spec/color.md) |
+| 维度 | 文档                                                   |
+| ---- | ------------------------------------------------------ |
+| 颜色 | [design/spec/color.md](design/spec/color.md)           |
 | 字号 | [design/spec/typography.md](design/spec/typography.md) |
-| 间距 | [design/spec/spacing.md](design/spec/spacing.md) |
+| 间距 | [design/spec/spacing.md](design/spec/spacing.md)       |
 
 主色：`#4368ff` → `--el-color-primary`（与 Element Plus 默认蓝对齐）
 
@@ -449,28 +539,37 @@ export const myRules = [{
 
 ## 规范清单
 
-### UI 规则（R001-R018，按 layer 自动分组）
+### UI 规则（R001-R037，按 layer 自动分组）
 
-| Rule | Layer | Vendor | 说明 |
-|---|---|---|---|
-| R001 | L1 | element | el-table-column 缺 `align="center"` |
-| R002 | L1 | element | el-table 缺 `empty-text` |
-| R003 | L1 | element | BaseTable 缺 `empty-text` |
-| R004 | L1 | element | 操作列按钮非文字按钮 |
-| R005 | L1 | element | 工具栏按钮缺 icon |
-| R006 | L1 | element | 表单控件缺 `size="small"` |
-| R007 | L1 | element | el-date-picker 缺 `width:100%` |
-| R008 | L1 | element | label-width ≥ 150px |
-| R009 | L1 | element | 状态字段纯文本渲染 |
-| R010 | L1 | element | 分类字段缺 `effect="plain"` |
-| R011 | L1 | element | 分页器位置错误 |
-| R012 | L1 | element | 弹窗内 el-table 缺 `empty-text` |
-| R013 | L4 | runtime | columnsDef 用旧格式 `operations: []` |
-| R014 | L1 | element | selection 列缺 header-align |
-| R015 | L1 | element | modal 内表格按钮非 link |
-| R016 | L0 | — | `<style>` 块硬编码颜色 |
-| R017 | L0 | — | `<template>` 块硬编码颜色 |
-| R018 | L0 | — | `<script>` 块硬编码颜色 |
+| Rule | Layer | Vendor    | 说明                                 |
+| ---- | ----- | --------- | ------------------------------------ |
+| R001 | L1    | element   | el-table-column 缺 `align="center"`  |
+| R002 | L1    | element   | el-table 缺 `empty-text`             |
+| R003 | L1    | element   | BaseTable 缺 `empty-text`            |
+| R004 | L1    | element   | 操作列按钮非文字按钮                 |
+| R005 | L1    | element   | 工具栏按钮缺 icon                    |
+| R006 | L1    | element   | 表单控件缺 `size="small"`            |
+| R007 | L1    | element   | el-date-picker 缺 `width:100%`       |
+| R008 | L1    | element   | label-width ≥ 150px                  |
+| R009 | L1    | element   | 状态字段纯文本渲染                   |
+| R010 | L1    | element   | 分类字段缺 `effect="plain"`          |
+| R011 | L1    | element   | 分页器位置错误                       |
+| R012 | L1    | element   | 弹窗内 el-table 缺 `empty-text`      |
+| R013 | L4    | runtime   | columnsDef 用旧格式 `operations: []` |
+| R014 | L1    | element   | selection 列缺 header-align          |
+| R015 | L1    | element   | modal 内表格按钮非 link              |
+| R016 | L0    | —         | `<style>` 块硬编码颜色               |
+| R017 | L0    | —         | `<template>` 块硬编码颜色            |
+| R018 | L0    | —         | `<script>` 块硬编码颜色              |
+| R021 | L2    | BaseTable | BaseTable 缺 `render-type="agGrid"`  |
+| R022 | L2    | BaseTable | BaseTable 缺唯一 `cid/:cid`          |
+| R031 | L1    | element   | el-card 建议使用统一场景 class       |
+| R032 | L1    | element   | el-tabs 建议明确页面场景             |
+| R033 | L1    | element   | el-descriptions 建议 bordered/容器   |
+| R034 | L1    | element   | el-drawer 建议明确 size              |
+| R035 | L1    | element   | el-upload 建议配置 tip/限制说明      |
+| R036 | L1    | element   | el-steps 建议明确状态来源            |
+| R037 | L1    | element   | 空/异常反馈建议统一操作入口          |
 
 ### 工程规范
 
@@ -482,11 +581,11 @@ export const myRules = [{
 
 ## 未来路线图
 
-| 阶段 | 目标 |
-|---|---|
-| **v1.5.x** | 生命周期 CLI + manifest + MCP + 多编辑器适配 + 规范插件接入 |
-| **v1.6** | 多业务 preset 矩阵（safe / hr / asset / ops 等）和更多 MCP 辅助工具 |
-| **v2.0** | 稳定接口冻结，正式标记 stable |
+| 阶段       | 目标                                                                |
+| ---------- | ------------------------------------------------------------------- |
+| **v1.5.x** | 生命周期 CLI + manifest + MCP + 多编辑器适配 + 规范插件接入         |
+| **v1.6**   | 多业务 preset 矩阵（safe / hr / asset / ops 等）和更多 MCP 辅助工具 |
+| **v2.0**   | 稳定接口冻结，正式标记 stable                                       |
 
 ---
 
@@ -505,7 +604,7 @@ node scanner/index.mjs scan --target reference
 
 - 提交规范见 [Git Commit Convention](#git-commit-convention)
 - 新增规则必须带 `category` → 自动获得 `layer/vendor`
-- 新增 vendor 必须同时更新：styles + skills + _detection.md + scanner
+- 新增 vendor 必须同时更新：styles + skills + \_detection.md + scanner
 
 ### Git Commit Convention
 

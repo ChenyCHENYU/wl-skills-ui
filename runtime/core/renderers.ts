@@ -277,14 +277,20 @@ const ICON_PRESETS = {
   view: { icon: View, cls: "jh-op-view", title: "查看" },
   edit: { icon: Edit, cls: "jh-op-edit", title: "编辑" },
   del: { icon: Delete, cls: "jh-op-del", title: "删除" },
+  danger: { icon: Delete, cls: "jh-op-del", title: "删除" },
   log: { icon: Document, cls: "jh-op-log", title: "记录" },
   ok: { icon: CircleCheck, cls: "jh-op-ok", title: "审核" },
   send: { icon: Upload, cls: "jh-op-send", title: "提交" },
 } as const;
 
+function isOpVisible(item: OpItem): boolean {
+  if (typeof item.show === "function") return item.show();
+  return item.show !== false;
+}
+
 /** 渲染操作列按钮组（图标 + 胶囊 + 文字链接，自动 stopPropagation） */
 export function renderOps(items: OpItem[]): VNode {
-  const visible = items.filter((item) => item.show !== false);
+  const visible = items.filter(isOpVisible);
   const iconItems = visible.filter((i) => i.type in ICON_PRESETS) as OpPreset[];
   const otherItems = visible.filter((i) => !(i.type in ICON_PRESETS)) as (
     | OpChip
@@ -300,7 +306,7 @@ export function renderOps(items: OpItem[]): VNode {
         {
           class: ["jh-op-btn", preset.cls],
           type: "button",
-          title: item.title ?? preset.title,
+          title: item.title ?? item.label ?? preset.title,
           onClick: (e: MouseEvent) => {
             e.stopPropagation();
             item.onClick(e);

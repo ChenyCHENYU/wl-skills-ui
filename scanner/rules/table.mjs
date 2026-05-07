@@ -1,4 +1,4 @@
-/** scanner/rules/table.mjs — 表格相关规则：R001 R002 R003 R014 */
+/** scanner/rules/table.mjs — 表格相关规则：R001 R002 R003 R014 R021 R022 */
 import { lineOf, issue, findTags } from "./_shared.mjs";
 
 export const tableRules = [
@@ -109,6 +109,58 @@ export const tableRules = [
               "warning",
               'selection 列缺少 header-align="center"，会导致表头复选框不居中',
               '添加 header-align="center"',
+            ),
+          );
+      }
+      return issues;
+    },
+  },
+
+  // R021: BaseTable 必须使用 AGGrid 渲染模式
+  {
+    id: "R021",
+    category: "table",
+    severity: "error",
+    name: 'BaseTable 缺少 render-type="agGrid"',
+    check(template, file, lineOffset) {
+      const issues = [];
+      for (const tag of findTags(template, "BaseTable")) {
+        if (!/render-type\s*=\s*["']agGrid["']/.test(tag.text))
+          issues.push(
+            issue(
+              file,
+              lineOf(template, tag.index, lineOffset),
+              "R021",
+              "table",
+              "error",
+              'BaseTable 必须显式配置 render-type="agGrid"',
+              '添加 render-type="agGrid"',
+            ),
+          );
+      }
+      return issues;
+    },
+  },
+
+  // R022: BaseTable 必须有唯一 cid
+  {
+    id: "R022",
+    category: "table",
+    severity: "error",
+    name: "BaseTable 缺少 cid/:cid",
+    check(template, file, lineOffset) {
+      const issues = [];
+      for (const tag of findTags(template, "BaseTable")) {
+        if (!/(^|\s)(:cid|cid)\s*=/.test(tag.text))
+          issues.push(
+            issue(
+              file,
+              lineOf(template, tag.index, lineOffset),
+              "R022",
+              "table",
+              "error",
+              "BaseTable 必须配置全局唯一 cid",
+              '添加 cid="页面缩写-唯一后缀" 或 :cid="TABLE_CID"',
             ),
           );
       }

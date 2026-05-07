@@ -2,6 +2,8 @@
 
 > 适用：带搜索区 + 工具栏 + 表格 + 分页的标准后台管理列表页。
 
+> 与 `wl-skills-kit` 协同说明：本模板是 `wk-skills-ui` 面向通用项目的 UI 示例，保留对纯 Element Plus、老旧封装和非 kit 项目的参考价值。若项目选择使用 `wl-skills-kit` 生成或规范化重构页面，则页面结构以 kit 的 `page-codegen/templates/universal/TPL-LIST.md` 为准；`wk-skills-ui` 继续负责 tokens/styles、化妆层、`defineColumns()`、`renderOps()` 等 UI 能力。
+
 ## 文件结构
 
 ```

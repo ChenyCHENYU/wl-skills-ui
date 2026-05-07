@@ -21,20 +21,20 @@ import {
   writeFileSync,
   rmSync,
   unlinkSync,
-} from 'node:fs';
-import { join, resolve, dirname, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { parseArgs } from 'node:util';
-import { createRequire } from 'node:module';
-import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
+} from "node:fs";
+import { join, resolve, dirname, relative } from "node:path";
+import { fileURLToPath } from "node:url";
+import { parseArgs } from "node:util";
+import { createRequire } from "node:module";
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const PKG_ROOT = resolve(__dirname, '..');
+const PKG_ROOT = resolve(__dirname, "..");
 const require = createRequire(import.meta.url);
-const PKG = require('../package.json');
-const MANIFEST_NAME = '.wk-skills-ui-manifest.json';
+const PKG = require("../package.json");
+const MANIFEST_NAME = ".wk-skills-ui-manifest.json";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 常量
@@ -42,51 +42,51 @@ const MANIFEST_NAME = '.wk-skills-ui-manifest.json';
 
 /** 编辑器 → 安装目录映射 */
 const EDITOR_TARGETS = {
-  'github-copilot': {
-    dir: '.github/instructions/wk-skills',
-    ext: '.instructions.md',
+  "github-copilot": {
+    dir: ".github/instructions/wk-skills",
+    ext: ".instructions.md",
   },
-  cursor: { dir: '.cursor/rules', ext: '.mdc' },
-  windsurf: { dir: '.windsurf/rules', ext: '.md' },
-  kiro: { dir: '.kiro/steering', ext: '.md' },
-  trae: { dir: '.trae/rules', ext: '.md' },
-  'claude-code': { dir: '.', ext: '.md', singleFile: 'CLAUDE.md' },
-  cline: { dir: '.', ext: '.md', singleFile: '.clinerules' },
-  'agents-generic': { dir: '.', ext: '.md', singleFile: 'AGENTS.md' },
-  qoder: { dir: '.qoder/rules', ext: '.md' },
+  cursor: { dir: ".cursor/rules", ext: ".mdc" },
+  windsurf: { dir: ".windsurf/rules", ext: ".md" },
+  kiro: { dir: ".kiro/steering", ext: ".md" },
+  trae: { dir: ".trae/rules", ext: ".md" },
+  "claude-code": { dir: ".", ext: ".md", singleFile: "CLAUDE.md" },
+  cline: { dir: ".", ext: ".md", singleFile: ".clinerules" },
+  "agents-generic": { dir: ".", ext: ".md", singleFile: "AGENTS.md" },
+  qoder: { dir: ".qoder/rules", ext: ".md" },
 };
 
 // ── 参数解析 ─────────────────────────────────────────────────────────────────
 const rawArgs = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
-  'init',
-  'update',
-  'diff',
-  'clean',
-  'doctor',
-  'prompts',
-  'scan',
-  'check',
-  'fix',
-  'all',
-  'add-preset',
-  'snapshot',
+  "init",
+  "update",
+  "diff",
+  "clean",
+  "doctor",
+  "prompts",
+  "scan",
+  "check",
+  "fix",
+  "all",
+  "add-preset",
+  "snapshot",
 ]);
-let subcommand = 'help';
+let subcommand = "help";
 
 if (rawArgs.length > 0 && SUBCOMMANDS.has(rawArgs[0])) {
   subcommand = rawArgs.shift();
 } else if (rawArgs.length === 0) {
-  subcommand = 'help';
+  subcommand = "help";
 }
 
 // 非 init 子命令：直接委托给 scanner/index.mjs
-const SCANNER_CMDS = new Set(['scan', 'check', 'fix', 'all', 'snapshot']);
+const SCANNER_CMDS = new Set(["scan", "check", "fix", "all", "snapshot"]);
 if (SCANNER_CMDS.has(subcommand)) {
-  const scannerBin = join(PKG_ROOT, 'scanner', 'index.mjs');
+  const scannerBin = join(PKG_ROOT, "scanner", "index.mjs");
   try {
     execFileSync(process.execPath, [scannerBin, subcommand, ...rawArgs], {
-      stdio: 'inherit',
+      stdio: "inherit",
     });
   } catch (e) {
     process.exit(e.status ?? 1);
@@ -96,49 +96,49 @@ if (SCANNER_CMDS.has(subcommand)) {
 
 // ── help ──────────────────────────────────────────────────────────────────────
 if (
-  subcommand === 'help' ||
-  rawArgs.includes('--help') ||
-  rawArgs.includes('-h')
+  subcommand === "help" ||
+  rawArgs.includes("--help") ||
+  rawArgs.includes("-h")
 ) {
   printHelp();
   process.exit(0);
 }
 
 // ── init ──────────────────────────────────────────────────────────────────────
-if (subcommand === 'init' || subcommand === 'update') {
+if (subcommand === "init" || subcommand === "update") {
   const { values } = parseArgs({
     args: rawArgs,
     options: {
-      project: { type: 'string', default: '.' },
-      editor: { type: 'string', default: '' },
-      mode: { type: 'string', default: 'native' }, // native | skin
-      'dry-run': { type: 'boolean', default: false },
-      'skills-only': { type: 'boolean', default: false },
-      force: { type: 'boolean', default: false },
+      project: { type: "string", default: "." },
+      editor: { type: "string", default: "" },
+      mode: { type: "string", default: "native" }, // native | skin
+      "dry-run": { type: "boolean", default: false },
+      "skills-only": { type: "boolean", default: false },
+      force: { type: "boolean", default: false },
     },
     strict: false,
   });
 
   const projectRoot = resolve(values.project);
-  const dryRun = values['dry-run'];
-  const skillsOnly = values['skills-only'];
-  const mode = values.mode === 'skin' ? 'skin' : 'native';
+  const dryRun = values["dry-run"];
+  const skillsOnly = values["skills-only"];
+  const mode = values.mode === "skin" ? "skin" : "native";
 
   if (
-    subcommand === 'update' &&
+    subcommand === "update" &&
     readManifest(projectRoot)?.version === PKG.version &&
     !values.force
   ) {
     console.log(
       `\n[wk-ui update] 当前项目已安装 v${PKG.version}，无需重复操作。`,
     );
-    console.log('如需强制更新：npx wk-ui update --force\n');
+    console.log("如需强制更新：npx wk-ui update --force\n");
     process.exit(0);
   }
 
   console.log(`\n[wk-ui ${subcommand}] 目标项目：${projectRoot}`);
   console.log(
-    `[wk-ui ${subcommand}] 模式：${mode === 'skin' ? '化妆 (skin)' : '原生 (native)'}`,
+    `[wk-ui ${subcommand}] 模式：${mode === "skin" ? "化妆 (skin)" : "原生 (native)"}`,
   );
   if (dryRun)
     console.log(`[wk-ui ${subcommand}] DRY-RUN 模式：不实际写入文件\n`);
@@ -170,61 +170,61 @@ if (subcommand === 'init' || subcommand === 'update') {
 
   console.log(`\n✅ wk-ui ${subcommand} 完成！\n`);
   printInstallSummary({ projectRoot, mode, editor });
-  console.log('下一步：');
-  if (mode === 'skin') {
-    console.log('  npx wk-ui scan --target src --mode skin   # 仅化妆层审计');
+  console.log("下一步：");
+  if (mode === "skin") {
+    console.log("  npx wk-ui scan --target src --mode skin   # 仅化妆层审计");
   } else {
-    console.log('  npx wk-ui check --project . # 验证接入完整性');
-    console.log('  npx wk-ui all   --project . # 完整扫描报告');
+    console.log("  npx wk-ui check --project . # 验证接入完整性");
+    console.log("  npx wk-ui all   --project . # 完整扫描报告");
   }
-  console.log('');
+  console.log("");
   process.exit(0);
 }
 
-if (subcommand === 'diff') {
+if (subcommand === "diff") {
   const { values } = parseArgs({
     args: rawArgs,
-    options: { project: { type: 'string', default: '.' } },
+    options: { project: { type: "string", default: "." } },
     strict: false,
   });
   runDiff(resolve(values.project));
   process.exit(0);
 }
 
-if (subcommand === 'clean') {
+if (subcommand === "clean") {
   const { values } = parseArgs({
     args: rawArgs,
     options: {
-      project: { type: 'string', default: '.' },
-      'dry-run': { type: 'boolean', default: false },
+      project: { type: "string", default: "." },
+      "dry-run": { type: "boolean", default: false },
     },
     strict: false,
   });
-  runClean(resolve(values.project), values['dry-run']);
+  runClean(resolve(values.project), values["dry-run"]);
   process.exit(0);
 }
 
-if (subcommand === 'doctor') {
+if (subcommand === "doctor") {
   const { values } = parseArgs({
     args: rawArgs,
-    options: { project: { type: 'string', default: '.' } },
+    options: { project: { type: "string", default: "." } },
     strict: false,
   });
   runDoctor(resolve(values.project));
   process.exit(0);
 }
 
-if (subcommand === 'prompts') {
+if (subcommand === "prompts") {
   console.log(triggerPrompts());
   process.exit(0);
 }
 
 // ── add-preset ─────────────────────────────────────────────────────────────────
-if (subcommand === 'add-preset') {
+if (subcommand === "add-preset") {
   const presetName = rawArgs[0];
   if (!presetName) {
     console.error(
-      '[wk-ui add-preset] 请提供预设名称，例如：wk-ui add-preset my-biz',
+      "[wk-ui add-preset] 请提供预设名称，例如：wk-ui add-preset my-biz",
     );
     process.exit(1);
   }
@@ -240,16 +240,16 @@ if (subcommand === 'add-preset') {
 
 /** 检测目标项目使用哪个 AI 编辑器 */
 function detectEditor(projectRoot) {
-  if (existsSync(join(projectRoot, '.cursor'))) return 'cursor';
-  if (existsSync(join(projectRoot, '.windsurf'))) return 'windsurf';
-  if (existsSync(join(projectRoot, '.kiro'))) return 'kiro';
-  if (existsSync(join(projectRoot, '.trae'))) return 'trae';
-  if (existsSync(join(projectRoot, 'CLAUDE.md'))) return 'claude-code';
-  if (existsSync(join(projectRoot, '.clinerules'))) return 'cline';
-  if (existsSync(join(projectRoot, 'AGENTS.md'))) return 'agents-generic';
-  if (existsSync(join(projectRoot, '.qoder'))) return 'qoder';
+  if (existsSync(join(projectRoot, ".cursor"))) return "cursor";
+  if (existsSync(join(projectRoot, ".windsurf"))) return "windsurf";
+  if (existsSync(join(projectRoot, ".kiro"))) return "kiro";
+  if (existsSync(join(projectRoot, ".trae"))) return "trae";
+  if (existsSync(join(projectRoot, "CLAUDE.md"))) return "claude-code";
+  if (existsSync(join(projectRoot, ".clinerules"))) return "cline";
+  if (existsSync(join(projectRoot, "AGENTS.md"))) return "agents-generic";
+  if (existsSync(join(projectRoot, ".qoder"))) return "qoder";
   // 默认 Copilot（最常见）
-  return 'github-copilot';
+  return "github-copilot";
 }
 
 /** 读取 skills/ 目录下所有 SKILL.md 文件 */
@@ -258,11 +258,11 @@ function collectSkills(skillsDir) {
   function walk(dir) {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const full = join(dir, entry.name);
-      if (entry.isDirectory() && !entry.name.startsWith('_')) {
+      if (entry.isDirectory() && !entry.name.startsWith("_")) {
         walk(full);
-      } else if (entry.name === 'SKILL.md') {
-        const rel = relative(skillsDir, dir).replace(/\\/g, '/');
-        const content = readFileSync(full, 'utf8');
+      } else if (entry.name === "SKILL.md") {
+        const rel = relative(skillsDir, dir).replace(/\\/g, "/");
+        const content = readFileSync(full, "utf8");
         skills.push({ path: rel, content, full });
       }
     }
@@ -275,68 +275,68 @@ function collectSkills(skillsDir) {
 function getHeaderTemplate(editor) {
   const headerPath = join(
     PKG_ROOT,
-    'skills',
-    '_meta',
-    '_compat',
-    'headers',
+    "skills",
+    "_meta",
+    "_compat",
+    "headers",
     `${editorHeaderName(editor)}.txt`,
   );
-  if (existsSync(headerPath)) return readFileSync(headerPath, 'utf8');
-  return '';
+  if (existsSync(headerPath)) return readFileSync(headerPath, "utf8");
+  return "";
 }
 
 /** 从 SKILL.md 内容中提取 frontmatter 字段 */
 function parseSkillFrontmatter(content) {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) return { description: '', applyTo: '**/*.vue' };
+  if (!match) return { description: "", applyTo: "**/*.vue" };
   const fm = match[1];
   const descMatch = fm.match(/description:\s*\|\n([\s\S]*?)(?=\n\w|$)/);
   const applyToMatch = fm.match(/applyTo:\s*"?([^"\n]+)"?/);
   return {
-    description: descMatch ? descMatch[1].replace(/^ {2}/gm, '').trim() : '',
-    applyTo: applyToMatch ? applyToMatch[1].trim() : '**/*.vue',
+    description: descMatch ? descMatch[1].replace(/^ {2}/gm, "").trim() : "",
+    applyTo: applyToMatch ? applyToMatch[1].trim() : "**/*.vue",
   };
 }
 
 /** 把 SKILL.md 内容（去掉原有 frontmatter）转为目标编辑器格式 */
 function transformForEditor(content, editor) {
   // 去掉原有 frontmatter
-  const body = content.replace(/^---\n[\s\S]*?\n---\n\n?/, '');
+  const body = content.replace(/^---\n[\s\S]*?\n---\n\n?/, "");
   const { description, applyTo } = parseSkillFrontmatter(content);
   const headerTemplate = getHeaderTemplate(editor);
 
   if (!headerTemplate) return body;
 
   const header = headerTemplate
-    .replace('{SKILL_DESCRIPTION}', description.split('\n')[0])
-    .replace('{APPLY_GLOB}', applyTo)
+    .replace("{SKILL_DESCRIPTION}", description.split("\n")[0])
+    .replace("{APPLY_GLOB}", applyTo)
     .replace(
-      '{SKILL_NAME}',
+      "{SKILL_NAME}",
       body
-        .split('\n')
-        .find((l) => l.startsWith('# '))
-        ?.slice(2) || 'Skill',
+        .split("\n")
+        .find((l) => l.startsWith("# "))
+        ?.slice(2) || "Skill",
     );
 
-  return header + '\n' + body;
+  return header + "\n" + body;
 }
 
 /** 安装 skills 到目标项目（按 mode 过滤）*/
-function installSkills({ projectRoot, editor, mode = 'native', dryRun }) {
-  const target = EDITOR_TARGETS[editor] || EDITOR_TARGETS['github-copilot'];
+function installSkills({ projectRoot, editor, mode = "native", dryRun }) {
+  const target = EDITOR_TARGETS[editor] || EDITOR_TARGETS["github-copilot"];
   const targetDir = join(projectRoot, target.dir);
-  const skillsDir = join(PKG_ROOT, 'skills');
+  const skillsDir = join(PKG_ROOT, "skills");
 
   console.log(`[wk-ui init] 安装 Skills → ${target.dir}`);
 
   let skills = collectSkills(skillsDir);
 
   // skin 模式：过滤掉 runtime/ 和 layouts/ （避免干扰老项目布局）
-  if (mode === 'skin') {
+  if (mode === "skin") {
     skills = skills.filter(
-      (s) => !s.path.startsWith('runtime/') && !s.path.startsWith('layouts/'),
+      (s) => !s.path.startsWith("runtime/") && !s.path.startsWith("layouts/"),
     );
-    console.log('  [skin mode] 已过滤掉 runtime/ 和 layouts/ 类 skill');
+    console.log("  [skin mode] 已过滤掉 runtime/ 和 layouts/ 类 skill");
   }
 
   let count = 0;
@@ -345,20 +345,20 @@ function installSkills({ projectRoot, editor, mode = 'native', dryRun }) {
     const outPath = join(projectRoot, target.singleFile);
     const transformed = skills
       .map((skill) => transformForEditor(skill.content, editor))
-      .join('\n\n---\n\n');
+      .join("\n\n---\n\n");
 
     if (dryRun) {
       console.log(`  [dry-run] 写入 ${relative(projectRoot, outPath)}`);
     } else {
       mkdirSync(dirname(outPath), { recursive: true });
-      writeFileSync(outPath, transformed, 'utf8');
+      writeFileSync(outPath, transformed, "utf8");
       console.log(`  ✔ 写入 ${relative(projectRoot, outPath)}`);
     }
-    installedFiles.push(relative(projectRoot, outPath).replace(/\\/g, '/'));
+    installedFiles.push(relative(projectRoot, outPath).replace(/\\/g, "/"));
     count = skills.length;
   } else {
     for (const skill of skills) {
-      const fileName = skill.path.replace(/\//g, '-') + target.ext;
+      const fileName = skill.path.replace(/\//g, "-") + target.ext;
       const outPath = join(targetDir, fileName);
       const transformed = transformForEditor(skill.content, editor);
 
@@ -366,10 +366,10 @@ function installSkills({ projectRoot, editor, mode = 'native', dryRun }) {
         console.log(`  [dry-run] 写入 ${relative(projectRoot, outPath)}`);
       } else {
         mkdirSync(targetDir, { recursive: true });
-        writeFileSync(outPath, transformed, 'utf8');
+        writeFileSync(outPath, transformed, "utf8");
         console.log(`  ✔ 写入 ${relative(projectRoot, outPath)}`);
       }
-      installedFiles.push(relative(projectRoot, outPath).replace(/\\/g, '/'));
+      installedFiles.push(relative(projectRoot, outPath).replace(/\\/g, "/"));
       count++;
     }
   }
@@ -379,33 +379,33 @@ function installSkills({ projectRoot, editor, mode = 'native', dryRun }) {
 }
 
 /** 接入配置引导（tokens.css + styles import）按 mode 推荐不同 presets */
-function installStyleSetup({ projectRoot, mode = 'native', dryRun }) {
-  console.log('[wk-ui init] 检查样式接入配置...\n');
+function installStyleSetup({ projectRoot, mode = "native", dryRun }) {
+  console.log("[wk-ui init] 检查样式接入配置...\n");
 
   const tokensHref =
-    '/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css';
+    "/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css";
   const stylesEntry =
-    mode === 'skin'
-      ? '@agile-team/wk-skills-ui/styles/presets/skin'
-      : '@agile-team/wk-skills-ui/styles';
+    mode === "skin"
+      ? "@agile-team/wk-skills-ui/styles/presets/skin"
+      : "@agile-team/wk-skills-ui/styles";
 
   // 检查 index.html
   const htmlFiles = [
-    join(projectRoot, 'index.html'),
-    join(projectRoot, 'public', 'index.html'),
+    join(projectRoot, "index.html"),
+    join(projectRoot, "public", "index.html"),
   ].filter((f) => existsSync(f));
 
   for (const htmlFile of htmlFiles) {
-    const content = readFileSync(htmlFile, 'utf8');
-    if (!content.includes('tokens') && !content.includes('wk-skills-ui')) {
+    const content = readFileSync(htmlFile, "utf8");
+    if (!content.includes("tokens") && !content.includes("wk-skills-ui")) {
       const tokensLink = `\n    <link rel="stylesheet" href="${tokensHref}" />`;
-      const updated = content.replace('</head>', tokensLink + '\n  </head>');
+      const updated = content.replace("</head>", tokensLink + "\n  </head>");
       if (dryRun) {
         console.log(
           `  [dry-run] 追加 tokens link → ${relative(projectRoot, htmlFile)}`,
         );
       } else {
-        writeFileSync(htmlFile, updated, 'utf8');
+        writeFileSync(htmlFile, updated, "utf8");
         console.log(
           `  ✔ 追加 tokens link → ${relative(projectRoot, htmlFile)}`,
         );
@@ -420,7 +420,7 @@ function installStyleSetup({ projectRoot, mode = 'native', dryRun }) {
   ⚠️  请手动在全局 SCSS 入口（main.scss 或 index.scss）添加：
      @use '${stylesEntry}' as *;
 ${
-  mode === 'native'
+  mode === "native"
     ? `
   ⚠️  请手动在 src/main.ts 添加：
      import { installCommonPreset } from '@agile-team/wk-skills-ui/runtime/common-preset';
@@ -434,7 +434,7 @@ ${
 
 /** 脚手架新预设文件 */
 function scaffoldPreset(name) {
-  const outPath = join(PKG_ROOT, 'runtime', 'presets', `${name}.ts`);
+  const outPath = join(PKG_ROOT, "runtime", "presets", `${name}.ts`);
   if (existsSync(outPath)) {
     console.error(`[wk-ui add-preset] 文件已存在：${outPath}`);
     process.exit(1);
@@ -469,7 +469,7 @@ export function install${capitalize(name)}Preset(): void {
   });
 }
 `;
-  writeFileSync(outPath, template, 'utf8');
+  writeFileSync(outPath, template, "utf8");
   console.log(`[wk-ui add-preset] ✔ 创建预设文件：${outPath}`);
   console.log(`  在 main.ts 中引入：install${capitalize(name)}Preset()`);
 }
@@ -481,15 +481,15 @@ function capitalize(s) {
 function editorHeaderName(editor) {
   return (
     {
-      cursor: 'cursor-mdc',
-      'github-copilot': 'github-copilot',
-      windsurf: 'windsurf',
-      kiro: 'kiro',
-      trae: 'trae',
-      'claude-code': 'claude-code',
-      cline: 'cline',
-      'agents-generic': 'agents',
-      qoder: 'qoder',
+      cursor: "cursor-mdc",
+      "github-copilot": "github-copilot",
+      windsurf: "windsurf",
+      kiro: "kiro",
+      trae: "trae",
+      "claude-code": "claude-code",
+      cline: "cline",
+      "agents-generic": "agents",
+      qoder: "qoder",
     }[editor] || editor
   );
 }
@@ -497,15 +497,15 @@ function editorHeaderName(editor) {
 function installSupportFiles({ projectRoot, dryRun }) {
   const files = [
     {
-      rel: '.github/wk-skills-ui/TRIGGER_PROMPTS.md',
+      rel: ".github/wk-skills-ui/TRIGGER_PROMPTS.md",
       content: triggerPrompts(),
     },
     {
-      rel: '.github/wk-skills-ui/README.md',
+      rel: ".github/wk-skills-ui/README.md",
       content: installReadme(),
     },
     {
-      rel: '.mcp.json',
+      rel: ".mcp.json",
       content: mergeMcpConfig(projectRoot),
     },
   ];
@@ -516,7 +516,7 @@ function installSupportFiles({ projectRoot, dryRun }) {
       console.log(`  [dry-run] 写入 ${f.rel}`);
     } else {
       mkdirSync(dirname(outPath), { recursive: true });
-      writeFileSync(outPath, f.content, 'utf8');
+      writeFileSync(outPath, f.content, "utf8");
       console.log(`  ✔ 写入 ${f.rel}`);
     }
     installed.push(f.rel);
@@ -527,6 +527,11 @@ function installSupportFiles({ projectRoot, dryRun }) {
 function triggerPrompts() {
   return `# wk-skills-ui Skill 触发提示
 
+## 核心原则
+
+- wk-skills-ui 优先保证样式绝对管控，覆盖纯 Element Plus、老项目封装、Base*/jh*/C_* 以及 wl-skills-kit 最佳写法
+- 不管是否使用 wl-skills-kit，wk-skills-ui 都要先保证视觉统一，再按需引导规范化重构
+
 ## 组合流程
 
 - 新项目：用 wk-ui 的 new-project-init 流程接入统一 UI 风格
@@ -534,11 +539,18 @@ function triggerPrompts() {
 - 全量审计：用 wk-ui 的 full-audit 流程扫描当前项目，不修改代码
 - 渐进迁移：用 wk-ui 的 progressive-migrate 流程从 skin 迁移到 runtime
 
+## 智能触发
+
+- 用户说"样式乱 / 不统一 / 老项目化妆"：先调用 wks_ui_route_intent，再调用 wks_ui_scan --mode skin
+- 用户说"卡片 / Tab / 详情 / 树 / 抽屉 / 上传 / 步骤条 / 更多操作"：触发对应 Element Plus 组件族 skill
+- 扫描 JSON 返回后：调用 wks_ui_recommend_flow 判断 recommendedFlows、nextActions 和 kitBridge
+
 ## 单点触发
 
 - 用 wk-ui 的 vendors/base-table skill 检查当前文件
 - 用 wk-ui 的 vendors/jh-components skill 检查当前文件
 - 用 wk-ui 的 element/el-table skill 检查当前文件
+- 用 wk-ui 的 element 组件族 skill 检查 card/tabs/descriptions/tree/drawer/upload/steps/overlay/navigation/feedback
 - 用 wk-ui 的 runtime/design-tokens skill 检查硬编码颜色
 
 ## 分工边界
@@ -551,6 +563,7 @@ function triggerPrompts() {
 - 扫描只读，修复前必须等待用户确认
 - skin 模式只处理 L0/L1/L2，不改业务布局和 runtime
 - fix 前建议先 dry-run 或通过 MCP 调用 wks_ui_fix_dry_run
+- 涉及 BaseTable render-type/cid、renderOps 或页面结构规范时，视觉统一后再桥接 wl-skills-kit validate-page / doctor-ui
 `;
 }
 
@@ -566,19 +579,19 @@ wl-skills-kit 可选安装，两者分工独立、不强耦合。
 }
 
 function mergeMcpConfig(projectRoot) {
-  const mcpPath = join(projectRoot, '.mcp.json');
+  const mcpPath = join(projectRoot, ".mcp.json");
   let config = { mcpServers: {} };
   if (existsSync(mcpPath)) {
     try {
-      config = JSON.parse(readFileSync(mcpPath, 'utf8'));
+      config = JSON.parse(readFileSync(mcpPath, "utf8"));
       if (!config.mcpServers) config.mcpServers = {};
     } catch {
       config = { mcpServers: {} };
     }
   }
-  config.mcpServers['wk-skills-ui'] = {
-    command: 'node',
-    args: ['node_modules/@agile-team/wk-skills-ui/mcp/server.js'],
+  config.mcpServers["wk-skills-ui"] = {
+    command: "node",
+    args: ["node_modules/@agile-team/wk-skills-ui/mcp/server.js"],
   };
   return `${JSON.stringify(config, null, 2)}\n`;
 }
@@ -587,7 +600,7 @@ function readManifest(projectRoot) {
   const manifestPath = join(projectRoot, MANIFEST_NAME);
   if (!existsSync(manifestPath)) return null;
   try {
-    return JSON.parse(readFileSync(manifestPath, 'utf8'));
+    return JSON.parse(readFileSync(manifestPath, "utf8"));
   } catch {
     return null;
   }
@@ -597,13 +610,13 @@ function writeManifest(projectRoot, data) {
   writeFileSync(
     join(projectRoot, MANIFEST_NAME),
     `${JSON.stringify(data, null, 2)}\n`,
-    'utf8',
+    "utf8",
   );
 }
 
 function fileHash(filePath) {
-  if (!existsSync(filePath)) return '';
-  return createHash('sha256').update(readFileSync(filePath)).digest('hex');
+  if (!existsSync(filePath)) return "";
+  return createHash("sha256").update(readFileSync(filePath)).digest("hex");
 }
 
 function runDiff(projectRoot) {
@@ -627,8 +640,8 @@ function runDiff(projectRoot) {
   console.log(`缺失: ${missing.length}`);
   console.log(`内容不同: ${changed.length}`);
   console.log(`相同: ${same.length}\n`);
-  printList('缺失文件', missing);
-  printList('内容不同', changed);
+  printList("缺失文件", missing);
+  printList("内容不同", changed);
 }
 
 function runClean(projectRoot, dryRun) {
@@ -648,64 +661,64 @@ function runClean(projectRoot, dryRun) {
     unlinkSync(join(projectRoot, MANIFEST_NAME));
   console.log(
     dryRun
-      ? '\n[DRY-RUN] 未实际删除。\n'
+      ? "\n[DRY-RUN] 未实际删除。\n"
       : `\n✅ 已清理 ${files.length} 个安装文件。\n`,
   );
 }
 
 function runDoctor(projectRoot) {
-  const pkgPath = join(projectRoot, 'package.json');
+  const pkgPath = join(projectRoot, "package.json");
   let pkg = null;
   if (existsSync(pkgPath)) {
     try {
-      pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+      pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
     } catch {
       pkg = null;
     }
   }
   const deps = pkg ? { ...pkg.dependencies, ...pkg.devDependencies } : {};
-  console.log('\n[wk-ui doctor]\n');
-  console.log(`${pkg ? '✔' : '⚠'} package.json — ${pkg ? '存在' : '缺失'}`);
+  console.log("\n[wk-ui doctor]\n");
+  console.log(`${pkg ? "✔" : "⚠"} package.json — ${pkg ? "存在" : "缺失"}`);
   console.log(
-    `${readManifest(projectRoot) ? '✔' : '⚠'} wk-skills-ui manifest — ${readManifest(projectRoot)?.version || '未安装'}`,
+    `${readManifest(projectRoot) ? "✔" : "⚠"} wk-skills-ui manifest — ${readManifest(projectRoot)?.version || "未安装"}`,
   );
   console.log(
-    `${existsSync(join(projectRoot, '.mcp.json')) ? '✔' : '⚠'} MCP config — .mcp.json`,
+    `${existsSync(join(projectRoot, ".mcp.json")) ? "✔" : "⚠"} MCP config — .mcp.json`,
   );
   console.log(
-    `${deps['@agile-team/wl-skills-kit'] || existsSync(join(projectRoot, '.wl-skills-manifest.json')) ? '✔' : 'ℹ'} wl-skills-kit bridge — 可选，不强耦合`,
+    `${deps["@agile-team/wl-skills-kit"] || existsSync(join(projectRoot, ".wl-skills-manifest.json")) ? "✔" : "ℹ"} wl-skills-kit bridge — 可选，不强耦合`,
   );
   console.log(
-    `${hasGitStandards(projectRoot, pkg) ? '✔' : '⚠'} git-standards — 建议接入 @robot-admin/git-standards\n`,
+    `${hasGitStandards(projectRoot, pkg) ? "✔" : "⚠"} git-standards — 建议接入 @robot-admin/git-standards\n`,
   );
 }
 
 function hasGitStandards(projectRoot, pkg) {
   return Boolean(
-    existsSync(join(projectRoot, 'eslint.config.ts')) ||
-    existsSync(join(projectRoot, '.prettierrc.js')) ||
-    existsSync(join(projectRoot, '.husky')) ||
-    pkg?.scripts?.['standards:init'],
+    existsSync(join(projectRoot, "eslint.config.ts")) ||
+    existsSync(join(projectRoot, ".prettierrc.js")) ||
+    existsSync(join(projectRoot, ".husky")) ||
+    pkg?.scripts?.["standards:init"],
   );
 }
 
 function printInstallSummary({ projectRoot, mode, editor }) {
-  console.log('已安装能力：');
+  console.log("已安装能力：");
   console.log(`  - 编辑器规则：${editor}`);
   console.log(
-    `  - UI Skill：${mode === 'skin' ? 'skin 模式' : 'native 全量模式'}`,
+    `  - UI Skill：${mode === "skin" ? "skin 模式" : "native 全量模式"}`,
   );
-  console.log('  - MCP：wk-skills-ui');
-  console.log('  - 触发提示：.github/wk-skills-ui/TRIGGER_PROMPTS.md');
-  if (existsSync(join(projectRoot, '.wl-skills-manifest.json'))) {
-    console.log('  - 桥接提醒：检测到 wl-skills-kit，两包独立分工，可组合使用');
+  console.log("  - MCP：wk-skills-ui");
+  console.log("  - 触发提示：.github/wk-skills-ui/TRIGGER_PROMPTS.md");
+  if (existsSync(join(projectRoot, ".wl-skills-manifest.json"))) {
+    console.log("  - 桥接提醒：检测到 wl-skills-kit，两包独立分工，可组合使用");
   } else {
     console.log(
-      '  - 桥接提醒：如需编码规范/页面生成/菜单字典权限，可选安装 wl-skills-kit',
+      "  - 桥接提醒：如需编码规范/页面生成/菜单字典权限，可选安装 wl-skills-kit",
     );
   }
   if (!hasGitStandards(projectRoot, null)) {
-    console.log('  - 规范插件：建议执行 npx @robot-admin/git-standards init');
+    console.log("  - 规范插件：建议执行 npx @robot-admin/git-standards init");
   }
 }
 
@@ -713,7 +726,7 @@ function printList(title, list) {
   if (!list.length) return;
   console.log(`${title}:`);
   for (const item of list) console.log(`  - ${item}`);
-  console.log('');
+  console.log("");
 }
 
 // ── 帮助信息 ──────────────────────────────────────────────────────────────────

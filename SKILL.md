@@ -96,7 +96,7 @@ npx wk-ui check --project [项目根目录]
 
 ---
 
-## 三、规则定义（R001—R020）
+## 三、规则定义（R001—R022）
 
 ### Category A：表格（el-table / AG Grid）
 
@@ -125,6 +125,22 @@ npx wk-ui check --project [项目根目录]
 ```diff
 - <BaseTable :hook="page">
 + <BaseTable :hook="page" empty-text="暂无数据">
+```
+
+#### R021 — BaseTable 缺少 AGGrid 渲染模式【高危】
+**检测**：`<BaseTable` 没有 `render-type="agGrid"`
+**标准**：与 `wl-skills-kit` 页面模板保持一致，所有业务表格必须显式使用 AGGrid 渲染模式
+```diff
+- <BaseTable :data="list" :columns="columns" />
++ <BaseTable render-type="agGrid" :cid="TABLE_CID" :data="list" :columns="columns" />
+```
+
+#### R022 — BaseTable 缺少唯一 cid【高危】
+**检测**：`<BaseTable` 没有 `cid` 或 `:cid`
+**标准**：每个 BaseTable 必须具备页面内/全局稳定唯一的 cid，推荐 `{pageAbbr}-{base36Timestamp}`，多表追加 `-sub1/-sub2`
+```diff
+- <BaseTable render-type="agGrid" :data="list" :columns="columns" />
++ <BaseTable render-type="agGrid" :cid="TABLE_CID" :data="list" :columns="columns" />
 ```
 
 ---

@@ -27,6 +27,7 @@ const rules = getRules();
 import { generateReport } from "./report.mjs";
 import { checkIntegration } from "./integration.mjs";
 import { runFix } from "./fix.mjs";
+import { createCoverageCollector, recommendFlows } from "./coverage.mjs";
 import {
   listSnapshots,
   rollbackSnapshot,
@@ -125,12 +126,14 @@ function runScan(targetDir, excludeDirs, exemptConfig) {
   let fileCount = 0;
   let exemptFileCount = 0;
   const exempt = exemptConfig || { isExempt: () => false };
+  const coverage = createCoverageCollector();
 
   for (const filePath of walkVue(targetDir, excludeDirs)) {
     fileCount++;
     const content = readFileSync(filePath, "utf8");
     const { text: template, lineOffset } = extractTemplate(content);
     const relPath = relative(targetDir, filePath).replace(/\\/g, "/");
+    coverage.addFile(relPath, template, content);
 
     // 整文件豁免
     if (exempt.isExempt(relPath)) {
@@ -183,7 +186,13 @@ function runScan(targetDir, excludeDirs, exemptConfig) {
       }
     }
   }
-  return { allIssues, exemptedIssues, fileCount, exemptFileCount };
+  return {
+    allIssues,
+    exemptedIssues,
+    fileCount,
+    exemptFileCount,
+    coverage: coverage.result(),
+  };
 }
 
 // ── 公共：按 layer / vendor / mode 过滤 ─────────────────────────────────────
@@ -340,17 +349,17 @@ if (subcommand === "all") {
     projectRoot,
     values.exempt || undefined,
   );
-  const { allIssues, exemptedIssues, fileCount, exemptFileCount } = runScan(
-    targetDir,
-    excludeDirs,
-    exemptConfig,
-  );
+  const { allIssues, exemptedIssues, fileCount, exemptFileCount, coverage } =
+    runScan(targetDir, excludeDirs, exemptConfig);
   const filtered = applyFilters(allIssues);
+  const recommendations = recommendFlows({ issues: filtered, coverage });
   const report = generateReport(filtered, fileCount, values.output, {
     integration,
     exemptFileCount,
     exemptedIssueCount: exemptedIssues.length,
     exemptPaths: exemptConfig.exemptPaths,
+    coverage,
+    recommendations,
   });
   if (values.outFile) {
     writeFileSync(values.outFile, report, "utf8");
@@ -372,16 +381,16 @@ if (subcommand === "all") {
     projectRoot,
     values.exempt || undefined,
   );
-  const { allIssues, exemptedIssues, fileCount, exemptFileCount } = runScan(
-    targetDir,
-    excludeDirs,
-    exemptConfig,
-  );
+  const { allIssues, exemptedIssues, fileCount, exemptFileCount, coverage } =
+    runScan(targetDir, excludeDirs, exemptConfig);
   const filtered = applyFilters(allIssues);
+  const recommendations = recommendFlows({ issues: filtered, coverage });
   const report = generateReport(filtered, fileCount, values.output, {
     exemptFileCount,
     exemptedIssueCount: exemptedIssues.length,
     exemptPaths: exemptConfig.exemptPaths,
+    coverage,
+    recommendations,
   });
   if (values.outFile) {
     writeFileSync(values.outFile, report, "utf8");

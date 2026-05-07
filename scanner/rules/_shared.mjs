@@ -46,9 +46,25 @@ export function inferMeta(category) {
   if (category === "color" || category === "token" || category === "style")
     return { layer: "L0", vendor: null };
   if (
-    ["table", "form", "dialog", "button", "tag", "pagination", "input"].includes(
-      category,
-    )
+    [
+      "table",
+      "form",
+      "dialog",
+      "button",
+      "tag",
+      "pagination",
+      "input",
+      "card",
+      "tabs",
+      "descriptions",
+      "tree",
+      "drawer",
+      "upload",
+      "steps",
+      "overlay",
+      "navigation",
+      "feedback",
+    ].includes(category)
   )
     return { layer: "L1", vendor: "element" };
   if (category.startsWith("vendor-")) {

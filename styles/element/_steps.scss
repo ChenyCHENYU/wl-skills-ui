@@ -1,0 +1,32 @@
+html body .el-steps {
+  .el-step__title {
+    color: var(--el-text-color-regular);
+    font-weight: var(--el-font-weight-medium);
+  }
+
+  .el-step__description {
+    color: var(--el-text-color-secondary);
+  }
+
+  .el-step__head.is-process,
+  .el-step__title.is-process {
+    color: var(--el-color-primary);
+    border-color: var(--el-color-primary);
+  }
+
+  .el-step__head.is-success,
+  .el-step__title.is-success {
+    color: var(--el-color-success);
+    border-color: var(--el-color-success);
+  }
+
+  .el-step__head.is-error,
+  .el-step__title.is-error {
+    color: var(--el-color-danger);
+    border-color: var(--el-color-danger);
+  }
+
+  .el-step__line {
+    background-color: var(--el-border-color-light);
+  }
+}

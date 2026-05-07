@@ -1,0 +1,26 @@
+html body .el-card {
+  border-color: var(--el-border-color-light);
+  border-radius: 10px;
+  box-shadow: var(--el-box-shadow);
+  overflow: hidden;
+
+  .el-card__header {
+    min-height: 44px;
+    padding: 12px 16px;
+    color: var(--el-text-color-primary);
+    font-weight: var(--el-font-weight-medium);
+    background: var(--el-fill-color-blank);
+    border-bottom-color: var(--el-border-color-light);
+  }
+
+  .el-card__body {
+    padding: 16px;
+    color: var(--el-text-color-regular);
+  }
+
+  &.is-always-shadow,
+  &.is-hover-shadow:focus,
+  &.is-hover-shadow:hover {
+    box-shadow: var(--el-box-shadow-light);
+  }
+}

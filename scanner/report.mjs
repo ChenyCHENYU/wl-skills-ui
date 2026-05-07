@@ -30,6 +30,16 @@ const CATEGORY_LABEL = {
   button: "按钮 / 操作列",
   tag: "标签 (el-tag)",
   pagination: "分页 (pagination)",
+  card: "卡片 (el-card)",
+  tabs: "标签页 (el-tabs)",
+  descriptions: "描述列表 (el-descriptions)",
+  tree: "树 (el-tree)",
+  drawer: "抽屉 (el-drawer)",
+  upload: "上传 (el-upload)",
+  steps: "步骤条 (el-steps)",
+  overlay: "弹层 (popover/tooltip/dropdown)",
+  navigation: "导航 (menu/breadcrumb)",
+  feedback: "反馈 (empty/result/alert/badge)",
 };
 
 const RULE_NAME = {
@@ -51,6 +61,15 @@ const RULE_NAME = {
   R016: "<style> 块硬编码 hex 颜色",
   R017: "<template> 内硬编码 hex 颜色",
   R018: "<script> 块硬编码 hex 颜色",
+  R021: 'BaseTable 缺少 render-type="agGrid"',
+  R022: "BaseTable 缺少唯一 cid",
+  R031: "详情/统计卡片建议使用统一场景 class",
+  R032: "el-tabs 建议明确页面场景",
+  R033: "el-descriptions 建议使用 bordered 或统一容器",
+  R034: "el-drawer 建议明确 size",
+  R035: "el-upload 建议配置 tip/限制说明",
+  R036: "el-steps 审批/流程建议明确状态来源",
+  R037: "空/异常反馈建议统一操作入口",
 };
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
@@ -276,9 +295,71 @@ function buildDetailSection(issues) {
   return lines;
 }
 
+function buildCoverageSection(extras) {
+  const coverage = extras.coverage;
+  const recommendations = extras.recommendations;
+  if (!coverage && !recommendations) return [];
+  const lines = ["## 八、组件覆盖与 AI 下一步建议", ""];
+
+  if (coverage) {
+    lines.push("### 组件覆盖");
+    lines.push("");
+    lines.push("| 类型 | 命中 |");
+    lines.push("|------|------|");
+    lines.push(
+      `| Element Plus | ${(coverage.element || []).map((v) => `\`${v}\``).join(", ") || "—"} |`,
+    );
+    lines.push(
+      `| Vendor 封装 | ${(coverage.vendors || []).map((v) => `\`${v}\``).join(", ") || "—"} |`,
+    );
+    lines.push(
+      `| Layout 场景 | ${(coverage.layouts || []).map((v) => `\`${v}\``).join(", ") || "—"} |`,
+    );
+    lines.push(
+      `| B 端业务场景 | ${(coverage.businessScenarios || []).map((v) => `\`${v}\``).join(", ") || "—"} |`,
+    );
+    lines.push(
+      `| 推荐 Skills | ${(coverage.recommendedSkills || []).map((v) => `\`${v}\``).join(", ") || "—"} |`,
+    );
+    lines.push("");
+  }
+
+  if (recommendations) {
+    lines.push("### 推荐流程");
+    lines.push("");
+    for (const flow of recommendations.recommendedFlows || []) {
+      lines.push(`- \`${flow}\``);
+    }
+    lines.push("");
+    lines.push("### 下一步");
+    lines.push("");
+    for (const action of recommendations.nextActions || []) {
+      lines.push(`- ${action}`);
+    }
+    lines.push("");
+    if (recommendations.kitBridge) {
+      lines.push("### wl-skills-kit 桥接判断");
+      lines.push("");
+      lines.push(
+        `- 是否建议桥接：**${recommendations.kitBridge.needed ? "是" : "否"}**`,
+      );
+      lines.push(`- 原因：${recommendations.kitBridge.reason}`);
+      if (recommendations.kitBridge.commands?.length) {
+        lines.push("- 建议命令：");
+        for (const command of recommendations.kitBridge.commands) {
+          lines.push(`  - \`${command}\``);
+        }
+      }
+      lines.push("");
+    }
+  }
+
+  return lines;
+}
+
 function buildFooter() {
   const lines = [];
-  lines.push("## 八、快照与回滚说明");
+  lines.push("## 九、快照与回滚说明");
   lines.push("");
   lines.push("`.wk-snapshot/` 是 `wk-skills-ui` 自动生成的修复前快照目录。");
   lines.push("每次执行 `wk-ui fix` 前会自动备份即将修改的文件，支持一键回退。");
@@ -310,6 +391,9 @@ export function generateReport(
       {
         summary: buildSummary(issues, fileCount),
         integration: extras.integration || null,
+        componentCoverage: extras.coverage || null,
+        recommendedSkills: extras.coverage?.recommendedSkills || [],
+        recommendations: extras.recommendations || null,
         issues,
       },
       null,
@@ -365,7 +449,10 @@ function buildMarkdown(issues, fileCount, extras = {}) {
   // 七、问题明细
   lines.push(...buildDetailSection(issues));
 
-  // 八、快照说明 & 页脚
+  // 八、组件覆盖与推荐
+  lines.push(...buildCoverageSection(extras));
+
+  // 九、快照说明 & 页脚
   lines.push(...buildFooter());
 
   return lines.join("\n");

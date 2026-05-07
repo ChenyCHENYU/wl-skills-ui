@@ -1,0 +1,22 @@
+html body .el-descriptions {
+  .el-descriptions__title {
+    color: var(--el-text-color-primary);
+    font-size: var(--el-font-size-medium);
+    font-weight: var(--el-font-weight-medium);
+  }
+
+  .el-descriptions__label.el-descriptions__cell.is-bordered-label,
+  .el-descriptions__label:not(.is-bordered-label) {
+    color: var(--el-text-color-regular);
+    font-weight: var(--el-font-weight-medium);
+    background: var(--el-fill-color-lighter);
+  }
+
+  .el-descriptions__content {
+    color: var(--el-text-color-primary);
+  }
+
+  .el-descriptions__table.is-bordered .el-descriptions__cell {
+    border-color: var(--el-border-color-light);
+  }
+}

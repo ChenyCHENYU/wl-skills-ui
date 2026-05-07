@@ -1,0 +1,22 @@
+html body .el-drawer {
+  background: var(--el-fill-color-blank);
+
+  .el-drawer__header {
+    min-height: 48px;
+    padding: 14px 16px;
+    margin-bottom: 0;
+    color: var(--el-text-color-primary);
+    font-weight: var(--el-font-weight-medium);
+    border-bottom: 1px solid var(--el-border-color-light);
+  }
+
+  .el-drawer__body {
+    padding: 16px;
+    color: var(--el-text-color-regular);
+  }
+
+  .el-drawer__footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--el-border-color-light);
+  }
+}

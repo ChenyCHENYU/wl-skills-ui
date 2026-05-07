@@ -1,0 +1,36 @@
+html body .el-breadcrumb {
+  .el-breadcrumb__inner,
+  .el-breadcrumb__separator {
+    color: var(--el-text-color-secondary);
+  }
+
+  .el-breadcrumb__inner.is-link,
+  .el-breadcrumb__inner a {
+    color: var(--el-text-color-regular);
+    font-weight: var(--el-font-weight-regular);
+  }
+
+  .el-breadcrumb__inner.is-link:hover,
+  .el-breadcrumb__inner a:hover {
+    color: var(--el-color-primary);
+  }
+}
+
+html body .el-menu {
+  border-right-color: var(--el-border-color-light);
+
+  .el-menu-item,
+  .el-sub-menu__title {
+    height: var(--el-menu-item-height, 40px);
+    line-height: var(--el-menu-item-height, 40px);
+    color: var(--el-text-color-regular);
+    font-size: var(--el-menu-item-font-size, 14px);
+  }
+
+  .el-menu-item.is-active,
+  .el-menu-item:hover,
+  .el-sub-menu__title:hover {
+    color: var(--el-color-primary);
+    background: var(--el-color-primary-light-9);
+  }
+}

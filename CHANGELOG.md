@@ -4,6 +4,19 @@ All notable changes to **@agile-team/wk-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.0] - 2026-05-07
+
+### Added
+
+- 扩展 Element Plus 高频组件族样式覆盖，补齐 card、tabs、descriptions、tree、drawer、upload、steps、overlay、navigation、feedback。
+- 新增 scanner 组件覆盖和 B 端业务场景识别，输出 componentCoverage、recommendedSkills、recommendations、kitBridge。
+- 新增 R031-R037 组件族治理规则，覆盖卡片、Tabs、详情、抽屉、上传、步骤和反馈状态。
+- 新增 MCP 工具 wks_ui_route_intent 和 wks_ui_recommend_flow，支持 AI 意图路由和扫描结果推荐。
+
+### Changed
+
+- 同步 README、Skill registry、detection 和 component-family Skill，明确与 wl-skills-kit 的桥接边界。
+
 ## [1.5.1] - 2026-05-05
 
 ### Changed

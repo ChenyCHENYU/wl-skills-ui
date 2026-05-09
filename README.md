@@ -193,8 +193,10 @@ yarn add @agile-team/wk-skills-ui
 
 ## 版本亮点
 
-当前小版本重点补齐 AI Skill 的安装、更新、清理和编辑器集成体验：
+当前 v1.6.2 版本重点补齐 AI Skill 的安装、更新、清理和编辑器集成体验，并强化多组件样式覆盖精度：
 
+- vendors 层各组件样式精细化调整：`_base-components`、`_ag-grid`、`_portal`、`_jh-tree`、`_jh-pagination`、`_jh-drag-col`、`_c-components`、`_base-query-toolbar` 全面优化
+- design tokens（`base.css` / `dist/tokens.css`）同步更新，security preset 样式调整
 - `wk-ui init/update` 会安装 Skill、触发提示、MCP 配置和 manifest 清单
 - `wk-ui diff/clean/doctor/prompts` 覆盖升级前对比、卸载清理、环境体检和提示词查看
 - 内置 `wk-skills-ui` MCP Server，供 AI 编辑器调用扫描、检查和 dry-run 修复

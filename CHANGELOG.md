@@ -4,6 +4,20 @@ All notable changes to **@agile-team/wk-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.2] - 2026-05-09
+
+### Changed
+
+- vendors 层多组件样式精细化调整：`_base-components`、`_ag-grid`、`_portal`、`_jh-tree`、`_jh-pagination`、`_jh-drag-col`、`_c-components`、`_base-query-toolbar` 选择器精准度与覆盖范围优化。
+- `design/tokens/base.css` / `dist/tokens.css` 同步更新设计令牌变量。
+- `styles/presets/security.scss` 安全模块预设样式调整。
+
+## [1.6.1] - 2026-05-09
+
+### Changed
+
+- 同步版本文案至 1.6.1，补齐 1.6.0 发布后文档一致性。
+
 ## [1.6.0] - 2026-05-07
 
 ### Added

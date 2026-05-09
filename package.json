@@ -1,5 +1,5 @@
 {
-  "name": "@agile-team/wk-skills-ui",
+  "name": "@agile-team/wl-skills-ui",
   "version": "1.6.2",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 项目通用化妆/原生双模式（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
@@ -33,8 +33,8 @@
     "./SKILL.md": "./SKILL.md"
   },
   "bin": {
-    "wk-ui": "bin/wk-ui.js",
-    "wk-scan": "scanner/index.mjs"
+    "wl-ui": "bin/wl-ui.js",
+    "wl-scan": "scanner/index.mjs"
   },
   "scripts": {
     "build": "tsup && npm run sync:tokens",
@@ -111,6 +111,9 @@
     "copilot-skill"
   ],
   "license": "UNLICENSED",
+  "publishConfig": {
+    "access": "public"
+  },
   "config": {
     "commitizen": {
       "path": "node_modules/cz-customizable"

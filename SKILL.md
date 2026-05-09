@@ -1,6 +1,6 @@
 ---
 description: |
-  UI 风格对齐 Skill —— 扫描 Vue SFC 文件，识别与 wk-skills-ui 五层规范不一致的控件写法，
+  UI 风格对齐 Skill —— 扫描 Vue SFC 文件，识别与 wl-skills-ui 五层规范不一致的控件写法，
   生成整改清单，经用户确认后执行全量自动修复，最终验证归零。
   支持老项目 Skin 化妆模式（不改布局）和新项目 Native 原生模式（完整接入）。
 applyTo: "**/*.vue"
@@ -12,16 +12,16 @@ applyTo: "**/*.vue"
 
 ```bash
 # 安装/更新 AI Skill、触发提示、MCP 配置和 manifest
-npx wk-ui init --project . --mode native
-npx wk-ui update --project .
+npx wl-ui init --project . --mode native
+npx wl-ui update --project .
 
 # 查看差异、体检、清理
-npx wk-ui diff --project .
-npx wk-ui doctor --project .
-npx wk-ui clean --project . --dry-run
+npx wl-ui diff --project .
+npx wl-ui doctor --project .
+npx wl-ui clean --project . --dry-run
 
 # 输出 AI 触发提示
-npx wk-ui prompts
+npx wl-ui prompts
 ```
 
 可选编辑器：`github-copilot`、`cursor`、`windsurf`、`kiro`、`trae`、`claude-code`、`cline`、`agents-generic`、`qoder`。修复前优先使用 `--dry-run` 或 MCP 工具 `wks_ui_fix_dry_run`。
@@ -40,13 +40,13 @@ npx wk-ui prompts
 
 ```bash
 # 推荐：一站式（接入完整性 + 风格扫描 + 报告）
-npx wk-ui all --project [项目根目录] --outFile /tmp/scan-result.md
+npx wl-ui all --project [项目根目录] --outFile /tmp/scan-result.md
 
 # 单独风格扫描
-npx wk-ui scan --target [项目src目录] --outFile /tmp/scan-result.md
+npx wl-ui scan --target [项目src目录] --outFile /tmp/scan-result.md
 
 # 单独接入完整性检查
-npx wk-ui check --project [项目根目录]
+npx wl-ui check --project [项目根目录]
 ```
 
 > 包未安装时也可：`node [SKILL_ROOT]/scanner/index.mjs all --project ...`
@@ -85,7 +85,7 @@ npx wk-ui check --project [项目根目录]
 ### Phase 4 — 修复
 
 按确认范围：
-- A 类（attr 缺失 / hex 颜色）→ `npx wk-ui fix --target [src] [--dry-run]`
+- A 类（attr 缺失 / hex 颜色）→ `npx wl-ui fix --target [src] [--dry-run]`
 - B 类（结构改造，如 R004/R013/R015）→ AI 逐文件编辑
 
 每修复一个文件，输出该文件的修改摘要（改了什么、改了几处）。
@@ -338,7 +338,7 @@ npx wk-ui check --project [项目根目录]
 | 通用业务枚举与 `installCommonPreset()` | `runtime/presets/common.ts` |
 | 选择弹窗完整实现 | `reference/SelectPopupCom.vue` |
 | CSS Token 变量（品牌色等）| `design/tokens/base.css`（业务侧 `<link>` 引入）|
-| Element Plus 全局覆盖 | `styles/element/`（业务侧 `@use '@agile-team/wk-skills-ui/styles' as *`）|
+| Element Plus 全局覆盖 | `styles/element/`（业务侧 `@use '@agile-team/wl-skills-ui/styles' as *`）|
 | Vendor 封装组件样式（树/分页/搜索/AG Grid）| `styles/vendors/_*.scss` |
 | Portal 视觉增强（可选）| `styles/vendors/_portal.scss` |
 
@@ -407,21 +407,21 @@ npx wk-ui check --project [项目根目录]
 ### 核心三步
 
 ```bash
-pnpm add @agile-team/wk-skills-ui
+pnpm add @agile-team/wl-skills-ui
 ```
 
 ```html
 <!-- index.html <head> 最先加载 -->
-<link rel="stylesheet" href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css" />
+<link rel="stylesheet" href="/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css" />
 ```
 
 ```scss
-@use '@agile-team/wk-skills-ui/styles' as *;
+@use '@agile-team/wl-skills-ui/styles' as *;
 ```
 
 ```ts
 // src/main.ts
-import { installCommonPreset } from '@agile-team/wk-skills-ui/runtime/common-preset';
+import { installCommonPreset } from '@agile-team/wl-skills-ui/runtime/common-preset';
 installCommonPreset();
 ```
 
@@ -429,7 +429,7 @@ installCommonPreset();
 
 ```typescript
 // 每个业务文件 columnsDef() 末尾：
-import { defineColumns, renderOps } from '@agile-team/wk-skills-ui/runtime';
+import { defineColumns, renderOps } from '@agile-team/wl-skills-ui/runtime';
 
 columnsDef(): TableColumnDesc<any>[] {
   return defineColumns([
@@ -588,7 +588,7 @@ import { renderDictClassifyTag, TRAIN_LEVEL_TYPE_MAP } from "@/util/ag-cell-rend
 | `renderCountBadge(value)` | 数值型徽标（绿色系） | `.jh-count-badge` |
 | `renderDangerText(value)` | 警示文本（红色字体 #f56c6c） | 内联 style |
 
-> **参考文件同步规则**：`@agile-team/wk-skills-ui/reference/ag-cell-renders.ts` 与业务项目中的 `src/util/ag-cell-renders.ts` 保持语义同步。每次在业务项目新增渲染函数后，同步更新 reference 文件，保证 skills 工具链对新项目的指导准确性。
+> **参考文件同步规则**：`@agile-team/wl-skills-ui/reference/ag-cell-renders.ts` 与业务项目中的 `src/util/ag-cell-renders.ts` 保持语义同步。每次在业务项目新增渲染函数后，同步更新 reference 文件，保证 skills 工具链对新项目的指导准确性。
 
 ### 9.4 迁移规则（logicType 列改造）
 

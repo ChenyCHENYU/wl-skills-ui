@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /**
- * wk-ui — wk-skills-ui 统一 CLI
+ * wl-ui — wl-skills-ui 统一 CLI
  *
  * 子命令：
- *   wk-ui init   [--project <path>] [--editor copilot|cursor|windsurf|kiro|trae] [--dry-run]
+ *   wl-ui init   [--project <path>] [--editor copilot|cursor|windsurf|kiro|trae] [--dry-run]
  *                把 skills/ 写入目标项目的 AI 编辑器规则目录
- *   wk-ui scan   → 委托给 scanner/index.mjs
- *   wk-ui check  → 委托给 scanner/index.mjs
- *   wk-ui fix    → 委托给 scanner/index.mjs
- *   wk-ui all    → 委托给 scanner/index.mjs
+ *   wl-ui scan   → 委托给 scanner/index.mjs
+ *   wl-ui check  → 委托给 scanner/index.mjs
+ *   wl-ui fix    → 委托给 scanner/index.mjs
+ *   wl-ui all    → 委托给 scanner/index.mjs
  *
- * 向后兼容：wk-scan 仍可用（直接调用 scanner/index.mjs）
+ * 向后兼容：wl-scan 仍可用（直接调用 scanner/index.mjs）
  */
 
 import {
@@ -34,7 +34,7 @@ const __dirname = dirname(__filename);
 const PKG_ROOT = resolve(__dirname, "..");
 const require = createRequire(import.meta.url);
 const PKG = require("../package.json");
-const MANIFEST_NAME = ".wk-skills-ui-manifest.json";
+const MANIFEST_NAME = ".wl-skills-ui-manifest.json";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 常量
@@ -130,22 +130,22 @@ if (subcommand === "init" || subcommand === "update") {
     !values.force
   ) {
     console.log(
-      `\n[wk-ui update] 当前项目已安装 v${PKG.version}，无需重复操作。`,
+      `\n[wl-ui update] 当前项目已安装 v${PKG.version}，无需重复操作。`,
     );
-    console.log("如需强制更新：npx wk-ui update --force\n");
+    console.log("如需强制更新：npx wl-ui update --force\n");
     process.exit(0);
   }
 
-  console.log(`\n[wk-ui ${subcommand}] 目标项目：${projectRoot}`);
+  console.log(`\n[wl-ui ${subcommand}] 目标项目：${projectRoot}`);
   console.log(
-    `[wk-ui ${subcommand}] 模式：${mode === "skin" ? "化妆 (skin)" : "原生 (native)"}`,
+    `[wl-ui ${subcommand}] 模式：${mode === "skin" ? "化妆 (skin)" : "原生 (native)"}`,
   );
   if (dryRun)
-    console.log(`[wk-ui ${subcommand}] DRY-RUN 模式：不实际写入文件\n`);
+    console.log(`[wl-ui ${subcommand}] DRY-RUN 模式：不实际写入文件\n`);
 
   // 1. 检测编辑器
   const editor = values.editor || detectEditor(projectRoot);
-  console.log(`[wk-ui ${subcommand}] 检测到编辑器：${editor}\n`);
+  console.log(`[wl-ui ${subcommand}] 检测到编辑器：${editor}\n`);
 
   // 2. 安装 skills（按 mode 过滤）
   const installedFiles = installSkills({ projectRoot, editor, mode, dryRun });
@@ -168,14 +168,14 @@ if (subcommand === "init" || subcommand === "update") {
     });
   }
 
-  console.log(`\n✅ wk-ui ${subcommand} 完成！\n`);
+  console.log(`\n✅ wl-ui ${subcommand} 完成！\n`);
   printInstallSummary({ projectRoot, mode, editor });
   console.log("下一步：");
   if (mode === "skin") {
-    console.log("  npx wk-ui scan --target src --mode skin   # 仅化妆层审计");
+    console.log("  npx wl-ui scan --target src --mode skin   # 仅化妆层审计");
   } else {
-    console.log("  npx wk-ui check --project . # 验证接入完整性");
-    console.log("  npx wk-ui all   --project . # 完整扫描报告");
+    console.log("  npx wl-ui check --project . # 验证接入完整性");
+    console.log("  npx wl-ui all   --project . # 完整扫描报告");
   }
   console.log("");
   process.exit(0);
@@ -224,7 +224,7 @@ if (subcommand === "add-preset") {
   const presetName = rawArgs[0];
   if (!presetName) {
     console.error(
-      "[wk-ui add-preset] 请提供预设名称，例如：wk-ui add-preset my-biz",
+      "[wl-ui add-preset] 请提供预设名称，例如：wl-ui add-preset my-biz",
     );
     process.exit(1);
   }
@@ -327,7 +327,7 @@ function installSkills({ projectRoot, editor, mode = "native", dryRun }) {
   const targetDir = join(projectRoot, target.dir);
   const skillsDir = join(PKG_ROOT, "skills");
 
-  console.log(`[wk-ui init] 安装 Skills → ${target.dir}`);
+  console.log(`[wl-ui init] 安装 Skills → ${target.dir}`);
 
   let skills = collectSkills(skillsDir);
 
@@ -380,14 +380,14 @@ function installSkills({ projectRoot, editor, mode = "native", dryRun }) {
 
 /** 接入配置引导（tokens.css + styles import）按 mode 推荐不同 presets */
 function installStyleSetup({ projectRoot, mode = "native", dryRun }) {
-  console.log("[wk-ui init] 检查样式接入配置...\n");
+  console.log("[wl-ui init] 检查样式接入配置...\n");
 
   const tokensHref =
-    "/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css";
+    "/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css";
   const stylesEntry =
     mode === "skin"
-      ? "@agile-team/wk-skills-ui/styles/presets/skin"
-      : "@agile-team/wk-skills-ui/styles";
+      ? "@agile-team/wl-skills-ui/styles/presets/skin"
+      : "@agile-team/wl-skills-ui/styles";
 
   // 检查 index.html
   const htmlFiles = [
@@ -397,7 +397,7 @@ function installStyleSetup({ projectRoot, mode = "native", dryRun }) {
 
   for (const htmlFile of htmlFiles) {
     const content = readFileSync(htmlFile, "utf8");
-    if (!content.includes("tokens") && !content.includes("wk-skills-ui")) {
+    if (!content.includes("tokens") && !content.includes("wl-skills-ui")) {
       const tokensLink = `\n    <link rel="stylesheet" href="${tokensHref}" />`;
       const updated = content.replace("</head>", tokensLink + "\n  </head>");
       if (dryRun) {
@@ -423,7 +423,7 @@ ${
   mode === "native"
     ? `
   ⚠️  请手动在 src/main.ts 添加：
-     import { installCommonPreset } from '@agile-team/wk-skills-ui/runtime/common-preset';
+     import { installCommonPreset } from '@agile-team/wl-skills-ui/runtime/common-preset';
      installCommonPreset();
 `
     : `
@@ -436,12 +436,12 @@ ${
 function scaffoldPreset(name) {
   const outPath = join(PKG_ROOT, "runtime", "presets", `${name}.ts`);
   if (existsSync(outPath)) {
-    console.error(`[wk-ui add-preset] 文件已存在：${outPath}`);
+    console.error(`[wl-ui add-preset] 文件已存在：${outPath}`);
     process.exit(1);
   }
   const template = `/**
  * runtime/presets/${name}.ts — ${name} 业务预设
- * 使用：import { install${capitalize(name)}Preset } from '@agile-team/wk-skills-ui/runtime/presets/${name}';
+ * 使用：import { install${capitalize(name)}Preset } from '@agile-team/wl-skills-ui/runtime/presets/${name}';
  */
 import type { TagMapItem } from '../core/types';
 import { renderTagNode } from '../core/renderers';
@@ -470,7 +470,7 @@ export function install${capitalize(name)}Preset(): void {
 }
 `;
   writeFileSync(outPath, template, "utf8");
-  console.log(`[wk-ui add-preset] ✔ 创建预设文件：${outPath}`);
+  console.log(`[wl-ui add-preset] ✔ 创建预设文件：${outPath}`);
   console.log(`  在 main.ts 中引入：install${capitalize(name)}Preset()`);
 }
 
@@ -497,11 +497,11 @@ function editorHeaderName(editor) {
 function installSupportFiles({ projectRoot, dryRun }) {
   const files = [
     {
-      rel: ".github/wk-skills-ui/TRIGGER_PROMPTS.md",
+      rel: ".github/wl-skills-ui/TRIGGER_PROMPTS.md",
       content: triggerPrompts(),
     },
     {
-      rel: ".github/wk-skills-ui/README.md",
+      rel: ".github/wl-skills-ui/README.md",
       content: installReadme(),
     },
     {
@@ -525,19 +525,19 @@ function installSupportFiles({ projectRoot, dryRun }) {
 }
 
 function triggerPrompts() {
-  return `# wk-skills-ui Skill 触发提示
+  return `# wl-skills-ui Skill 触发提示
 
 ## 核心原则
 
-- wk-skills-ui 优先保证样式绝对管控，覆盖纯 Element Plus、老项目封装、Base*/jh*/C_* 以及 wl-skills-kit 最佳写法
-- 不管是否使用 wl-skills-kit，wk-skills-ui 都要先保证视觉统一，再按需引导规范化重构
+- wl-skills-ui 优先保证样式绝对管控，覆盖纯 Element Plus、老项目封装、Base*/jh*/C_* 以及 wl-skills-kit 最佳写法
+- 不管是否使用 wl-skills-kit，wl-skills-ui 都要先保证视觉统一，再按需引导规范化重构
 
 ## 组合流程
 
-- 新项目：用 wk-ui 的 new-project-init 流程接入统一 UI 风格
-- 老项目：用 wk-ui 的 legacy-skin-align 流程做老项目化妆对齐
-- 全量审计：用 wk-ui 的 full-audit 流程扫描当前项目，不修改代码
-- 渐进迁移：用 wk-ui 的 progressive-migrate 流程从 skin 迁移到 runtime
+- 新项目：用 wl-ui 的 new-project-init 流程接入统一 UI 风格
+- 老项目：用 wl-ui 的 legacy-skin-align 流程做老项目化妆对齐
+- 全量审计：用 wl-ui 的 full-audit 流程扫描当前项目，不修改代码
+- 渐进迁移：用 wl-ui 的 progressive-migrate 流程从 skin 迁移到 runtime
 
 ## 智能触发
 
@@ -547,15 +547,15 @@ function triggerPrompts() {
 
 ## 单点触发
 
-- 用 wk-ui 的 vendors/base-table skill 检查当前文件
-- 用 wk-ui 的 vendors/jh-components skill 检查当前文件
-- 用 wk-ui 的 element/el-table skill 检查当前文件
-- 用 wk-ui 的 element 组件族 skill 检查 card/tabs/descriptions/tree/drawer/upload/steps/overlay/navigation/feedback
-- 用 wk-ui 的 runtime/design-tokens skill 检查硬编码颜色
+- 用 wl-ui 的 vendors/base-table skill 检查当前文件
+- 用 wl-ui 的 vendors/jh-components skill 检查当前文件
+- 用 wl-ui 的 element/el-table skill 检查当前文件
+- 用 wl-ui 的 element 组件族 skill 检查 card/tabs/descriptions/tree/drawer/upload/steps/overlay/navigation/feedback
+- 用 wl-ui 的 runtime/design-tokens skill 检查硬编码颜色
 
 ## 分工边界
 
-- wk-skills-ui：视觉一致性、化妆层、设计令牌、Runtime 渲染、UI 扫描修复
+- wl-skills-ui：视觉一致性、化妆层、设计令牌、Runtime 渲染、UI 扫描修复
 - wl-skills-kit：编码规范、页面生成、菜单/字典/权限同步、通用 Agent Pipeline
 
 ## 执行约束
@@ -568,11 +568,11 @@ function triggerPrompts() {
 }
 
 function installReadme() {
-  return `# wk-skills-ui 已安装
+  return `# wl-skills-ui 已安装
 
-- 触发提示：.github/wk-skills-ui/TRIGGER_PROMPTS.md
-- MCP Server：wk-skills-ui
-- 更新命令：npx wk-ui update
+- 触发提示：.github/wl-skills-ui/TRIGGER_PROMPTS.md
+- MCP Server：wl-skills-ui
+- 更新命令：npx wl-ui update
 
 wl-skills-kit 可选安装，两者分工独立、不强耦合。
 `;
@@ -589,9 +589,9 @@ function mergeMcpConfig(projectRoot) {
       config = { mcpServers: {} };
     }
   }
-  config.mcpServers["wk-skills-ui"] = {
+  config.mcpServers["wl-skills-ui"] = {
     command: "node",
-    args: ["node_modules/@agile-team/wk-skills-ui/mcp/server.js"],
+    args: ["node_modules/@agile-team/wl-skills-ui/mcp/server.js"],
   };
   return `${JSON.stringify(config, null, 2)}\n`;
 }
@@ -623,7 +623,7 @@ function runDiff(projectRoot) {
   const manifest = readManifest(projectRoot);
   if (!manifest) {
     console.log(
-      `\n[wk-ui diff] 未找到 ${MANIFEST_NAME}，请先执行 wk-ui init。\n`,
+      `\n[wl-ui diff] 未找到 ${MANIFEST_NAME}，请先执行 wl-ui init。\n`,
     );
     return;
   }
@@ -636,7 +636,7 @@ function runDiff(projectRoot) {
     else if (fileHash(full) !== hash) changed.push(rel);
     else same.push(rel);
   }
-  console.log(`\n[wk-ui diff] manifest: v${manifest.version}`);
+  console.log(`\n[wl-ui diff] manifest: v${manifest.version}`);
   console.log(`缺失: ${missing.length}`);
   console.log(`内容不同: ${changed.length}`);
   console.log(`相同: ${same.length}\n`);
@@ -647,7 +647,7 @@ function runDiff(projectRoot) {
 function runClean(projectRoot, dryRun) {
   const manifest = readManifest(projectRoot);
   if (!manifest) {
-    console.log(`\n[wk-ui clean] 未找到 ${MANIFEST_NAME}，无需清理。\n`);
+    console.log(`\n[wl-ui clean] 未找到 ${MANIFEST_NAME}，无需清理。\n`);
     return;
   }
   const files = Object.keys(manifest.files || {});
@@ -677,10 +677,10 @@ function runDoctor(projectRoot) {
     }
   }
   const deps = pkg ? { ...pkg.dependencies, ...pkg.devDependencies } : {};
-  console.log("\n[wk-ui doctor]\n");
+  console.log("\n[wl-ui doctor]\n");
   console.log(`${pkg ? "✔" : "⚠"} package.json — ${pkg ? "存在" : "缺失"}`);
   console.log(
-    `${readManifest(projectRoot) ? "✔" : "⚠"} wk-skills-ui manifest — ${readManifest(projectRoot)?.version || "未安装"}`,
+    `${readManifest(projectRoot) ? "✔" : "⚠"} wl-skills-ui manifest — ${readManifest(projectRoot)?.version || "未安装"}`,
   );
   console.log(
     `${existsSync(join(projectRoot, ".mcp.json")) ? "✔" : "⚠"} MCP config — .mcp.json`,
@@ -708,8 +708,8 @@ function printInstallSummary({ projectRoot, mode, editor }) {
   console.log(
     `  - UI Skill：${mode === "skin" ? "skin 模式" : "native 全量模式"}`,
   );
-  console.log("  - MCP：wk-skills-ui");
-  console.log("  - 触发提示：.github/wk-skills-ui/TRIGGER_PROMPTS.md");
+  console.log("  - MCP：wl-skills-ui");
+  console.log("  - 触发提示：.github/wl-skills-ui/TRIGGER_PROMPTS.md");
   if (existsSync(join(projectRoot, ".wl-skills-manifest.json"))) {
     console.log("  - 桥接提醒：检测到 wl-skills-kit，两包独立分工，可组合使用");
   } else {
@@ -732,36 +732,36 @@ function printList(title, list) {
 // ── 帮助信息 ──────────────────────────────────────────────────────────────────
 function printHelp() {
   console.log(`
-wk-ui — @agile-team/wk-skills-ui 统一 CLI v${PKG.version}
+wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
 
 用法：
-  wk-ui init   [--project <path>] [--editor <editor>] [--mode native|skin]
+  wl-ui init   [--project <path>] [--editor <editor>] [--mode native|skin]
                 [--dry-run] [--skills-only]
                 把 skills/ 写入目标项目的 AI 编辑器规则目录
-  wk-ui update [--project <path>] [--force] [--dry-run]
+  wl-ui update [--project <path>] [--force] [--dry-run]
                 增量更新 skills / MCP / 触发提示
-  wk-ui diff   [--project <path>]
+  wl-ui diff   [--project <path>]
                 对比已安装文件与 manifest
-  wk-ui clean  [--project <path>] [--dry-run]
-                清理 wk-skills-ui 安装文件
-  wk-ui doctor [--project <path>]
+  wl-ui clean  [--project <path>] [--dry-run]
+                清理 wl-skills-ui 安装文件
+  wl-ui doctor [--project <path>]
                 检查安装状态 / MCP / 桥接 / 规范插件
-  wk-ui prompts
+  wl-ui prompts
                 打印 AI 触发提示词
 
-  wk-ui scan   --target <src> [--layer L0,L1,L2] [--vendor base-table,jh]
+  wl-ui scan   --target <src> [--layer L0,L1,L2] [--vendor base-table,jh]
                               [--mode skin|native] [--outFile report.md]
                               [--exempt <config.json>]
-  wk-ui check  --project <项目根目录>
-  wk-ui fix    --target <src目录> [--dry-run] [--no-snapshot]
-  wk-ui all    --project <项目根目录> [--outFile report.md]
+  wl-ui check  --project <项目根目录>
+  wl-ui fix    --target <src目录> [--dry-run] [--no-snapshot]
+  wl-ui all    --project <项目根目录> [--outFile report.md]
 
-  wk-ui snapshot list     [--project .]           列出所有快照
-  wk-ui snapshot rollback [--id <id>] [--dry-run]  回退到快照（默认最新）
-  wk-ui snapshot diff     [--id <id>]              查看快照与当前差异
-  wk-ui snapshot clean    [--keep <N>]             清理旧快照
+  wl-ui snapshot list     [--project .]           列出所有快照
+  wl-ui snapshot rollback [--id <id>] [--dry-run]  回退到快照（默认最新）
+  wl-ui snapshot diff     [--id <id>]              查看快照与当前差异
+  wl-ui snapshot clean    [--keep <N>]             清理旧快照
 
-  wk-ui add-preset <name>   脚手架一个新的业务预设文件
+  wl-ui add-preset <name>   脚手架一个新的业务预设文件
 
 参数：
   --project       项目根目录（默认 .）
@@ -777,16 +777,16 @@ wk-ui — @agile-team/wk-skills-ui 统一 CLI v${PKG.version}
   --force         update 时强制覆盖同版本安装
 
 示例：
-  npx wk-ui init
-  npx wk-ui update --force
-  npx wk-ui doctor
-  npx wk-ui prompts
-  npx wk-ui init --mode skin --project /path/to/legacy-project
-  npx wk-ui scan --target src --mode skin --outFile report.md
-  npx wk-ui scan --target src --layer L0,L1
-  npx wk-ui fix --target src                     # 自动创建快照 + 修复
-  npx wk-ui snapshot rollback                     # 一键回退最近修复
-  npx wk-ui add-preset my-biz
+  npx wl-ui init
+  npx wl-ui update --force
+  npx wl-ui doctor
+  npx wl-ui prompts
+  npx wl-ui init --mode skin --project /path/to/legacy-project
+  npx wl-ui scan --target src --mode skin --outFile report.md
+  npx wl-ui scan --target src --layer L0,L1
+  npx wl-ui fix --target src                     # 自动创建快照 + 修复
+  npx wl-ui snapshot rollback                     # 一键回退最近修复
+  npx wl-ui add-preset my-biz
 
 规范插件：
   npx @robot-admin/git-standards init

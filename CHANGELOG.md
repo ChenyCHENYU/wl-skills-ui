@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to **@agile-team/wk-skills-ui** will be documented in this file.
+All notable changes to **@agile-team/wl-skills-ui** will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
@@ -43,9 +43,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- `wk-ui update/diff/clean/doctor/prompts`：补齐安装生命周期管理、安装清单、差异检查、清理与体检能力
-- `wk-ui init/update`：安装 AI Skill 时同步写入 `.github/wk-skills-ui/TRIGGER_PROMPTS.md` 触发提示与 `.mcp.json` MCP 配置
-- `mcp/server.js`：新增 `wk-skills-ui` MCP Server，提供 `wks_ui_check`、`wks_ui_scan`、`wks_ui_fix_dry_run`、`wks_ui_skill_prompt`
+- `wl-ui update/diff/clean/doctor/prompts`：补齐安装生命周期管理、安装清单、差异检查、清理与体检能力
+- `wl-ui init/update`：安装 AI Skill 时同步写入 `.github/wl-skills-ui/TRIGGER_PROMPTS.md` 触发提示与 `.mcp.json` MCP 配置
+- `mcp/server.js`：新增 `wl-skills-ui` MCP Server，提供 `wks_ui_check`、`wks_ui_scan`、`wks_ui_fix_dry_run`、`wks_ui_skill_prompt`
 - 多编辑器适配扩展：新增 `claude-code`、`cline`、`agents-generic`、`qoder`
 - 可选桥接提醒：检测/提示 `@agile-team/wl-skills-kit`，保持两包独立分工、不强耦合
 - 规范插件提醒：建议业务项目执行 `npx @robot-admin/git-standards init` 接入代码质量与提交规范闭环
@@ -112,7 +112,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **快照回退机制**：`wk-scan fix` 自动在修复前创建快照，支持 `wk-scan snapshot rollback` 一键回退
+- **快照回退机制**：`wl-scan fix` 自动在修复前创建快照，支持 `wl-scan snapshot rollback` 一键回退
 - **快照管理命令**：`snapshot list / rollback / diff / clean`，完整的快照生命周期管理
 - **豁免配置系统**：`.wk-exempt.json` 配置文件，支持路径级和规则级豁免（大屏/地图/流程等）
 - **结构化报告增强**：报告新增豁免统计、规范覆盖率、回退命令提示
@@ -127,14 +127,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `fix.mjs` 重构为两遍扫描：先收集再写入，支持原子化快照
 - `report.mjs` 摘要新增实际检查文件数、豁免文件数、规范覆盖率百分比
 - `index.mjs` 支持 `snapshot` 子命令
-- `wk-ui.js` CLI help 更新为 v1.4，补充 snapshot 和 exempt 用法
+- `wl-ui.js` CLI help 更新为 v1.4，补充 snapshot 和 exempt 用法
 - `package.json` exports 新增 `./runtime/presets/security` 和 `./runtime/presets/*`
 
 ## [1.3.1] - 2025-05
 
 ### Fixed
 
-- 全局包名/路径统一为 `@agile-team/wk-skills-ui`（scanner init、integration check、SKILL.md、模板、标准文档、runtime 注释）
+- 全局包名/路径统一为 `@agile-team/wl-skills-ui`（scanner init、integration check、SKILL.md、模板、标准文档、runtime 注释）
 - `installSafePreset` / `safe-preset` 全部修正为 `installCommonPreset` / `common-preset`
 - `renderDangerText` 硬编码 `#f56c6c` → `var(--el-color-danger)`
 - `RATING_LEVEL_COLORS` 硬编码颜色 → `var(--wk-rating-lv*, fallback)` 可主题化
@@ -179,7 +179,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Runtime API：`defineColumns` / `renderOps` / `renderTagNode` / `renderClassifyTag` / `renderBadge` / `renderCountBadge` / `renderRatingLevel` / `renderDangerText`
 - 通用业务预设 `installCommonPreset()`：15+ 字段自动映射
 - 动态字典解析器 `setDictResolver()`
-- CLI 工具：`wk-ui init/scan/check/fix/all/add-preset`
+- CLI 工具：`wl-ui init/scan/check/fix/all/add-preset`
 - Scanner 规则：R001–R018（table/form/button/tag/dialog/color）
 - AI Skills 系统：4 flows + 12 单点 skill
 - 多编辑器适配：GitHub Copilot / Cursor / Windsurf / Kiro / Trae
@@ -192,7 +192,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- 全局包名/路径统一为 `@agile-team/wk-skills-ui`（scanner init、integration check、SKILL.md、模板、标准文档、runtime 注释）
+- 全局包名/路径统一为 `@agile-team/wl-skills-ui`（scanner init、integration check、SKILL.md、模板、标准文档、runtime 注释）
 - `installSafePreset` / `safe-preset` 全部修正为 `installCommonPreset` / `common-preset`
 - `renderDangerText` 硬编码 `#f56c6c` → `var(--el-color-danger)`
 - `RATING_LEVEL_COLORS` 硬编码颜色 → `var(--wk-rating-lv*, fallback)` 可主题化

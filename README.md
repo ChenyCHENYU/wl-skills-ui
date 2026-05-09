@@ -1,8 +1,8 @@
-# @agile-team/wk-skills-ui
+# @agile-team/wl-skills-ui
 
 > **企业级 UI 风格对齐框架** — 让 Vue + Element Plus 业务系统获得一致的视觉、可被 AI 精确识别和修复的设计规范，以及可演进的工程能力。
 
-[![npm version](https://img.shields.io/npm/v/@agile-team/wk-skills-ui.svg)](https://www.npmjs.com/package/@agile-team/wk-skills-ui)
+[![npm version](https://img.shields.io/npm/v/@agile-team/wl-skills-ui.svg)](https://www.npmjs.com/package/@agile-team/wl-skills-ui)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-green.svg)]()
 
 ---
@@ -52,7 +52,7 @@
 ## 目录结构
 
 ```
-wk-skills-ui/
+wl-skills-ui/
 ├── design/                       # L0 — 设计令牌
 │   ├── tokens/
 │   │   ├── base.css              # CSS 变量声明（:root --el-color-primary 等）
@@ -161,7 +161,7 @@ wk-skills-ui/
 │   └── engineering/              # 工程规范（import 顺序 / 命名 / SCSS 结构）
 │
 ├── bin/                          # CLI
-│   └── wk-ui.js                  # 统一入口（init/update/diff/clean/doctor/prompts/scan/fix/add-preset）
+│   └── wl-ui.js                  # 统一入口（init/update/diff/clean/doctor/prompts/scan/fix/add-preset）
 │
 ├── dist/                         # 构建产物 + 兼容重定向
 │   ├── tokens.css                # = design/tokens/base.css
@@ -181,10 +181,10 @@ wk-skills-ui/
 ## 安装
 
 ```bash
-pnpm add @agile-team/wk-skills-ui
+pnpm add @agile-team/wl-skills-ui
 # 或
-npm i @agile-team/wk-skills-ui
-yarn add @agile-team/wk-skills-ui
+npm i @agile-team/wl-skills-ui
+yarn add @agile-team/wl-skills-ui
 ```
 
 要求：Node ≥ 18，Vue ≥ 3.2，Element Plus ≥ 2.2。
@@ -197,9 +197,9 @@ yarn add @agile-team/wk-skills-ui
 
 - vendors 层各组件样式精细化调整：`_base-components`、`_ag-grid`、`_portal`、`_jh-tree`、`_jh-pagination`、`_jh-drag-col`、`_c-components`、`_base-query-toolbar` 全面优化
 - design tokens（`base.css` / `dist/tokens.css`）同步更新，security preset 样式调整
-- `wk-ui init/update` 会安装 Skill、触发提示、MCP 配置和 manifest 清单
-- `wk-ui diff/clean/doctor/prompts` 覆盖升级前对比、卸载清理、环境体检和提示词查看
-- 内置 `wk-skills-ui` MCP Server，供 AI 编辑器调用扫描、检查和 dry-run 修复
+- `wl-ui init/update` 会安装 Skill、触发提示、MCP 配置和 manifest 清单
+- `wl-ui diff/clean/doctor/prompts` 覆盖升级前对比、卸载清理、环境体检和提示词查看
+- 内置 `wl-skills-ui` MCP Server，供 AI 编辑器调用扫描、检查和 dry-run 修复
 - 支持 GitHub Copilot、Cursor、Windsurf、Kiro、Trae、Claude Code、Cline、Qoder、通用 Agents
 - 与 `@agile-team/wl-skills-kit` 只做可选桥接提醒，不建立强依赖
 - 接入 `@robot-admin/git-standards`，仓库维护和业务项目均可复用提交/检查规范
@@ -208,12 +208,12 @@ yarn add @agile-team/wk-skills-ui
 
 ## 与 wl-skills-kit 的协同闭环
 
-`wk-skills-ui` 与 `wl-skills-kit` 不强耦合，但可以互相配合形成“先统一视觉，再按团队规范渐进修复”的闭环：
+`wl-skills-ui` 与 `wl-skills-kit` 不强耦合，但可以互相配合形成“先统一视觉，再按团队规范渐进修复”的闭环：
 
-- `wk-skills-ui` 负责整体设计体系、tokens、样式风格、化妆层和 UI runtime；无论项目是 kit 最佳写法、纯 Element Plus、老旧 `Base*` 封装，还是其他基于 Element Plus 的封装，都应尽量覆盖成统一视觉风格。
+- `wl-skills-ui` 负责整体设计体系、tokens、样式风格、化妆层和 UI runtime；无论项目是 kit 最佳写法、纯 Element Plus、老旧 `Base*` 封装，还是其他基于 Element Plus 的封装，都应尽量覆盖成统一视觉风格。
 - `wl-skills-kit` 负责 AI 生成页面和前端工作流必须遵守的团队规范、最佳实践、业务模板、mock、api.md、菜单/字典/权限同步等，不直接负责样式体系。
-- `wk-ui scan/check` 先识别项目中的多种 UI 写法并给出风格/结构结论；如果需要从“样式统一”进一步升级为“团队最佳实践写法”，再提示使用 `wl-skills-kit` 按扫描结论进行规范化重构。
-- 即使暂不重构，`wk-skills-ui` 的 Skin/Native 样式覆盖也应继续生效，保证老项目和非标准写法至少获得统一视觉。
+- `wl-ui scan/check` 先识别项目中的多种 UI 写法并给出风格/结构结论；如果需要从“样式统一”进一步升级为“团队最佳实践写法”，再提示使用 `wl-skills-kit` 按扫描结论进行规范化重构。
+- 即使暂不重构，`wl-skills-ui` 的 Skin/Native 样式覆盖也应继续生效，保证老项目和非标准写法至少获得统一视觉。
 
 当页面由 `wl-skills-kit` 生成或重构时，推荐最终页面骨架保持：
 
@@ -229,7 +229,7 @@ AbstractPageQueryHook + BaseQuery + BaseToolbar + BaseTable(render-type="agGrid"
 
 ```bash
 # 1. 自动安装 skills + 配置接入
-npx wk-ui init --mode native
+npx wl-ui init --mode native
 ```
 
 ```html
@@ -237,26 +237,26 @@ npx wk-ui init --mode native
 <head>
   <link
     rel="stylesheet"
-    href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css"
+    href="/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css"
   />
 </head>
 ```
 
 ```scss
 // 3. src/styles/index.scss
-@use "@agile-team/wk-skills-ui/styles" as *;
+@use "@agile-team/wl-skills-ui/styles" as *;
 ```
 
 ```ts
 // 4. src/main.ts
-import { installCommonPreset } from "@agile-team/wk-skills-ui/runtime/common-preset";
+import { installCommonPreset } from "@agile-team/wl-skills-ui/runtime/common-preset";
 installCommonPreset();
 ```
 
 ```vue
 <!-- 5. 业务代码用 runtime API（参考 templates/list-page/） -->
 <script setup>
-import { defineColumns, renderOps } from "@agile-team/wk-skills-ui/runtime";
+import { defineColumns, renderOps } from "@agile-team/wl-skills-ui/runtime";
 
 const columns = defineColumns([
   { type: "index", label: "序号", width: 60, align: "center" },
@@ -282,38 +282,38 @@ const columns = defineColumns([
 
 ```bash
 # 1. 化妆模式接入（不安装 runtime/layouts 类 skill）
-npx wk-ui init --mode skin
+npx wl-ui init --mode skin
 ```
 
 ```scss
 // 2. 仅引入 skin preset（不引入 layouts，避免冲击老布局）
-@use "@agile-team/wk-skills-ui/styles/presets/skin" as *;
+@use "@agile-team/wl-skills-ui/styles/presets/skin" as *;
 ```
 
 ```bash
 # 3. AI 编辑器中触发：
-#    "用 wk-ui 的 legacy-skin-align 流程跑一下当前项目"
+#    "用 wl-ui 的 legacy-skin-align 流程跑一下当前项目"
 # → AI 按 _flows/legacy-skin-align.md 顺序执行 6 个 phase
 
 # 或纯审计（不修）：
-npx wk-ui scan --target src --mode skin --outFile audit.md
+npx wl-ui scan --target src --mode skin --outFile audit.md
 ```
 
 ### 场景 C — AI 编辑器 / MCP 接入
 
 ```bash
 # 安装或更新 Skill 到当前业务项目
-npx wk-ui init --project . --editor auto
-npx wk-ui update --project .
+npx wl-ui init --project . --editor auto
+npx wl-ui update --project .
 
 # 查看 AI 触发提示
-npx wk-ui prompts
+npx wl-ui prompts
 
 # 体检安装结果和 MCP/规范插件提示
-npx wk-ui doctor --project .
+npx wl-ui doctor --project .
 ```
 
-安装后会写入 `.github/wk-skills-ui/TRIGGER_PROMPTS.md`、`.mcp.json` 和 `.wk-skills-ui-manifest.json`。支持的编辑器可以单独指定，例如 `--editor claude-code`、`--editor cline`、`--editor agents-generic`、`--editor qoder`。
+安装后会写入 `.github/wl-skills-ui/TRIGGER_PROMPTS.md`、`.mcp.json` 和 `.wl-skills-ui-manifest.json`。支持的编辑器可以单独指定，例如 `--editor claude-code`、`--editor cline`、`--editor agents-generic`、`--editor qoder`。
 
 ### 场景 D — 仅 CI 检查
 
@@ -321,9 +321,9 @@ npx wk-ui doctor --project .
 // package.json
 {
   "scripts": {
-    "ui:check": "wk-ui check --project .",
-    "ui:audit": "wk-ui scan --target src --outFile ui-audit.md",
-    "ui:fix": "wk-ui fix --target src --dry-run"
+    "ui:check": "wl-ui check --project .",
+    "ui:audit": "wl-ui scan --target src --outFile ui-audit.md",
+    "ui:fix": "wl-ui fix --target src --dry-run"
   }
 }
 ```
@@ -333,19 +333,19 @@ npx wk-ui doctor --project .
 ## CLI 速查
 
 ```bash
-wk-ui init    [--project .] [--editor <e>] [--mode native|skin]
+wl-ui init    [--project .] [--editor <e>] [--mode native|skin]
                             [--dry-run] [--skills-only]
-wk-ui update  [--project .] [--force] [--dry-run]
-wk-ui diff    [--project .]
-wk-ui clean   [--project .] [--dry-run]
-wk-ui doctor  [--project .]
-wk-ui prompts
-wk-ui scan    --target src  [--layer L0,L1,L2] [--vendor base-table,jh]
+wl-ui update  [--project .] [--force] [--dry-run]
+wl-ui diff    [--project .]
+wl-ui clean   [--project .] [--dry-run]
+wl-ui doctor  [--project .]
+wl-ui prompts
+wl-ui scan    --target src  [--layer L0,L1,L2] [--vendor base-table,jh]
                             [--mode skin|native] [--outFile report.md]
-wk-ui check   --project .
-wk-ui fix     --target src  [--dry-run]
-wk-ui all     --project .
-wk-ui add-preset <name>     # 脚手架新业务 preset
+wl-ui check   --project .
+wl-ui fix     --target src  [--dry-run]
+wl-ui all     --project .
+wl-ui add-preset <name>     # 脚手架新业务 preset
 ```
 
 支持的 AI 编辑器：`github-copilot` / `cursor` / `windsurf` / `kiro` / `trae` / `claude-code` / `cline` / `agents-generic` / `qoder`（自动检测）
@@ -353,11 +353,11 @@ wk-ui add-preset <name>     # 脚手架新业务 preset
 `init/update` 会同时写入：
 
 - AI Skill 规则文件
-- `.github/wk-skills-ui/TRIGGER_PROMPTS.md` 触发提示
-- `.mcp.json` 中的 `wk-skills-ui` MCP Server 配置
-- `.wk-skills-ui-manifest.json` 安装清单，供 `update/diff/clean/doctor` 使用
+- `.github/wl-skills-ui/TRIGGER_PROMPTS.md` 触发提示
+- `.mcp.json` 中的 `wl-skills-ui` MCP Server 配置
+- `.wl-skills-ui-manifest.json` 安装清单，供 `update/diff/clean/doctor` 使用
 
-> 可选桥接：如项目也安装了 `@agile-team/wl-skills-kit`，两者保持独立分工，不互相强依赖。kit 负责编码规范/页面生成/菜单字典权限，wk-skills-ui 负责 UI 风格/化妆层/Runtime 渲染。
+> 可选桥接：如项目也安装了 `@agile-team/wl-skills-kit`，两者保持独立分工，不互相强依赖。kit 负责编码规范/页面生成/菜单字典权限，wl-skills-ui 负责 UI 风格/化妆层/Runtime 渲染。
 
 > 规范插件建议：项目可执行 `npx @robot-admin/git-standards init` 接入 ESLint/Prettier/Husky/提交规范，形成代码质量闭环。
 
@@ -368,7 +368,7 @@ wk-ui add-preset <name>     # 脚手架新业务 preset
 ### 组合流程触发（一句话跑全套）
 
 ```
-@workspace 用 wk-ui 的 legacy-skin-align 流程对当前项目做老项目化妆对齐
+@workspace 用 wl-ui 的 legacy-skin-align 流程对当前项目做老项目化妆对齐
 ↓
 AI 按 _flows/legacy-skin-align.md 严格 6 phase 执行：
   1. 接入 tokens
@@ -382,7 +382,7 @@ AI 按 _flows/legacy-skin-align.md 严格 6 phase 执行：
 ### 单点 Skill 触发（精准修复）
 
 ```
-@workspace 用 wk-ui 的 vendors/base-table skill 检查这个文件
+@workspace 用 wl-ui 的 vendors/base-table skill 检查这个文件
 ↓ AI 仅加载 base-table SKILL.md，针对 R001/R002/R003/R014 修复
 ```
 
@@ -402,13 +402,13 @@ Base* > jh-* > C_*/c_* > custom wrappers
 ### 1. 新增一个业务 preset
 
 ```bash
-npx wk-ui add-preset my-biz
+npx wl-ui add-preset my-biz
 # 生成 runtime/presets/my-biz.ts，按提示填字段映射，然后：
 ```
 
 ```ts
 // main.ts
-import { installMyBizPreset } from "@agile-team/wk-skills-ui/runtime/presets/my-biz";
+import { installMyBizPreset } from "@agile-team/wl-skills-ui/runtime/presets/my-biz";
 installMyBizPreset();
 ```
 
@@ -450,7 +450,7 @@ export const myRules = [
 
 ## Element Plus 组件族样式管控
 
-`wk-skills-ui` 的核心是样式绝对管控。加载 `styles`、`styles/presets/skin` 或 `styles/presets/element-only` 后，会统一覆盖首批 B 端高频 Element Plus 组件族：
+`wl-skills-ui` 的核心是样式绝对管控。加载 `styles`、`styles/presets/skin` 或 `styles/presets/element-only` 后，会统一覆盖首批 B 端高频 Element Plus 组件族：
 
 | 组件族       | 覆盖标签                                                   | 典型场景                         |
 | ------------ | ---------------------------------------------------------- | -------------------------------- |
@@ -465,7 +465,7 @@ export const myRules = [
 | navigation   | `el-menu` `el-breadcrumb`                                  | 导航、面包屑                     |
 | feedback     | `el-empty` `el-result` `el-alert` `el-badge` `el-timeline` | 空状态、异常状态、提示反馈       |
 
-扫描器会在 JSON/Markdown 报告中输出 `componentCoverage`、`recommendedSkills`、`recommendations` 和 `kitBridge`，用于 AI 自动判断下一步是继续由 `wk-skills-ui` 做 Skin/Native 视觉统一，还是桥接 `wl-skills-kit` 做页面结构规范化。
+扫描器会在 JSON/Markdown 报告中输出 `componentCoverage`、`recommendedSkills`、`recommendations` 和 `kitBridge`，用于 AI 自动判断下一步是继续由 `wl-skills-ui` 做 Skin/Native 视觉统一，还是桥接 `wl-skills-kit` 做页面结构规范化。
 
 同时会识别以下 B 端组合业务场景：
 

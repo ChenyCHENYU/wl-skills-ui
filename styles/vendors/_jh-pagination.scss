@@ -17,7 +17,7 @@
 
     &:hover {
       color: var(--el-color-primary) !important;
-      background-color: rgba(67, 104, 255, 0.06) !important;
+      background-color: rgba(34, 84, 244, 0.06) !important;
     }
 
     // 当前页 → 品牌蓝填充
@@ -49,7 +49,7 @@
 
     &:hover:not(:disabled) {
       color: var(--el-color-primary) !important;
-      background-color: rgba(67, 104, 255, 0.06) !important;
+      background-color: rgba(34, 84, 244, 0.06) !important;
     }
 
     &:disabled { opacity: 0.4; cursor: not-allowed; }

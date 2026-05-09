@@ -7,23 +7,23 @@
 // ── CSS 变量注入（AG Grid 28+ 支持）──────────────────────────────────────────
 .ag-root-wrapper {
   --ag-background-color: #ffffff;
-  --ag-odd-row-background-color: #fafbfd;
-  --ag-header-background-color: #f5f7fa;
+  --ag-odd-row-background-color: #ffffff;
+    --ag-header-background-color: #fafafa;
   --ag-header-foreground-color: #374151;
-  --ag-border-color: #e5e9f0;
-  --ag-row-border-color: #f0f2f7;
-  --ag-row-hover-color: rgba(67, 104, 255, 0.07);
-  --ag-selected-row-background-color: rgba(67, 104, 255, 0.10);
-  --ag-range-selection-border-color: rgba(67, 104, 255, 0.4);
+  --ag-border-color: rgba(0, 0, 0, 0.06);
+    --ag-row-border-color: rgba(0, 0, 0, 0.06);
+    --ag-row-hover-color: rgba(34, 84, 244, 0.06);
+    --ag-selected-row-background-color: rgba(34, 84, 244, 0.10);
+    --ag-range-selection-border-color: rgba(34, 84, 244, 0.4);
   --ag-font-size: 13px;
   --ag-font-family: inherit;
-  --ag-row-height: 38px;
-  --ag-header-height: 40px;
+  --ag-row-height: 26px;
+    --ag-header-height: 36px;
   --ag-cell-horizontal-padding: 8px;
   --ag-checkbox-checked-color: var(--el-color-primary);
   --ag-input-focus-border-color: var(--el-color-primary);
 
-  border: 1px solid #e5e9f0;
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
@@ -31,15 +31,17 @@
 
 // ── 表头 ──────────────────────────────────────────────────────────────────────
 .ag-header {
-  background-color: #f5f7fa !important;
-  border-bottom: 1px solid #dde3ed !important;
-  min-height: 40px !important;
+  background-color: #fafafa !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    min-height: 36px !important;
 }
 
-.ag-header-row { height: 40px !important; }
+.ag-header-row {
+  height: 36px !important;
+}
 
 .ag-header-cell {
-  height: 40px !important;
+  height: 36px !important;
   padding: 0 8px !important;
   font-size: 12.5px !important;
   font-weight: 600 !important;
@@ -48,7 +50,9 @@
   display: flex !important;
   align-items: center !important;
 
-  &::after { background-color: var(--el-border-color-lighter) !important; }
+  &::after {
+      background-color: rgba(0, 0, 0, 0.06) !important;
+    }
 }
 
 .ag-header-cell-comp-wrapper {
@@ -88,11 +92,18 @@
 }
 
 .ag-row-even  { background-color: #ffffff; }
-.ag-row-odd   { background-color: #fafbfd; }
+.ag-row-odd {
+  background-color: #ffffff;
+}
 
 .ag-row:hover,
-.ag-row.ag-row-hover    { background-color: rgba(67, 104, 255, 0.07) !important; }
-.ag-row.ag-row-selected { background-color: rgba(67, 104, 255, 0.10) !important; }
+.ag-row.ag-row-hover {
+  background-color: rgba(34, 84, 244, 0.06) !important;
+}
+
+.ag-row.ag-row-selected {
+  background-color: rgba(34, 84, 244, 0.10) !important;
+}
 
 // ── 单元格 ────────────────────────────────────────────────────────────────────
 .ag-cell {
@@ -231,7 +242,7 @@
     display: block;
     width: 52px;
     height: 52px;
-    background: url("data:image/svg+xml,%3Csvg width='52' height='52' viewBox='0 0 52 52' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='26' cy='26' r='22' stroke='%23EEF2FF' stroke-width='2.5'/%3E%3Ccircle cx='26' cy='26' r='22' stroke='%234368ff' stroke-width='2.5' stroke-linecap='round' stroke-dasharray='138' stroke-dashoffset='230' style='transform-origin:center;animation:ag-spin-outer 1.4s ease-in-out infinite,ag-rotate-cw 1.8s linear infinite'/%3E%3Ccircle cx='26' cy='26' r='13' stroke='%23C7D2FE' stroke-width='2'/%3E%3Ccircle cx='26' cy='26' r='13' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-dasharray='82' stroke-dashoffset='150' style='transform-origin:center;animation:ag-spin-inner 1.0s ease-in-out infinite,ag-rotate-ccw 1.2s linear infinite'/%3E%3Ccircle cx='26' cy='26' r='3.5' fill='%234368ff' style='transform-origin:center;animation:ag-pulse-dot 1.6s ease-in-out infinite'/%3E%3C/svg%3E") center/contain no-repeat;
+    background: url("data:image/svg+xml,%3Csvg width='52' height='52' viewBox='0 0 52 52' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='26' cy='26' r='22' stroke='%23F2F5FF' stroke-width='2.5'/%3E%3Ccircle cx='26' cy='26' r='22' stroke='%232254F4' stroke-width='2.5' stroke-linecap='round' stroke-dasharray='138' stroke-dashoffset='230' style='transform-origin:center;animation:ag-spin-outer 1.4s ease-in-out infinite,ag-rotate-cw 1.8s linear infinite'/%3E%3Ccircle cx='26' cy='26' r='13' stroke='%23D3DDFD' stroke-width='2'/%3E%3Ccircle cx='26' cy='26' r='13' stroke='%237A98F8' stroke-width='2' stroke-linecap='round' stroke-dasharray='82' stroke-dashoffset='150' style='transform-origin:center;animation:ag-spin-inner 1.0s ease-in-out infinite,ag-rotate-ccw 1.2s linear infinite'/%3E%3Ccircle cx='26' cy='26' r='3.5' fill='%232254F4' style='transform-origin:center;animation:ag-pulse-dot 1.6s ease-in-out infinite'/%3E%3C/svg%3E") center/contain no-repeat;
   }
 
   // 省略号文字（AG Grid 默认插入"Loading..."，此处做字体优化）
@@ -254,9 +265,9 @@
   height: 12px;
   // 三个点用 box-shadow 模拟
   width: 36px;
-  background: radial-gradient(circle at 6px 6px, #4368ff 3.5px, transparent 3.5px),
-              radial-gradient(circle at 18px 6px, #4368ff 3.5px, transparent 3.5px),
-              radial-gradient(circle at 30px 6px, #4368ff 3.5px, transparent 3.5px);
+  background: radial-gradient(circle at 6px 6px, #2254f4 3.5px, transparent 3.5px),
+      radial-gradient(circle at 18px 6px, #2254f4 3.5px, transparent 3.5px),
+      radial-gradient(circle at 30px 6px, #2254f4 3.5px, transparent 3.5px);
   animation: ag-dot-bounce 1.2s ease-in-out infinite;
   opacity: 0.7;
 }

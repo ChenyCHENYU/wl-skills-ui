@@ -45,37 +45,58 @@
   // 查看 — hover 蓝
   &.jh-op-view {
     color: #C0C4CC;
-    &:hover { color: #2563EB; background: rgba(37, 99, 235, 0.09); }
+    &:hover {
+        color: var(--el-color-primary);
+        background: rgba(34, 84, 244, 0.09);
+      }
   }
   // 编辑 — hover 翠绿
   &.jh-op-edit {
     color: #C0C4CC;
-    &:hover { color: #059669; background: rgba(5, 150, 105, 0.09); }
+    &:hover {
+        color: var(--el-color-success);
+        background: rgba(43, 178, 104, 0.09);
+      }
   }
   // 删除/作废 — hover 红
   &.jh-op-del {
     color: #C0C4CC;
-    &:hover { color: #DC2626; background: rgba(220, 38, 38, 0.09); }
+    &:hover {
+        color: var(--el-color-danger);
+        background: rgba(187, 45, 63, 0.09);
+      }
   }
   // 记录 — hover 靛蓝
   &.jh-op-log {
     color: #C0C4CC;
-    &:hover { color: #4F46E5; background: rgba(79, 70, 229, 0.09); }
+    &:hover {
+        color: var(--el-color-primary);
+        background: rgba(34, 84, 244, 0.09);
+      }
   }
   // 审核 — hover 翠绿
   &.jh-op-ok {
     color: #C0C4CC;
-    &:hover { color: #059669; background: rgba(5, 150, 105, 0.09); }
+    &:hover {
+        color: var(--el-color-success);
+        background: rgba(43, 178, 104, 0.09);
+      }
   }
   // 提交 — hover 主色
   &.jh-op-send {
     color: #C0C4CC;
-    &:hover { color: var(--el-color-primary, #4368ff); background: rgba(67, 104, 255, 0.09); }
+    &:hover {
+        color: var(--el-color-primary, #2254f4);
+        background: rgba(34, 84, 244, 0.09);
+      }
   }
   // 保存（内联表格用）— hover 翠绿
   &.jh-op-save {
     color: #C0C4CC;
-    &:hover { color: #059669; background: rgba(5, 150, 105, 0.09); }
+    &:hover {
+        color: var(--el-color-success);
+        background: rgba(43, 178, 104, 0.09);
+      }
     &:disabled { opacity: 0.45; cursor: not-allowed; }
   }
   // 取消（内联表格用）— hover 中灰
@@ -117,8 +138,8 @@
 
   svg { width: 12px; height: 12px; flex-shrink: 0; }
   &:hover {
-    background: rgba(67, 104, 255, 0.10);
-    color: var(--el-color-primary, #4368ff);
+    background: rgba(34, 84, 244, 0.10);
+      color: var(--el-color-primary, #2254f4);
   }
   &:active { opacity: 0.65; transform: scale(0.96); }
 }
@@ -135,7 +156,7 @@
   border-radius: 4px;
   border: none;
   background: transparent;
-  color: var(--el-color-primary, #4368ff);
+  color: var(--el-color-primary, #2254f4);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -146,8 +167,8 @@
   flex-shrink: 0;
 
   &:hover {
-    background: rgba(67, 104, 255, 0.08);
-    color: var(--el-color-primary, #4368ff);
+    background: rgba(34, 84, 244, 0.08);
+      color: var(--el-color-primary, #2254f4);
   }
   &:active { opacity: 0.55; }
 }
@@ -168,14 +189,29 @@
   letter-spacing: 0.03em;
   flex-shrink: 0;
 
-  &.el-tag--danger  { background: #DC2626 !important; color: #fff !important; }
-  &.el-tag--warning { background: #EA580C !important; color: #fff !important; }
-  &.el-tag--success { background: #059669 !important; color: #fff !important; }
-  &.el-tag--info    { background: #4F46E5 !important; color: #fff !important; }
+  &.el-tag--danger {
+      background: var(--el-color-danger) !important;
+      color: #fff !important;
+    }
+  
+    &.el-tag--warning {
+      background: var(--el-color-warning) !important;
+      color: #fff !important;
+    }
+  
+    &.el-tag--success {
+      background: var(--el-color-success) !important;
+      color: #fff !important;
+    }
+  
+    &.el-tag--info {
+      background: var(--el-color-primary) !important;
+      color: #fff !important;
+    }
 
   // type="" 时无修饰类
   &:not(.el-tag--danger):not(.el-tag--warning):not(.el-tag--success):not(.el-tag--info) {
-    background: #4F46E5 !important;
+    background: var(--el-color-primary) !important;
     color: #fff !important;
   }
 }
@@ -184,14 +220,14 @@
 .jh-count-badge {
   display: inline-block;
   padding: 2px 6px;
-  background: rgba(103, 194, 58, 0.08);
-  color: #3e8a1f;
+  background: rgba(43, 178, 104, 0.08);
+    color: var(--el-color-success);
   border-radius: 4px;
   font-family: 'SFMono-Regular', 'Consolas', 'Monaco', monospace;
   font-size: 11.5px;
   font-weight: 600;
   letter-spacing: 0.03em;
-  border: 1px solid rgba(103, 194, 58, 0.22);
+  border: 1px solid rgba(43, 178, 104, 0.22);
   white-space: nowrap;
 }
 
@@ -199,14 +235,14 @@
 .jh-riskno-badge {
   display: inline-block;
   padding: 2px 6px;
-  background: rgba(99, 102, 241, 0.08);
-  color: #4338CA;
+  background: rgba(34, 84, 244, 0.08);
+    color: var(--el-color-primary);
   border-radius: 4px;
   font-family: 'SFMono-Regular', 'Consolas', 'Monaco', monospace;
   font-size: 11.5px;
   font-weight: 600;
   letter-spacing: 0.03em;
-  border: 1px solid rgba(99, 102, 241, 0.18);
+  border: 1px solid rgba(34, 84, 244, 0.18);
   white-space: nowrap;
   max-width: 100%;
   overflow: hidden;
@@ -243,11 +279,30 @@
   white-space: nowrap;
   line-height: 1;
 
-  &--success { background: rgba(5, 150, 105, 0.12); color: #065F46; }
-  &--warning { background: rgba(245, 158, 11, 0.12); color: #78350F; }
-  &--danger  { background: rgba(220, 38, 38, 0.12);  color: #991B1B; }
-  &--info    { background: rgba(99, 102, 241, 0.10); color: #3730A3; }
-  &--default { background: rgba(99, 102, 241, 0.10); color: #3730A3; }
+  &--success {
+      background: rgba(43, 178, 104, 0.12);
+      color: var(--el-color-success);
+    }
+  
+    &--warning {
+      background: rgba(234, 154, 19, 0.12);
+      color: var(--el-color-warning);
+    }
+  
+    &--danger {
+      background: rgba(187, 45, 63, 0.12);
+      color: var(--el-color-danger);
+    }
+  
+    &--info {
+      background: rgba(34, 84, 244, 0.10);
+      color: var(--el-color-primary);
+    }
+  
+    &--default {
+      background: rgba(34, 84, 244, 0.10);
+      color: var(--el-color-primary);
+    }
 }
 
 // ── 兼容旧 el-button 操作列（其他页面渐进迁移）──────────────────────────────.ag-cell .el-button + .el-button { margin-left: 4px; }
@@ -260,7 +315,7 @@
   transition: background-color 0.15s, color 0.15s;
 
   &:not(.el-button--danger):hover {
-    background-color: rgba(67, 104, 255, 0.08) !important;
+    background-color: rgba(34, 84, 244, 0.08) !important;
     color: var(--el-color-primary) !important;
   }
 }
@@ -270,7 +325,7 @@
   color: var(--el-color-danger);
   &:hover {
     color: var(--el-color-danger) !important;
-    background-color: rgba(245, 108, 108, 0.08) !important;
+    background-color: rgba(187, 45, 63, 0.08) !important;
   }
 }
 
@@ -312,7 +367,7 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 .el-message-box__btns {
   .el-button {
-    height: 28px;
+    height: 24px;
     padding: 0 14px;
     font-size: 13px;
     border-radius: 6px !important;
@@ -325,7 +380,7 @@
       &:hover {
         border-color: var(--el-color-primary);
         color: var(--el-color-primary);
-        background: rgba(67, 104, 255, 0.04);
+        background: rgba(34, 84, 244, 0.04);
       }
     }
   }
@@ -348,7 +403,7 @@
   }
 
   .el-button {
-    height: 28px !important;
+    height: 24px !important;
     padding: 0 14px !important;
     font-size: 13px !important;
     border-radius: 6px !important;
@@ -361,7 +416,7 @@
       &:hover {
         border-color: var(--el-color-primary) !important;
         color: var(--el-color-primary) !important;
-        background: rgba(67, 104, 255, 0.04) !important;
+        background: rgba(34, 84, 244, 0.04) !important;
       }
     }
   }
@@ -384,7 +439,7 @@
     }
     &:focus {
       border-color: var(--el-color-primary) !important;
-      box-shadow: 0 0 0 2px rgba(67, 104, 255, 0.12) !important;
+      box-shadow: 0 0 0 2px rgba(34, 84, 244, 0.12) !important;
     }
   }
 

@@ -89,7 +89,7 @@
 
   // ── Hover（非选中行）──────────────────────────────────────────────────────
   &:hover {
-    background-color: rgba(67, 104, 255, 0.07) !important;
+    background-color: rgba(34, 84, 244, 0.07) !important;
 
     &::before { transform: translateY(-50%) scale(1); opacity: 0.55; }
 
@@ -113,7 +113,7 @@
 
 // ── 选中状态 ──────────────────────────────────────────────────────────────────
 .drag-left .el-tree-node.is-current > .el-tree-node__content {
-  background-color: rgba(67, 104, 255, 0.10) !important;
+  background-color: rgba(34, 84, 244, 0.10) !important;
   box-shadow: inset 3px 0 0 var(--el-color-primary) !important;
   font-weight: 500;
   color: var(--el-color-primary) !important;
@@ -146,7 +146,9 @@
   > .el-tree-node__expand-icon.is-leaf { color: transparent !important; }
 
   // hover 时加深一点
-  &:hover { background-color: rgba(67, 104, 255, 0.15) !important; }
+    &:hover {
+      background-color: rgba(34, 84, 244, 0.15) !important;
+    }
 }
 
 // ── 展开/折叠图标 ─────────────────────────────────────────────────────────────

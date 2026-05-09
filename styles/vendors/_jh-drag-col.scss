@@ -38,10 +38,10 @@ html .drag-col-container > .slider-col {
   &:hover {
     background: linear-gradient(
       to right,
-      rgba(67, 104, 255, 0.06) 3px,
+      rgba(34, 84, 244, 0.06) 3px,
       var(--el-color-primary) 3px,
       var(--el-color-primary) 7px,
-      rgba(67, 104, 255, 0.06) 7px
+      rgba(34, 84, 244, 0.06) 7px
     ) !important;
 
     &::after {
@@ -54,10 +54,10 @@ html .drag-col-container > .slider-col {
   &:active {
     background: linear-gradient(
       to right,
-      rgba(67, 104, 255, 0.1) 2.5px,
+      rgba(34, 84, 244, 0.1) 2.5px,
       var(--el-color-primary) 2.5px,
       var(--el-color-primary) 7.5px,
-      rgba(67, 104, 255, 0.1) 7.5px
+      rgba(34, 84, 244, 0.1) 7.5px
     ) !important;
   }
 }

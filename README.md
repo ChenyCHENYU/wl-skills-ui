@@ -193,12 +193,13 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.6.8 版本重点强化“统一规则源 + 多编辑器分发 + 项目集群封装必覆盖 + UI 细节精准修复”的闭环：
+当前 v1.6.9 版本重点强化“统一规则源 + 多编辑器分发 + 项目集群封装必覆盖 + UI 细节精准修复”的闭环：
 
 - `skills/**/*.md` 作为唯一规则源，`wl-ui init/update` 会按编辑器格式转换并覆盖写入目标 rules
 - `skills/_meta/_compat/editors.json` 作为 AI 编辑器安装配置唯一来源，CLI 不再维护第二份编辑器路径映射
 - `wl-ui update --editor all --force` 可一次性刷新全部支持编辑器；未指定编辑器时会刷新 manifest 与项目中已存在的编辑器规则目录
 - `standards/architecture/01-layer-boundaries.md` 固化 tokens、Element Plus、Project Vendors、layouts、runtime、scanner、skills 的扩展边界，明确 `Base*` / `jh-*` / `C_*` / AG Grid 是当前项目集群必覆盖层
+- `vendors/jh-components` 使用 `<jh-*>` 全量通配治理，当前只维护代表性基线和专项覆盖准入，避免遗漏新增 jh 封装
 - `npm run docs:check` 校验旧命名、旧命令、版本文案和编辑器配置，防止规则文档回退
 - 表格空状态改为对应表格区域内自适应居中，避免嵌套表格靠固定高度猜效果
 - 查询区/工具栏按钮补齐 token fallback，禁用按钮独立保留清晰禁用态
@@ -380,7 +381,7 @@ wl-ui add-preset <name>     # 脚手架新业务 preset
 AI 按 _flows/legacy-skin-align.md 严格 6 phase 执行：
   1. 接入 tokens
   2. 接入 skin preset
-  3. 触发 vendors/* skill 修复（按优先级 Base > jh > C_ > custom）
+  3. 触发 vendors/* skill 修复（按优先级 Base > jh-* > C_ > AG Grid > custom）
   4. 触发 element/* skill 修复
   5. 触发 tokens/* 规则修复
   6. 不动业务代码
@@ -427,14 +428,26 @@ installMyBizPreset();
 4. 在 `skills/_meta/_detection.md` 追加识别特征
 5. 在 `scanner/rules/` 追加规则（带 `category: 'vendor-xxx'`，自动获得 `layer:'L2'`）
 
-### 3. 新增一类页面骨架
+### 3. 新增复杂 jh-* 封装专项覆盖
+
+`<jh-*>` 默认已由 `vendors/jh-components` 全量识别。只有当某个 jh 组件满足以下条件之一时，才升级为专项样式：
+
+1. 内部包含多个 Element Plus 组件或复杂 DOM
+2. 默认样式明显偏离当前项目集群 tokens / spacing / radius
+3. 高频出现在列表、树表、弹窗、详情、上传、流程等核心页面
+4. scanner 或人工审计反复发现相同视觉问题
+5. AI 按通用 jh 规则无法稳定修复
+
+专项覆盖落地时，新增 `styles/vendors/_jh-xxx.scss`，并同步 `skills/vendors/jh-components/SKILL.md` 的代表性基线。
+
+### 4. 新增一类页面骨架
 
 1. 在 `styles/layouts/` 新建 `_xxx.scss`
 2. 在 `styles/layouts/index.scss` `@forward` 进去
 3. 在 `templates/xxx/` 新建 `TPL-XXX.md`
 4. 在 `skills/layouts/xxx/` 新建 `SKILL.md`
 
-### 4. 新增一条扫描规则
+### 5. 新增一条扫描规则
 
 ```js
 // scanner/rules/my-rule.mjs

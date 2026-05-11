@@ -31,7 +31,7 @@
 | ---------------------------------------------------------------------- | ------ | ------------------------------------------ |
 | `<BaseTable>` `<base-table>` `<BaseDataTable>`                         | #1     | vendors/base-table                         |
 | `<BaseQuery>` `<BaseToolbar>` `<base-*>` 其它                          | #1     | vendors/base-components（暂随 base-table） |
-| `<jh-table>` `<jh-form>` `<jh-tree>` `<jh-pagination>` `<jh-drag-col>` | #2     | vendors/jh-components                      |
+| `<jh-*>` 全量通配；代表性基线含 `jh-table` / `jh-form` / `jh-tree` / `jh-pagination` / `jh-drag-col` | #2     | vendors/jh-components                      |
 | `<C_*>` `<c-*>`                                                        | #3     | vendors/c-components                       |
 | `src/components/PascalCase.vue` 无前缀                                 | #4     | vendors/custom-wrappers                    |
 | `.ag-root-wrapper` / AG Grid API                                       | —      | vendors/ag-grid                            |

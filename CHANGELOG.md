@@ -4,6 +4,14 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.9] - 2026-05-11
+
+### Changed
+
+- `vendors/jh-components` 明确采用 `<jh-*>` 全量通配治理，当前文档中的 `jh-table`、`jh-form`、`jh-tree`、`jh-pagination`、`jh-drag-col` 仅作为代表性基线，不是完整清单。
+- README、架构边界和检测速查表补齐复杂 `jh-*` 封装升级为专项样式覆盖的准入条件，避免盲目穷举或局部补丁污染。
+- 同步 `styles/vendors/index.scss` 中 Base、jh、C、AG Grid、custom wrappers 的 L2 优先级注释。
+
 ## [1.6.8] - 2026-05-11
 
 ### Changed

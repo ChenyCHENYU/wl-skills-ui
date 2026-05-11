@@ -2,7 +2,7 @@
 //
 // 加载顺序：从最高优先级到兜底（同选择器特异性下，后加载会覆盖前面）
 // 优先级约定（v3 团队规范）：
-//   Base*  >  jh-*  >  C_*/c_*  >  custom wrappers
+//   Base*  >  jh-*  >  C_*/c_*  >  AG Grid  >  custom wrappers
 // → 但 SCSS 加载顺序里我们反过来：兜底先加载，让高优先级覆盖
 
 @forward './_portal';            // 弹层/popper 通用（基础设施层）

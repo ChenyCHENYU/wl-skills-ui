@@ -84,6 +84,8 @@ Base* > jh-* > C_*/c_* > AG Grid > custom wrappers
 
 这些组件虽然不是 Element Plus 原生选择器，但在当前项目集群中同样属于统一 UI 风格体系的一部分，必须使用 L0 tokens 和 L1 组件视觉原则进行对齐。
 
+`jh-*` 采用通配治理：所有 `<jh-*>` 标签先统一归入 `vendors/jh-components`。当前只维护代表性基线与专项覆盖准入，避免为了追求清单完整而制造过期枚举；当某个 jh 组件复杂、高频或反复出现视觉偏差时，再沉淀为 `styles/vendors/_jh-xxx.scss` 专项覆盖。
+
 新增 vendor 覆盖时应同时补齐：
 
 1. `styles/vendors/_xxx.scss`

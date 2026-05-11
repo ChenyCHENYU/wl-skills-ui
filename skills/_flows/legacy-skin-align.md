@@ -11,7 +11,7 @@ applyTo: "**/*.{vue,scss,html}"
 
 ## 触发短语
 
-- "用 wk-ui 给这个老项目化妆对齐"
+- "用 wl-ui 给这个老项目化妆对齐"
 - "legacy-skin 流程跑一下"
 - "skin mode 接入"
 
@@ -19,18 +19,18 @@ applyTo: "**/*.{vue,scss,html}"
 
 ### Phase 0 — 安装/更新 Skill 与 MCP 配置
 ```bash
-npx wk-ui init --project . --mode skin
-npx wk-ui doctor --project .
+npx wl-ui init --project . --mode skin
+npx wl-ui doctor --project .
 ```
 
-该命令会写入 AI 编辑器规则、触发提示、`.mcp.json` 和 `.wk-skills-ui-manifest.json`。已安装项目可改用 `npx wk-ui update --project .`。
+该命令会写入 AI 编辑器规则、触发提示、`.mcp.json` 和 `.wl-skills-ui-manifest.json`。已安装项目可改用 `npx wl-ui update --project .`。
 
 （AI 严格按序）
 
 ### Phase 1 — 接入 tokens
 1. 检查 `index.html`，在 `<head>` 内追加：
    ```html
-   <link rel="stylesheet" href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css" />
+   <link rel="stylesheet" href="/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css" />
    ```
 2. 检查 `vite.config.ts` / `webpack` 是否能解析 `node_modules` 路径
 
@@ -38,7 +38,7 @@ npx wk-ui doctor --project .
 1. 找到全局 SCSS 入口（`src/main.scss` / `src/styles/index.scss`）
 2. 在文件最顶部追加：
    ```scss
-   @use '@agile-team/wk-skills-ui/styles/presets/skin' as *;
+   @use '@agile-team/wl-skills-ui/styles/presets/skin' as *;
    ```
 3. **不**引入 `layouts/` 层（避免和老项目布局冲突）
 

@@ -27,7 +27,7 @@ const columnsDef = [
 ## 迁移后（新格式）
 
 ```ts
-import { renderOps } from "@agile-team/wk-skills-ui/runtime";
+import { renderOps } from "@agile-team/wl-skills-ui/runtime";
 
 const columnsDef = [
   { label: "名称", name: "name" },

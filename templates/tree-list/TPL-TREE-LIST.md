@@ -2,7 +2,7 @@
 
 > 适用：左侧组织树 + 右侧数据列表的经典后台管理布局。
 
-> 与 `wl-skills-kit` 协同说明：本模板是 `wk-skills-ui` 面向通用项目的 UI 示例，保留对纯 Element Plus、老旧封装和非 kit 项目的参考价值。若项目选择使用 `wl-skills-kit` 生成或规范化重构页面，则页面结构以 kit 的 `page-codegen/templates/universal/TPL-TREE-LIST.md` 为准；`wk-skills-ui` 继续负责 tokens/styles、化妆层、`defineColumns()`、`renderOps()` 等 UI 能力。
+> 与 `wl-skills-kit` 协同说明：本模板是 `wl-skills-ui` 面向通用项目的 UI 示例，保留对纯 Element Plus、老旧封装和非 kit 项目的参考价值。若项目选择使用 `wl-skills-kit` 生成或规范化重构页面，则页面结构以 kit 的 `page-codegen/templates/universal/TPL-TREE-LIST.md` 为准；`wl-skills-ui` 继续负责 tokens/styles、化妆层、`defineColumns()`、`renderOps()` 等 UI 能力。
 
 ## 布局结构
 
@@ -95,7 +95,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch } from "vue";
-import { defineColumns, renderOps } from "@agile-team/wk-skills-ui/runtime";
+import { defineColumns, renderOps } from "@agile-team/wl-skills-ui/runtime";
 
 const treeRef = ref();
 const treeKeyword = ref("");
@@ -151,7 +151,7 @@ function columnsDef() {
 </script>
 
 <style lang="scss" scoped>
-// 注意：.tree-list-container 的 flex 布局已由 wk-skills-ui/styles/shared/_layout.scss 提供
+// 注意：.tree-list-container 的 flex 布局已由 wl-skills-ui/styles/shared/_layout.scss 提供
 // 只需保证 class 名一致，样式自动生效
 .tree-list-container {
   display: flex;

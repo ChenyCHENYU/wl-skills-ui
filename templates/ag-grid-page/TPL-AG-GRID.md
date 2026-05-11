@@ -6,7 +6,7 @@
 
 ```typescript
 // [Module]List.ts — 页面逻辑
-import { defineColumns, renderOps, renderTagNode } from '@agile-team/wk-skills-ui/runtime';
+import { defineColumns, renderOps, renderTagNode } from '@agile-team/wl-skills-ui/runtime';
 import type { TableColumnDesc } from '@/types/table';
 
 columnsDef(): TableColumnDesc<any>[] {

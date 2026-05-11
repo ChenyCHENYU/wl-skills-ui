@@ -10,12 +10,12 @@ applyTo: "**/*.{vue,ts}"
 
 ## 触发短语
 
-- "用 wk-ui 把这个文件迁移到 runtime"
+- "用 wl-ui 把这个文件迁移到 runtime"
 - "progressive-migrate 流程跑一下"
 
 ## 前置条件
 
-- 已经接入 wk-skills-ui
+- 已经接入 wl-skills-ui
 - 已经拿到目标封装组件的源码控制权（或确认可改造）
 
 ## 执行步骤
@@ -35,7 +35,7 @@ applyTo: "**/*.{vue,ts}"
 ### Phase 4 — 字段映射改造
 - 业务自定义状态字段 → 注册到 `installCommonPreset` 之外的 `add-preset`
   ```bash
-  npx wk-ui add-preset my-biz
+  npx wl-ui add-preset my-biz
   ```
 
 ### Phase 5 — 验证

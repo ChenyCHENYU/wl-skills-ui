@@ -11,7 +11,7 @@ applyTo: "**/*.{vue,scss}"
 
 ## 触发短语
 
-- "用 wk-ui 全量审计当前项目"
+- "用 wl-ui 全量审计当前项目"
 - "audit 流程跑一下"
 - "出一份风格健康度报告"
 
@@ -19,7 +19,7 @@ applyTo: "**/*.{vue,scss}"
 
 ### Phase 1 — 扫描全量
 ```bash
-npx wk-ui scan --target src --outFile audit-report.md
+npx wl-ui scan --target src --outFile audit-report.md
 ```
 
 ### Phase 2 — 按层分组统计

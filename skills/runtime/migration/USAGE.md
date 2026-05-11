@@ -3,7 +3,7 @@
 ## 调用方式
 
 ```
-帮我把这个旧项目接入 wk-skills-ui
+帮我把这个旧项目接入 wl-skills-ui
 这个项目还没有用统一风格库，帮我按标准接入
 ```
 
@@ -11,18 +11,18 @@
 
 ```bash
 # 1. 安装
-pnpm add @agile-team/wk-skills-ui
+pnpm add @agile-team/wl-skills-ui
 
 # 2. 接入完整性检查（看缺什么）
-npx wk-ui check --project .
+npx wl-ui check --project .
 
 # 3. 按 check 输出逐步补齐 Step 2~5
 
 # 4. 全量扫描
-npx wk-ui all --project . --outFile report.md
+npx wl-ui all --project . --outFile report.md
 
 # 5. 批量修复 A 类问题
-npx wk-ui fix --target src
+npx wl-ui fix --target src
 ```
 
 ## 预计工作量参考

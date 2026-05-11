@@ -33,7 +33,7 @@ applyTo: "**/*.vue"
 - 表单内日期选择器无宽度 → `style="width:100%"`（R007）
 
 ### B 类
-- 直接全局覆盖 `.jh-*` → 改为引入 `wk-skills-ui/styles` 由 vendors 层处理
+- 直接全局覆盖 `.jh-*` → 改为引入 `wl-skills-ui/styles` 由 vendors 层处理
 
 ## 全局样式来源
 

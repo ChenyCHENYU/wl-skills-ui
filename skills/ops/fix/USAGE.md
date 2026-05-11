@@ -11,14 +11,14 @@
 
 ```bash
 # 1. 先扫描了解情况
-npx wk-ui scan --target src --outFile /tmp/before.md
+npx wl-ui scan --target src --outFile /tmp/before.md
 
 # 2. dry-run 预览修复效果
-npx wk-ui fix --target src --dry-run
+npx wl-ui fix --target src --dry-run
 
 # 3. 确认无误后执行
-npx wk-ui fix --target src
+npx wl-ui fix --target src
 
 # 4. 验证效果
-npx wk-ui scan --target src --outFile /tmp/after.md
+npx wl-ui scan --target src --outFile /tmp/after.md
 ```

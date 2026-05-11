@@ -193,10 +193,13 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.6.2 版本重点补齐 AI Skill 的安装、更新、清理和编辑器集成体验，并强化多组件样式覆盖精度：
+当前 v1.6.5 版本重点强化“统一规则源 + 多编辑器分发 + UI 细节精准修复”的闭环：
 
-- vendors 层各组件样式精细化调整：`_base-components`、`_ag-grid`、`_portal`、`_jh-tree`、`_jh-pagination`、`_jh-drag-col`、`_c-components`、`_base-query-toolbar` 全面优化
-- design tokens（`base.css` / `dist/tokens.css`）同步更新，security preset 样式调整
+- `skills/**/*.md` 作为唯一规则源，`wl-ui init/update` 会按编辑器格式转换并覆盖写入目标 rules
+- `wl-ui update --editor all --force` 可一次性刷新全部支持编辑器；未指定编辑器时会刷新 manifest 与项目中已存在的编辑器规则目录
+- 表格空状态改为对应表格区域内自适应居中，避免嵌套表格靠固定高度猜效果
+- 查询区/工具栏按钮补齐 token fallback，禁用按钮独立保留清晰禁用态
+- 表单控件圆角统一使用 `--wk-form-control-radius`，覆盖 input/select/date/textarea/upload 等控件家族
 - `wl-ui init/update` 会安装 Skill、触发提示、MCP 配置和 manifest 清单
 - `wl-ui diff/clean/doctor/prompts` 覆盖升级前对比、卸载清理、环境体检和提示词查看
 - 内置 `wl-skills-ui` MCP Server，供 AI 编辑器调用扫描、检查和 dry-run 修复
@@ -303,8 +306,9 @@ npx wl-ui scan --target src --mode skin --outFile audit.md
 
 ```bash
 # 安装或更新 Skill 到当前业务项目
-npx wl-ui init --project . --editor auto
-npx wl-ui update --project .
+npx wl-ui init --project .
+npx wl-ui update --project . --force
+npx wl-ui update --project . --editor all --force
 
 # 查看 AI 触发提示
 npx wl-ui prompts
@@ -313,7 +317,7 @@ npx wl-ui prompts
 npx wl-ui doctor --project .
 ```
 
-安装后会写入 `.github/wl-skills-ui/TRIGGER_PROMPTS.md`、`.mcp.json` 和 `.wl-skills-ui-manifest.json`。支持的编辑器可以单独指定，例如 `--editor claude-code`、`--editor cline`、`--editor agents-generic`、`--editor qoder`。
+安装后会写入 `.github/wl-skills-ui/TRIGGER_PROMPTS.md`、`.mcp.json` 和 `.wl-skills-ui-manifest.json`。支持的编辑器可以单独指定，例如 `--editor kiro`、`--editor claude-code`、`--editor cline`、`--editor agents-generic`、`--editor qoder`；也可以使用 `--editor all` 一次性生成全部编辑器规则。
 
 ### 场景 D — 仅 CI 检查
 
@@ -335,7 +339,7 @@ npx wl-ui doctor --project .
 ```bash
 wl-ui init    [--project .] [--editor <e>] [--mode native|skin]
                             [--dry-run] [--skills-only]
-wl-ui update  [--project .] [--force] [--dry-run]
+wl-ui update  [--project .] [--editor <e|all>] [--force] [--dry-run]
 wl-ui diff    [--project .]
 wl-ui clean   [--project .] [--dry-run]
 wl-ui doctor  [--project .]
@@ -348,7 +352,7 @@ wl-ui all     --project .
 wl-ui add-preset <name>     # 脚手架新业务 preset
 ```
 
-支持的 AI 编辑器：`github-copilot` / `cursor` / `windsurf` / `kiro` / `trae` / `claude-code` / `cline` / `agents-generic` / `qoder`（自动检测）
+支持的 AI 编辑器：`github-copilot` / `cursor` / `windsurf` / `kiro` / `trae` / `claude-code` / `cline` / `agents-generic` / `qoder` / `all`。`update` 未指定编辑器时会优先刷新 manifest 与项目中已存在的编辑器规则目录。
 
 `init/update` 会同时写入：
 

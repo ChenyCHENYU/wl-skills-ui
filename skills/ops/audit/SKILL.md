@@ -24,33 +24,33 @@ applyTo: "**"
 ### 全量审计（推荐）
 
 ```bash
-npx wk-ui all --project . --outFile audit-report.md
+npx wl-ui all --project . --outFile audit-report.md
 ```
 
 ### 分层审计
 
 ```bash
 # 仅看 L0 颜色 token 违规
-npx wk-ui scan --target src --layer L0 --outFile l0-report.md
+npx wl-ui scan --target src --layer L0 --outFile l0-report.md
 
 # 仅看 L1 Element Plus 控件问题
-npx wk-ui scan --target src --layer L1 --outFile l1-report.md
+npx wl-ui scan --target src --layer L1 --outFile l1-report.md
 
 # 仅看 L2 封装组件问题（vendor 层）
-npx wk-ui scan --target src --layer L2 --outFile l2-report.md
+npx wl-ui scan --target src --layer L2 --outFile l2-report.md
 
 # 化妆模式项目只看 L0/L1/L2（跳过 L3/L4）
-npx wk-ui scan --target src --mode skin --outFile skin-audit.md
+npx wl-ui scan --target src --mode skin --outFile skin-audit.md
 ```
 
 ### 精准 vendor 审计
 
 ```bash
 # 仅扫描 BaseTable 相关规则
-npx wk-ui scan --target src --vendor base-table
+npx wl-ui scan --target src --vendor base-table
 
 # 仅扫描 Element Plus 原生控件
-npx wk-ui scan --target src --vendor element
+npx wl-ui scan --target src --vendor element
 ```
 
 ---
@@ -60,13 +60,13 @@ npx wk-ui scan --target src --vendor element
 在 AI 编辑器中触发：
 
 ```
-用 wk-ui 的 ops/audit skill 对当前项目做全量审计
+用 wl-ui 的 ops/audit skill 对当前项目做全量审计
 ```
 
 **AI 执行步骤：**
 
-1. `npx wk-ui check --project .` → 接入完整性（I001-I005）
-2. `npx wk-ui scan --target src --output json --outFile /tmp/audit.json` → JSON 格式结果
+1. `npx wl-ui check --project .` → 接入完整性（I001-I005）
+2. `npx wl-ui scan --target src --output json --outFile /tmp/audit.json` → JSON 格式结果
 3. 读取 JSON，按如下格式汇报：
 
 ```markdown
@@ -81,7 +81,7 @@ npx wk-ui scan --target src --vendor element
 ...
 
 ### 修复建议（优先级排序）
-1. 运行 `npx wk-ui fix --target src --dry-run` 先预览 A 类自动修复
+1. 运行 `npx wl-ui fix --target src --dry-run` 先预览 A 类自动修复
 2. 对 R009/R010 状态字段手工确认并应用 renderTagNode
 3. 对 L0 颜色违规批量替换为 CSS Token
 ```
@@ -94,11 +94,11 @@ npx wk-ui scan --target src --vendor element
 
 | 编号 | 检查项 | 说明 |
 |---|---|---|
-| I001 | tokens.css / base.css 已引入 | index.html `<head>` 中有 wk-skills-ui tokens |
-| I002 | styles 预设已引入 | SCSS 入口含 `@use '@agile-team/wk-skills-ui/styles...'` |
+| I001 | tokens.css / base.css 已引入 | index.html `<head>` 中有 wl-skills-ui tokens |
+| I002 | styles 预设已引入 | SCSS 入口含 `@use '@agile-team/wl-skills-ui/styles...'` |
 | I003 | runtime preset 已安装 | main.ts 含 `installCommonPreset()` |
 | I004 | skills 已安装 | `.github/instructions/` 或 `.cursor/rules/` 等目录存在 wk-skills 文件 |
-| I005 | package.json 版本 | @agile-team/wk-skills-ui 版本 ≥ 0.3.0 |
+| I005 | package.json 版本 | @agile-team/wl-skills-ui 版本 ≥ 0.3.0 |
 
 ---
 

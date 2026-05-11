@@ -47,7 +47,7 @@ applyTo: "**/*.vue"
 
 ## 与 wl-skills-kit 的协同闭环
 
-本 Skill 必须保留对多种 BaseTable/封装表格写法的识别和样式覆盖能力，不要求老项目先改成 `wl-skills-kit` 最佳实践。扫描时先判断当前写法能否通过化妆层统一视觉；若用户希望进一步规范化业务代码，再提示可使用 `wl-skills-kit` 按团队模板重构为 `BaseTable render-type="agGrid" + cid + defineColumns/renderOps`。也就是说：`wk-skills-ui` 负责先统一样式，`wl-skills-kit` 负责可选的规范化生成/修复。
+本 Skill 必须保留对多种 BaseTable/封装表格写法的识别和样式覆盖能力，不要求老项目先改成 `wl-skills-kit` 最佳实践。扫描时先判断当前写法能否通过化妆层统一视觉；若用户希望进一步规范化业务代码，再提示可使用 `wl-skills-kit` 按团队模板重构为 `BaseTable render-type="agGrid" + cid + defineColumns/renderOps`。也就是说：`wl-skills-ui` 负责先统一样式，`wl-skills-kit` 负责可选的规范化生成/修复。
 
 ## 全局样式来源
 

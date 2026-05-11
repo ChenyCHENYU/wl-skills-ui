@@ -27,7 +27,7 @@ applyTo: "**/*.vue"
 
 ### 方式二：命令触发
 ```
-用 wk-ui 的 layouts/list-page skill 检查这个文件
+用 wl-ui 的 layouts/list-page skill 检查这个文件
 → AI 加载本 SKILL.md，对当前文件做 Detect → Diagnose → Repair
 ```
 
@@ -99,7 +99,7 @@ applyTo: "**/*.vue"
 
 ```bash
 # 直接在编辑器让 AI：
-# 按 wk-ui 的 templates/list-page/TPL-LIST.md 创建该页面
+# 按 wl-ui 的 templates/list-page/TPL-LIST.md 创建该页面
 ```
 
 ---

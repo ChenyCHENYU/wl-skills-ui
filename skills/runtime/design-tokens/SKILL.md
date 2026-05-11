@@ -71,10 +71,10 @@ applyTo: "**/*.{vue,scss,css}"
 
 ```bash
 # 检测 hex 颜色违规
-npx wk-ui scan --target src --outFile color-report.md
+npx wl-ui scan --target src --outFile color-report.md
 
 # 自动修复（仅修已知 Token 的 hex，不修 ECharts 等特殊场景）
-npx wk-ui fix --target src
+npx wl-ui fix --target src
 ```
 
 ## 已覆盖的 hex 映射

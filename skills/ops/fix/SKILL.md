@@ -1,6 +1,6 @@
 ---
 description: |
-  wk-ui fix 自动修复指南 — A 类问题（attr 缺失、hex 颜色）的批量自动修复，
+  wl-ui fix 自动修复指南 — A 类问题（attr 缺失、hex 颜色）的批量自动修复，
   支持 dry-run 预览，幂等安全，不修改已符合标准的文件。
 applyTo: "**"
 ---
@@ -21,19 +21,19 @@ applyTo: "**"
 
 ```bash
 # 先预览（推荐！）
-npx wk-ui fix --target src --dry-run
+npx wl-ui fix --target src --dry-run
 
 # 确认后执行
-npx wk-ui fix --target src
+npx wl-ui fix --target src
 
 # 只修复特定目录
-npx wk-ui fix --target src/views/check
+npx wl-ui fix --target src/views/check
 ```
 
 ## 修复后必须验证
 
 ```bash
-npx wk-ui scan --target src --outFile /tmp/after-fix.md
+npx wl-ui scan --target src --outFile /tmp/after-fix.md
 ```
 
 对比修复前后报告，确认 A 类问题归零，剩余仅为需人工处理的规则。

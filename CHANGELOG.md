@@ -4,6 +4,45 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.6] - 2026-05-11
+
+### Changed
+
+- README、主 `SKILL.md`、Flow、Standards、Templates 和多编辑器兼容文档同步到 `wl-ui` / `wl-skills-ui` 当前命名，移除旧版 `wk-ui` / `wk-skills-ui` 过期写法。
+- README 和多编辑器兼容文档补齐 `wl-ui update --editor all --force`、manifest 多编辑器刷新策略和 v1.6.5 规则分发说明。
+
+## [1.6.5] - 2026-05-11
+
+### Added
+
+- `wl-ui update --editor all --force`：支持一次性将同一套 `skills/**/*.md` 规则转换并覆盖写入全部支持的 AI 编辑器目录。
+- manifest 新增 `editors` 数组记录，兼容旧版 `editor` 字符串字段，便于多编辑器项目持续更新。
+
+### Changed
+
+- `wl-ui update` 未指定 `--editor` 时，会优先刷新 manifest 中记录的编辑器和项目里已存在的编辑器规则目录，避免团队不同 AI 编辑器 rules 漂移。
+
+## [1.6.4] - 2026-05-11
+
+### Fixed
+
+- 表单控件圆角统一使用 `--wk-form-control-radius`，覆盖 input、select、date、input-number、cascader、autocomplete、textarea、upload 等控件族。
+- Element Plus 上传拖拽区和上传列表项补齐圆角 token 与 fallback，避免局部硬编码导致视觉不一致。
+- `el-form`、`style-align` Skill 和 `standards/ui/03-form.md` 补齐表单圆角一致性规则，引导 AI 避免局部 patch。
+
+## [1.6.3] - 2026-05-11
+
+### Fixed
+
+- Element Plus 表格空状态改为在对应表格区域内自适应居中，嵌套表格不再依赖固定高度猜效果。
+- AG Grid 空状态提示文案改为更通用并支持 CSS 变量自定义。
+- 查询区和工具栏按钮补齐 CSS 变量 fallback，避免 token 未加载时按钮颜色丢失。
+- 禁用按钮增加独立样式约束，避免 hover/active 覆盖禁用态。
+
+### Changed
+
+- `el-table`、`base-table`、`style-align` 等 Skill 补充智能空状态修复规则，要求 AI 根据真实业务上下文判断空态文案与区域，而不是硬编码。
+
 ## [1.6.2] - 2026-05-09
 
 ### Changed

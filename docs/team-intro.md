@@ -1,4 +1,4 @@
-# @agile-team/wk-skills-ui — 团队接入指南
+# @agile-team/wl-skills-ui — 团队接入指南
 
 > 版本：v1.6.0 · 适用：所有基于 Vue 3 + Element Plus 的业务子应用
 
@@ -36,12 +36,12 @@
 适合：**项目已有大量业务代码，不想动**。一行样式导入，立刻对齐视觉。
 
 ```bash
-pnpm add @agile-team/wk-skills-ui
+pnpm add @agile-team/wl-skills-ui
 ```
 
 ```scss
 // src/styles/index.scss（或项目全局样式入口）
-@use "@agile-team/wk-skills-ui/styles/presets/skin" as *;
+@use "@agile-team/wl-skills-ui/styles/presets/skin" as *;
 ```
 
 完成。刷新页面，按钮、表格、分页、弹窗、标签全部对齐统一风格。
@@ -56,12 +56,12 @@ pnpm add @agile-team/wk-skills-ui
 
 ```scss
 // src/styles/index.scss
-@use "@agile-team/wk-skills-ui/styles" as *;
+@use "@agile-team/wl-skills-ui/styles" as *;
 ```
 
 ```ts
 // src/main.ts
-import { installCommonPreset } from "@agile-team/wk-skills-ui/runtime/common-preset";
+import { installCommonPreset } from "@agile-team/wl-skills-ui/runtime/common-preset";
 installCommonPreset();
 ```
 
@@ -78,10 +78,10 @@ installCommonPreset();
 
 ```bash
 # 1. 安装
-pnpm add @agile-team/wk-skills-ui
+pnpm add @agile-team/wl-skills-ui
 
 # 2. 在全局样式入口加一行
-#    @use "@agile-team/wk-skills-ui/styles/presets/skin" as *;
+#    @use "@agile-team/wl-skills-ui/styles/presets/skin" as *;
 
 # 3. 启动项目，浏览器看效果
 pnpm dev
@@ -95,13 +95,13 @@ pnpm dev
 
 ```bash
 # 扫描 src 目录，输出报告
-npx wk-ui scan --target src --outFile ui-audit.md
+npx wl-ui scan --target src --outFile ui-audit.md
 
 # 预览修复内容（不实际写入）
-npx wk-ui fix --target src --dry-run
+npx wl-ui fix --target src --dry-run
 
 # 确认没问题，执行修复
-npx wk-ui fix --target src
+npx wl-ui fix --target src
 ```
 
 扫描报告会告诉你：哪些文件写死了颜色、哪些按钮不合尺寸规范、哪些封装组件需要覆盖样式。
@@ -116,7 +116,7 @@ npx wk-ui fix --target src
 |------|----------|
 | 样式导入 | 删除 `@use` 那一行，立即恢复 |
 | 扫描修复 | 修复前有 `--dry-run` 预览；git 可随时 `revert` |
-| CLI 工具安装 | `npx wk-ui clean --project .` 一键卸载所有注入文件 |
+| CLI 工具安装 | `npx wl-ui clean --project .` 一键卸载所有注入文件 |
 
 ---
 
@@ -146,7 +146,7 @@ npx wk-ui fix --target src
 可以一句话触发 AI 自动帮你把整个项目的样式对齐：
 
 ```
-用 wk-ui 的 legacy-skin-align 流程对当前项目做老项目化妆对齐
+用 wl-ui 的 legacy-skin-align 流程对当前项目做老项目化妆对齐
 ```
 
 AI 会按照 6 个阶段依次执行：接入 tokens → 引入 skin preset → 修复各类封装组件样式 → 修复 Element Plus 控件 → 修复硬编码颜色 → 全程不动业务逻辑。
@@ -156,12 +156,12 @@ AI 会按照 6 个阶段依次执行：接入 tokens → 引入 skin preset → 
 ## 安装一览
 
 ```bash
-pnpm add @agile-team/wk-skills-ui
+pnpm add @agile-team/wl-skills-ui
 ```
 
 要求：Node ≥ 18，Vue ≥ 3.2，Element Plus ≥ 2.2
 
-NPM：[@agile-team/wk-skills-ui](https://www.npmjs.com/package/@agile-team/wk-skills-ui)
+NPM：[@agile-team/wl-skills-ui](https://www.npmjs.com/package/@agile-team/wl-skills-ui)
 
 ---
 

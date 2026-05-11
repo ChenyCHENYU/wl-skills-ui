@@ -17,10 +17,10 @@ src/
 ## 全局入口 (src/styles/index.scss)
 
 ```scss
-// 1. wk-skills-ui 设计 token（必须在 index.html <link> 加载 design/tokens/base.css）
+// 1. wl-skills-ui 设计 token（必须在 index.html <link> 加载 design/tokens/base.css）
 
-// 2. wk-skills-ui 样式重置
-@use "@agile-team/wk-skills-ui/styles" as *;
+// 2. wl-skills-ui 样式重置
+@use "@agile-team/wl-skills-ui/styles" as *;
 
 // 3. 项目自定义变量
 @use "./variables" as *;

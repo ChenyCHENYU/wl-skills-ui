@@ -1,6 +1,6 @@
 ---
 description: |
-  UI 风格对齐 Skill — 扫描业务系统 Vue SFC 文件，识别与 wk-skills-ui 标准不一致的写法，
+  UI 风格对齐 Skill — 扫描业务系统 Vue SFC 文件，识别与 wl-skills-ui 标准不一致的写法，
   生成整改清单，经用户确认后执行自动修复，最终验证归零。
   覆盖：表格对齐/空状态、按钮图标化、表单控件尺寸、弹窗分页位置、颜色 Token。
 applyTo: "**/*.vue"
@@ -14,13 +14,13 @@ applyTo: "**/*.vue"
 
 ```bash
 # 推荐：一站式扫描（接入完整性 + 风格 + 报告）
-npx wk-ui all --project [项目根目录] --outFile /tmp/scan-result.md
+npx wl-ui all --project [项目根目录] --outFile /tmp/scan-result.md
 
 # 单独风格扫描
-npx wk-ui scan --target [项目src目录] --outFile /tmp/scan-result.md
+npx wl-ui scan --target [项目src目录] --outFile /tmp/scan-result.md
 
 # 接入完整性检查
-npx wk-ui check --project [项目根目录]
+npx wl-ui check --project [项目根目录]
 ```
 
 读取扫描输出，提取：
@@ -56,7 +56,7 @@ npx wk-ui check --project [项目根目录]
 
 按确认范围执行：
 
-- **A 类（attr 缺失 / hex 颜色）** → `npx wk-ui fix --target [src] [--dry-run]`
+- **A 类（attr 缺失 / hex 颜色）** → `npx wl-ui fix --target [src] [--dry-run]`
 - **B 类（结构改造，R004/R013/R015）** → AI 逐文件编辑
 
 每修复一个文件，输出该文件修改摘要。

@@ -6,7 +6,7 @@
 
 ```
 帮我检查一下这个项目的 UI 风格是否符合规范
-扫描 src/ 目录，找出所有不符合 wk-skills-ui 标准的地方
+扫描 src/ 目录，找出所有不符合 wl-skills-ui 标准的地方
 对 src/views/safety/ 下的文件做风格对齐修复
 ```
 
@@ -16,10 +16,10 @@
 用户：帮我对 src/views/check/ 目录做完整的风格扫描修复
 
 AI 执行：
-  1. [Phase 1] npx wk-ui all --project . --outFile /tmp/scan.md
+  1. [Phase 1] npx wl-ui all --project . --outFile /tmp/scan.md
   2. [Phase 2] 展示摘要（文件数、问题数、按规则分类）
   3. [Phase 3] 询问：是否全量修复？哪些文件需要跳过？
-  4. [Phase 4] 执行修复（A 类 → wk-ui fix；B 类 → 逐文件编辑）
+  4. [Phase 4] 执行修复（A 类 → wl-ui fix；B 类 → 逐文件编辑）
   5. [Phase 5] 重新扫描，展示 before/after 对比
 ```
 

@@ -11,7 +11,7 @@ applyTo: "**/*.{vue,ts,scss,html}"
 
 ## 触发短语
 
-- "用 wk-ui 给新项目接入"
+- "用 wl-ui 给新项目接入"
 - "new-project 流程跑一下"
 - "native mode 完整接入"
 
@@ -19,35 +19,35 @@ applyTo: "**/*.{vue,ts,scss,html}"
 
 ### Phase 0 — 安装/更新 Skill 与 MCP 配置
 ```bash
-npx wk-ui init --project . --mode native
-npx wk-ui doctor --project .
+npx wl-ui init --project . --mode native
+npx wl-ui doctor --project .
 ```
 
-该命令会写入 AI 编辑器规则、触发提示、`.mcp.json` 和 `.wk-skills-ui-manifest.json`。已安装项目可改用 `npx wk-ui update --project .`。
+该命令会写入 AI 编辑器规则、触发提示、`.mcp.json` 和 `.wl-skills-ui-manifest.json`。已安装项目可改用 `npx wl-ui update --project .`。
 
 
 
 ### Phase 1 — 安装包
 ```bash
-pnpm add @agile-team/wk-skills-ui
+pnpm add @agile-team/wl-skills-ui
 ```
 
 ### Phase 2 — 注入 tokens
 `index.html` `<head>`：
 ```html
-<link rel="stylesheet" href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css" />
+<link rel="stylesheet" href="/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css" />
 ```
 
 ### Phase 3 — 接入完整样式
 `src/styles/index.scss`：
 ```scss
-@use '@agile-team/wk-skills-ui/styles' as *;   // 等价于 presets/full
+@use '@agile-team/wl-skills-ui/styles' as *;   // 等价于 presets/full
 ```
 
 ### Phase 4 — 接入 runtime
 `src/main.ts`：
 ```ts
-import { installCommonPreset } from '@agile-team/wk-skills-ui/runtime/common-preset';
+import { installCommonPreset } from '@agile-team/wl-skills-ui/runtime/common-preset';
 installCommonPreset();
 ```
 
@@ -59,7 +59,7 @@ installCommonPreset();
 
 ### Phase 6 — 业务定制 preset（按需）
 ```bash
-npx wk-ui add-preset my-biz
+npx wl-ui add-preset my-biz
 # 生成 runtime/presets/my-biz.ts，自定义业务字段映射
 ```
 
@@ -67,8 +67,8 @@ npx wk-ui add-preset my-biz
 `package.json` `scripts`：
 ```json
 {
-  "ui:check": "wk-ui check --project .",
-  "ui:fix":   "wk-ui fix --target src --dry-run"
+  "ui:check": "wl-ui check --project .",
+  "ui:fix":   "wl-ui fix --target src --dry-run"
 }
 ```
 

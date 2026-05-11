@@ -4,7 +4,7 @@
 
 用于治理 Element Plus 首批 B 端高频组件族的统一视觉，包括 card、tabs、descriptions、tree、drawer、upload、steps、overlay、navigation、feedback。
 
-核心原则：wk-skills-ui 优先保证样式绝对管控。无论项目使用纯 `el-*`、老旧封装、Base*/jh*/C_*，还是 wl-skills-kit 最佳写法，都先通过 L1/L2 样式层统一视觉，再按需引导规范化重构。
+核心原则：wl-skills-ui 优先保证样式绝对管控。无论项目使用纯 `el-*`、老旧封装、Base*/jh*/C_*，还是 wl-skills-kit 最佳写法，都先通过 L1/L2 样式层统一视觉，再按需引导规范化重构。
 
 ## 覆盖组件
 
@@ -51,9 +51,9 @@
 ## AI 使用流程
 
 1. 识别当前页面是否命中上述组件族。
-2. 优先确认项目是否加载 `@agile-team/wk-skills-ui/styles` 或 `styles/presets/skin`。
+2. 优先确认项目是否加载 `@agile-team/wl-skills-ui/styles` 或 `styles/presets/skin`。
 3. 运行 `wks_ui_scan --output json` 获取 `componentCoverage`。
-4. 如果只是视觉不统一，优先使用 wk-skills-ui 样式层解决。
+4. 如果只是视觉不统一，优先使用 wl-skills-ui 样式层解决。
 5. 如果扫描结果提示页面结构、BaseTable、renderOps 等规范问题，再桥接 wl-skills-kit。
 
 ## 推荐 MCP

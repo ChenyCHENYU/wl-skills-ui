@@ -13,7 +13,8 @@ applyTo: "**/*.vue"
 ```bash
 # 安装/更新 AI Skill、触发提示、MCP 配置和 manifest
 npx wl-ui init --project . --mode native
-npx wl-ui update --project .
+npx wl-ui update --project . --force
+npx wl-ui update --project . --editor all --force
 
 # 查看差异、体检、清理
 npx wl-ui diff --project .
@@ -24,7 +25,7 @@ npx wl-ui clean --project . --dry-run
 npx wl-ui prompts
 ```
 
-可选编辑器：`github-copilot`、`cursor`、`windsurf`、`kiro`、`trae`、`claude-code`、`cline`、`agents-generic`、`qoder`。修复前优先使用 `--dry-run` 或 MCP 工具 `wks_ui_fix_dry_run`。
+可选编辑器：`github-copilot`、`cursor`、`windsurf`、`kiro`、`trae`、`claude-code`、`cline`、`agents-generic`、`qoder`、`all`。`update` 未指定编辑器时会刷新 manifest 与项目中已存在的编辑器规则目录；修复前优先使用 `--dry-run` 或 MCP 工具 `wks_ui_fix_dry_run`。
 
 
 ## 一、适用场景
@@ -101,8 +102,8 @@ npx wl-ui check --project [项目根目录]
 ### Category A：表格（el-table / AG Grid）
 
 #### R001 — el-table-column 缺少居中对齐【高危】
-**检测**：`<el-table-column` 没有 `align="center"`，或有 `align="left"`  
-**标准**：所有列必须 `align="center"`，selection 列 width=55，index 列 width=60  
+**检测**：`<el-table-column` 没有 `align="center"`，或有 `align="left"`
+**标准**：所有列必须 `align="center"`，selection 列 width=55，index 列 width=60
 ```diff
 - <el-table-column label="名称" prop="name">
 + <el-table-column align="center" label="名称" prop="name">
@@ -112,16 +113,16 @@ npx wl-ui check --project [项目根目录]
 > ⚠️ `selection` 列必须同时加 `align="center"` **和** `header-align="center"`，否则表头复选框与数据行复选框会出现垂直错位。
 
 #### R002 — el-table 缺少空状态文本【中危】
-**检测**：`<el-table` 没有 `empty-text` 属性  
-**标准**：统一 `empty-text="暂无数据"`  
+**检测**：`<el-table` 没有 `empty-text` 属性
+**标准**：统一 `empty-text="暂无数据"`
 ```diff
 - <el-table :data="list">
 + <el-table :data="list" empty-text="暂无数据">
 ```
 
 #### R003 — BaseTable 缺少空状态文本【中危】
-**检测**：`<BaseTable` 没有 `empty-text` 属性  
-**标准**：统一 `empty-text="暂无数据"`  
+**检测**：`<BaseTable` 没有 `empty-text` 属性
+**标准**：统一 `empty-text="暂无数据"`
 ```diff
 - <BaseTable :hook="page">
 + <BaseTable :hook="page" empty-text="暂无数据">
@@ -148,11 +149,11 @@ npx wl-ui check --project [项目根目录]
 ### Category B：按钮（el-button）
 
 #### R004 — 操作列使用文字按钮【高危】
-**检测**：列定义模板中有 `jh-op-btn` 缺失的操作按钮  
-**标准**：操作列必须用 `defaultSlot: ({ row }) => renderOps([...])` 图标按钮系统  
+**检测**：列定义模板中有 `jh-op-btn` 缺失的操作按钮
+**标准**：操作列必须用 `defaultSlot: ({ row }) => renderOps([...])` 图标按钮系统
 
 #### R013 — columnsDef 旧格式 operations:[] 文字按钮【高危】
-**检测**：script 块中 columnsDef 内有 `operations: [` 旧格式数组（由 scanner/index.mjs 单独检测）  
+**检测**：script 块中 columnsDef 内有 `operations: [` 旧格式数组（由 scanner/index.mjs 单独检测）
 **标准**：同 R004，改为 `defaultSlot: ({ row }) => renderOps([...])`
 
 **简单迁移（无条件显示）**：
@@ -181,15 +182,15 @@ npx wl-ui check --project [项目根目录]
 + ])
 ```
 
-**含 Upload / 自定义组件的操作（特殊案例，不能直接用 renderOps）**：  
+**含 Upload / 自定义组件的操作（特殊案例，不能直接用 renderOps）**：
 将 Upload 操作从 operations[] 中抽出，改为 toolbarDef() 中的 `renderNode:` 按钮，操作列仍用 renderOps 承载其他操作。
 
-**标签→type 映射**：查看→`view`，编辑/修改→`edit`，删除/移除→`del`，审核/审批→`ok`，提交→`send`，流程记录→`log`  
+**标签→type 映射**：查看→`view`，编辑/修改→`edit`，删除/移除→`del`，审核/审批→`ok`，提交→`send`，流程记录→`log`
 **参考**：`reference/ag-cell-renders.ts` - `renderOps` 函数
 
 #### R005 — 工具栏按钮缺少 icon【中危】
-**检测**：toolbarDef / 顶部 el-button 没有 `icon` 属性  
-**标准**：工具栏按钮必须带 icon + 文字  
+**检测**：toolbarDef / 顶部 el-button 没有 `icon` 属性
+**标准**：工具栏按钮必须带 icon + 文字
 ```diff
 - <el-button type="primary" @click="handleAdd">新增</el-button>
 + <el-button type="primary" icon="Plus" @click="handleAdd">新增</el-button>
@@ -200,24 +201,24 @@ npx wl-ui check --project [项目根目录]
 ### Category C：表单控件（el-input / el-select / el-date-picker）
 
 #### R006 — el-input / el-select 未统一 size【中危】
-**检测**：`<el-input` 或 `<el-select` 没有 `size="small"` 属性  
-**标准**：全局统一 `size="small"`  
+**检测**：`<el-input` 或 `<el-select` 没有 `size="small"` 属性
+**标准**：全局统一 `size="small"`
 ```diff
 - <el-input v-model="form.name" placeholder="请输入">
 + <el-input size="small" v-model="form.name" placeholder="请输入">
 ```
 
 #### R007 — el-date-picker 宽度未撑满【中危】
-**检测**：`<el-date-picker` 没有 `style` 包含 `width:100%`  
-**标准**：在 el-form-item 内必须 `style="width:100%"`  
+**检测**：`<el-date-picker` 没有 `style` 包含 `width:100%`
+**标准**：在 el-form-item 内必须 `style="width:100%"`
 ```diff
 - <el-date-picker v-model="form.date" type="date">
 + <el-date-picker style="width:100%" v-model="form.date" type="date">
 ```
 
 #### R008 — el-form labelWidth 不统一【低危】
-**检测**：`labelWidth` 小于 150px  
-**标准**：统一 `labelWidth="150px"`（最长标签"隐患排查内容及标准"9字=~126px+padding=142px，150px安全兜底）  
+**检测**：`labelWidth` 小于 150px
+**标准**：统一 `labelWidth="150px"`（最长标签"隐患排查内容及标准"9字=~126px+padding=142px，150px安全兜底）
 **注意**：此规则需人工确认，不自动修改（可能有特殊布局需求）
 
 ---
@@ -225,16 +226,16 @@ npx wl-ui check --project [项目根目录]
 ### Category D：状态标签（ElTag）
 
 #### R009 — 状态字段纯文本渲染【高危】
-**检测**：column 的 `name` 含 `Status/Level/State` 关键字，但 `defaultNode/defaultSlot` 没有 `renderTagNode` 或 `ElTag`  
+**检测**：column 的 `name` 含 `Status/Level/State` 关键字，但 `defaultNode/defaultSlot` 没有 `renderTagNode` 或 `ElTag`
 **标准**：
 - 动态状态（启停/审批/流程）→ `renderTagNode()` / 使用 `COLUMN_AUTO_MAP` 自动映射
-- 常用字段直接用 `defineColumns()` 包裹列定义，自动应用：`enableStatus/approvalStatus/riskLevel/permitStatus/trainStatus/credentialStatus/unifyQuestionStatus` 等  
-**参考**：`reference/define-columns.ts` COLUMN_AUTO_MAP 完整列表  
+- 常用字段直接用 `defineColumns()` 包裹列定义，自动应用：`enableStatus/approvalStatus/riskLevel/permitStatus/trainStatus/credentialStatus/unifyQuestionStatus` 等
+**参考**：`reference/define-columns.ts` COLUMN_AUTO_MAP 完整列表
 **注意**：此规则需人工确认，不自动修复
 
 #### R010 — 分类字段使用填充色 ElTag【中危】
-**检测**：`effect` 不是 `"plain"`，但字段语义是分类/归档属性  
-**标准**：分类字段统一 `effect="plain"`（outline 风格）  
+**检测**：`effect` 不是 `"plain"`，但字段语义是分类/归档属性
+**标准**：分类字段统一 `effect="plain"`（outline 风格）
 ```diff
 - h(ElTag, { type: 'warning' }, () => label)
 + h(ElTag, { type: 'warning', effect: 'plain' }, () => label)
@@ -245,8 +246,8 @@ npx wl-ui check --project [项目根目录]
 ### Category E：弹窗/分页
 
 #### R011 — 分页组件位置错误【高危】
-**检测**：`<pagination` 或 `<Pagination` 出现在 `<template #footer>` 内  
-**标准**：分页必须在内容区（el-col 内），footer 只放操作按钮  
+**检测**：`<pagination` 或 `<Pagination` 出现在 `<template #footer>` 内
+**标准**：分页必须在内容区（el-col 内），footer 只放操作按钮
 **参考**：`reference/SelectPopupCom.vue`
 
 #### R012 — 弹窗内 el-table 缺少空状态【中危】
@@ -273,8 +274,8 @@ npx wl-ui check --project [项目根目录]
 > 支持图标类型：`jh-op-del`（删除）、`jh-op-view`（查看/详情）、`jh-op-edit`（编辑）
 
 #### R016 — `<style>` 块存在硬编码 hex 颜色【中危】
-**检测**：`<style>` 块中直接写入已有 CSS Token 对应的 hex 颜色值  
-**标准**：使用 CSS 变量代替硬编码，确保品牌色切换生效  
+**检测**：`<style>` 块中直接写入已有 CSS Token 对应的 hex 颜色值
+**标准**：使用 CSS 变量代替硬编码，确保品牌色切换生效
 ```diff
 - color: #4368ff;
 + color: var(--el-color-primary);
@@ -284,11 +285,11 @@ npx wl-ui check --project [项目根目录]
 **已覆盖颜色**：`#409eff/#3a7afe/#4368ff`→primary，`#fb2323/#f56c6c`→danger，`#0cc859/#67c23a`→success，`#ffaf27/#e6a23c`→warning，`#ecf5ff`→primary-light-9
 
 #### R017 — 编号/工号/证件号列缺少 renderBadge【高危】
-**检测**：`columnsDef()` / `columns` 数组中，label 含“编号”“工号”“证件号”但没有 `renderBadge` / `defaultSlot`（脚本式列定义）  
-**标准**：所有标识符类字段（射5类）必须使用 `renderBadge(row.xxx)`，包括：  
-- label 含“编号”：门岗编号、主机编号、通道编号…  
-- label 含“工号”：上报人工号、处置人工号…  
-- label 含“证件号”：证件号码、驾驶员证件号码、车主证件号码…  
+**检测**：`columnsDef()` / `columns` 数组中，label 含“编号”“工号”“证件号”但没有 `renderBadge` / `defaultSlot`（脚本式列定义）
+**标准**：所有标识符类字段（射5类）必须使用 `renderBadge(row.xxx)`，包括：
+- label 含“编号”：门岗编号、主机编号、通道编号…
+- label 含“工号”：上报人工号、处置人工号…
+- label 含“证件号”：证件号码、驾驶员证件号码、车主证件号码…
 ```diff
 - { label: "工号", name: "userNo", minWidth: 100 }
 + { label: "工号", name: "userNo", minWidth: 100,
@@ -300,8 +301,8 @@ npx wl-ui check --project [项目根目录]
 > **答疑解惑：证件号码要用 badge 吗？** 是的。证件号码是唧18位的唯一标识字符串，badge 的等宽字体让长串数字更易辨识，视觉上传达“这是个标识码”的语义。
 
 #### R018 — `logicType:dict` 列缺少 defaultSlot【高危】
-**检测**：`columnsDef()` / `columns` 中某列有 `logicType: BusLogicDataType.dict`，但没有 `defaultSlot` / `renderTag` / `renderDictClassifyTag`（脚本式列定义）  
-**标准**：`logicType:dict` 仅提供字符串渲染，必须换为标签渲染：  
+**检测**：`columnsDef()` / `columns` 中某列有 `logicType: BusLogicDataType.dict`，但没有 `defaultSlot` / `renderTag` / `renderDictClassifyTag`（脚本式列定义）
+**标准**：`logicType:dict` 仅提供字符串渲染，必须换为标签渲染：
 ```diff
 - { name: "trainLevel", label: "培训级别",
 -   logicType: BusLogicDataType.dict, logicValue: "trainLevel" }

@@ -50,7 +50,7 @@ applyTo: "**/*.{ts,vue}"
 ## 静态 Map（字典固定时）
 
 ```typescript
-import { renderTagNode, renderClassifyTag } from '@agile-team/wk-skills-ui/runtime';
+import { renderTagNode, renderClassifyTag } from '@agile-team/wl-skills-ui/runtime';
 
 export const MY_STATUS_MAP = {
   "0": { label: "待处理", type: "info" },
@@ -69,7 +69,7 @@ export const MY_STATUS_MAP = {
 ## 动态字典（后端配置时）
 
 ```typescript
-import { renderDictClassifyTag } from '@agile-team/wk-skills-ui/runtime/common-preset';
+import { renderDictClassifyTag } from '@agile-team/wl-skills-ui/runtime/common-preset';
 
 // 只需定义颜色映射，label 由字典动态获取
 export const TRAIN_LEVEL_COLOR_MAP: Record<string, string> = {

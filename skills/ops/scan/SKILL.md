@@ -1,6 +1,6 @@
 ---
 description: |
-  wk-ui scan 扫描器使用指南 — 如何运行风格扫描、接入完整性检查，解读报告格式。
+  wl-ui scan 扫描器使用指南 — 如何运行风格扫描、接入完整性检查，解读报告格式。
 applyTo: "**"
 ---
 
@@ -10,16 +10,16 @@ applyTo: "**"
 
 ```bash
 # 一站式（推荐）：接入完整性 + 风格扫描 + 生成 Markdown 报告
-npx wk-ui all --project . --outFile report.md
+npx wl-ui all --project . --outFile report.md
 
 # 仅风格扫描
-npx wk-ui scan --target src
+npx wl-ui scan --target src
 
 # 仅接入完整性检查（I001~I004）
-npx wk-ui check --project .
+npx wl-ui check --project .
 
 # JSON 格式输出（方便程序处理）
-npx wk-ui scan --target src --output json
+npx wl-ui scan --target src --output json
 ```
 
 ## 参数说明
@@ -37,8 +37,8 @@ npx wk-ui scan --target src --output json
 
 ```yaml
 # .github/workflows/style-check.yml
-- name: wk-skills-ui 风格检查
-  run: npx wk-ui all --project . --fail-on-error
+- name: wl-skills-ui 风格检查
+  run: npx wl-ui all --project . --fail-on-error
 ```
 
 ## 报告格式说明
@@ -46,7 +46,7 @@ npx wk-ui scan --target src --output json
 ```
 一、接入完整性仪表盘
   ✅ I001 — tokens.css 已在 index.html 引入
-  ✅ I002 — 全局 SCSS 已引入 wk-skills-ui 样式
+  ✅ I002 — 全局 SCSS 已引入 wl-skills-ui 样式
   ✅ I003 — runtime 已被引用
   ✅ I004 — peerDependencies 版本满足要求
 

@@ -49,12 +49,12 @@ Step 7 — 旧 vendor 化妆层（_base-table.scss 等）按需保留或删除
 在 AI 编辑器中触发：
 
 ```
-用 wk-ui 的 ops/migrate skill 帮我迁移 src/pages/safety/ 目录
+用 wl-ui 的 ops/migrate skill 帮我迁移 src/pages/safety/ 目录
 ```
 
 **AI 执行步骤：**
 
-1. 扫描目标目录：`npx wk-ui scan --target src/pages/safety --output json`
+1. 扫描目标目录：`npx wl-ui scan --target src/pages/safety --output json`
 2. 识别迁移优先级：
    - R013（columnsDef 旧格式）→ 优先迁移到 `defineColumns`
    - R004/R005（按钮规则）→ 用 `renderOps` 替换
@@ -81,7 +81,7 @@ columnsDef() {
 }
 
 // ✅ 新写法
-import { defineColumns, renderOps } from '@agile-team/wk-skills-ui/runtime';
+import { defineColumns, renderOps } from '@agile-team/wl-skills-ui/runtime';
 
 columnsDef() {
   return defineColumns([
@@ -101,8 +101,8 @@ columnsDef() {
 当项目有自定义状态字段时，扩展到 common preset：
 
 ```typescript
-// runtime/presets/my-biz.ts（用 wk-ui add-preset my-biz 生成）
-import { createPreset } from '@agile-team/wk-skills-ui/runtime';
+// runtime/presets/my-biz.ts（用 wl-ui add-preset my-biz 生成）
+import { createPreset } from '@agile-team/wl-skills-ui/runtime';
 
 export const installMyBizPreset = createPreset({
   name: 'my-biz',
@@ -126,9 +126,9 @@ export const installMyBizPreset = createPreset({
 
 ```scss
 // 确认没有布局冲突后，把：
-@use '@agile-team/wk-skills-ui/styles/presets/skin' as *;
+@use '@agile-team/wl-skills-ui/styles/presets/skin' as *;
 // 改为：
-@use '@agile-team/wk-skills-ui/styles' as *;
+@use '@agile-team/wl-skills-ui/styles' as *;
 ```
 
 **验证方式：** 跑冒烟测试，确认以下页面类型视觉无异常：

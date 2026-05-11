@@ -12,5 +12,5 @@
 
 ```bash
 # 一站式扫描并保存报告
-npx wk-ui all --project . --outFile /tmp/wk-scan-$(date +%Y%m%d).md
+npx wl-ui all --project . --outFile /tmp/wk-scan-$(date +%Y%m%d).md
 ```

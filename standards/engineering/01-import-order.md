@@ -22,7 +22,7 @@ import { ElMessage } from "element-plus";
 import { usePageHook } from "@/hooks/page";
 import type { PageResult } from "@/types";
 
-import { renderOps, defineColumns } from "@agile-team/wk-skills-ui/runtime";
+import { renderOps, defineColumns } from "@agile-team/wl-skills-ui/runtime";
 
 import MyModal from "./MyModal.vue";
 import type { MyItem } from "./types";

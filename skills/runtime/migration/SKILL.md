@@ -1,6 +1,6 @@
 ---
 description: |
-  历史项目 UI 全量迁移 Skill — 针对从旧版本（无 wk-skills-ui）升级到标准规范的完整改造流程。
+  历史项目 UI 全量迁移 Skill — 针对从旧版本（无 wl-skills-ui）升级到标准规范的完整改造流程。
   包含：依赖安装、tokens 接入、SCSS 替换、runtime 注册、columnsDef 迁移、全量扫描验证。
 applyTo: "**"
 ---
@@ -9,7 +9,7 @@ applyTo: "**"
 
 ## 适用场景
 
-- 已有业务系统从零接入 wk-skills-ui
+- 已有业务系统从零接入 wl-skills-ui
 - 旧版 jh-ui 系统升级到新规范
 - 统一多个历史项目到同一 UI 标准
 
@@ -20,7 +20,7 @@ applyTo: "**"
 ### Step 1 — 安装依赖
 
 ```bash
-pnpm add @agile-team/wk-skills-ui
+pnpm add @agile-team/wl-skills-ui
 ```
 
 ### Step 2 — 接入 CSS Tokens
@@ -30,7 +30,7 @@ pnpm add @agile-team/wk-skills-ui
 ```html
 <link
   rel="stylesheet"
-  href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css"
+  href="/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css"
 />
 ```
 
@@ -39,9 +39,9 @@ pnpm add @agile-team/wk-skills-ui
 在全局 SCSS 入口（`src/assets/style/main.scss` 或 `src/styles/index.scss`）追加：
 
 ```scss
-@use "@agile-team/wk-skills-ui/styles" as *;
+@use "@agile-team/wl-skills-ui/styles" as *;
 // 可选 portal 视觉增强：
-// @use '@agile-team/wk-skills-ui/styles/portal';
+// @use '@agile-team/wl-skills-ui/styles/portal';
 ```
 
 > 注意：如果项目有旧的 element-plus 覆盖样式，确认无冲突后可删除旧样式。
@@ -51,7 +51,7 @@ pnpm add @agile-team/wk-skills-ui
 在 `src/main.ts` 中（`app.mount` 之前）：
 
 ```typescript
-import { installCommonPreset } from "@agile-team/wk-skills-ui/runtime/common-preset";
+import { installCommonPreset } from "@agile-team/wl-skills-ui/runtime/common-preset";
 installCommonPreset();
 ```
 
@@ -68,13 +68,13 @@ import { defineColumns } from "@/util/define-columns";
 import { renderOps } from "@/util/ag-cell-renders";
 
 // ✅ 新写法
-import { defineColumns, renderOps } from "@agile-team/wk-skills-ui/runtime";
+import { defineColumns, renderOps } from "@agile-team/wl-skills-ui/runtime";
 ```
 
 然后运行扫描：
 
 ```bash
-npx wk-ui all --project . --outFile migration-report.md
+npx wl-ui all --project . --outFile migration-report.md
 ```
 
 按报告逐步修复 R001~R018 违规项。
@@ -84,13 +84,13 @@ npx wk-ui all --project . --outFile migration-report.md
 ## 验收检查清单
 
 ```bash
-npx wk-ui check --project .
+npx wl-ui check --project .
 ```
 
 所有 I001~I004 必须全部通过：
 
 - ✅ I001：`index.html` 中存在 `tokens.css` link 标签
-- ✅ I002：全局 SCSS 中引入 wk-skills-ui 样式
+- ✅ I002：全局 SCSS 中引入 wl-skills-ui 样式
 - ✅ I003：`runtime` 已被引用（ag-cell-renders 或 package import）
 - ✅ I004：peer dependencies 版本满足要求
 

@@ -1,4 +1,4 @@
-# Skills Registry — wk-skills-ui v1.3
+# Skills Registry — wl-skills-ui v1.3
 
 > 全部可被 AI 编辑器加载的 skill 索引，按 5 层架构组织。
 

@@ -6,6 +6,7 @@
       "description": "VS Code GitHub Copilot Chat Agent 模式",
       "skillFormat": "SKILL.md with YAML frontmatter (applyTo: glob)",
       "installPath": ".github/instructions/wk-skills/",
+      "ext": ".instructions.md",
       "headerFile": "headers/github-copilot.txt"
     },
     {
@@ -14,6 +15,7 @@
       "description": "Cursor AI 编辑器 .mdc 规则文件",
       "skillFormat": ".mdc files with YAML frontmatter (globs:)",
       "installPath": ".cursor/rules/",
+      "ext": ".mdc",
       "headerFile": "headers/cursor-mdc.txt"
     },
     {
@@ -22,6 +24,7 @@
       "description": "Windsurf AI 编辑器规则文件",
       "skillFormat": "Plain markdown, no frontmatter",
       "installPath": ".windsurf/rules/",
+      "ext": ".md",
       "headerFile": "headers/windsurf.txt"
     },
     {
@@ -30,6 +33,7 @@
       "description": "Kiro AI 编辑器 steering 文档",
       "skillFormat": "Markdown with YAML frontmatter (inclusion: manual)",
       "installPath": ".kiro/steering/",
+      "ext": ".md",
       "headerFile": "headers/kiro.txt"
     },
     {
@@ -38,6 +42,7 @@
       "description": "Trae AI 编辑器规则文件",
       "skillFormat": "Markdown with description frontmatter",
       "installPath": ".trae/rules/",
+      "ext": ".md",
       "headerFile": "headers/trae.txt"
     },
     {
@@ -46,6 +51,8 @@
       "description": "Claude Code 项目规则文件",
       "skillFormat": "Plain markdown",
       "installPath": "./",
+      "ext": ".md",
+      "singleFile": "CLAUDE.md",
       "headerFile": "headers/claude-code.txt"
     },
     {
@@ -54,6 +61,8 @@
       "description": "Cline 规则文件",
       "skillFormat": "Plain markdown",
       "installPath": "./",
+      "ext": ".md",
+      "singleFile": ".clinerules",
       "headerFile": "headers/cline.txt"
     },
     {
@@ -62,6 +71,8 @@
       "description": "AGENTS.md 通用代理协议",
       "skillFormat": "Plain markdown",
       "installPath": "./",
+      "ext": ".md",
+      "singleFile": "AGENTS.md",
       "headerFile": "headers/agents.txt"
     },
     {
@@ -70,6 +81,7 @@
       "description": "Qoder IDE 规则文件",
       "skillFormat": "Markdown with description frontmatter",
       "installPath": ".qoder/rules/",
+      "ext": ".md",
       "headerFile": "headers/qoder.txt"
     }
   ]

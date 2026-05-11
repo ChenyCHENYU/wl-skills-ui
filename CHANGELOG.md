@@ -4,6 +4,18 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.7] - 2026-05-11
+
+### Added
+
+- 新增 `standards/architecture/01-layer-boundaries.md`，明确 tokens、Element Plus、vendors、layouts、runtime、scanner、skills 的职责边界和扩展规则。
+- 新增 `npm run docs:check`，校验旧命名、旧命令、README 版本文案、CHANGELOG 版本记录和编辑器配置完整性。
+
+### Changed
+
+- CLI 编辑器安装配置改为读取 `skills/_meta/_compat/editors.json`，消除代码内第二份 `EDITOR_TARGETS` 路径映射。
+- `editors.json` 补齐 `ext`、`singleFile`、`headerFile` 等安装行为字段，使 AI 编辑器配置成为单一事实源。
+
 ## [1.6.6] - 2026-05-11
 
 ### Changed

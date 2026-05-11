@@ -3,7 +3,7 @@
  * wl-ui — wl-skills-ui 统一 CLI
  *
  * 子命令：
- *   wl-ui init   [--project <path>] [--editor copilot|cursor|windsurf|kiro|trae] [--dry-run]
+ *   wl-ui init   [--project <path>] [--editor <editor|all>] [--dry-run]
  *                把 skills/ 写入目标项目的 AI 编辑器规则目录
  *   wl-ui scan   → 委托给 scanner/index.mjs
  *   wl-ui check  → 委托给 scanner/index.mjs
@@ -40,21 +40,7 @@ const MANIFEST_NAME = ".wl-skills-ui-manifest.json";
 // 常量
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-/** 编辑器 → 安装目录映射 */
-const EDITOR_TARGETS = {
-  "github-copilot": {
-    dir: ".github/instructions/wk-skills",
-    ext: ".instructions.md",
-  },
-  cursor: { dir: ".cursor/rules", ext: ".mdc" },
-  windsurf: { dir: ".windsurf/rules", ext: ".md" },
-  kiro: { dir: ".kiro/steering", ext: ".md" },
-  trae: { dir: ".trae/rules", ext: ".md" },
-  "claude-code": { dir: ".", ext: ".md", singleFile: "CLAUDE.md" },
-  cline: { dir: ".", ext: ".md", singleFile: ".clinerules" },
-  "agents-generic": { dir: ".", ext: ".md", singleFile: "AGENTS.md" },
-  qoder: { dir: ".qoder/rules", ext: ".md" },
-};
+const EDITOR_TARGETS = loadEditorTargets();
 const EDITOR_IDS = Object.keys(EDITOR_TARGETS);
 
 // ── 参数解析 ─────────────────────────────────────────────────────────────────
@@ -265,6 +251,33 @@ function detectEditor(projectRoot) {
   return "github-copilot";
 }
 
+function loadEditorTargets() {
+  const configPath = join(
+    PKG_ROOT,
+    "skills",
+    "_meta",
+    "_compat",
+    "editors.json",
+  );
+  const config = JSON.parse(readFileSync(configPath, "utf8"));
+  return Object.fromEntries(
+    config.editors.map((editor) => [
+      editor.id,
+      {
+        dir: normalizeInstallDir(editor.installPath),
+        ext: editor.ext || ".md",
+        singleFile: editor.singleFile,
+        headerFile: editor.headerFile,
+      },
+    ]),
+  );
+}
+
+function normalizeInstallDir(installPath) {
+  const normalized = installPath.replace(/\\/g, "/").replace(/\/+$/, "");
+  return normalized === "." || normalized === "" ? "." : normalized;
+}
+
 function detectInstalledEditors(projectRoot) {
   return EDITOR_IDS.filter((editor) => {
     const target = EDITOR_TARGETS[editor];
@@ -338,13 +351,14 @@ function collectSkills(skillsDir) {
 
 /** 读取编辑器 frontmatter 模板 */
 function getHeaderTemplate(editor) {
+  const target = EDITOR_TARGETS[editor];
+  const headerFile = target?.headerFile;
   const headerPath = join(
     PKG_ROOT,
     "skills",
     "_meta",
     "_compat",
-    "headers",
-    `${editorHeaderName(editor)}.txt`,
+    headerFile || join("headers", `${editor}.txt`),
   );
   if (existsSync(headerPath)) return readFileSync(headerPath, "utf8");
   return "";
@@ -541,22 +555,6 @@ export function install${capitalize(name)}Preset(): void {
 
 function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-function editorHeaderName(editor) {
-  return (
-    {
-      cursor: "cursor-mdc",
-      "github-copilot": "github-copilot",
-      windsurf: "windsurf",
-      kiro: "kiro",
-      trae: "trae",
-      "claude-code": "claude-code",
-      cline: "cline",
-      "agents-generic": "agents",
-      qoder: "qoder",
-    }[editor] || editor
-  );
 }
 
 function installSupportFiles({ projectRoot, dryRun }) {

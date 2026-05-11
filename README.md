@@ -193,10 +193,13 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.6.5 版本重点强化“统一规则源 + 多编辑器分发 + UI 细节精准修复”的闭环：
+当前 v1.6.7 版本重点强化“统一规则源 + 多编辑器分发 + 分层边界治理 + UI 细节精准修复”的闭环：
 
 - `skills/**/*.md` 作为唯一规则源，`wl-ui init/update` 会按编辑器格式转换并覆盖写入目标 rules
+- `skills/_meta/_compat/editors.json` 作为 AI 编辑器安装配置唯一来源，CLI 不再维护第二份编辑器路径映射
 - `wl-ui update --editor all --force` 可一次性刷新全部支持编辑器；未指定编辑器时会刷新 manifest 与项目中已存在的编辑器规则目录
+- `standards/architecture/01-layer-boundaries.md` 固化 tokens、Element Plus、vendors、layouts、runtime、scanner、skills 的扩展边界，避免胶水补丁污染
+- `npm run docs:check` 校验旧命名、旧命令、版本文案和编辑器配置，防止规则文档回退
 - 表格空状态改为对应表格区域内自适应居中，避免嵌套表格靠固定高度猜效果
 - 查询区/工具栏按钮补齐 token fallback，禁用按钮独立保留清晰禁用态
 - 表单控件圆角统一使用 `--wk-form-control-radius`，覆盖 input/select/date/textarea/upload 等控件家族

@@ -4,10 +4,28 @@
 html .el-table {
   .el-table__header-wrapper th,
   .el-table__fixed-header-wrapper th {
-    color: var(--el-text-color-primary);
-    background: var(--el-fill-color-lighter);
+    color: var(--el-text-color-primary, #303133);
+    background: var(--el-fill-color-lighter, #fafafa);
   }
+
   .el-table__header tr {
-    --el-table-tr-bg-color: var(--el-fill-color-lighter);
+    --el-table-tr-bg-color: var(--el-fill-color-lighter, #fafafa);
+  }
+
+  .el-table__empty-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100% !important;
+  }
+
+  .el-table__empty-text {
+    width: 100%;
+    line-height: 1.5;
+  }
+
+  .el-empty {
+    width: 100%;
+    margin: 0 auto;
   }
 }

@@ -2,8 +2,8 @@ html body .el-empty {
   --el-empty-padding: 32px 0;
 
   .el-empty__description p {
-    color: var(--el-text-color-secondary);
-    font-size: var(--el-font-size-base);
+    color: var(--el-text-color-secondary, #909399);
+      font-size: var(--el-font-size-base, 14px);
   }
 
   .el-empty__bottom {
@@ -15,38 +15,38 @@ html body .el-alert {
   border-radius: 8px;
 
   .el-alert__title {
-    font-weight: var(--el-font-weight-medium);
+    font-weight: var(--el-font-weight-medium, 500);
   }
 
   .el-alert__description {
-    color: var(--el-text-color-regular);
+    color: var(--el-text-color-regular, #606266);
   }
 }
 
 html body .el-badge {
   .el-badge__content {
-    border-color: var(--el-fill-color-blank);
-    box-shadow: var(--el-box-shadow);
+    border-color: var(--el-fill-color-blank, #ffffff);
+      box-shadow: var(--el-box-shadow, 0 0 12px rgba(0, 0, 0, 0.12));
   }
 }
 
 html body .el-result {
   .el-result__title p {
-    color: var(--el-text-color-primary);
-    font-weight: var(--el-font-weight-medium);
+    color: var(--el-text-color-primary, #303133);
+      font-weight: var(--el-font-weight-medium, 500);
   }
 
   .el-result__subtitle p {
-    color: var(--el-text-color-secondary);
+    color: var(--el-text-color-secondary, #909399);
   }
 }
 
 html body .el-timeline {
   .el-timeline-item__timestamp {
-    color: var(--el-text-color-secondary);
+    color: var(--el-text-color-secondary, #909399);
   }
 
   .el-timeline-item__content {
-    color: var(--el-text-color-regular);
+    color: var(--el-text-color-regular, #606266);
   }
 }

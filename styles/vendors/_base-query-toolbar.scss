@@ -86,14 +86,14 @@
     line-height: 1 !important;
     padding: 0 10px !important;
     font-size: 12px !important;
-    background-color: var(--el-color-primary) !important;
-    border-color: var(--el-color-primary) !important;
+    background-color: var(--el-color-primary, #2254f4) !important;
+      border-color: var(--el-color-primary, #2254f4) !important;
     color: #ffffff !important;
     transition: background-color 0.15s, box-shadow 0.15s;
 
     &:hover {
-      background-color: var(--el-color-primary-light-3) !important;
-      border-color: var(--el-color-primary-light-3) !important;
+      background-color: var(--el-color-primary-light-3, #7a98f8) !important;
+        border-color: var(--el-color-primary-light-3, #7a98f8) !important;
       box-shadow: 0 2px 8px rgba(34, 84, 244, 0.25);
     }
     &:active { opacity: 0.85; }
@@ -169,13 +169,13 @@
 
     // ── 主操作：填充蓝（新增/新建/申请）─────────────────────────────────
     &.el-button--primary {
-      background-color: var(--el-color-primary) !important;
-      border-color: var(--el-color-primary) !important;
+      background-color: var(--el-color-primary, #2254f4) !important;
+        border-color: var(--el-color-primary, #2254f4) !important;
       color: #ffffff !important;
 
       &:hover {
-        background-color: var(--el-color-primary-light-3) !important;
-        border-color: var(--el-color-primary-light-3) !important;
+        background-color: var(--el-color-primary-light-3, #7a98f8) !important;
+          border-color: var(--el-color-primary-light-3, #7a98f8) !important;
         box-shadow: 0 2px 8px rgba(34, 84, 244, 0.28);
       }
       &:active { opacity: 0.85; }
@@ -183,13 +183,13 @@
 
     // ── 危险操作：填充红（删除/作废/驳回）───────────────────────────────
     &.el-button--danger {
-      background-color: var(--el-color-danger) !important;
-      border-color: var(--el-color-danger) !important;
+      background-color: var(--el-color-danger, #f5222d) !important;
+        border-color: var(--el-color-danger, #f5222d) !important;
       color: #ffffff !important;
 
       &:hover {
-        background-color: var(--el-color-danger-light-3) !important;
-        border-color: var(--el-color-danger-light-3) !important;
+        background-color: var(--el-color-danger-light-3, #f56c6c) !important;
+          border-color: var(--el-color-danger-light-3, #f56c6c) !important;
         box-shadow: 0 2px 8px rgba(187, 45, 63, 0.25);
       }
       &:active { opacity: 0.85; }
@@ -197,13 +197,13 @@
 
     // ── 警告操作：填充橙（提醒/预警相关）───────────────────────────────
     &.el-button--warning {
-      background-color: var(--el-color-warning) !important;
-      border-color: var(--el-color-warning) !important;
+      background-color: var(--el-color-warning, #faad14) !important;
+        border-color: var(--el-color-warning, #faad14) !important;
       color: #ffffff !important;
 
       &:hover {
-        background-color: var(--el-color-warning-light-3) !important;
-        border-color: var(--el-color-warning-light-3) !important;
+        background-color: var(--el-color-warning-light-3, #ffd666) !important;
+          border-color: var(--el-color-warning-light-3, #ffd666) !important;
       }
     }
 
@@ -222,16 +222,35 @@
 
     // ── 成功操作：填充绿（审批通过/启用）────────────────────────────────
     &.el-button--success {
-      background-color: var(--el-color-success) !important;
-      border-color: var(--el-color-success) !important;
+      background-color: var(--el-color-success, #2bb268) !important;
+        border-color: var(--el-color-success, #2bb268) !important;
       color: #ffffff !important;
 
       &:hover {
-        background-color: var(--el-color-success-light-3) !important;
-        border-color: var(--el-color-success-light-3) !important;
-      }
-    }
-  }
+        background-color: var(--el-color-success-light-3, #80d0a4) !important;
+          border-color: var(--el-color-success-light-3, #80d0a4) !important;
+        }
+        }
+        }
+        }
+.base-query-box .el-button.is-disabled,
+.base-query-box .el-button.is-disabled:hover,
+.base-query-box .el-button.is-disabled:focus,
+.base-query-box .el-button.is-disabled:active,
+.base-toolbar-box .el-button.is-disabled,
+.base-toolbar-box .el-button.is-disabled:hover,
+.base-toolbar-box .el-button.is-disabled:focus,
+.base-toolbar-box .el-button.is-disabled:active,
+.base-toolbar-box .el-button[disabled],
+.base-toolbar-box .el-button[disabled]:hover,
+.base-toolbar-box .el-button[disabled]:focus,
+.base-toolbar-box .el-button[disabled]:active {
+  color: var(--el-disabled-text-color, #a8abb2) !important;
+  background-color: var(--el-disabled-bg-color, #f5f7fa) !important;
+  border-color: var(--el-border-color-light, #e4e7ed) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  cursor: not-allowed !important;
 }
 
 // ── 下拉菜单按钮（工具栏内的 el-dropdown 触发器）────────────────────────────

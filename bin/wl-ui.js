@@ -55,6 +55,7 @@ const EDITOR_TARGETS = {
   "agents-generic": { dir: ".", ext: ".md", singleFile: "AGENTS.md" },
   qoder: { dir: ".qoder/rules", ext: ".md" },
 };
+const EDITOR_IDS = Object.keys(EDITOR_TARGETS);
 
 // ── 参数解析 ─────────────────────────────────────────────────────────────────
 const rawArgs = process.argv.slice(2);
@@ -124,9 +125,10 @@ if (subcommand === "init" || subcommand === "update") {
   const skillsOnly = values["skills-only"];
   const mode = values.mode === "skin" ? "skin" : "native";
 
+  const manifest = readManifest(projectRoot);
   if (
     subcommand === "update" &&
-    readManifest(projectRoot)?.version === PKG.version &&
+    manifest?.version === PKG.version &&
     !values.force
   ) {
     console.log(
@@ -144,11 +146,21 @@ if (subcommand === "init" || subcommand === "update") {
     console.log(`[wl-ui ${subcommand}] DRY-RUN 模式：不实际写入文件\n`);
 
   // 1. 检测编辑器
-  const editor = values.editor || detectEditor(projectRoot);
-  console.log(`[wl-ui ${subcommand}] 检测到编辑器：${editor}\n`);
+  const editors = resolveEditorsForInstall({
+    projectRoot,
+    subcommand,
+    requestedEditor: values.editor,
+    manifest,
+  });
+  console.log(`[wl-ui ${subcommand}] 目标编辑器：${editors.join(", ")}\n`);
 
   // 2. 安装 skills（按 mode 过滤）
-  const installedFiles = installSkills({ projectRoot, editor, mode, dryRun });
+  const installedFiles = [];
+  for (const editor of editors) {
+    installedFiles.push(
+      ...installSkills({ projectRoot, editor, mode, dryRun }),
+    );
+  }
   installedFiles.push(...installSupportFiles({ projectRoot, dryRun }));
 
   // 3. 安装接入配置（非 --skills-only 时）
@@ -159,7 +171,8 @@ if (subcommand === "init" || subcommand === "update") {
   if (!dryRun) {
     writeManifest(projectRoot, {
       version: PKG.version,
-      editor,
+      editor: editors.join(","),
+      editors,
       mode,
       installedAt: new Date().toISOString(),
       files: Object.fromEntries(
@@ -169,7 +182,7 @@ if (subcommand === "init" || subcommand === "update") {
   }
 
   console.log(`\n✅ wl-ui ${subcommand} 完成！\n`);
-  printInstallSummary({ projectRoot, mode, editor });
+  printInstallSummary({ projectRoot, mode, editor: editors.join(", ") });
   console.log("下一步：");
   if (mode === "skin") {
     console.log("  npx wl-ui scan --target src --mode skin   # 仅化妆层审计");
@@ -250,6 +263,58 @@ function detectEditor(projectRoot) {
   if (existsSync(join(projectRoot, ".qoder"))) return "qoder";
   // 默认 Copilot（最常见）
   return "github-copilot";
+}
+
+function detectInstalledEditors(projectRoot) {
+  return EDITOR_IDS.filter((editor) => {
+    const target = EDITOR_TARGETS[editor];
+    if (target.singleFile)
+      return existsSync(join(projectRoot, target.singleFile));
+    return existsSync(join(projectRoot, target.dir));
+  });
+}
+
+function normalizeManifestEditors(manifest) {
+  if (Array.isArray(manifest?.editors)) return manifest.editors;
+  if (typeof manifest?.editor === "string") {
+    return manifest.editor
+      .split(",")
+      .map((editor) => editor.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function uniqueValidEditors(editors) {
+  return [...new Set(editors)].filter((editor) => EDITOR_TARGETS[editor]);
+}
+
+function resolveEditorsForInstall({
+  projectRoot,
+  subcommand,
+  requestedEditor,
+  manifest,
+}) {
+  if (requestedEditor) {
+    if (requestedEditor === "all") return EDITOR_IDS;
+    const editors = uniqueValidEditors(
+      requestedEditor.split(",").map((editor) => editor.trim()),
+    );
+    if (editors.length > 0) return editors;
+    console.error(`[wl-ui ${subcommand}] 不支持的编辑器：${requestedEditor}`);
+    console.error(`支持：${EDITOR_IDS.join(" | ")} | all`);
+    process.exit(1);
+  }
+
+  if (subcommand === "update") {
+    const editors = uniqueValidEditors([
+      ...normalizeManifestEditors(manifest),
+      ...detectInstalledEditors(projectRoot),
+    ]);
+    if (editors.length > 0) return editors;
+  }
+
+  return [detectEditor(projectRoot)];
 }
 
 /** 读取 skills/ 目录下所有 SKILL.md 文件 */
@@ -738,8 +803,8 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
   wl-ui init   [--project <path>] [--editor <editor>] [--mode native|skin]
                 [--dry-run] [--skills-only]
                 把 skills/ 写入目标项目的 AI 编辑器规则目录
-  wl-ui update [--project <path>] [--force] [--dry-run]
-                增量更新 skills / MCP / 触发提示
+  wl-ui update [--project <path>] [--editor <editor|all>] [--force] [--dry-run]
+                更新已安装编辑器 rules / MCP / 触发提示
   wl-ui diff   [--project <path>]
                 对比已安装文件与 manifest
   wl-ui clean  [--project <path>] [--dry-run]
@@ -765,7 +830,7 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
 
 参数：
   --project       项目根目录（默认 .）
-  --editor        指定编辑器：github-copilot | cursor | windsurf | kiro | trae | claude-code | cline | agents-generic | qoder
+  --editor        指定编辑器：github-copilot | cursor | windsurf | kiro | trae | claude-code | cline | agents-generic | qoder | all
   --mode          init: native(默认,完整接入) | skin(化妆,老项目)
                   scan: skin(只看L0/L1/L2) | native(全量)
   --layer         scan 过滤：L0/L1/L2/L3/L4（逗号分隔）
@@ -779,6 +844,7 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
 示例：
   npx wl-ui init
   npx wl-ui update --force
+  npx wl-ui update --editor all --force
   npx wl-ui doctor
   npx wl-ui prompts
   npx wl-ui init --mode skin --project /path/to/legacy-project

@@ -7,7 +7,7 @@
 任何新增能力都必须遵守：
 
 - 单一事实源：同一类配置只能有一个权威来源。
-- 分层隔离：tokens、Element Plus 原子覆盖、vendor 封装覆盖、layouts、runtime、scanner、skills 各自负责自己的边界。
+- 分层隔离：tokens、Element Plus 原子覆盖、项目集群封装覆盖、layouts、runtime、scanner、skills 各自负责自己的边界。
 - 向下依赖：上层可以使用下层 token 和规范，下层不能反向依赖上层实现。
 - 覆盖有序：后写入和高优先级覆盖必须有明确目录和加载顺序，不能靠零散 `!important` 补丁堆叠。
 - 项目集群优先：当前风格先服务当前项目集群；未来多项目集群主题替换应通过 theme/tokens/preset 入口扩展，而不是修改组件规则本身。
@@ -17,8 +17,8 @@
 | 层级 | 目录 | 职责 | 不允许做的事 |
 | --- | --- | --- | --- |
 | L0 Design Tokens | `design/tokens`、`styles/tokens` | 定义颜色、圆角、间距、字号、阴影等基础变量 | 不写具体组件选择器，不绑定业务组件名 |
-| L1 Element Plus | `styles/element`、`skills/element` | 统一 Element Plus 原生组件视觉 | 不处理 `Base*`、`jh-*`、`C_*` 等封装私有结构 |
-| L2 Vendors | `styles/vendors`、`skills/vendors` | 覆盖业务项目封装组件和第三方组合组件 | 不重新定义品牌色体系，不覆盖 layout 骨架语义 |
+| L1 Element Plus | `styles/element`、`skills/element` | 统一 Element Plus 原生组件视觉，作为全部封装层的基础视觉规则 | 不把 `Base*`、`jh-*`、`C_*`、AG Grid 的私有选择器混入原子层 |
+| L2 Project Vendors | `styles/vendors`、`skills/vendors` | 必须覆盖当前项目集群里的 `Base*`、`jh-*`、`C_*`、自研封装、AG Grid 等封装/组合组件，使其继承同一套风格 | 不重新定义品牌色体系，不脱离 L0/L1 另起一套视觉规则，不覆盖 layout 骨架语义 |
 | L3 Layouts | `styles/layouts`、`skills/layouts`、`templates` | 约束列表页、树表页、表单弹窗等页面骨架 | 不改 token，不写 vendor 私有修复 |
 | L4 Runtime | `runtime`、`reference` | 提供 `defineColumns`、`renderOps`、preset 等业务渲染能力 | 不直接承担老项目 skin 化妆职责 |
 | Automation | `scanner`、`mcp` | 扫描、检查、dry-run 修复和 AI 工具入口 | 不绕过 skills/standards 私自定义新规则语义 |
@@ -72,13 +72,17 @@ styles/element/_upload.scss
 
 每个文件只处理对应组件族或强相关子组件。跨组件一致性通过 token 解决，例如表单圆角统一使用 `--wk-form-control-radius`，不能在 input、select、upload 中分别写不同硬编码。
 
-## Vendor 覆盖边界
+L1 的“不处理封装私有结构”不是“不覆盖封装组件”，而是要求封装组件进入 L2，由 L2 按当前项目集群真实封装形态做统一风格适配。
 
-vendor 层用于承接老项目封装和组合组件，优先级必须明确：
+## Project Vendors 覆盖边界
+
+Project Vendors 层是当前项目集群的必需覆盖层，不是可选补丁层。它用于承接所有基于 Element Plus 或与 Element Plus 共同组成页面的封装/组合组件，包括：
 
 ```text
-Base* > jh-* > C_*/c_* > custom wrappers
+Base* > jh-* > C_*/c_* > AG Grid > custom wrappers
 ```
+
+这些组件虽然不是 Element Plus 原生选择器，但在当前项目集群中同样属于统一 UI 风格体系的一部分，必须使用 L0 tokens 和 L1 组件视觉原则进行对齐。
 
 新增 vendor 覆盖时应同时补齐：
 

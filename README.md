@@ -193,12 +193,12 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.6.7 版本重点强化“统一规则源 + 多编辑器分发 + 分层边界治理 + UI 细节精准修复”的闭环：
+当前 v1.6.8 版本重点强化“统一规则源 + 多编辑器分发 + 项目集群封装必覆盖 + UI 细节精准修复”的闭环：
 
 - `skills/**/*.md` 作为唯一规则源，`wl-ui init/update` 会按编辑器格式转换并覆盖写入目标 rules
 - `skills/_meta/_compat/editors.json` 作为 AI 编辑器安装配置唯一来源，CLI 不再维护第二份编辑器路径映射
 - `wl-ui update --editor all --force` 可一次性刷新全部支持编辑器；未指定编辑器时会刷新 manifest 与项目中已存在的编辑器规则目录
-- `standards/architecture/01-layer-boundaries.md` 固化 tokens、Element Plus、vendors、layouts、runtime、scanner、skills 的扩展边界，避免胶水补丁污染
+- `standards/architecture/01-layer-boundaries.md` 固化 tokens、Element Plus、Project Vendors、layouts、runtime、scanner、skills 的扩展边界，明确 `Base*` / `jh-*` / `C_*` / AG Grid 是当前项目集群必覆盖层
 - `npm run docs:check` 校验旧命名、旧命令、版本文案和编辑器配置，防止规则文档回退
 - 表格空状态改为对应表格区域内自适应居中，避免嵌套表格靠固定高度猜效果
 - 查询区/工具栏按钮补齐 token fallback，禁用按钮独立保留清晰禁用态
@@ -396,11 +396,11 @@ AI 按 _flows/legacy-skin-align.md 严格 6 phase 执行：
 ### Skin 模式优先级（团队约定）
 
 ```
-Base* > jh-* > C_*/c_* > custom wrappers
+Base* > jh-* > C_*/c_* > AG Grid > custom wrappers
        (高)            (低)
 ```
 
-样式文件加载顺序在 `styles/vendors/index.scss` 中固化，确保高优先级覆盖低优先级。
+样式文件加载顺序在 `styles/vendors/index.scss` 中固化，确保高优先级覆盖低优先级。vendor 层不是可选补丁层，而是当前项目集群统一风格的必需适配层。
 
 ---
 
@@ -457,7 +457,7 @@ export const myRules = [
 
 ## Element Plus 组件族样式管控
 
-`wl-skills-ui` 的核心是样式绝对管控。加载 `styles`、`styles/presets/skin` 或 `styles/presets/element-only` 后，会统一覆盖首批 B 端高频 Element Plus 组件族：
+`wl-skills-ui` 的核心是样式绝对管控。加载 `styles`、`styles/presets/skin` 或 `styles/presets/element-only` 后，会先统一覆盖首批 B 端高频 Element Plus 组件族；基于 Element Plus 的 `Base*`、`jh-*`、`C_*`、AG Grid 等封装/组合组件由 `styles/vendors` 继续承接，确保当前项目集群不管怎么封装组装，都收敛到同一套视觉体系：
 
 | 组件族       | 覆盖标签                                                   | 典型场景                         |
 | ------------ | ---------------------------------------------------------- | -------------------------------- |

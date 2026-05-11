@@ -4,6 +4,13 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.8] - 2026-05-11
+
+### Changed
+
+- 修正架构边界文档中 L1/L2 的表述：L1 负责 Element Plus 原生组件族，L2 Project Vendors 是当前项目集群的必需覆盖层。
+- README 和架构文档明确 `Base*`、`jh-*`、`C_*`、AG Grid、自研封装和 custom wrappers 都必须按统一 tokens 与 Element Plus 基础视觉对齐，不应被理解为可选补丁。
+
 ## [1.6.7] - 2026-05-11
 
 ### Added

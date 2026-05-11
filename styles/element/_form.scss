@@ -1,5 +1,9 @@
 // styles/element/_form.scss — el-form / el-input 覆盖
 
+html body {
+  --wk-form-control-radius: var(--el-border-radius-base, 6px);
+}
+
 .el-form-item--small {
   margin-bottom: 8px;
 }
@@ -10,13 +14,14 @@
 }
 
 // ── 全局输入框圆角统一（6px，与搜索区保持一致）──────────────────────────────
-.el-input__wrapper {
-  border-radius: 6px;
-}
-.el-select .el-select__wrapper {
-  border-radius: 6px;
-}
+.el-input__wrapper,
+.el-select__wrapper,
+.el-select .el-select__wrapper,
 .el-date-editor.el-input__wrapper,
-.el-date-editor .el-input__wrapper {
-  border-radius: 6px;
+.el-date-editor .el-input__wrapper,
+.el-input-number .el-input__wrapper,
+.el-cascader .el-input__wrapper,
+.el-autocomplete .el-input__wrapper,
+.el-textarea__inner {
+  border-radius: var(--wk-form-control-radius) !important;
 }

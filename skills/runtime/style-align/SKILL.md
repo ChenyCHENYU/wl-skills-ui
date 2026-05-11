@@ -87,6 +87,7 @@ npx wk-ui check --project [项目根目录]
 - **R006**【中危】el-input / el-select 缺少 `size="small"`
 - **R007**【中危】el-date-picker 缺少 `style="width:100%"`
 - **R008**【低危】el-form labelWidth < 150px
+- **表单圆角一致性**【中危】输入、选择、日期、textarea、上传等控件必须统一使用 `--wk-form-control-radius`，不要局部硬编码不同圆角
 
 ### 弹窗类 → 详见 [skills/components/dialog/SKILL.md](../../components/dialog/SKILL.md)
 

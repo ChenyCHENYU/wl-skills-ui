@@ -1,3 +1,34 @@
+import { readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const VENDOR_REGISTRY_PATH = resolve(
+  __dirname,
+  "..",
+  "skills",
+  "_meta",
+  "_compat",
+  "vendors.json",
+);
+
+// 启动时一次性 parse + 编译 RegExp，复用整个进程生命周期；不引入运行时性能开销
+const VENDOR_REGISTRY = (() => {
+  const raw = JSON.parse(readFileSync(VENDOR_REGISTRY_PATH, "utf8"));
+  return raw.vendors
+    .filter((v) => Array.isArray(v.patterns) && v.patterns.length > 0)
+    .map((v) => ({
+      id: v.id,
+      label: v.label,
+      vendor: v.label,
+      skill: v.skill,
+      baseline: v.baseline || [],
+      pattern: new RegExp(v.patterns.join("|"), "g"),
+    }));
+})();
+
+const VENDOR_PATTERNS = VENDOR_REGISTRY;
+
 const ELEMENT_SKILL_MAP = {
   "el-table": "element/el-table",
   "el-table-column": "element/el-table",
@@ -37,26 +68,7 @@ const ELEMENT_SKILL_MAP = {
   "el-collapse": "element/el-feedback",
 };
 
-const VENDOR_PATTERNS = [
-  {
-    pattern: /<\/?Base[A-Z][\w-]*/g,
-    vendor: "Base*",
-    skill: "vendors/base-table",
-  },
-  {
-    pattern: /<\/?base-[\w-]+/g,
-    vendor: "base-*",
-    skill: "vendors/base-table",
-  },
-  { pattern: /<\/?jh-[\w-]+/g, vendor: "jh-*", skill: "vendors/jh-components" },
-  { pattern: /<\/?C_[\w-]+/g, vendor: "C_*", skill: "vendors/c-components" },
-  { pattern: /<\/?c-[\w-]+/g, vendor: "c-*", skill: "vendors/c-components" },
-  {
-    pattern: /ag-grid|agGrid|\.ag-root-wrapper/g,
-    vendor: "AG Grid",
-    skill: "vendors/ag-grid",
-  },
-];
+// VENDOR_PATTERNS 现由 vendors.json 单一事实源驱动（见文件顶部 VENDOR_REGISTRY）
 
 const LAYOUT_PATTERNS = [
   {
@@ -233,13 +245,13 @@ export function recommendFlows({ issues = [], coverage = {} } = {}) {
   if (issues.length === 0) {
     flows.push("full-audit");
     nextActions.push(
-      "保持 wk-skills-ui 样式入口，定期运行 wks_ui_scan 做只读审计",
+      "保持 wl-skills-ui 样式入口，定期运行 wl_ui_scan 做只读审计",
     );
   } else {
     flows.push("legacy-skin-align");
-    nextActions.push("先运行 wks_ui_scan --mode skin 确认 L0/L1/L2 样式偏差");
+    nextActions.push("先运行 wl_ui_scan --mode skin 确认 L0/L1/L2 样式偏差");
     nextActions.push(
-      "修复前运行 wks_ui_fix_dry_run 预览改动，不直接写入业务文件",
+      "修复前运行 wl_ui_fix_dry_run 预览改动，不直接写入业务文件",
     );
   }
 
@@ -278,7 +290,7 @@ export function recommendFlows({ issues = [], coverage = {} } = {}) {
       needed: shouldUseKit,
       reason: shouldUseKit
         ? "扫描结果涉及页面结构、BaseTable 或操作列规范，建议在视觉统一后使用 wl-skills-kit 做规范化生成/修复。"
-        : "当前更适合由 wk-skills-ui 先完成样式绝对管控，无需强制切换到 wl-skills-kit。",
+        : "当前更适合由 wl-skills-ui 先完成样式绝对管控，无需强制切换到 wl-skills-kit。",
       commands: shouldUseKit
         ? ["wl-skills validate-page <page>", "wl-skills doctor-ui <project>"]
         : [],

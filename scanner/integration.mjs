@@ -1,10 +1,10 @@
 /**
  * 接入完整性检查
- * 检查目标项目是否正确引入了 @agile-team/wk-skills-ui 的样式和 runtime
+ * 检查目标项目是否正确引入了 @agile-team/wl-skills-ui 的样式和 runtime
  *
  * 检查项：
  *   I001 — index.html 是否引入 tokens.css（或同等 css-var-compile.css）
- *   I002 — main.scss / 全局入口是否引入 @agile-team/wk-skills-ui/styles 或 shared/index.scss
+ *   I002 — main.scss / 全局入口是否引入 @agile-team/wl-skills-ui/styles 或 shared/index.scss
  *   I003 — src/util/ 是否有 ag-cell-renders.ts 或者 main.ts 中安装了 runtime
  *   I004 — element-plus 是否在 dependencies 中（peer 兼容）
  */
@@ -24,8 +24,8 @@ export function checkIntegration(projectRoot) {
     const html = readFileSync(indexHtml, "utf8");
     const hasTokens =
       /(css-var-compile|tokens)\.css/.test(html) ||
-      /wk-skills-ui\/(dist\/tokens|design\/tokens)/.test(html) ||
-      /@agile-team\/wk-skills-ui/.test(html);
+      /wl-skills-ui\/(dist\/tokens|design\/tokens)/.test(html) ||
+      /@agile-team\/wl-skills-ui/.test(html);
     checks.push({
       id: "I001",
       severity: hasTokens ? "info" : "error",
@@ -35,7 +35,7 @@ export function checkIntegration(projectRoot) {
         : "index.html 缺少 tokens.css 引入",
       suggestion: hasTokens
         ? ""
-        : '在 <head> 最先加载：<link rel="stylesheet" href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css" />',
+        : '在 <head> 最先加载：<link rel="stylesheet" href="/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css" />',
     });
   } else {
     checks.push({
@@ -47,7 +47,7 @@ export function checkIntegration(projectRoot) {
     });
   }
 
-  // ── I002: 全局样式入口引入 @agile-team/wk-skills-ui ─────────────────────────
+  // ── I002: 全局样式入口引入 @agile-team/wl-skills-ui ─────────────────────────
   const styleEntries = [
     "src/assets/style/main.scss",
     "src/assets/style/index.scss",
@@ -66,19 +66,19 @@ export function checkIntegration(projectRoot) {
   }
   if (styleHit) {
     const referenced =
-      /@agile-team\/wk-skills-ui(\/styles)?/.test(styleHit.content) ||
-      /wk-skills-ui(\/dist)?/.test(styleHit.content) ||
+      /@agile-team\/wl-skills-ui(\/styles)?/.test(styleHit.content) ||
+      /wl-skills-ui(\/dist)?/.test(styleHit.content) ||
       /shared\/index/.test(styleHit.content);
     checks.push({
       id: "I002",
       severity: referenced ? "info" : "warning",
       ok: referenced,
       description: referenced
-        ? `全局样式入口 ${styleHit.rel} 已引入 @agile-team/wk-skills-ui`
-        : `全局样式入口 ${styleHit.rel} 未引入 @agile-team/wk-skills-ui/styles`,
+        ? `全局样式入口 ${styleHit.rel} 已引入 @agile-team/wl-skills-ui`
+        : `全局样式入口 ${styleHit.rel} 未引入 @agile-team/wl-skills-ui/styles`,
       suggestion: referenced
         ? ""
-        : `在 ${styleHit.rel} 末尾添加：@use '@agile-team/wk-skills-ui/styles' as *;`,
+        : `在 ${styleHit.rel} 末尾添加：@use '@agile-team/wl-skills-ui/styles' as *;`,
     });
   } else {
     checks.push({
@@ -87,7 +87,7 @@ export function checkIntegration(projectRoot) {
       ok: false,
       description: "未找到全局 SCSS 入口（main.scss / index.scss）",
       suggestion:
-        "在 src/assets/style/main.scss 中 @use '@agile-team/wk-skills-ui/styles' as *;",
+        "在 src/assets/style/main.scss 中 @use '@agile-team/wl-skills-ui/styles' as *;",
     });
   }
 
@@ -103,7 +103,7 @@ export function checkIntegration(projectRoot) {
     const p = join(projectRoot, entry);
     if (
       existsSync(p) &&
-      /@agile-team\/wk-skills-ui\/runtime/.test(readFileSync(p, "utf8"))
+      /@agile-team\/wl-skills-ui\/runtime/.test(readFileSync(p, "utf8"))
     ) {
       runtimeReferenced = true;
       break;
@@ -119,7 +119,7 @@ export function checkIntegration(projectRoot) {
       : "未发现 runtime 引入（无 src/util/ag-cell-renders.ts，main.ts 也未 import runtime）",
     suggestion: runtimeOk
       ? ""
-      : '推荐：在 main.ts 中 import { installCommonPreset } from "@agile-team/wk-skills-ui/runtime/common-preset"; installCommonPreset();',
+      : '推荐：在 main.ts 中 import { installCommonPreset } from "@agile-team/wl-skills-ui/runtime/common-preset"; installCommonPreset();',
   });
 
   // ── I004: element-plus 已安装 ────────────────────────────────────────

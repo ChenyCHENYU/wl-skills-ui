@@ -38,7 +38,7 @@ export function addRules(rules) {
   for (const r of rules) {
     if (!r.id || typeof r.check !== "function")
       throw new Error(
-        `[wk-scan] addRules: 规则 "${r.id}" 必须提供 id 和 check() 方法`,
+        `[wl-scan] addRules: 规则 "${r.id}" 必须提供 id 和 check() 方法`,
       );
     _externalRules.push(r);
   }

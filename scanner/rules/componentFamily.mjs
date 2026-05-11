@@ -26,7 +26,7 @@ export const componentFamilyRules = [
             "card",
             "info",
             "el-card 未标识业务场景 class，跨项目卡片密度和标题区可能不一致",
-            "建议按场景添加 detail-card/stat-card/wk-card，或确认已加载 wk-skills-ui Element 样式覆盖",
+            "建议按场景添加 detail-card/stat-card/wk-card，或确认已加载 wl-skills-ui Element 样式覆盖",
           ),
         );
       }
@@ -50,7 +50,7 @@ export const componentFamilyRules = [
             "tabs",
             "info",
             "el-tabs 未标识 detail/config 等业务场景，复杂详情页 Tab 风格可能漂移",
-            "建议添加 detail-tabs/config-tabs/wk-tabs，或通过 wk-skills-ui tabs 覆盖层统一视觉",
+            "建议添加 detail-tabs/config-tabs/wk-tabs，或通过 wl-skills-ui tabs 覆盖层统一视觉",
           ),
         );
       }
@@ -74,7 +74,7 @@ export const componentFamilyRules = [
             "descriptions",
             "info",
             "el-descriptions 未使用 border/bordered，也未处于统一详情容器，字段展示易出现视觉不齐",
-            "建议添加 border 或放入 detail-page/detail-card，并加载 wk-skills-ui descriptions 覆盖层",
+            "建议添加 border 或放入 detail-page/detail-card，并加载 wl-skills-ui descriptions 覆盖层",
           ),
         );
       }
@@ -173,7 +173,7 @@ export const componentFamilyRules = [
               "feedback",
               "info",
               `${tagName} 未提供统一操作入口，空/异常状态可恢复性不足`,
-              "建议根据业务补充操作按钮或 extra/default slot，并加载 wk-skills-ui feedback 覆盖层",
+              "建议根据业务补充操作按钮或 extra/default slot，并加载 wl-skills-ui feedback 覆盖层",
             ),
           );
         }

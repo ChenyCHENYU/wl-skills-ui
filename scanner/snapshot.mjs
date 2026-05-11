@@ -6,7 +6,7 @@
  *   回退时读取 manifest，一键还原所有文件内容。
  *   不在项目里留备份文件，不影响性能，不污染 git。
  *
- * 快照格式（.wk-snapshot/<timestamp>.json）：
+ * 快照格式（.wl-snapshot/<timestamp>.json）：
  *   {
  *     "version": 1,
  *     "createdAt": "2025-05-02T17:30:00.000Z",
@@ -20,17 +20,17 @@
  *   }
  *
  * CLI：
- *   wk-scan snapshot list   [--project <path>]           列出所有快照
- *   wk-scan snapshot rollback [--id <timestamp>]          回退指定快照（默认最新）
- *   wk-scan snapshot clean   [--keep <N>]                 清理旧快照，保留最近 N 个
- *   wk-scan snapshot diff    [--id <timestamp>]           查看快照与当前文件差异
+ *   wl-scan snapshot list   [--project <path>]           列出所有快照
+ *   wl-scan snapshot rollback [--id <timestamp>]          回退指定快照（默认最新）
+ *   wl-scan snapshot clean   [--keep <N>]                 清理旧快照，保留最近 N 个
+ *   wl-scan snapshot diff    [--id <timestamp>]           查看快照与当前文件差异
  *
  * 集成：fix.mjs 调用 createSnapshot() 即可，无需改业务逻辑。
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, unlinkSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
-const SNAPSHOT_DIR = ".wk-snapshot";
+const SNAPSHOT_DIR = ".wl-snapshot";
 const SNAPSHOT_VERSION = 1;
 
 /**
@@ -112,7 +112,7 @@ export function listSnapshots(projectRoot) {
 export function rollbackSnapshot(projectRoot, snapshotId, dryRun = false) {
   const snapshots = listSnapshots(projectRoot);
   if (snapshots.length === 0) {
-    throw new Error("没有找到任何快照。请先执行 wk-scan fix 生成快照。");
+    throw new Error("没有找到任何快照。请先执行 wl-scan fix 生成快照。");
   }
 
   let target;

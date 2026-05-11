@@ -6,7 +6,7 @@
 //   - 不包含 L3 layouts（security 已有自己的页面骨架）
 //
 // 使用：
-//   @use '@agile-team/wk-skills-ui/styles/presets/security' as *;
+//   @use '@agile-team/wl-skills-ui/styles/presets/security' as *;
 
 @forward '../tokens/index';
 @forward '../element/index';

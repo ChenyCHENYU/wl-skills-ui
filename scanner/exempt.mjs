@@ -2,7 +2,7 @@
  * scanner/exempt.mjs — 豁免配置
  *
  * 支持两种配置方式：
- *   1. 项目根目录下 .wk-exempt.json
+ *   1. 项目根目录下 .wl-exempt.json
  *   2. CLI --exempt <path> 指定配置文件
  *
  * 配置格式：
@@ -46,7 +46,7 @@ function matchGlob(filePath, pattern) {
  * @returns {object} { exemptPaths, exemptRules, exemptCategories, isExempt(file, rule?) }
  */
 export function loadExemptConfig(projectRoot, exemptPath) {
-  const defaultPath = join(projectRoot, ".wk-exempt.json");
+  const defaultPath = join(projectRoot, ".wl-exempt.json");
   const configPath = exemptPath ? resolve(exemptPath) : defaultPath;
 
   const empty = {
@@ -62,7 +62,7 @@ export function loadExemptConfig(projectRoot, exemptPath) {
   try {
     config = JSON.parse(readFileSync(configPath, "utf8"));
   } catch {
-    console.warn(`[wk-scan] 豁免配置解析失败: ${configPath}`);
+    console.warn(`[wl-scan] 豁免配置解析失败: ${configPath}`);
     return empty;
   }
 

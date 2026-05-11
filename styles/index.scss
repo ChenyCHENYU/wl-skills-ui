@@ -1,5 +1,5 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// wk-skills-ui — 样式层入口（v3 默认 = full preset）
+// wl-skills-ui — 样式层入口（v3 默认 = full preset）
 //
 // 五层架构：
 //   L0  tokens   — 设计令牌（颜色/间距/圆角/字号）
@@ -9,13 +9,13 @@
 //   L4  runtime  — 业务渲染（TS/JS API，不在样式层）
 //
 // 不同场景按需替换：
-//   完整接入（推荐 / 新项目）：@use 'wk-skills-ui/styles' as *;
-//   化妆模式（老项目）：       @use 'wk-skills-ui/styles/presets/skin' as *;
-//   仅 Element：               @use 'wk-skills-ui/styles/presets/element-only' as *;
-//   仅 tokens：                @use 'wk-skills-ui/styles/presets/tokens-only' as *;
+//   完整接入（推荐 / 新项目）：@use 'wl-skills-ui/styles' as *;
+//   化妆模式（老项目）：       @use 'wl-skills-ui/styles/presets/skin' as *;
+//   仅 Element：               @use 'wl-skills-ui/styles/presets/element-only' as *;
+//   仅 tokens：                @use 'wl-skills-ui/styles/presets/tokens-only' as *;
 //
 // 前置：在 index.html <head> 加载设计令牌：
-//   <link rel="stylesheet" href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css" />
+//   <link rel="stylesheet" href="/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css" />
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @forward './presets/full';

@@ -1,7 +1,7 @@
 /* design/tokens/index.css — 设计系统 Token 入口
  *
  * 在 index.html 中最先加载：
- *   <link rel="stylesheet" href="/node_modules/@agile-team/wk-skills-ui/design/tokens/index.css" />
+ *   <link rel="stylesheet" href="/node_modules/@agile-team/wl-skills-ui/design/tokens/index.css" />
  *
  * 注意：dist/tokens.css 保留用于兼容旧版本引用路径，内容与此文件相同。
  */

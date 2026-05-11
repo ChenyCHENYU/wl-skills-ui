@@ -10,7 +10,7 @@
  *   - 安防通用启用/停用已在 common preset 内
  *
  * 使用：
- *   import { installSecurityPreset } from '@agile-team/wk-skills-ui/runtime/presets/security';
+ *   import { installSecurityPreset } from '@agile-team/wl-skills-ui/runtime/presets/security';
  *   installSecurityPreset();   // main.ts 调用一次
  *
  * 主色约定：

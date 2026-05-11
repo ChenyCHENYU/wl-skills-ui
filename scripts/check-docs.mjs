@@ -23,17 +23,39 @@ const forbiddenPatterns = [
     pattern: /@agile-team\/wk-skills-ui/,
     message: "旧 npm 包名 @agile-team/wk-skills-ui",
   },
+  { pattern: /\bwk-scan\b/, message: "旧 CLI 名称 wk-scan" },
+  { pattern: /\.wk-snapshot\b/, message: "旧快照目录 .wk-snapshot" },
+  { pattern: /\bwk-exempt\b/, message: "旧豁免配置 wk-exempt" },
+  { pattern: /\bwks_ui_/, message: "旧 MCP 工具前缀 wks_ui_" },
   { pattern: /--editor auto/, message: "无效编辑器参数 --editor auto" },
-  { pattern: /当前 v1\.6\.2/, message: "过期 README 当前版本文案" },
 ];
+
+const SCAN_EXTS = new Set([
+  ".md",
+  ".mjs",
+  ".js",
+  ".ts",
+  ".scss",
+  ".css",
+  ".txt",
+  ".json",
+  ".vue",
+]);
+const SCAN_SKIP_FILES = new Set(["CHANGELOG.md", "check-docs.mjs"]);
+const SCAN_SKIP_DIRS = new Set(["node_modules", ".git", "dist", "es"]);
 
 function walk(dir) {
   const files = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (["node_modules", ".git", "dist", "es"].includes(entry.name)) continue;
+    if (SCAN_SKIP_DIRS.has(entry.name)) continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) files.push(...walk(full));
-    if (entry.isFile() && entry.name.endsWith(".md")) files.push(full);
+    if (
+      entry.isFile() &&
+      SCAN_EXTS.has(entry.name.slice(entry.name.lastIndexOf("."))) &&
+      !SCAN_SKIP_FILES.has(entry.name)
+    )
+      files.push(full);
   }
   return files;
 }
@@ -42,8 +64,36 @@ for (const file of walk(root)) {
   const rel = relative(root, file).replace(/\\/g, "/");
   const content = readFileSync(file, "utf8");
   for (const { pattern, message } of forbiddenPatterns) {
-    if (rel === "CHANGELOG.md") continue;
     if (pattern.test(content)) errors.push(`${rel}: ${message}`);
+  }
+}
+
+// vendor 优先级一致性：README / architecture / styles/vendors/index.scss 必须一致
+const VENDOR_PRIORITY = "Base* > jh-* > C_*/c_* > AG Grid > custom wrappers";
+const vendorPriorityFiles = [
+  "README.md",
+  "standards/architecture/01-layer-boundaries.md",
+  "styles/vendors/index.scss",
+];
+for (const rel of vendorPriorityFiles) {
+  const full = join(root, rel);
+  if (!existsSync(full)) {
+    errors.push(`${rel}: 文件不存在，无法校验 vendor 优先级`);
+    continue;
+  }
+  if (!readFileSync(full, "utf8").includes(VENDOR_PRIORITY)) {
+    errors.push(`${rel}: 缺少统一 vendor 优先级 "${VENDOR_PRIORITY}"`);
+  }
+}
+
+// jh 通配语义：jh-components SKILL 必须明确 <jh-*> 全量识别 + 代表性基线表述
+const jhSkill = join(root, "skills/vendors/jh-components/SKILL.md");
+if (existsSync(jhSkill)) {
+  const jh = readFileSync(jhSkill, "utf8");
+  if (!/<jh-\*>/.test(jh) || !/代表性基线/.test(jh)) {
+    errors.push(
+      "skills/vendors/jh-components/SKILL.md: 必须包含 `<jh-*>` 全量识别和“代表性基线”表述",
+    );
   }
 }
 

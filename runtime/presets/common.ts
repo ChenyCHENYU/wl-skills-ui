@@ -9,10 +9,10 @@
  *   - setDictResolver() — 解耦动态字典查询
  *
  * 使用：
- *   import { installCommonPreset } from '@agile-team/wk-skills-ui/runtime/common-preset';
+ *   import { installCommonPreset } from '@agile-team/wl-skills-ui/runtime/common-preset';
  *   installCommonPreset();   // main.ts 调用一次即可
  *
- * 自定义：如需扩展自己业务的字段映射，运行 `npx wk-ui add-preset <name>` 脚手架一份。
+ * 自定义：如需扩展自己业务的字段映射，运行 `npx wl-ui add-preset <name>` 脚手架一份。
  */
 import type { VNode } from "vue";
 import type { TagMapItem } from "../core/types";

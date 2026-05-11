@@ -25,7 +25,7 @@ npx wl-ui clean --project . --dry-run
 npx wl-ui prompts
 ```
 
-可选编辑器：`github-copilot`、`cursor`、`windsurf`、`kiro`、`trae`、`claude-code`、`cline`、`agents-generic`、`qoder`、`all`。`update` 未指定编辑器时会刷新 manifest 与项目中已存在的编辑器规则目录；修复前优先使用 `--dry-run` 或 MCP 工具 `wks_ui_fix_dry_run`。
+可选编辑器：`github-copilot`、`cursor`、`windsurf`、`kiro`、`trae`、`claude-code`、`cline`、`agents-generic`、`qoder`、`all`。`update` 未指定编辑器时会刷新 manifest 与项目中已存在的编辑器规则目录；修复前优先使用 `--dry-run` 或 MCP 工具 `wl_ui_fix_dry_run`。
 
 
 ## 一、适用场景

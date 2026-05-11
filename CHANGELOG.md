@@ -4,6 +4,23 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.10] - 2026-05-11
+
+### Removed
+
+- 移除所有 `wk-skills-ui` / `wk-ui` / `wk-scan` / `wks_ui_*` / `.wk-snapshot` / `wk-exempt` 旧命名（运行时、注释、文档、headers、MCP 工具名、scanner、styles），未来不再兼容旧前缀。
+- `examples/wk-exempt.example.json` 重命名为 `examples/wl-exempt.example.json`。
+
+### Added
+
+- 新增 vendor 单一事实源 `skills/_meta/_compat/vendors.json`，承载 Base / jh / C / AG Grid / custom 的 id、priority、patterns、baseline、styles。`scanner/coverage.mjs` 启动时一次性 parse + 编译 RegExp，长生命周期复用，零运行时性能开销。
+- 新增 CLI 子命令 `wl-ui add-vendor <tag> [--family <id>] [--dry-run]`，一键生成专项 SCSS、`@forward` 注册、vendors.json baseline 追加、scanner 规则草稿。
+- `npm run docs:check` 扩展校验范围至 `.md/.mjs/.js/.ts/.scss/.css/.txt/.json/.vue`，新增 `wk-scan` / `.wk-snapshot` / `wk-exempt` / `wks_ui_` 禁忌词、vendor 优先级一致性、`jh-components` SKILL 全量通配语义校验。
+
+### Changed
+
+- MCP 工具前缀统一为 `wl_ui_*`（原 `wks_ui_*`），server name 同步为 `wl-skills-ui`。
+
 ## [1.6.9] - 2026-05-11
 
 ### Changed

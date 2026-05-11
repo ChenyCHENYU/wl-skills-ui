@@ -1,23 +1,23 @@
 #!/usr/bin/env node
 /**
- * wk-skills-ui — UI 风格对齐扫描器（CLI）
+ * wl-skills-ui — UI 风格对齐扫描器（CLI）
  *
  * 用法：
- *   wk-scan scan --target <path>          # 风格扫描
- *   wk-scan scan --target <path> --outFile report.md
- *   wk-scan scan --target <path> --output json
- *   wk-scan check --project <path>        # 接入完整性检查
- *   wk-scan fix --target <path>           # 自动修复 A 类问题
- *   wk-scan fix --target <path> --dry-run
- *   wk-scan all --project <path>          # 接入检查 + 风格扫描 + 报告
- *   wk-scan init                          # 打印接入指引
- *   wk-scan snapshot list                  # 列出快照
- *   wk-scan snapshot rollback [--id <id>]  # 回退到快照（默认最新）
- *   wk-scan snapshot diff [--id <id>]      # 查看快照与当前差异
- *   wk-scan snapshot clean [--keep <N>]    # 清理旧快照
+ *   wl-scan scan --target <path>          # 风格扫描
+ *   wl-scan scan --target <path> --outFile report.md
+ *   wl-scan scan --target <path> --output json
+ *   wl-scan check --project <path>        # 接入完整性检查
+ *   wl-scan fix --target <path>           # 自动修复 A 类问题
+ *   wl-scan fix --target <path> --dry-run
+ *   wl-scan all --project <path>          # 接入检查 + 风格扫描 + 报告
+ *   wl-scan init                          # 打印接入指引
+ *   wl-scan snapshot list                  # 列出快照
+ *   wl-scan snapshot rollback [--id <id>]  # 回退到快照（默认最新）
+ *   wl-scan snapshot diff [--id <id>]      # 查看快照与当前差异
+ *   wl-scan snapshot clean [--keep <N>]    # 清理旧快照
  *
  * 兼容旧用法：
- *   wk-scan --target <path>               # 等价于 scan
+ *   wl-scan --target <path>               # 等价于 scan
  */
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve, relative } from "node:path";
@@ -219,28 +219,28 @@ function applyFilters(issues) {
 const excludeDirs = values.exclude.split(",").map((s) => s.trim());
 
 if (subcommand === "init") {
-  console.log(`# wk-skills-ui 接入指引
+  console.log(`# wl-skills-ui 接入指引
 
 1. 安装依赖：
-   pnpm add @agile-team/wk-skills-ui
+   pnpm add @agile-team/wl-skills-ui
 
 2. 在 index.html <head> 最先加载 tokens.css：
-   <link rel="stylesheet" href="/node_modules/@agile-team/wk-skills-ui/design/tokens/base.css" />
+   <link rel="stylesheet" href="/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css" />
 
 3. 在全局 SCSS 入口（如 src/assets/style/main.scss）追加：
-   @use '@agile-team/wk-skills-ui/styles' as *;
-   // 化妆模式：@use '@agile-team/wk-skills-ui/styles/presets/skin' as *;
+   @use '@agile-team/wl-skills-ui/styles' as *;
+   // 化妆模式：@use '@agile-team/wl-skills-ui/styles/presets/skin' as *;
 
 4. 在 src/main.ts 中注册 runtime（可选，仅当业务侧用到 defineColumns）：
-   import { installCommonPreset } from '@agile-team/wk-skills-ui/runtime/common-preset';
+   import { installCommonPreset } from '@agile-team/wl-skills-ui/runtime/common-preset';
    installCommonPreset();
 
 5. 业务列定义改用 defineColumns：
-   import { defineColumns, renderOps } from '@agile-team/wk-skills-ui/runtime';
+   import { defineColumns, renderOps } from '@agile-team/wl-skills-ui/runtime';
 
 6. 验证：
-   npx wk-ui check --project .
-   npx wk-ui scan --target src
+   npx wl-ui check --project .
+   npx wl-ui scan --target src
 `);
   process.exit(0);
 }
@@ -251,7 +251,7 @@ if (subcommand === "check") {
   if (values.output === "json") {
     console.log(JSON.stringify({ projectRoot, checks }, null, 2));
   } else {
-    console.log(`# wk-skills-ui 接入完整性检查\n`);
+    console.log(`# wl-skills-ui 接入完整性检查\n`);
     console.log(`项目根目录：${projectRoot}\n`);
     for (const c of checks) {
       const icon = c.ok ? "✅" : c.severity === "error" ? "❌" : "⚠️";
@@ -328,7 +328,7 @@ if (subcommand === "fix") {
   if (result.snapshotId) {
     console.log(`\n📸 已创建快照: ${result.snapshotId}`);
     console.log(
-      `   回退命令: npx wk-scan snapshot rollback --id ${result.snapshotId}`,
+      `   回退命令: npx wl-scan snapshot rollback --id ${result.snapshotId}`,
     );
   }
   if (values["dry-run"])
@@ -363,7 +363,7 @@ if (subcommand === "all") {
   });
   if (values.outFile) {
     writeFileSync(values.outFile, report, "utf8");
-    console.error(`[wk-scan] 报告已写入: ${values.outFile}`);
+    console.error(`[wl-scan] 报告已写入: ${values.outFile}`);
   } else {
     console.log(report);
   }
@@ -394,7 +394,7 @@ if (subcommand === "all") {
   });
   if (values.outFile) {
     writeFileSync(values.outFile, report, "utf8");
-    console.error(`[wk-scan] 报告已写入: ${values.outFile}`);
+    console.error(`[wl-scan] 报告已写入: ${values.outFile}`);
   } else {
     console.log(report);
   }

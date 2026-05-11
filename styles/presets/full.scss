@@ -2,9 +2,9 @@
 // 包含：L0 tokens + L1 element + L2 vendors + L3 layouts
 //
 // 使用：
-//   @use '@agile-team/wk-skills-ui/styles' as *;
+//   @use '@agile-team/wl-skills-ui/styles' as *;
 //   // 等价于：
-//   @use '@agile-team/wk-skills-ui/styles/presets/full' as *;
+//   @use '@agile-team/wl-skills-ui/styles/presets/full' as *;
 
 @forward '../tokens/index';
 @forward '../element/index';

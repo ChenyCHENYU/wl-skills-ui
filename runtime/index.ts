@@ -8,7 +8,7 @@
  *   runtime/presets/registry.ts — createPreset / installPreset
  *
  * 使用：
- *   import { defineColumns, renderOps, renderTagNode } from '@agile-team/wk-skills-ui/runtime';
+ *   import { defineColumns, renderOps, renderTagNode } from '@agile-team/wl-skills-ui/runtime';
  */
 export * from "./core";
 export * from "./presets/registry";

@@ -193,7 +193,15 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.6.9 版本重点强化“统一规则源 + 多编辑器分发 + 项目集群封装必覆盖 + UI 细节精准修复”的闭环：
+当前 v1.6.10 版本继续强化“统一规则源 + 单一事实源 + 项目集群封装必覆盖 + UI 细节精准修复”的闭环，并彻底剔除旧前缀：
+
+- 全量移除旧 `wk-` 前缀命名（包名 / CLI / 快照目录 / 豁免配置 / MCP 工具名），不再兼容（详见 CHANGELOG v1.6.10）
+- 新增 `skills/_meta/_compat/vendors.json` 作为 L2 Project Vendors 的单一事实源（id / priority / patterns / baseline / styles），`scanner/coverage.mjs` 启动时一次性编译 RegExp，零运行时开销
+- 新增 `wl-ui add-vendor <tag> [--family <id>] [--dry-run]` 脚手架命令：一键生成专项 SCSS、`@forward` 注册、`vendors.json` baseline 追加、scanner 规则草稿
+- MCP 工具前缀统一为 `wl_ui_*`（`wl_ui_check` / `wl_ui_scan` / `wl_ui_fix_dry_run` / `wl_ui_skill_prompt` / `wl_ui_route_intent` / `wl_ui_recommend_flow`）
+- `npm run docs:check` 扩展到全部代码与文档类型，新增禁忌词、vendor 优先级一致性、`jh-components` 全量通配语义防回归
+
+历史亮点（v1.6.9）：
 
 - `skills/**/*.md` 作为唯一规则源，`wl-ui init/update` 会按编辑器格式转换并覆盖写入目标 rules
 - `skills/_meta/_compat/editors.json` 作为 AI 编辑器安装配置唯一来源，CLI 不再维护第二份编辑器路径映射
@@ -508,20 +516,20 @@ export const myRules = [
 
 | MCP Tool                | 作用                                                       |
 | ----------------------- | ---------------------------------------------------------- |
-| `wks_ui_check`          | 检查 tokens/styles/runtime 接入完整性                      |
-| `wks_ui_scan`           | 扫描 UI 风格偏差，输出 Markdown 或 JSON                    |
-| `wks_ui_fix_dry_run`    | 预览自动修复，不实际写入                                   |
-| `wks_ui_skill_prompt`   | 输出 AI 触发提示                                           |
-| `wks_ui_route_intent`   | 根据自然语言识别 UI 治理意图并推荐 flow/tool/skill         |
-| `wks_ui_recommend_flow` | 根据扫描 JSON 推荐 nextActions 和 `wl-skills-kit` 桥接动作 |
+| `wl_ui_check`          | 检查 tokens/styles/runtime 接入完整性                      |
+| `wl_ui_scan`           | 扫描 UI 风格偏差，输出 Markdown 或 JSON                    |
+| `wl_ui_fix_dry_run`    | 预览自动修复，不实际写入                                   |
+| `wl_ui_skill_prompt`   | 输出 AI 触发提示                                           |
+| `wl_ui_route_intent`   | 根据自然语言识别 UI 治理意图并推荐 flow/tool/skill         |
+| `wl_ui_recommend_flow` | 根据扫描 JSON 推荐 nextActions 和 `wl-skills-kit` 桥接动作 |
 
 推荐智能体流程：
 
 ```text
 用户自然语言
-  → wks_ui_route_intent
-  → wks_ui_scan --output json
-  → wks_ui_recommend_flow
+  → wl_ui_route_intent
+  → wl_ui_scan --output json
+  → wl_ui_recommend_flow
   → 先保证样式统一
   → 如需规范化，再桥接 wl-skills-kit validate-page / doctor-ui
 ```

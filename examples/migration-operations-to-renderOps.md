@@ -98,10 +98,10 @@ Scanner 规则 R013 会自动检测旧格式 `operations: [...]`。
 
 ```bash
 # 扫描所有旧格式
-npx wk-scan scan --target src --layer L4
+npx wl-scan scan --target src --layer L4
 
 # 查看影响文件
-npx wk-scan scan --target src --output json | jq '.issues[] | select(.rule == "R013") | .file'
+npx wl-scan scan --target src --output json | jq '.issues[] | select(.rule == "R013") | .file'
 ```
 
 > 注意：operations → renderOps 不可自动修复，需要人工确认每个操作的图标类型和回调。

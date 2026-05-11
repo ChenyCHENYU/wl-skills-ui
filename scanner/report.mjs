@@ -361,20 +361,20 @@ function buildFooter() {
   const lines = [];
   lines.push("## 九、快照与回滚说明");
   lines.push("");
-  lines.push("`.wk-snapshot/` 是 `wk-skills-ui` 自动生成的修复前快照目录。");
-  lines.push("每次执行 `wk-ui fix` 前会自动备份即将修改的文件，支持一键回退。");
+  lines.push("`.wl-snapshot/` 是 `wl-skills-ui` 自动生成的修复前快照目录。");
+  lines.push("每次执行 `wl-ui fix` 前会自动备份即将修改的文件，支持一键回退。");
   lines.push("");
   lines.push("```bash");
-  lines.push("wk-ui snapshot list              # 列出所有快照");
-  lines.push("wk-ui snapshot diff --id <id>    # 查看某次快照与当前差异");
-  lines.push("wk-ui snapshot rollback --id <id> # 回滚到指定快照");
-  lines.push("wk-ui snapshot clean --keep 3    # 仅保留最近 3 个快照");
+  lines.push("wl-ui snapshot list              # 列出所有快照");
+  lines.push("wl-ui snapshot diff --id <id>    # 查看某次快照与当前差异");
+  lines.push("wl-ui snapshot rollback --id <id> # 回滚到指定快照");
+  lines.push("wl-ui snapshot clean --keep 3    # 仅保留最近 3 个快照");
   lines.push("```");
   lines.push("");
   lines.push("---");
   lines.push("");
-  lines.push("> 由 `wk-skills-ui` scanner 自动生成。修复前请经用户确认。");
-  lines.push("> 回退命令：`npx wk-scan snapshot rollback`");
+  lines.push("> 由 `wl-skills-ui` scanner 自动生成。修复前请经用户确认。");
+  lines.push("> 回退命令：`npx wl-scan snapshot rollback`");
   return lines;
 }
 
@@ -410,7 +410,7 @@ function buildMarkdown(issues, fileCount, extras = {}) {
   lines.push("# UI 风格对齐扫描报告");
   lines.push("");
   lines.push(`> 生成时间：${ts}`);
-  lines.push("> 工具版本：@agile-team/wk-skills-ui");
+  lines.push("> 工具版本：@agile-team/wl-skills-ui");
   lines.push("");
   lines.push("---");
   lines.push("");

@@ -57,6 +57,7 @@ const SUBCOMMANDS = new Set([
   "fix",
   "all",
   "add-preset",
+  "add-vendor",
   "snapshot",
 ]);
 let subcommand = "help";
@@ -228,6 +229,28 @@ if (subcommand === "add-preset") {
     process.exit(1);
   }
   scaffoldPreset(presetName);
+  process.exit(0);
+}
+
+// ── add-vendor ─────────────────────────────────────────────────────────────────
+if (subcommand === "add-vendor") {
+  const tag = rawArgs[0];
+  if (!tag) {
+    console.error(
+      "[wl-ui add-vendor] 请提供 vendor 标签名，例如：wl-ui add-vendor jh-upload --family jh",
+    );
+    process.exit(1);
+  }
+  const { values } = parseArgs({
+    args: rawArgs.slice(1),
+    options: {
+      family: { type: "string", default: "" },
+      "dry-run": { type: "boolean", default: false },
+    },
+    strict: false,
+  });
+  const family = values.family || inferVendorFamily(tag);
+  scaffoldVendor({ tag, family, dryRun: values["dry-run"] });
   process.exit(0);
 }
 
@@ -557,6 +580,149 @@ function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+/** 根据 tag 名推断 vendor family（jh / base / c / ag-grid / custom） */
+function inferVendorFamily(tag) {
+  if (/^jh-/i.test(tag)) return "jh";
+  if (/^Base[A-Z]|^base-/.test(tag)) return "base";
+  if (/^C_|^c-/.test(tag)) return "c";
+  if (/ag[-_]?grid/i.test(tag)) return "ag-grid";
+  return "custom";
+}
+
+/** 脚手架新 vendor 专项覆盖：生成 SCSS、scanner 规则草稿、Skill 基线追加 */
+function scaffoldVendor({ tag, family, dryRun }) {
+  const safe = tag.replace(/[^a-zA-Z0-9_-]/g, "-").toLowerCase();
+  const VENDORS_JSON = join(
+    PKG_ROOT,
+    "skills",
+    "_meta",
+    "_compat",
+    "vendors.json",
+  );
+  const SCSS_PATH = join(PKG_ROOT, "styles", "vendors", `_${safe}.scss`);
+  const VENDORS_INDEX = join(PKG_ROOT, "styles", "vendors", "index.scss");
+  const SKILL_DIR = join(
+    PKG_ROOT,
+    "skills",
+    "vendors",
+    family === "jh" ? "jh-components" : `${family}-components`,
+  );
+  const SKILL_FILE = join(SKILL_DIR, "SKILL.md");
+
+  const actions = [];
+
+  // 1) SCSS 模板
+  if (existsSync(SCSS_PATH)) {
+    console.warn(`[wl-ui add-vendor] 已存在，跳过：${SCSS_PATH}`);
+  } else {
+    const scss = `// styles/vendors/_${safe}.scss — ${tag} 专项视觉覆盖
+// family: ${family}
+//
+// 准入条件（详见 standards/architecture/01-layer-boundaries.md）：
+//   - 复杂 DOM / 多 Element Plus 组合
+//   - 默认样式偏离 tokens（颜色/间距/圆角/密度）
+//   - 高频出现于核心页面
+//   - scanner 反复反馈或 AI 修复不稳定
+//
+// 约束：
+//   - 仅使用 design/tokens/base.css 中的 CSS 变量
+//   - 不写死颜色/间距/圆角；不污染全局选择器
+//   - 选择器范围必须收敛到 .${safe}__root 或 ${tag} 标签
+
+.${safe},
+${tag} {
+  // TODO: 用 var(--el-*) / var(--wl-*) tokens 替换硬编码
+}
+`;
+    actions.push({ type: "create", path: SCSS_PATH, content: scss });
+  }
+
+  // 2) styles/vendors/index.scss 追加 @forward
+  const idx = readFileSync(VENDORS_INDEX, "utf8");
+  if (!idx.includes(`'./_${safe}'`) && !idx.includes(`"./_${safe}"`)) {
+    const insertLine = `@forward './_${safe}';            // ${tag} 专项覆盖（${family}）\n`;
+    const anchor = "@forward './_base-table';";
+    const next = idx.includes(anchor)
+      ? idx.replace(anchor, insertLine + anchor)
+      : idx + "\n" + insertLine;
+    actions.push({ type: "update", path: VENDORS_INDEX, content: next });
+  }
+
+  // 3) vendors.json baseline 追加
+  const reg = JSON.parse(readFileSync(VENDORS_JSON, "utf8"));
+  const entry = reg.vendors.find((v) => v.id === family);
+  if (entry && !entry.baseline.includes(tag)) {
+    entry.baseline.push(tag);
+    if (!entry.styles.includes(`_${safe}.scss`))
+      entry.styles.push(`_${safe}.scss`);
+    actions.push({
+      type: "update",
+      path: VENDORS_JSON,
+      content: JSON.stringify(reg, null, 2) + "\n",
+    });
+  }
+
+  // 4) Skill 文档代表性基线追加（仅 jh family 自动追加，其它给提示）
+  if (family === "jh" && existsSync(SKILL_FILE)) {
+    const skill = readFileSync(SKILL_FILE, "utf8");
+    if (!skill.includes(tag)) {
+      const hint = `\n<!-- add-vendor: 建议在「代表性基线」表中补充一行 ${tag} -->\n`;
+      actions.push({ type: "update", path: SKILL_FILE, content: skill + hint });
+    }
+  }
+
+  // 5) scanner 规则草稿（仅生成模板，不强制注册）
+  const RULE_PATH = join(
+    PKG_ROOT,
+    "scanner",
+    "rules",
+    `vendor-${safe}.draft.mjs`,
+  );
+  if (!existsSync(RULE_PATH)) {
+    const rule = `/**
+ * scanner/rules/vendor-${safe}.draft.mjs — ${tag} 专项规则草稿
+ *
+ * 启用方式：
+ *   1) 改名为 vendor-${safe}.mjs
+ *   2) 在 scanner/rules/index.mjs 中 import 并 push 到 BUILT_IN_RULES
+ */
+export const ${safe.replace(/-/g, "_")}Rules = [
+  {
+    id: "V-${safe.toUpperCase()}-001",
+    category: "vendor",
+    severity: "warning",
+    description: "${tag} 视觉应统一覆盖到 tokens（草稿规则）",
+    check(ctx) {
+      // ctx: { file, content, addIssue(...) }
+      // TODO: 实现检测逻辑
+      return [];
+    },
+  },
+];
+`;
+    actions.push({ type: "create", path: RULE_PATH, content: rule });
+  }
+
+  // 执行 / 预览
+  for (const act of actions) {
+    const rel = relative(PKG_ROOT, act.path).replace(/\\/g, "/");
+    if (dryRun) {
+      console.log(`[dry-run] ${act.type}: ${rel}`);
+    } else {
+      writeFileSync(act.path, act.content, "utf8");
+      console.log(`[wl-ui add-vendor] ${act.type}: ${rel}`);
+    }
+  }
+  if (actions.length === 0) {
+    console.log("[wl-ui add-vendor] 无变更（已存在）");
+  } else if (!dryRun) {
+    console.log("\n下一步：");
+    console.log(`  1. 编辑 styles/vendors/_${safe}.scss 用 tokens 覆盖样式`);
+    console.log("  2. 如需检测规则，把 vendor-*.draft.mjs 改名并在 rules/index.mjs 注册");
+    console.log("  3. 运行 npm run docs:check && npm run lint && npm run build");
+  }
+}
+
 function installSupportFiles({ projectRoot, dryRun }) {
   const files = [
     {
@@ -604,9 +770,9 @@ function triggerPrompts() {
 
 ## 智能触发
 
-- 用户说"样式乱 / 不统一 / 老项目化妆"：先调用 wks_ui_route_intent，再调用 wks_ui_scan --mode skin
+- 用户说"样式乱 / 不统一 / 老项目化妆"：先调用 wl_ui_route_intent，再调用 wl_ui_scan --mode skin
 - 用户说"卡片 / Tab / 详情 / 树 / 抽屉 / 上传 / 步骤条 / 更多操作"：触发对应 Element Plus 组件族 skill
-- 扫描 JSON 返回后：调用 wks_ui_recommend_flow 判断 recommendedFlows、nextActions 和 kitBridge
+- 扫描 JSON 返回后：调用 wl_ui_recommend_flow 判断 recommendedFlows、nextActions 和 kitBridge
 
 ## 单点触发
 
@@ -625,7 +791,7 @@ function triggerPrompts() {
 
 - 扫描只读，修复前必须等待用户确认
 - skin 模式只处理 L0/L1/L2，不改业务布局和 runtime
-- fix 前建议先 dry-run 或通过 MCP 调用 wks_ui_fix_dry_run
+- fix 前建议先 dry-run 或通过 MCP 调用 wl_ui_fix_dry_run
 - 涉及 BaseTable render-type/cid、renderOps 或页面结构规范时，视觉统一后再桥接 wl-skills-kit validate-page / doctor-ui
 `;
 }
@@ -825,6 +991,8 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
   wl-ui snapshot clean    [--keep <N>]             清理旧快照
 
   wl-ui add-preset <name>   脚手架一个新的业务预设文件
+  wl-ui add-vendor <tag> [--family <id>] [--dry-run]
+                           脚手架新 vendor 专项覆盖（SCSS + scanner 草稿 + vendors.json 注册）
 
 参数：
   --project       项目根目录（默认 .）
@@ -833,7 +1001,7 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
                   scan: skin(只看L0/L1/L2) | native(全量)
   --layer         scan 过滤：L0/L1/L2/L3/L4（逗号分隔）
   --vendor        scan 过滤：element/base-table/jh-components/...（逗号分隔）
-  --exempt        豁免配置文件路径（默认 .wk-exempt.json）
+  --exempt        豁免配置文件路径（默认 .wl-exempt.json）
   --dry-run       预览模式，不实际写入文件
   --no-snapshot   fix 时跳过快照创建
   --skills-only   仅安装 skill 文件，不处理 index.html

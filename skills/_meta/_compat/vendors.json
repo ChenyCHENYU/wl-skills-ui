@@ -1,0 +1,73 @@
+{
+  "description": "L2 Project Vendors 单一事实源。scanner 识别、Skill 推荐、AI 路由、文档优先级均从此读取。",
+  "priorityOrder": ["base", "jh", "c", "ag-grid", "custom"],
+  "vendors": [
+    {
+      "id": "base",
+      "label": "Base*",
+      "priority": 1,
+      "skill": "vendors/base-table",
+      "patterns": [
+        "<\\/?Base[A-Z][\\w-]*",
+        "<\\/?base-[\\w-]+"
+      ],
+      "mode": "wildcard",
+      "baseline": ["BaseTable", "BaseDataTable", "BaseQuery", "BaseToolbar"],
+      "styles": [
+        "_base-table.scss",
+        "_base-components.scss",
+        "_base-query-toolbar.scss"
+      ]
+    },
+    {
+      "id": "jh",
+      "label": "jh-*",
+      "priority": 2,
+      "skill": "vendors/jh-components",
+      "patterns": ["<\\/?jh-[\\w-]+"],
+      "mode": "wildcard",
+      "baseline": [
+        "jh-table",
+        "jh-form",
+        "jh-tree",
+        "jh-pagination",
+        "jh-drag-col"
+      ],
+      "styles": [
+        "_jh-tree.scss",
+        "_jh-pagination.scss",
+        "_jh-drag-col.scss"
+      ]
+    },
+    {
+      "id": "c",
+      "label": "C_* / c-*",
+      "priority": 3,
+      "skill": "vendors/c-components",
+      "patterns": ["<\\/?C_[\\w-]+", "<\\/?c-[\\w-]+"],
+      "mode": "wildcard",
+      "baseline": [],
+      "styles": ["_c-components.scss"]
+    },
+    {
+      "id": "ag-grid",
+      "label": "AG Grid",
+      "priority": 4,
+      "skill": "vendors/ag-grid",
+      "patterns": ["ag-grid", "agGrid", "\\.ag-root-wrapper"],
+      "mode": "framework",
+      "baseline": ["ag-grid-vue3"],
+      "styles": ["_ag-grid.scss"]
+    },
+    {
+      "id": "custom",
+      "label": "custom wrappers",
+      "priority": 5,
+      "skill": "vendors/custom-wrappers",
+      "patterns": [],
+      "mode": "fallback",
+      "baseline": [],
+      "styles": ["_custom-wrappers.scss"]
+    }
+  ]
+}

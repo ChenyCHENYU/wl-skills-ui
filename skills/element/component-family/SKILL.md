@@ -52,16 +52,16 @@
 
 1. 识别当前页面是否命中上述组件族。
 2. 优先确认项目是否加载 `@agile-team/wl-skills-ui/styles` 或 `styles/presets/skin`。
-3. 运行 `wks_ui_scan --output json` 获取 `componentCoverage`。
+3. 运行 `wl_ui_scan --output json` 获取 `componentCoverage`。
 4. 如果只是视觉不统一，优先使用 wl-skills-ui 样式层解决。
 5. 如果扫描结果提示页面结构、BaseTable、renderOps 等规范问题，再桥接 wl-skills-kit。
 
 ## 推荐 MCP
 
-- `wks_ui_route_intent`：根据用户自然语言判断组件族和治理流程。
-- `wks_ui_scan`：只读扫描并输出组件覆盖。
-- `wks_ui_recommend_flow`：根据扫描 JSON 推荐下一步。
-- `wks_ui_fix_dry_run`：修复前预览，不直接写入。
+- `wl_ui_route_intent`：根据用户自然语言判断组件族和治理流程。
+- `wl_ui_scan`：只读扫描并输出组件覆盖。
+- `wl_ui_recommend_flow`：根据扫描 JSON 推荐下一步。
+- `wl_ui_fix_dry_run`：修复前预览，不直接写入。
 
 ## 执行约束
 

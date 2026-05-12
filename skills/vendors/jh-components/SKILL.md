@@ -15,12 +15,22 @@ applyTo: "**/*.vue"
 
 | 类型 | 子组件 | 标签 | 关键类名 | 治理方式 |
 |---|---|---|---|---|
+| SCSS 皮肤适配 | `@jhlc/jh-ui` | — | `.com-text` / `.com-input` / `.com-textarea` / `.com-input-tip` | `styles/vendors/_jh-ui.scss` |
 | 专项样式覆盖 | jh-tree | `<jh-tree>` | `.jh-tree` / `.base-tree` | `styles/vendors/_jh-tree.scss` |
 | 专项样式覆盖 | jh-pagination | `<jh-pagination>` | `.jh-pagination` | `styles/vendors/_jh-pagination.scss` |
 | 专项样式覆盖 | jh-drag-col | `<jh-drag-col>` | `.drag-col-container` / `.drag-left` / `.slider-col` | `styles/vendors/_jh-drag-col.scss` |
 | 通用规则治理 | jh-table | `<jh-table>` | `.jh-table` | 继承 L0 tokens + L1 table 视觉原则 |
 | 通用规则治理 | jh-form | `<jh-form>` | `.jh-form` | 继承 L0 tokens + L1 form 视觉原则 |
 | 通用规则治理 | 其它 jh-* | `<jh-*>` | `.jh-*` / 组件内部 Element Plus 类 | 先按 jh 通用规则治理，复杂结构再升级专项样式 |
+
+### `@jhlc/jh-ui` SCSS 皮肤包识别
+
+项目同时安装 `@jhlc/jh-ui` 与 `element-plus`（常为 `2.2.6-prod.3` 定制版）时，输入控件 DOM 为 `.el-input > .el-input__inner`（无 `.el-input__wrapper`），表单 label 文本被包成 `<span class="com-text">`，并由 `.has-colon .com-text::after` 注入冒号。`_jh-ui.scss` 已经精准覆盖：
+
+- label `.com-text` 单行省略 + has-colon 冒号保留
+- EP 2.2.x `.el-input__inner` 圆角 / focus / error 三态
+- jh-select / jh-date-picker 的 `.el-select.is-focus` / `.el-input.is-focus` 兼容
+- 必填星号在 inline-flex label 下显式声明颜色
 
 ## Diagnose
 
@@ -42,6 +52,7 @@ applyTo: "**/*.vue"
 
 ## 全局样式来源
 
+- `styles/vendors/_jh-ui.scss`
 - `styles/vendors/_jh-tree.scss`
 - `styles/vendors/_jh-pagination.scss`
 - `styles/vendors/_jh-drag-col.scss`

@@ -31,9 +31,11 @@
         "jh-form",
         "jh-tree",
         "jh-pagination",
-        "jh-drag-col"
+        "jh-drag-col",
+        "@jhlc/jh-ui"
       ],
       "styles": [
+        "_jh-ui.scss",
         "_jh-tree.scss",
         "_jh-pagination.scss",
         "_jh-drag-col.scss"

@@ -193,8 +193,10 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.6.13 版本继续强化“统一规则源 + 单一事实源 + 项目集群封装必覆盖 + UI 细节精准修复”的闭环，并补齐销售报价页暴露出的通用 UI 细节：
+当前 v1.6.14 版本继续强化“统一规则源 + 单一事实源 + 项目集群封装必覆盖 + UI 细节精准修复”的闭环，并补齐销售报价页暴露出的通用 UI 细节：
 
+- 新增 `@jhlc/jh-ui` SCSS 皮肤包专项适配（`styles/vendors/_jh-ui.scss`），精准覆盖 `.com-text` label、`.com-input` / `.com-textarea` 控件 wrapper、`.has-colon` 冒号注入等 jh-ui 特有 DOM
+- 兼容 Element Plus 2.2.x（`.el-input__inner` 直挂结构）下输入、选择、日期控件的圆角 / focus / error 三态，jh-select 与 jh-date-picker focus 行为稳定
 - 补强输入、选择、日期、文本域 focus 品牌色边框和必填星号红色显示规则，兼容 Element Plus 定制版本差异
 - 修复表单必填星号、错误 label、错误提示和错误边框红色态，避免校验反馈被通用 label/input 样式覆盖
 - 优化 BaseToolbar 下拉/分裂按钮组，让“主动作 + 下拉动作”按一个动作组展示，避免视觉割裂

@@ -1,0 +1,102 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// @jhlc/jh-ui adapter — L2 vendor 化妆层（项目集群专用）
+//
+// 背景
+//   `@jhlc/jh-ui@3.x` 是项目集群在用的 Element Plus SCSS 皮肤包，
+//   常与 Element Plus 2.2.x（如 `element-plus@2.2.6-prod.3`）配套使用。
+//   它对 Element Plus 的 DOM/选择器约定与社区版（2.6+）不一致：
+//
+//     1. 表单 label 文本被包成 `<span class="com-text">`，
+//        `.el-form-item__label` 自身是 `display: inline-flex`。
+//        → 直接在 label 上写 ellipsis 不生效，必须落到 `.com-text`。
+//     2. `.has-colon .el-form-item__label .com-text::after` 注入冒号。
+//        → ellipsis 容器必须给 `::after` 预留空间。
+//     3. 输入控件 DOM 为 `.el-input > .el-input__inner`（无 `.el-input__wrapper`）。
+//        → focus / error 必须命中 `.el-input__inner`，
+//          `.el-input__wrapper.is-focus` 这类 EP 2.6+ 规则在这里不生效。
+//     4. select 用 `.el-select .el-input > .el-input__inner`，
+//        focus 标志位为 `.el-select.is-focus` 或 `.el-input.is-focus`。
+//     5. `.com-input` / `.com-textarea` / `.com-input-tip` 是 jh-ui 的控件
+//        外层 wrapper，承载 form-item 的 has-tip / is-error 形态。
+//
+// 边界
+//   - 本文件只负责修复 jh-ui DOM 与 wl-skills-ui 统一规则的对接差异。
+//   - 不重复 jh-ui 已经设好的视觉（如下拉项 padding/radius、表单 margin-bottom）。
+//   - Element Plus 2.6+ 项目的 `.el-input__wrapper` 规则继续由
+//     `_base-components.scss` 统一处理。
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// 1) label 文本容器（.com-text） — 单行省略，允许收缩
+//    .el-form-item__label 在 jh-ui 中是 inline-flex，
+//    必须放开 min-width 才能让内部 .com-text 真的 shrink。
+.el-form-item__label {
+  min-width: 0;
+}
+
+.el-form-item__label > .com-text,
+.el-form-item__label .com-text {
+  display: inline-block;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+// has-colon 模式下，.com-text::after 注入冒号，
+// 给一点 padding 避免冒号被 ellipsis 裁掉
+.has-colon .el-form-item__label > .com-text,
+.has-colon .el-form-item__label .com-text {
+  padding-right: 6px;
+}
+
+// 2) Element Plus 2.2.x 输入控件统一圆角（无 .el-input__wrapper）
+.el-input > .el-input__inner,
+.el-textarea > .el-textarea__inner,
+.el-date-editor > .el-input__inner {
+  border-radius: 6px;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+// 3) focus 品牌色边框（兼容 EP 2.2.x DOM 与 jh-select / jh-date-picker）
+.el-input.is-focus > .el-input__inner,
+.el-input > .el-input__inner:focus,
+.el-textarea.is-focus > .el-textarea__inner,
+.el-textarea > .el-textarea__inner:focus,
+.el-select.is-focus .el-input > .el-input__inner,
+.el-select .el-input.is-focus > .el-input__inner,
+.el-date-editor.is-focus > .el-input__inner,
+.el-date-editor .el-input.is-focus > .el-input__inner {
+  border-color: var(--el-color-primary, #2254f4) !important;
+  box-shadow: 0 0 0 1px var(--el-color-primary, #2254f4) inset;
+}
+
+// 4) error 红色边框（兼容 EP 2.2.x DOM；
+//    error label / message 颜色由 _base-components.scss 已统一处理）
+.el-form-item.is-error .el-input > .el-input__inner,
+.el-form-item.is-error .el-textarea > .el-textarea__inner,
+.el-form-item.is-error .el-date-editor > .el-input__inner {
+  border-color: var(--el-color-danger, #f56c6c) !important;
+  box-shadow: 0 0 0 1px var(--el-color-danger, #f56c6c) inset !important;
+}
+
+// 5) com-input / com-textarea / com-input-tip — jh-ui form-item wrapper
+//    保留 jh-ui 自身 margin-bottom、has-tip 间距，不覆盖；
+//    仅对齐内部输入控件圆角，避免在 wrapper 内 fallback 成方角。
+.com-input > .el-input > .el-input__inner,
+.com-input > .el-textarea > .el-textarea__inner,
+.com-textarea > .el-textarea > .el-textarea__inner {
+  border-radius: 6px;
+}
+
+// 6) 必填星号兼容 jh-ui label 结构
+//    Element Plus 把 `::before` 放在 `.el-form-item__label` 上，
+//    jh-ui 没改这一点；但 label 自身是 inline-flex，部分浏览器下
+//    `::before` 会作为 flex 项参与排版，必须显式声明颜色/显示。
+.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label::before,
+.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label::after,
+.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label > .com-text::before,
+.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label > .com-text::after {
+  color: var(--el-color-danger, #f56c6c) !important;
+}

@@ -4,6 +4,14 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.14] - 2026-05-12
+
+### Added
+
+- 新增 `styles/vendors/_jh-ui.scss` 专项承接 `@jhlc/jh-ui` SCSS 皮肤包，覆盖 `.com-text` label 包裹、`.has-colon` 冒号注入、`.com-input` / `.com-textarea` 控件 wrapper 等 jh-ui 特有 DOM 模式。
+- 新增 Element Plus 2.2.x（`.el-input__inner` 直挂结构、无 `.el-input__wrapper`）下输入、选择、日期控件的圆角 / focus / error 三态规则，jh-select 与 jh-date-picker focus 表现稳定。
+- `skills/_meta/_compat/vendors.json` 在 jh vendor 下登记 `@jhlc/jh-ui` baseline 与 `_jh-ui.scss` 样式来源；`skills/vendors/jh-components/SKILL.md` 补齐识别表与全局样式来源。
+
 ## [1.6.13] - 2026-05-12
 
 ### Fixed

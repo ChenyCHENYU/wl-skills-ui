@@ -482,14 +482,20 @@
 .el-input__wrapper,
 .el-select .el-input__wrapper,
 .el-select__wrapper,
-.el-date-editor.el-input__wrapper {
+.el-date-editor.el-input__wrapper,
+.el-textarea__inner {
   border-radius: 6px !important;
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .el-input__wrapper.is-focus,
+.el-input__wrapper:focus-within,
+.el-select__wrapper.is-focus,
 .el-select__wrapper.is-focused,
-.el-date-editor.el-input__wrapper.is-focus {
+.el-select__wrapper:focus-within,
+.el-date-editor.el-input__wrapper.is-focus,
+.el-date-editor.el-input__wrapper:focus-within,
+.el-textarea__inner:focus {
   box-shadow: 0 0 0 1.5px var(--el-color-primary, #2254f4) inset !important;
 }
 
@@ -503,8 +509,11 @@
 }
 
 .el-form-item.is-required:not(.is-no-asterisk).asterisk-left > .el-form-item__label::before,
-.el-form-item.is-required:not(.is-no-asterisk).asterisk-right > .el-form-item__label::after {
+.el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::after,
+.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::before,
+.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::after {
   color: var(--el-color-danger, #f56c6c) !important;
+  display: inline-block !important;
 }
 
 .el-form-item.is-error {

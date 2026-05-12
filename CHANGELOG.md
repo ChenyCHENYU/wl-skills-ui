@@ -4,6 +4,13 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.13] - 2026-05-12
+
+### Fixed
+
+- 补强表单输入、选择、日期和文本域的 focus 品牌色边框兼容规则，确保普通 focus 态稳定生效。
+- 补强 Element Plus 必填星号红色显示规则，兼容未显式配置 asterisk 方向的表单场景。
+
 ## [1.6.12] - 2026-05-12
 
 ### Fixed

@@ -207,9 +207,16 @@ if (subcommand === "clean") {
 if (subcommand === "doctor") {
   const { values } = parseArgs({
     args: rawArgs,
-    options: { project: { type: "string", default: "." } },
+    options: {
+      project: { type: "string", default: "." },
+      "print-overrides": { type: "boolean", default: false },
+    },
     strict: false,
   });
+  if (values["print-overrides"]) {
+    await printOverrides(resolve(values.project));
+    process.exit(0);
+  }
   runDoctor(resolve(values.project));
   process.exit(0);
 }
@@ -895,6 +902,40 @@ function runClean(projectRoot, dryRun) {
   );
 }
 
+async function printOverrides(projectRoot) {
+  const pkgPath = join(projectRoot, "package.json");
+  if (!existsSync(pkgPath)) {
+    console.error(`[wl-ui doctor] 未找到 ${pkgPath}`);
+    process.exit(1);
+  }
+  const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+  const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+  const loader = await import("../skills/_meta/_compat/loader.mjs");
+  const vendors = loader.listCompatVendors();
+  const evaluations = vendors
+    .map((c) => loader.evaluateVendor(c, deps))
+    .filter((e) => e.verdict !== "not-applicable");
+  if (evaluations.length === 0) {
+    console.log(
+      "[wl-ui doctor] 当前项目未命中任何 vendor 适配矩阵，无需 overrides",
+    );
+    return;
+  }
+  const snippet = loader.buildOverridesSnippet(evaluations);
+  if (!snippet) {
+    console.log("[wl-ui doctor] 当前项目所有 vendor 配对已命中推荐组合 ✓");
+    return;
+  }
+  console.log(
+    "\n[wl-ui doctor --print-overrides] 检测到 vendor 版本偏离，复制以下片段到 package.json：\n",
+  );
+  console.log("// pnpm");
+  console.log(JSON.stringify(snippet.pnpm, null, 2));
+  console.log("\n// npm / yarn");
+  console.log(JSON.stringify(snippet.npmYarn, null, 2));
+  console.log("\n复制后执行：pnpm install（或对应包管理器的 install 命令）\n");
+}
+
 function runDoctor(projectRoot) {
   const pkgPath = join(projectRoot, "package.json");
   let pkg = null;
@@ -973,8 +1014,9 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
                 对比已安装文件与 manifest
   wl-ui clean  [--project <path>] [--dry-run]
                 清理 wl-skills-ui 安装文件
-  wl-ui doctor [--project <path>]
-                检查安装状态 / MCP / 桥接 / 规范插件
+  wl-ui doctor [--project <path>] [--print-overrides]
+                检查安装状态 / MCP / 桥接 / 规范插件；
+                --print-overrides 时输出 vendor 版本偏离的 pnpm/npm/yarn overrides 修复片段
   wl-ui prompts
                 打印 AI 触发提示词
 

@@ -41,7 +41,28 @@
 
 ## 维护流程
 
-- 推荐版本字段统一在 `skills/_meta/_compat/vendors.json` 的 `vendors[id=jh].compat` 字段。
+- 推荐版本字段统一在 `skills/_meta/_compat/vendors.json` 的 `vendors[id=jh].compat`（结构化 schema：`peers / gatingPeer / conflictsWith / domAssumptions`）。
+- 共享加载器 `skills/_meta/_compat/loader.mjs` 暴露 `listCompatVendors / evaluateVendor / buildOverridesSnippet`，scanner、MCP、Vite 插件、CLI 单源共用。
 - 本文档由 `scripts/check-docs.mjs` 校验：版本号必须与 `vendors.json` 一致，避免漂移。
-- scanner `I005` 接入完整性检查会按本表校验消费方项目是否使用推荐组合。
+- scanner `I005:<vendor>` 接入完整性检查会按本表校验消费方项目是否使用推荐组合。
 - MCP 工具 `wl_ui_detect_skin` 直接读取消费方 `package.json` 给 AI 返回结构化结果。
+- Vite 插件 `@agile-team/wl-skills-ui/vite` 在启动期自动校验，无需手动调用。
+- `npx wl-ui doctor --print-overrides` 在检测到偏离时输出可直接复制的 pnpm/npm/yarn `overrides` 片段。
+
+## 启动期自动校验（推荐）
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { wlSkillsCheck } from '@agile-team/wl-skills-ui/vite';
+
+export default defineConfig({
+  plugins: [
+    wlSkillsCheck({
+      // enforce: 'warn' | 'error' | 'silent'  默认 'warn'
+      // includeVendors: ['jh']                  只校验指定 vendor
+      // verbose: true                            额外打印 match 项
+    }),
+  ],
+});
+```

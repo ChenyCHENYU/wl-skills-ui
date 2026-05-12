@@ -4,6 +4,21 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.1] - 2026-05-12
+
+### Added
+
+- 新增 Vite 插件 `@agile-team/wl-skills-ui/vite`：消费方在 `vite.config.ts` 加一行 `wlSkillsCheck()` 即可在每次 `dev/build` 启动期自动校验 vendor 版本配对，偏离推荐组合时彩色打印警告与一键修复片段（`enforce: 'warn' | 'error' | 'silent'`）。
+- 新增 `npx wl-ui doctor --print-overrides` 子命令：检测到偏离时直接输出 pnpm/npm/yarn `overrides` JSON 片段，复制即可修复。
+- `skills/_meta/_compat/loader.mjs` 抽出共享 compat 加载器，统一 `evaluateVendor` / `buildOverridesSnippet` 语义，scanner、MCP、Vite、CLI 单源共用。
+- `vendors.json` 的 `compat` 升级为结构化 schema（`peers / gatingPeer / conflictsWith / domAssumptions`），同时保留旧平铺字段兜底；未来新增 vendor 配对无需改读取方代码。
+
+### Changed
+
+- scanner `I005` 改为遍历全部声明 `compat` 的 vendor，输出按 vendor 拆分的子检查项 `I005:<id>`，更易定位。
+- MCP `wl_ui_detect_skin` 返回结构升级：`vendors[].verdict`、`fixSnippet`、`summary` 统一暴露，AI 一次拿全多 vendor 评估结果。
+- `package.json` `files` 字段加入 `runtime/vite`，确保 Vite 插件随包发布。
+
 ## [1.7.0] - 2026-05-12
 
 ### Added

@@ -201,13 +201,27 @@ yarn add @agile-team/wl-skills-ui
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入 |
 | `@agile-team/wl-skills-ui` | `^1.7.0` | 已对齐上述组合的 DOM 假设 |
 
-新接入项目可执行 `npx wl-ui check --project .`（看 `I005`）或 MCP 工具 `wl_ui_detect_skin` 自动判断当前组合是否命中推荐。完整版本-项目实测表见 `docs/compat-matrix.md`。
+三种识别方式，任选其一：
+
+- **启动期自动**：`vite.config.ts` 加一行 `import { wlSkillsCheck } from '@agile-team/wl-skills-ui/vite'; export default defineConfig({ plugins: [wlSkillsCheck()] })`，每次 `dev/build` 偏离推荐组合时彩色打印警告（支持 `enforce: 'error'` 阻断）。
+- **手动 CLI**：`npx wl-ui check --project .` 看 `I005:<vendor>`；偏离时执行 `npx wl-ui doctor --print-overrides` 拿到可直接复制的 `pnpm.overrides` 修复片段。
+- **AI 协作**：MCP 工具 `wl_ui_detect_skin` 一次返回多 vendor 评估结果（`vendors[].verdict / fixSnippet / summary`）。
+
+完整版本-项目实测表见 `docs/compat-matrix.md`。
 
 ---
 
 ## 版本亮点
 
-当前 v1.7.0 版本聚焦“**项目集群依赖配对单一事实源 + AI/Skill 强约束识别**”：
+当前 v1.7.1 版本在 v1.7.0「单一事实源」基础上，把"识别"升级为"启动期自动 + 一键修复"：
+
+- 新增 Vite 插件 `@agile-team/wl-skills-ui/vite`：消费方一行配置即可在每次启动 dev/build 时自动跑版本配对校验，偏离时彩色提示 + 修复片段
+- 新增 `npx wl-ui doctor --print-overrides`：检测到偏离直接输出 pnpm/npm/yarn overrides JSON，复制粘贴即可修复
+- `vendors.json` `compat` 升级为 `peers / gatingPeer / conflictsWith / domAssumptions` 结构化 schema，未来新增 vendor 配对零代码改动
+- scanner `I005` 拆为 `I005:<vendor>`，MCP `wl_ui_detect_skin` 一次返回多 vendor 结果
+- 抽出 `skills/_meta/_compat/loader.mjs` 共享加载器，scanner/MCP/Vite/CLI 单源共用
+
+历史亮点（v1.7.0 起）：
 
 - 新增 `docs/compat-matrix.md` 作为项目集群推荐版本与 wl-skills-ui 的适配矩阵单一事实源；`skills/_meta/_compat/vendors.json` 在 `jh.compat` 字段钉死 `element-plus@2.2.6-prod.3` + `@jhlc/jh-ui@3.1.0`
 - scanner 接入完整性新增 `I005`：基于 `vendors.json` 校验消费方 `package.json` 是否锚定推荐组合，偏离时给出明确建议

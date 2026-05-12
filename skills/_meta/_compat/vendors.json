@@ -41,6 +41,23 @@
         "_jh-drag-col.scss"
       ],
       "compat": {
+        "peers": {
+          "element-plus": "2.2.6-prod.3",
+          "@jhlc/jh-ui": "3.1.0"
+        },
+        "gatingPeer": "@jhlc/jh-ui",
+        "conflictsWith": [
+          {
+            "name": "element-plus",
+            "rangeNote": ">=2.3.0",
+            "reason": "EP 2.3.0 起引入 .el-input__wrapper，与 jh-ui 3.x 假设的 .el-input>.el-input__inner DOM 不兼容"
+          }
+        ],
+        "domAssumptions": [
+          ".el-input>.el-input__inner",
+          ".el-form-item__label>.com-text",
+          ".has-colon .com-text::after"
+        ],
         "elementPlus": "2.2.6-prod.3",
         "elementPlusRange": "<2.3.0",
         "jhUi": "3.1.0",

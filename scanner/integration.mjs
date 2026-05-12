@@ -12,16 +12,13 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from "node:url";
+import {
+  listCompatVendors,
+  evaluateVendor,
+} from "../skills/_meta/_compat/loader.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const VENDORS_JSON = JSON.parse(
-  readFileSync(
-    join(__dirname, "..", "skills", "_meta", "_compat", "vendors.json"),
-    "utf8",
-  ),
-);
-const JH_COMPAT = VENDORS_JSON.vendors.find((v) => v.id === "jh")?.compat || {};
 
 /**
  * @param {string} projectRoot — 项目根目录（包含 index.html / src / package.json）
@@ -153,30 +150,38 @@ export function checkIntegration(projectRoot) {
         suggestion: hasEp && hasVue ? "" : "pnpm add vue element-plus",
       });
 
-      // ── I005: jh-ui ↔ element-plus 版本配对 ──────────────────────────
-      const jhUi = deps["@jhlc/jh-ui"];
-      const ep = deps["element-plus"];
-      if (jhUi) {
-        const epOk = ep && ep.includes(JH_COMPAT.elementPlus || "2.2.6-prod.3");
-        const jhOk = jhUi.includes(JH_COMPAT.jhUi || "3.1.0");
-        const ok = epOk && jhOk;
+      // ── I005: vendor 配对（jh-ui / 未来 vendor 都走这条） ─────────────
+      const vendors = listCompatVendors();
+      let anyEvaluated = false;
+      for (const compat of vendors) {
+        const ev = evaluateVendor(compat, deps);
+        if (ev.verdict === "not-applicable") continue;
+        anyEvaluated = true;
+        const ok = ev.verdict === "match";
+        const actuals = ev.peers
+          .map((p) => `${p.name} ${p.actual || "未安装"}`)
+          .join(" + ");
+        const expecteds = ev.peers
+          .map((p) => `${p.name}@${p.expected}`)
+          .join(" + ");
         checks.push({
-          id: "I005",
+          id: `I005:${compat.vendorId}`,
           severity: ok ? "info" : "warning",
           ok,
           description: ok
-            ? `jh-ui 推荐组合命中（@jhlc/jh-ui ${jhUi} + element-plus ${ep}）`
-            : `jh-ui 版本配对偏离推荐（实际 @jhlc/jh-ui ${jhUi} + element-plus ${ep || "未安装"}）`,
+            ? `${compat.vendorId} 推荐组合命中（${actuals}）`
+            : `${compat.vendorId} 版本配对偏离推荐（实际 ${actuals}）`,
           suggestion: ok
             ? ""
-            : `推荐组合：@jhlc/jh-ui@${JH_COMPAT.jhUi} + element-plus@${JH_COMPAT.elementPlus}（详见 docs/compat-matrix.md）`,
+            : `推荐组合：${expecteds}（详见 docs/compat-matrix.md，或执行 npx wl-ui doctor --print-overrides）`,
         });
-      } else {
+      }
+      if (!anyEvaluated) {
         checks.push({
           id: "I005",
           severity: "info",
           ok: true,
-          description: "未检测到 @jhlc/jh-ui，跳过 jh-ui 配对校验",
+          description: "未命中任何已声明 compat 的 vendor，跳过配对校验",
           suggestion: "",
         });
       }

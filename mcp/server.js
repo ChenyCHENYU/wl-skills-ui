@@ -128,6 +128,60 @@ function projectRoot(args = {}) {
   return resolve(args.project || process.env.WL_PROJECT_ROOT || process.cwd());
 }
 
+async function detectSkin(args = {}) {
+  const root = projectRoot(args);
+  const pkgPath = join(root, "package.json");
+  const fs = require("node:fs");
+  if (!fs.existsSync(pkgPath)) {
+    return { ok: false, reason: `未找到 ${pkgPath}` };
+  }
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+  const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+  const loader = await import("../skills/_meta/_compat/loader.mjs");
+  const vendors = loader.listCompatVendors();
+  const evaluations = vendors.map((c) => ({
+    compat: c,
+    evaluation: loader.evaluateVendor(c, deps),
+  }));
+  const applicable = evaluations.filter(
+    (e) => e.evaluation.verdict !== "not-applicable",
+  );
+  const overrides = loader.buildOverridesSnippet(
+    applicable.map((e) => e.evaluation),
+  );
+  return {
+    ok: true,
+    project: pkg.name,
+    vendors: evaluations.map(({ compat, evaluation }) => ({
+      vendorId: compat.vendorId,
+      vendorLabel: compat.vendorLabel,
+      gatingPeer: compat.gatingPeer,
+      verdict: evaluation.verdict,
+      peers: evaluation.peers,
+      conflictsWith: compat.conflictsWith,
+      domAssumptions: compat.domAssumptions,
+      note: compat.note,
+    })),
+    summary:
+      applicable.length === 0
+        ? "no-applicable-vendor"
+        : applicable.every((e) => e.evaluation.verdict === "match")
+          ? "all-match"
+          : "has-mismatch",
+    fixSnippet: overrides,
+    recommendedScss: applicable.some(
+      ({ compat }) => compat.vendorId === "jh" && deps["@jhlc/jh-ui"],
+    )
+      ? [
+          "styles/vendors/_jh-ui.scss",
+          "styles/vendors/_jh-tree.scss",
+          "styles/vendors/_jh-pagination.scss",
+          "styles/vendors/_jh-drag-col.scss",
+        ]
+      : ["styles/vendors/_base-components.scss"],
+  };
+}
+
 function runScanner(command, args = {}) {
   const root = projectRoot(args);
   const scanner = join(PKG_ROOT, "scanner", "index.mjs");
@@ -349,10 +403,9 @@ async function dispatchTool(id, name, args) {
       return;
     }
     if (name === "wl_ui_detect_skin") {
+      const result = await detectSkin(args);
       sendResult(id, {
-        content: [
-          { type: "text", text: JSON.stringify(detectSkin(args), null, 2) },
-        ],
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       });
       return;
     }

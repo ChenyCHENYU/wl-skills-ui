@@ -8,7 +8,7 @@ export default defineConfig({
   },
   format: ["esm"],
   dts: true,
-  clean: false, // 不清空 dist/（scss 文件在里面）
+  clean: true, // outDir 是 es/，与 dist/ 互不影响；v1.8.0 起每次构建清空 es/ 避免 hash 残留
   outDir: "es",
   external: ["vue", "element-plus", "@element-plus/icons-vue"],
   noExternal: ["@babel/runtime"],

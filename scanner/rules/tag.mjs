@@ -1,4 +1,7 @@
-/** scanner/rules/tag.mjs — 标签/状态规则：R009 R010 R012 R017 R018 */
+/** scanner/rules/tag.mjs — 标签/状态规则：R009 R010 R012 R019 R020
+ *  v1.8.0 重号：原 R017 → R019（与 color.mjs R017 冲突），原 R018 → R020（与 color.mjs R018 冲突）。
+ *  事实源：standards/rules.json
+ */
 import { lineOf, issue, findTags } from "./_shared.mjs";
 
 /** 状态类字段名关键字（动态流转状态） */
@@ -124,15 +127,14 @@ export const tagRules = [
     },
   },
 
-  // R017: 编号/工号/证件号列缺少 renderBadge（脚本式 columnsDef）
+  // R019（原 R017，v1.8.0 重号）: 编号/工号/证件号列缺少 renderBadge
   {
-    id: "R017",
+    id: "R019",
     category: "tag",
     severity: "warning",
     name: "编号/工号/证件号列缺少 renderBadge（脚本式 columnsDef）",
     checkScript(script, file, lineOffset) {
       const issues = [];
-      /** label 关键字：编号、工号、证件号、以及常见英文组合 */
       const BADGE_LABEL_RE =
         /编号|工号|证件号|驾驶员证件号|车主证件号|处置人工号/;
       const lines = script.split("\n");
@@ -150,7 +152,7 @@ export const tagRules = [
         issues.push({
           file,
           line: lineOffset + i + 1,
-          rule: "R017",
+          rule: "R019",
           category: "tag",
           severity: "warning",
           description: `编号列 "${label}" 未使用 renderBadge，纯文本无视觉区分`,
@@ -161,9 +163,9 @@ export const tagRules = [
     },
   },
 
-  // R018: 脚本式列定义使用 logicType:dict 但缺少 defaultSlot（应改为 renderDictClassifyTag）
+  // R020（原 R018，v1.8.0 重号）: logicType:dict 列缺少 defaultSlot
   {
-    id: "R018",
+    id: "R020",
     category: "tag",
     severity: "warning",
     name: "dict列缺少 defaultSlot/renderDictClassifyTag（脚本式 columnsDef）",
@@ -190,7 +192,7 @@ export const tagRules = [
         issues.push({
           file,
           line: lineOffset + i + 1,
-          rule: "R018",
+          rule: "R020",
           category: "tag",
           severity: "warning",
           description: `"${label}" 使用 logicType:dict 但无 defaultSlot，纯文本展示枚举值`,

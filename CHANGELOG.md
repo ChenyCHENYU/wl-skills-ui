@@ -4,6 +4,30 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.0] - 2026-05-12
+
+### Added
+
+- 新增 **`standards/rules.json`** R-rule 单一事实源：29 条规则按 `id / category / severity / appliesTo / autoFixable / scanner / skills` 结构化注册，所有 standards 文档、SKILL.md、scanner、MCP、未来 ESLint 插件均从此派生。
+- 新增 **`standards/rules-loader.mjs`** 共享加载器：暴露 `loadRules / listRules / getRule / groupByCategory / buildRuleSummary`，scanner / MCP / check-docs / Vite 插件统一读取。
+- 新增 MCP 工具 **`wl_ui_list_rules`**：按 `category / severity / autoFixable` 过滤返回规则摘要。
+- 新增 MCP 工具 **`wl_ui_describe_rule`**：按 ID 返回单条 R-rule 完整定义（含 aliases 兼容旧 ID）。
+- 新增 **`docs/governance-long-term.md`**：业务项目长效治理方案（基线 / 豁免 / 漂移看板 / 版本钉死 / 写作期 AI 守护五机制）。
+- `scripts/check-docs.mjs` 扩展：校验 `scanner/rules/*.mjs` 中所有 `id` 必须在 `rules.json` 注册、SKILL.md 引用的 R-id 必须存在、`_registry.md` 引用的 skill 目录必须真实存在。
+
+### Changed (Breaking-ish)
+
+- **修复 R011 逻辑反转 bug**：之前 scanner 检测分页"不在 #footer 报错"，与 `standards/ui/05` "分页必须放内容区，不得放 #footer" 相互矛盾。v1.8.0 反转 scanner 检测语义，与 standards 对齐。
+- **`scanner/rules/tag.mjs` R017/R018 重号为 R019/R020**：原 ID 与 `color.mjs` 的 R017/R018 冲突。`rules.json` 通过 `aliases: [R017_TAG_LEGACY/R018_TAG_LEGACY]` 兼容历史引用；scanner 输出 `rule` 字段改为新 ID。
+- **`skills/_meta/_registry.md` 清理 12 条幽灵条目**：删除 9 个不存在的 `element/*` SKILL 引用（el-card/el-tabs/el-descriptions/el-tree/el-drawer/el-upload/el-steps/el-overlay/el-navigation/el-feedback），声明已统一归入 `element/component-family`；删除 2 个 `ops/*` 引用（route-intent / recommend-flow），声明为 MCP 工具而非独立 SKILL。
+- **`skills/runtime/style-align/SKILL.md` 改为指针式引用**：不再复述 17 条 R-rule 内容，仅保留分类→编号→SKILL 映射表，规则细节统一查 `standards/rules.json` 或 `wl_ui_describe_rule`。
+- `tsup.config.ts` `clean: true`：每次构建清空 `es/` 目录，避免 hash 残留。
+
+### Notes
+
+- R013（Upload 嵌入 operations[]）由文档约束晋升为 `rules.json` 正式条目（`severity: review`，无 scanner 实现）。
+- 推荐业务项目跟进：跑一次 `npx wl-ui audit --target src --outFile .wl-baseline.json` 建立基线，配合 `--baseline` 增量门槛使用（详见 `docs/governance-long-term.md`）。
+
 ## [1.7.1] - 2026-05-12
 
 ### Added

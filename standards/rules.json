@@ -1,0 +1,392 @@
+{
+  "version": "1.0.0",
+  "description": "wl-skills-ui R-rule 单一事实源。所有 standards 文档、SKILL.md、scanner 规则、MCP 工具、ESLint 插件均从此派生。",
+  "severityLevels": {
+    "error": "强制（必须修复，影响视觉一致性或运行时）",
+    "warning": "强烈建议（应修复，可能引发风格漂移）",
+    "info": "建议（人工评估）",
+    "suggestion": "提示（场景化最佳实践）",
+    "review": "需人工评审（不能自动判定）"
+  },
+  "categories": {
+    "table": {
+      "label": "表格 / 列定义",
+      "standardsDoc": "standards/ui/01-table.md"
+    },
+    "button": {
+      "label": "按钮 / 操作列",
+      "standardsDoc": "standards/ui/02-button.md"
+    },
+    "form": {
+      "label": "表单 / 控件",
+      "standardsDoc": "standards/ui/03-form.md"
+    },
+    "tag": {
+      "label": "状态标签 / 分类",
+      "standardsDoc": "standards/ui/04-tag-status.md"
+    },
+    "dialog": {
+      "label": "弹窗 / 分页布局",
+      "standardsDoc": "standards/ui/05-dialog-pagination.md"
+    },
+    "style": {
+      "label": "样式 / Token",
+      "standardsDoc": "standards/engineering/03-scss-structure.md"
+    },
+    "base": {
+      "label": "BaseTable 强约束",
+      "standardsDoc": "skills/vendors/base-table/SKILL.md"
+    },
+    "family": {
+      "label": "组件族场景化建议",
+      "standardsDoc": "skills/element/component-family/SKILL.md"
+    },
+    "layout": {
+      "label": "页面骨架 / 操作组合",
+      "standardsDoc": "skills/layouts/list-page/SKILL.md"
+    }
+  },
+  "rules": [
+    {
+      "id": "R001",
+      "category": "table",
+      "severity": "error",
+      "title": "el-table-column 必须 align=\"center\"",
+      "rationale": "项目集群所有表格列默认居中对齐；备注/标准等长文本列可显式 align=\"left\"。",
+      "appliesTo": ["el-table-column"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/table.mjs",
+      "skills": ["element/el-table", "vendors/base-table"]
+    },
+    {
+      "id": "R002",
+      "category": "table",
+      "severity": "warning",
+      "title": "el-table 必须 empty-text=\"暂无数据\"",
+      "rationale": "统一空状态文案，避免出现「No Data / 暂无 / 空」等不一致。",
+      "appliesTo": ["el-table"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/table.mjs",
+      "skills": ["element/el-table"]
+    },
+    {
+      "id": "R003",
+      "category": "table",
+      "severity": "warning",
+      "title": "BaseTable 必须 empty-text=\"暂无数据\"",
+      "rationale": "Base* 封装表格与原生 el-table 共用同一空状态文案。",
+      "appliesTo": ["BaseTable"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/table.mjs",
+      "skills": ["vendors/base-table"]
+    },
+    {
+      "id": "R004",
+      "category": "button",
+      "severity": "error",
+      "title": "操作列必须使用 renderOps / jh-op-btn",
+      "rationale": "操作列不得直接 <el-button>，必须用 renderOps 图标系统或 jh-op-btn 类。",
+      "appliesTo": [
+        "el-table-column[label=操作]",
+        "AG Grid columnDef[field=ops]"
+      ],
+      "autoFixable": false,
+      "manualReason": "需识别按钮语义、show 条件与业务回调",
+      "scanner": "scanner/rules/button.mjs",
+      "skills": ["element/el-table", "vendors/base-table", "ops/migrate"]
+    },
+    {
+      "id": "R005",
+      "category": "button",
+      "severity": "warning",
+      "title": "工具栏 el-button 必须配 icon",
+      "rationale": "类型化按钮需补 icon 提升可识别性（Plus/Edit/Search/Refresh/Download/Upload）。",
+      "appliesTo": ["el-button[type=primary|success|warning|danger]"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/button.mjs",
+      "skills": ["layouts/list-page"]
+    },
+    {
+      "id": "R006",
+      "category": "form",
+      "severity": "warning",
+      "title": "el-input / el-select 必须 size=\"small\"",
+      "rationale": "全系统统一 small 控件高度，与表格行高匹配。",
+      "appliesTo": ["el-input", "el-select"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/form.mjs",
+      "skills": ["element/el-form"]
+    },
+    {
+      "id": "R007",
+      "category": "form",
+      "severity": "warning",
+      "title": "el-date-picker 必须 style=\"width:100%\"",
+      "rationale": "DatePicker 默认宽度固定，在 grid 布局会留白，必须撑满列宽。",
+      "appliesTo": ["el-date-picker"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/form.mjs",
+      "skills": ["element/el-form"]
+    },
+    {
+      "id": "R008",
+      "category": "form",
+      "severity": "info",
+      "title": "el-form labelWidth ≥ 150px",
+      "rationale": "中文标签最长 9 字（如「隐患排查内容及标准」）需要 150px 不截断。",
+      "appliesTo": ["el-form"],
+      "autoFixable": false,
+      "manualReason": "可能存在特殊布局需求（双列紧凑、移动端适配）",
+      "scanner": "scanner/rules/form.mjs",
+      "skills": ["element/el-form"]
+    },
+    {
+      "id": "R009",
+      "category": "tag",
+      "severity": "warning",
+      "title": "状态/分类字段必须使用 renderTagNode / ElTag",
+      "rationale": "字段名命中 status/state/level/type/category 时，纯文本展示语义不足；需走渲染器。",
+      "appliesTo": [
+        "el-table-column[prop~=status|level|type]",
+        "ColumnsDef.label[~=状态|级别|类型]"
+      ],
+      "autoFixable": false,
+      "manualReason": "需识别业务字段语义和取值字典",
+      "scanner": "scanner/rules/tag.mjs",
+      "skills": ["element/el-tag"]
+    },
+    {
+      "id": "R010",
+      "category": "tag",
+      "severity": "warning",
+      "title": "分类字段 ElTag 必须使用 effect=\"plain\"",
+      "rationale": "Type/Level/Category 等分类字段视觉权重应低于 status，使用 outline 风格。",
+      "appliesTo": ["el-tag"],
+      "autoFixable": false,
+      "manualReason": "需结合业务判定 status vs classify",
+      "scanner": "scanner/rules/tag.mjs",
+      "skills": ["element/el-tag"]
+    },
+    {
+      "id": "R011",
+      "category": "dialog",
+      "severity": "error",
+      "title": "弹窗内 el-pagination 必须放在内容区，不得放在 #footer 插槽",
+      "rationale": "el-pagination 内部含 fixed/absolute 定位，进入 #footer 后会逃出弹窗容器漂浮在页面底部。",
+      "appliesTo": ["el-dialog > template#footer > el-pagination"],
+      "autoFixable": false,
+      "manualReason": "需识别 dialog 布局结构、把分页移入 .popup-pagination 容器",
+      "scanner": "scanner/rules/dialog.mjs",
+      "skills": ["layouts/form-dialog"]
+    },
+    {
+      "id": "R012",
+      "category": "table",
+      "severity": "warning",
+      "title": "弹窗内 el-table 必须 empty-text",
+      "rationale": "弹窗选择器场景空状态尤其重要，避免空白困惑用户。",
+      "appliesTo": ["el-dialog el-table"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/tag.mjs",
+      "skills": ["layouts/form-dialog"]
+    },
+    {
+      "id": "R013",
+      "category": "layout",
+      "severity": "review",
+      "title": "Upload 嵌入 operations[] 必须抽离到 toolbarDef",
+      "rationale": "renderOps 数组里直接放 <el-upload> 会导致按钮与上传组件耦合渲染，应改为 toolbar 级。",
+      "appliesTo": ["renderOps[].component=el-upload"],
+      "autoFixable": false,
+      "manualReason": "需识别上传业务、把上传抽到 toolbarDef 并保留 row 上下文",
+      "scanner": null,
+      "skills": ["ops/migrate", "runtime/migration"]
+    },
+    {
+      "id": "R014",
+      "category": "table",
+      "severity": "warning",
+      "title": "selection 列必须 header-align=\"center\"",
+      "rationale": "selection 列默认 header 不居中，会导致表头复选框偏移。",
+      "appliesTo": ["el-table-column[type=selection]"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/table.mjs",
+      "skills": ["element/el-table"]
+    },
+    {
+      "id": "R015",
+      "category": "button",
+      "severity": "error",
+      "title": "弹窗嵌套表格操作列不得使用 el-button link",
+      "rationale": "弹窗内嵌表格用 link 按钮会与外层 footer 操作按钮风格混淆。",
+      "appliesTo": ["*.modal.vue el-table-column el-button[link]"],
+      "autoFixable": false,
+      "manualReason": "需识别按钮语义并选择 jh-op-btn 类型",
+      "scanner": "scanner/rules/button.mjs",
+      "skills": ["layouts/form-dialog"]
+    },
+    {
+      "id": "R016",
+      "category": "style",
+      "severity": "warning",
+      "title": "<style> 块禁止硬编码 hex 颜色",
+      "rationale": "颜色必须走 CSS Token，避免主题切换失效。",
+      "appliesTo": ["*.vue <style>", "*.scss"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/color.mjs",
+      "skills": ["runtime/design-tokens"]
+    },
+    {
+      "id": "R017",
+      "category": "style",
+      "severity": "warning",
+      "title": "<template> 块禁止硬编码 hex 颜色",
+      "rationale": "color/style 属性内的 hex 颜色必须走 CSS Token。",
+      "appliesTo": ["*.vue <template>"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/color.mjs",
+      "skills": ["runtime/design-tokens"]
+    },
+    {
+      "id": "R018",
+      "category": "style",
+      "severity": "warning",
+      "title": "<script> 块禁止硬编码 hex 颜色",
+      "rationale": "ECharts/inline 配色需统一 CHART_COLORS / Token。",
+      "appliesTo": ["*.vue <script>", "*.ts"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/color.mjs",
+      "skills": ["runtime/design-tokens"]
+    },
+    {
+      "id": "R019",
+      "category": "tag",
+      "severity": "warning",
+      "title": "编号/工号/证件号列必须使用 renderBadge",
+      "rationale": "编号类列纯文本视觉无区分；renderBadge 提供 hover 复制和颜色区分。",
+      "appliesTo": ["ColumnsDef.label[~=编号|工号|证件号]"],
+      "autoFixable": false,
+      "manualReason": "需保留 row 数据并 import renderBadge",
+      "scanner": "scanner/rules/tag.mjs",
+      "skills": ["element/el-tag"],
+      "aliases": ["R017_TAG_LEGACY"],
+      "introducedIn": "1.8.0",
+      "renamedFrom": "R017 (tag.mjs 旧 ID，与 color.mjs R017 冲突，v1.8.0 重号)"
+    },
+    {
+      "id": "R020",
+      "category": "tag",
+      "severity": "warning",
+      "title": "logicType:dict 列必须 defaultSlot/renderDictClassifyTag",
+      "rationale": "字典字段不应仅靠 logicType 自动文本展示，应显式渲染分类 Tag。",
+      "appliesTo": ["ColumnsDef[logicType=dict]"],
+      "autoFixable": false,
+      "manualReason": "需识别字典 key 并迁移到 renderDictClassifyTag",
+      "scanner": "scanner/rules/tag.mjs",
+      "skills": ["element/el-tag"],
+      "aliases": ["R018_TAG_LEGACY"],
+      "introducedIn": "1.8.0",
+      "renamedFrom": "R018 (tag.mjs 旧 ID，与 color.mjs R018 冲突，v1.8.0 重号)"
+    },
+    {
+      "id": "R021",
+      "category": "base",
+      "severity": "error",
+      "title": "BaseTable 必须 render-type=\"agGrid\"",
+      "rationale": "项目集群规定 BaseTable 仅 AG Grid 渲染模式，禁止 elTable 模式。",
+      "appliesTo": ["BaseTable"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/table.mjs",
+      "skills": ["vendors/base-table"]
+    },
+    {
+      "id": "R022",
+      "category": "base",
+      "severity": "error",
+      "title": "BaseTable 必须配置全局唯一 cid",
+      "rationale": "cid 用于列宽/排序持久化与 wl-skills-kit 桥接。",
+      "appliesTo": ["BaseTable"],
+      "autoFixable": false,
+      "manualReason": "需按页面命名规范分配唯一 cid",
+      "scanner": "scanner/rules/table.mjs",
+      "skills": ["vendors/base-table"]
+    },
+    {
+      "id": "R031",
+      "category": "family",
+      "severity": "suggestion",
+      "title": "el-card 建议标识业务场景 class",
+      "rationale": "detail-card / stat-card / wk-card 区分密度与标题区。",
+      "appliesTo": ["el-card"],
+      "autoFixable": false,
+      "scanner": "scanner/rules/componentFamily.mjs",
+      "skills": ["element/component-family"]
+    },
+    {
+      "id": "R032",
+      "category": "family",
+      "severity": "suggestion",
+      "title": "el-tabs 建议标识业务场景 class",
+      "rationale": "detail-tabs / config-tabs / wk-tabs 控制 Tab 视觉密度。",
+      "appliesTo": ["el-tabs"],
+      "autoFixable": false,
+      "scanner": "scanner/rules/componentFamily.mjs",
+      "skills": ["element/component-family"]
+    },
+    {
+      "id": "R033",
+      "category": "family",
+      "severity": "suggestion",
+      "title": "el-descriptions 建议 border 或统一容器",
+      "rationale": "无 border 的 descriptions 在长字段下视觉散乱。",
+      "appliesTo": ["el-descriptions"],
+      "autoFixable": false,
+      "scanner": "scanner/rules/componentFamily.mjs",
+      "skills": ["element/component-family"]
+    },
+    {
+      "id": "R034",
+      "category": "family",
+      "severity": "warning",
+      "title": "el-drawer 必须显式 size",
+      "rationale": "默认抽屉宽度跨页面不统一，详情 480px / 编辑 560px 是项目集群约定。",
+      "appliesTo": ["el-drawer"],
+      "autoFixable": false,
+      "scanner": "scanner/rules/componentFamily.mjs",
+      "skills": ["element/component-family"]
+    },
+    {
+      "id": "R035",
+      "category": "family",
+      "severity": "warning",
+      "title": "el-upload 必须配 accept/limit/tip",
+      "rationale": "附件场景缺失限制说明会导致用户上传非法格式后报错。",
+      "appliesTo": ["el-upload"],
+      "autoFixable": false,
+      "scanner": "scanner/rules/componentFamily.mjs",
+      "skills": ["element/component-family"]
+    },
+    {
+      "id": "R036",
+      "category": "family",
+      "severity": "suggestion",
+      "title": "el-steps 建议绑定 active/process-status/finish-status",
+      "rationale": "审批/流程状态需明确表达，避免空 active 导致首步永远 process。",
+      "appliesTo": ["el-steps"],
+      "autoFixable": false,
+      "scanner": "scanner/rules/componentFamily.mjs",
+      "skills": ["element/component-family"]
+    },
+    {
+      "id": "R037",
+      "category": "family",
+      "severity": "suggestion",
+      "title": "空/异常反馈组件建议提供操作入口",
+      "rationale": "el-empty / el-result / el-alert 无操作按钮时用户无法恢复操作。",
+      "appliesTo": ["el-empty", "el-result", "el-alert"],
+      "autoFixable": false,
+      "scanner": "scanner/rules/componentFamily.mjs",
+      "skills": ["element/component-family"]
+    }
+  ]
+}

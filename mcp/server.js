@@ -99,6 +99,41 @@ const TOOLS = [
     },
   },
   {
+    name: "wl_ui_list_rules",
+    description:
+      "列出 wl-skills-ui R-rule 全集（事实源：standards/rules.json）。可按 category / severity / autoFixable 过滤。",
+    inputSchema: {
+      type: "object",
+      properties: {
+        category: {
+          type: "string",
+          description:
+            "可选：table / button / form / dialog / tag / style / base / family / layout",
+        },
+        severity: {
+          type: "string",
+          description: "可选：error / warning / info / suggestion / review",
+        },
+        autoFixable: {
+          type: "boolean",
+          description: "可选：仅返回可自动修复的规则",
+        },
+      },
+      required: [],
+    },
+  },
+  {
+    name: "wl_ui_describe_rule",
+    description: "返回单条 R-rule 的完整定义（事实源：standards/rules.json）。",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "规则 ID，例如 R001、R019" },
+      },
+      required: ["id"],
+    },
+  },
+  {
     name: "wl_ui_recommend_flow",
     description:
       "根据 wl_ui_scan --output json 的扫描结果推荐后续 flow、tool 和 wl-skills-kit 桥接动作。",
@@ -406,6 +441,57 @@ async function dispatchTool(id, name, args) {
       const result = await detectSkin(args);
       sendResult(id, {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      });
+      return;
+    }
+    if (name === "wl_ui_list_rules") {
+      const loader = await import("../standards/rules-loader.mjs");
+      const rules = loader.listRules({
+        category: args.category,
+        severity: args.severity,
+        autoFixable: args.autoFixable,
+      });
+      const summary = rules.map((r) => ({
+        id: r.id,
+        severity: r.severity,
+        category: r.category,
+        title: r.title,
+        autoFixable: !!r.autoFixable,
+      }));
+      sendResult(id, {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              { total: summary.length, rules: summary },
+              null,
+              2,
+            ),
+          },
+        ],
+      });
+      return;
+    }
+    if (name === "wl_ui_describe_rule") {
+      const loader = await import("../standards/rules-loader.mjs");
+      const rule = loader.getRule(args.id);
+      if (!rule) {
+        sendResult(id, {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                { ok: false, reason: `规则 ${args.id} 未注册` },
+                null,
+                2,
+              ),
+            },
+          ],
+        });
+        return;
+      }
+      sendResult(id, {
+        content: [{ type: "text", text: JSON.stringify(rule, null, 2) }],
       });
       return;
     }

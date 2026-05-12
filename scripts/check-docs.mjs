@@ -145,6 +145,97 @@ for (const editor of editorConfig.editors) {
   }
 }
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// v1.8.0 新增校验：rules.json 单一事实源 + 幽灵 skill
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const rulesJsonPath = join(root, "standards", "rules.json");
+if (!existsSync(rulesJsonPath)) {
+  errors.push("standards/rules.json: 文件不存在（v1.8.0 起为 R-rule 单一事实源）");
+} else {
+  const rulesData = JSON.parse(readFileSync(rulesJsonPath, "utf8"));
+  const rulesById = new Map(rulesData.rules.map((r) => [r.id, r]));
+  const aliasMap = new Map();
+  for (const r of rulesData.rules)
+    for (const a of r.aliases || []) aliasMap.set(a, r.id);
+
+  // (1) 校验 ID 唯一
+  if (rulesById.size !== rulesData.rules.length) {
+    errors.push("standards/rules.json: 存在重复 R-id");
+  }
+
+  // (2) 校验 scanner/rules/*.mjs 中所有 id: "Rxxx" 都在 rules.json 中存在且 scanner 字段一致
+  const scannerRulesDir = join(root, "scanner", "rules");
+  for (const f of readdirSync(scannerRulesDir)) {
+    if (!f.endsWith(".mjs") || f.startsWith("_") || f === "index.mjs") continue;
+    const code = readFileSync(join(scannerRulesDir, f), "utf8");
+    const idMatches = [...code.matchAll(/id:\s*["'](R\d{3})["']/g)].map(
+      (m) => m[1],
+    );
+    for (const rid of idMatches) {
+      const rule = rulesById.get(rid);
+      if (!rule) {
+        errors.push(
+          `scanner/rules/${f}: 规则 ${rid} 未在 standards/rules.json 注册`,
+        );
+        continue;
+      }
+      const expectedScanner = `scanner/rules/${f}`;
+      if (rule.scanner && rule.scanner !== expectedScanner) {
+        errors.push(
+          `standards/rules.json: ${rid}.scanner 应为 "${expectedScanner}"（当前 "${rule.scanner}"）`,
+        );
+      }
+    }
+  }
+
+  // (3) 校验 skills/**/SKILL.md 引用的 R-rule 必须在 rules.json 中存在
+  const skillsRoot = join(root, "skills");
+  function walkSkills(dir, list = []) {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walkSkills(p, list);
+      else if (e.name.endsWith(".md")) list.push(p);
+    }
+    return list;
+  }
+  for (const f of walkSkills(skillsRoot)) {
+    const rel = relative(root, f).replace(/\\/g, "/");
+    const content = readFileSync(f, "utf8");
+    const refs = [...new Set(
+      [...content.matchAll(/\b(R\d{3})\b/g)].map((m) => m[1]),
+    )];
+    for (const rid of refs) {
+      if (rulesById.has(rid)) continue;
+      if (aliasMap.has(rid)) continue;
+      errors.push(
+        `${rel}: 引用了未注册规则 ${rid}（应在 standards/rules.json 中定义或加 aliases）`,
+      );
+    }
+  }
+
+  // (4) 校验 _registry.md 提到的 skill 目录必须真实存在
+  const registryPath = join(root, "skills", "_meta", "_registry.md");
+  if (existsSync(registryPath)) {
+    const reg = readFileSync(registryPath, "utf8");
+    const skillRefs = [
+      ...reg.matchAll(/\b(element|vendors|layouts|runtime|ops)\/([a-z][a-z0-9-]*)\b/g),
+    ];
+    const seen = new Set();
+    for (const m of skillRefs) {
+      const key = `${m[1]}/${m[2]}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const dir = join(skillsRoot, m[1], m[2]);
+      const skillFile = join(dir, "SKILL.md");
+      if (!existsSync(skillFile)) {
+        errors.push(
+          `skills/_meta/_registry.md: 引用的 skill "${key}" 不存在 (期望 ${relative(root, skillFile).replace(/\\/g, "/")})`,
+        );
+      }
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error(
     "docs:check failed:\n" + errors.map((error) => `- ${error}`).join("\n"),

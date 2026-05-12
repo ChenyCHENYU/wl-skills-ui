@@ -67,53 +67,26 @@ npx wl-ui check --project [项目根目录]
 
 ---
 
-## 二、规则速查（R001—R018）
+## 二、规则总览（指针式）
 
-### 表格类 → 详见 [skills/components/table/SKILL.md](../../components/table/SKILL.md)
+**所有 R-rule 的权威定义统一在 `standards/rules.json`**。本节只列分类与编号映射，禁止在此复述规则细节（避免漂移）。AI 需要某条规则的完整定义时，调用 MCP `wl_ui_describe_rule R001` 或读取 `standards/rules.json`。
 
-- **R001**【高危】el-table-column 缺少 `align="center"`
-- **R002**【中危】el-table 缺少 `empty-text="暂无数据"`
-- **R003**【中危】BaseTable 缺少 `empty-text="暂无数据"`
-- **R014**【中危】selection 列缺少 `header-align="center"`
+| 分类 | 编号 | 关联 SKILL |
+| --- | --- | --- |
+| 表格 / 列定义 | R001 R002 R003 R012 R014 R021 R022 | `element/el-table`, `vendors/base-table` |
+| 按钮 / 操作列 | R004 R005 R015 | `element/el-table`, `layouts/list-page`, `layouts/form-dialog` |
+| 表单 / 控件 | R006 R007 R008 | `element/el-form`, `layouts/form-dialog` |
+| 弹窗 / 分页 | R011 | `element/el-dialog`, `layouts/form-dialog` |
+| 状态 / 分类 / 编号 / 字典 | R009 R010 R019 R020 | `element/el-tag` |
+| 颜色 / Token | R016 R017 R018 | `runtime/design-tokens` |
+| 组件族场景化 | R031–R037 | `element/component-family` |
+| 布局 / 操作组合 | R013（人工评审） | `ops/migrate`, `runtime/migration` |
 
-### 按钮类 → 详见 [skills/components/table/SKILL.md](../../components/dialog/SKILL.md)
+> 历史 ID 漂移：v1.8.0 起 `tag.mjs` 中的旧 R017/R018 重号为 **R019/R020**（避免与 `color.mjs` 的 R017/R018 冲突）；旧 ID 在 `rules.json` 通过 `aliases` 兼容。
 
-- **R004**【高危】操作列使用文字按钮（应改为 renderOps 图标系统）
-- **R005**【中危】工具栏按钮缺少 icon
-- **R015**【高危】弹窗嵌套表格操作列使用 el-button link
+## 三、可否自动修复
 
-### 表单类 → 详见 [skills/components/form/SKILL.md](../../components/form/SKILL.md)
-
-- **R006**【中危】el-input / el-select 缺少 `size="small"`
-- **R007**【中危】el-date-picker 缺少 `style="width:100%"`
-- **R008**【低危】el-form labelWidth < 150px
-- **表单圆角一致性**【中危】输入、选择、日期、textarea、上传等控件必须统一使用 `--wk-form-control-radius`，不要局部硬编码不同圆角
-
-### 弹窗类 → 详见 [skills/components/dialog/SKILL.md](../../components/dialog/SKILL.md)
-
-- **R011**【高危】弹窗内分页器未放在 `<template #footer>` 中
-
-### 颜色类
-
-- **R016**【中危】`<style>` 块存在硬编码 hex 颜色
-- **R017**【中危】`<template>` 块存在硬编码 hex 颜色
-- **R018**【中危】`<script>` 块存在硬编码 hex 颜色
-
-### 状态标签类 → 详见 [skills/components/tag-status/SKILL.md](../../components/tag-status/SKILL.md)
-
-- **R009**【高危】状态字段纯文本渲染（需人工确认）
-- **R010**【中危】分类字段使用填充色 Tag（需人工确认）
-
----
-
-## 三、无法自动修复的规则
-
-| 规则                         | 原因                                         | AI 职责                            |
-| ---------------------------- | -------------------------------------------- | ---------------------------------- |
-| R008 labelWidth              | 可能有特殊布局需求                           | 标注疑似问题 + 给建议 + 等用户确认 |
-| R009 状态字段纯文本          | 需识别业务语义                               | 同上                               |
-| R010 分类 vs 状态判断        | 需结合字段业务含义                           | 同上                               |
-| R013（含 Upload 等特殊操作） | Upload 嵌入 operations[] 需抽离到 toolbarDef | 同上                               |
+由 `standards/rules.json` 的 `autoFixable` 字段权威决定，不在此另行声明。`npx wl-ui fix --target src --dry-run` 会按该字段筛选可自动修复条目。
 
 ---
 

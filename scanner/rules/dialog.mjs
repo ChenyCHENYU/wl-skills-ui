@@ -1,29 +1,44 @@
-/** scanner/rules/dialog.mjs — 弹窗分页规则：R011 */
+/** scanner/rules/dialog.mjs — 弹窗分页规则：R011
+ *  v1.8.0 修复：之前逻辑反了（要求"必须放 #footer"），与 standards/ui/05-dialog-pagination.md
+ *  「分页必须放在内容区，不得放在 #footer」语义矛盾。本版反转为正确语义：检测到
+ *  #footer 内含 el-pagination 即报错。
+ *  事实源：standards/rules.json (R011)
+ */
 import { lineOf, issue } from "./_shared.mjs";
 
 export const dialogRules = [
-  // R011: pagination 放在 #footer 外面
+  // R011: el-pagination 不得位于 #footer 插槽中
   {
     id: "R011",
     category: "dialog",
     severity: "error",
-    name: "弹窗内分页器应放在 #footer slot 中",
+    name: "弹窗内 el-pagination 不得放在 #footer 插槽中",
     check(template, file, lineOffset) {
       const issues = [];
-      // 找到 #footer slot 的范围
-      const footerMatch = /<template\s+#footer\b/;
-      const footerIdx = template.search(footerMatch);
-      // 找 el-pagination
-      const paginationPattern = /<el-pagination\b/g;
+      // 提取所有 <template #footer ...> ... </template> 段
+      const footerSegments = [];
+      const footerOpenRe = /<template\s+#footer\b[^>]*>/g;
+      let openMatch;
+      while ((openMatch = footerOpenRe.exec(template)) !== null) {
+        const start = openMatch.index;
+        const after = template.slice(start);
+        // 简易匹配最近的 </template>（v3 中 footer slot 不嵌套 template）
+        const closeRel = after.search(/<\/template>/);
+        if (closeRel === -1) continue;
+        footerSegments.push({ start, end: start + closeRel });
+      }
+      const inFooter = (idx) =>
+        footerSegments.some((s) => idx >= s.start && idx <= s.end);
+
+      const paginationRe = /<el-pagination\b/g;
       let m;
-      while ((m = paginationPattern.exec(template)) !== null) {
-        // 是否在 el-dialog 里？
+      while ((m = paginationRe.exec(template)) !== null) {
+        // 必须在 el-dialog 内
         const before = template.slice(0, m.index);
         const dialogOpens = (before.match(/<el-dialog\b/g) || []).length;
         const dialogCloses = (before.match(/<\/el-dialog>/g) || []).length;
-        if (dialogOpens <= dialogCloses) continue; // 不在 dialog 内
-        // 是否在 footer 之外？
-        if (footerIdx === -1 || m.index < footerIdx)
+        if (dialogOpens <= dialogCloses) continue;
+        if (inFooter(m.index)) {
           issues.push(
             issue(
               file,
@@ -31,10 +46,11 @@ export const dialogRules = [
               "R011",
               "dialog",
               "error",
-              "弹窗内 el-pagination 未放在 <template #footer> 中",
-              '将 el-pagination 移至 <template #footer><div class="dialog-footer">...</div></template>',
+              "弹窗内 el-pagination 位于 #footer 插槽中（会逃出 dialog 容器漂浮在页面底部）",
+              '将 el-pagination 移到内容区，包裹 <div class="popup-pagination">；#footer 仅放操作按钮',
             ),
           );
+        }
       }
       return issues;
     },

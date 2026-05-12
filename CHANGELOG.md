@@ -4,6 +4,20 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.12] - 2026-05-12
+
+### Fixed
+
+- 修复表单 label 单行省略样式覆盖后，必填星号、错误 label、错误提示和错误边框红色态不明显的问题。
+
+## [1.6.11] - 2026-05-11
+
+### Changed
+
+- 优化 BaseToolbar 下拉/分裂按钮组样式，统一高度、圆角、间距和下拉菜单 hover 可读性。
+- 优化 AG Grid 操作列内 `jh-op-*` 操作按钮，取消 active 缩放并提升选中行可读性。
+- 补齐输入控件 focus 品牌色边框、统一圆角、长表单 label 单行省略和弹窗图标居中尺寸规则。
+
 ## [1.6.10] - 2026-05-11
 
 ### Removed

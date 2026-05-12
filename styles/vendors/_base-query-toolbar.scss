@@ -262,6 +262,57 @@
   font-weight: 500;
 }
 
+.base-toolbar-box .el-button-group {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+
+  .el-button {
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+
+  .el-button:first-child {
+    border-top-left-radius: 6px !important;
+    border-bottom-left-radius: 6px !important;
+  }
+
+  .el-button:last-child {
+    border-top-right-radius: 6px !important;
+    border-bottom-right-radius: 6px !important;
+    margin-left: -1px !important;
+  }
+}
+
+.base-toolbar-box .el-dropdown,
+.base-toolbar-box .action-button-wrap .el-dropdown,
+.base-toolbar-box .action-button-wrap .el-button-group {
+  display: inline-flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+}
+
+.el-dropdown-menu .el-dropdown-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  line-height: 1.3;
+  color: var(--el-text-color-regular, #606266);
+}
+
+.el-dropdown-menu .el-dropdown-menu__item:hover,
+.el-dropdown-menu .el-dropdown-menu__item:focus {
+  color: var(--el-color-primary, #2254f4) !important;
+  background-color: rgba(34, 84, 244, 0.08) !important;
+}
+
+.el-dropdown-menu .el-dropdown-menu__item .el-icon,
+.el-dropdown-menu .el-dropdown-menu__item svg {
+  color: currentColor !important;
+  fill: currentColor;
+  flex: 0 0 auto;
+}
 // ── 弹窗/抽屉底部按钮行 ──────────────────────────────────────────────────────
 .dialog-footer .el-button {
   border-radius: 6px !important;

@@ -21,6 +21,8 @@
   align-items: center;
   justify-content: center;
   flex-wrap: nowrap;
+  width: 100%;
+    min-width: 0;
 }
 
 // ── 第一层：纯图标按钮（26×26px，hover 变语义色）──────────────────────────
@@ -40,7 +42,9 @@
   flex-shrink: 0;
 
   svg { width: 14px; height: 14px; }
-  &:active { opacity: 0.6; transform: scale(0.92); }
+        &:active {
+          opacity: 0.6;
+        }
 
   // 查看 — hover 蓝
   &.jh-op-view {
@@ -141,7 +145,9 @@
     background: rgba(34, 84, 244, 0.10);
       color: var(--el-color-primary, #2254f4);
   }
-  &:active { opacity: 0.65; transform: scale(0.96); }
+        &:active {
+          opacity: 0.65;
+        }
 }
 
 // ── 第三层：文字按钮（业务专属长名称）────────────────────────────────────────
@@ -193,17 +199,17 @@
       background: var(--el-color-danger) !important;
       color: #fff !important;
     }
-  
+
     &.el-tag--warning {
       background: var(--el-color-warning) !important;
       color: #fff !important;
     }
-  
+
     &.el-tag--success {
       background: var(--el-color-success) !important;
       color: #fff !important;
     }
-  
+
     &.el-tag--info {
       background: var(--el-color-primary) !important;
       color: #fff !important;
@@ -283,22 +289,22 @@
       background: rgba(43, 178, 104, 0.12);
       color: var(--el-color-success);
     }
-  
+
     &--warning {
       background: rgba(234, 154, 19, 0.12);
       color: var(--el-color-warning);
     }
-  
+
     &--danger {
       background: rgba(187, 45, 63, 0.12);
       color: var(--el-color-danger);
     }
-  
+
     &--info {
       background: rgba(34, 84, 244, 0.10);
       color: var(--el-color-primary);
     }
-  
+
     &--default {
       background: rgba(34, 84, 244, 0.10);
       color: var(--el-color-primary);
@@ -329,6 +335,24 @@
   }
 }
 
+.ag-row-selected {
+
+  .jh-op-btn,
+  .jh-op-chip,
+  .jh-op-link {
+    background-color: rgba(255, 255, 255, 0.65);
+    color: var(--el-color-primary, #2254f4);
+  }
+
+  .jh-op-del {
+    color: var(--el-color-danger, #f5222d);
+  }
+
+  .jh-op-edit,
+  .jh-op-ok {
+    color: var(--el-color-success, #2bb268);
+  }
+}
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // FullScreenDialog — 全屏/关闭按钮尺寸对齐 + 弹窗底部按钮风格
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -455,6 +479,67 @@
   }
 }
 
+.el-input__wrapper,
+.el-select .el-input__wrapper,
+.el-select__wrapper,
+.el-date-editor.el-input__wrapper {
+  border-radius: 6px !important;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.el-input__wrapper.is-focus,
+.el-select__wrapper.is-focused,
+.el-date-editor.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1.5px var(--el-color-primary, #2254f4) inset !important;
+}
+
+.el-form-item__label,
+.base-query-box .el-form-item__label,
+[class*='base-form'] .el-form-item__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: keep-all;
+}
+
+.el-form-item.is-required:not(.is-no-asterisk).asterisk-left > .el-form-item__label::before,
+.el-form-item.is-required:not(.is-no-asterisk).asterisk-right > .el-form-item__label::after {
+  color: var(--el-color-danger, #f56c6c) !important;
+}
+
+.el-form-item.is-error {
+  .el-form-item__label,
+  .el-form-item__error {
+    color: var(--el-color-danger, #f56c6c) !important;
+  }
+
+  .el-input__wrapper,
+  .el-select__wrapper,
+  .el-date-editor.el-input__wrapper,
+  .el-textarea__inner {
+    box-shadow: 0 0 0 1px var(--el-color-danger, #f56c6c) inset !important;
+  }
+}
+
+.header .svg-icon,
+.el-dialog__header .svg-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  flex: 0 0 24px !important;
+  border-radius: 6px !important;
+  transform: none !important;
+}
+
+.header .svg-icon svg,
+.el-dialog__header .svg-icon svg {
+  width: 14px !important;
+  height: 14px !important;
+}
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MenuDivider 分区标题分割线 — 颜色 Token 化
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

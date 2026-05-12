@@ -193,8 +193,12 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.6.10 版本继续强化“统一规则源 + 单一事实源 + 项目集群封装必覆盖 + UI 细节精准修复”的闭环，并彻底剔除旧前缀：
+当前 v1.6.12 版本继续强化“统一规则源 + 单一事实源 + 项目集群封装必覆盖 + UI 细节精准修复”的闭环，并补齐销售报价页暴露出的通用 UI 细节：
 
+- 修复表单必填星号、错误 label、错误提示和错误边框红色态，避免校验反馈被通用 label/input 样式覆盖
+- 优化 BaseToolbar 下拉/分裂按钮组，让“主动作 + 下拉动作”按一个动作组展示，避免视觉割裂
+- 优化 AG Grid 操作列 `jh-op-*` 图标/胶囊/文字按钮，取消按压缩放抖动，并提升选中行下的可读性
+- 补齐输入控件 focus 品牌色边框、统一圆角、长 label 单行省略和自定义弹窗图标居中尺寸规则
 - 全量移除旧 `wk-` 前缀命名（包名 / CLI / 快照目录 / 豁免配置 / MCP 工具名），不再兼容（详见 CHANGELOG v1.6.10）
 - 新增 `skills/_meta/_compat/vendors.json` 作为 L2 Project Vendors 的单一事实源（id / priority / patterns / baseline / styles），`scanner/coverage.mjs` 启动时一次性编译 RegExp，零运行时开销
 - 新增 `wl-ui add-vendor <tag> [--family <id>] [--dry-run]` 脚手架命令：一键生成专项 SCSS、`@forward` 注册、`vendors.json` baseline 追加、scanner 规则草稿

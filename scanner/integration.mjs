@@ -7,9 +7,21 @@
  *   I002 — main.scss / 全局入口是否引入 @agile-team/wl-skills-ui/styles 或 shared/index.scss
  *   I003 — src/util/ 是否有 ag-cell-renders.ts 或者 main.ts 中安装了 runtime
  *   I004 — element-plus 是否在 dependencies 中（peer 兼容）
+ *   I005 — @jhlc/jh-ui ↔ element-plus 版本配对是否符合推荐组合（vendors.json 单一事实源）
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const VENDORS_JSON = JSON.parse(
+  readFileSync(
+    join(__dirname, "..", "skills", "_meta", "_compat", "vendors.json"),
+    "utf8",
+  ),
+);
+const JH_COMPAT = VENDORS_JSON.vendors.find((v) => v.id === "jh")?.compat || {};
 
 /**
  * @param {string} projectRoot — 项目根目录（包含 index.html / src / package.json）
@@ -140,6 +152,34 @@ export function checkIntegration(projectRoot) {
             : `peer 依赖缺失：${!hasVue ? "vue " : ""}${!hasEp ? "element-plus" : ""}`,
         suggestion: hasEp && hasVue ? "" : "pnpm add vue element-plus",
       });
+
+      // ── I005: jh-ui ↔ element-plus 版本配对 ──────────────────────────
+      const jhUi = deps["@jhlc/jh-ui"];
+      const ep = deps["element-plus"];
+      if (jhUi) {
+        const epOk = ep && ep.includes(JH_COMPAT.elementPlus || "2.2.6-prod.3");
+        const jhOk = jhUi.includes(JH_COMPAT.jhUi || "3.1.0");
+        const ok = epOk && jhOk;
+        checks.push({
+          id: "I005",
+          severity: ok ? "info" : "warning",
+          ok,
+          description: ok
+            ? `jh-ui 推荐组合命中（@jhlc/jh-ui ${jhUi} + element-plus ${ep}）`
+            : `jh-ui 版本配对偏离推荐（实际 @jhlc/jh-ui ${jhUi} + element-plus ${ep || "未安装"}）`,
+          suggestion: ok
+            ? ""
+            : `推荐组合：@jhlc/jh-ui@${JH_COMPAT.jhUi} + element-plus@${JH_COMPAT.elementPlus}（详见 docs/compat-matrix.md）`,
+        });
+      } else {
+        checks.push({
+          id: "I005",
+          severity: "info",
+          ok: true,
+          description: "未检测到 @jhlc/jh-ui，跳过 jh-ui 配对校验",
+          suggestion: "",
+        });
+      }
     } catch {
       checks.push({
         id: "I004",

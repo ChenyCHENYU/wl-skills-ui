@@ -4,6 +4,22 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.0] - 2026-05-12
+
+### Added
+
+- 新增 `docs/compat-matrix.md`：项目集群推荐版本与 wl-skills-ui 的适配矩阵单一事实源（`element-plus@2.2.6-prod.3` + `@jhlc/jh-ui@3.1.0`）。
+- `skills/_meta/_compat/vendors.json` 在 `jh.compat` 字段钉死推荐 EP/jh-ui 版本与 EP 2.2 vs 2.3 DOM 差异说明。
+- scanner 接入完整性新增 `I005`：从 `vendors.json` 读取推荐版本，校验消费方 `package.json` 是否命中推荐组合。
+- MCP 新增 `wl_ui_detect_skin` 工具：读取项目 `package.json` 返回 `verdict (match / mismatch / no-jh-ui)` 与推荐 SCSS 列表。
+
+### Changed
+
+- `legacy-skin-align` flow 增加 Phase 0.5 强约束：写样式前必须先识别 jh-ui ↔ EP 版本配对。
+- `skills/vendors/jh-components/SKILL.md` 补全反例（`.el-input__wrapper.is-focus` 在 EP 2.2 永远命中不到等），并显式钉死推荐组合。
+- `scripts/check-docs.mjs` 扩展：`docs/compat-matrix.md` 的 EP/jh-ui 版本必须与 `vendors.json` 一致。
+- README 新增「项目-依赖适配矩阵速查」章节，引导消费方一键判断推荐组合是否命中。
+
 ## [1.6.14] - 2026-05-12
 
 ### Added

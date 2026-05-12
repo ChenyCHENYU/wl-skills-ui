@@ -39,7 +39,13 @@
         "_jh-tree.scss",
         "_jh-pagination.scss",
         "_jh-drag-col.scss"
-      ]
+      ],
+      "compat": {
+        "elementPlus": "2.2.6-prod.3",
+        "elementPlusRange": "<2.3.0",
+        "jhUi": "3.1.0",
+        "note": "jh-ui 3.x 假设 EP 2.2.x DOM (.el-input>.el-input__inner)，EP 2.3 起引入 .el-input__wrapper 后不再兼容"
+      }
     },
     {
       "id": "c",

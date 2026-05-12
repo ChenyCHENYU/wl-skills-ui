@@ -27,6 +27,20 @@ npx wl-ui doctor --project .
 
 （AI 严格按序）
 
+### Phase 0.5 — 识别 jh-ui ↔ Element Plus 版本配对（强约束）
+
+在写任何样式前，**必须先**通过下列任一方式确认推荐组合命中情况：
+
+- MCP：调用 `wl_ui_detect_skin`，读取项目 `package.json` 返回 `verdict`（`match` / `mismatch` / `no-jh-ui`）。
+- CLI：执行 `npx wl-ui check --project .`，关注 `I005` 项。
+- 文档：对照 `docs/compat-matrix.md` 的「推荐版本」表。
+
+判定规则：
+
+- `verdict === "match"`（推荐组合）：`_jh-ui.scss` 等 EP 2.2.x 适配规则可全量启用。
+- `verdict === "mismatch"`（版本偏离）：禁止套用 EP 2.6+ `.el-input__wrapper` 规则；先与项目方对齐版本再继续 Phase 1。
+- `verdict === "no-jh-ui"`：无需启用 `_jh-ui.scss`，按 EP 默认 DOM 处理。
+
 ### Phase 1 — 接入 tokens
 1. 检查 `index.html`，在 `<head>` 内追加：
    ```html

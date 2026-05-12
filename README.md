@@ -191,11 +191,30 @@ yarn add @agile-team/wl-skills-ui
 
 ---
 
+## 项目-依赖适配矩阵速查
+
+集团项目集群推荐组合（**单一事实源**：`docs/compat-matrix.md` + `skills/_meta/_compat/vendors.json` 的 `jh.compat`）：
+
+| 依赖 | 推荐版本 | 备注 |
+|---|---|---|
+| `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
+| `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入 |
+| `@agile-team/wl-skills-ui` | `^1.7.0` | 已对齐上述组合的 DOM 假设 |
+
+新接入项目可执行 `npx wl-ui check --project .`（看 `I005`）或 MCP 工具 `wl_ui_detect_skin` 自动判断当前组合是否命中推荐。完整版本-项目实测表见 `docs/compat-matrix.md`。
+
+---
+
 ## 版本亮点
 
-当前 v1.6.14 版本继续强化“统一规则源 + 单一事实源 + 项目集群封装必覆盖 + UI 细节精准修复”的闭环，并补齐销售报价页暴露出的通用 UI 细节：
+当前 v1.7.0 版本聚焦“**项目集群依赖配对单一事实源 + AI/Skill 强约束识别**”：
 
-- 新增 `@jhlc/jh-ui` SCSS 皮肤包专项适配（`styles/vendors/_jh-ui.scss`），精准覆盖 `.com-text` label、`.com-input` / `.com-textarea` 控件 wrapper、`.has-colon` 冒号注入等 jh-ui 特有 DOM
+- 新增 `docs/compat-matrix.md` 作为项目集群推荐版本与 wl-skills-ui 的适配矩阵单一事实源；`skills/_meta/_compat/vendors.json` 在 `jh.compat` 字段钉死 `element-plus@2.2.6-prod.3` + `@jhlc/jh-ui@3.1.0`
+- scanner 接入完整性新增 `I005`：基于 `vendors.json` 校验消费方 `package.json` 是否锚定推荐组合，偏离时给出明确建议
+- MCP 新增 `wl_ui_detect_skin` 工具，AI 写样式前可一键拿到 `verdict: match | mismatch | no-jh-ui` 与推荐 SCSS 列表
+- `legacy-skin-align` flow 增加 Phase 0.5 强约束：写样式前必须先识别版本配对；`jh-components` SKILL 补全反例（`.el-input__wrapper.is-focus` 在 EP 2.2 永远命中不到等）
+- `docs:check` 扩展校验：`docs/compat-matrix.md` 中的版本号必须与 `vendors.json` 同步，避免事实源漂移
+- 沿用 v1.6.14 的 `_jh-ui.scss` 适配层（`.com-text` label / EP 2.2.x `.el-input__inner` focus + error / 必填星号）
 - 兼容 Element Plus 2.2.x（`.el-input__inner` 直挂结构）下输入、选择、日期控件的圆角 / focus / error 三态，jh-select 与 jh-date-picker focus 行为稳定
 - 补强输入、选择、日期、文本域 focus 品牌色边框和必填星号红色显示规则，兼容 Element Plus 定制版本差异
 - 修复表单必填星号、错误 label、错误提示和错误边框红色态，避免校验反馈被通用 label/input 样式覆盖

@@ -97,6 +97,28 @@ if (existsSync(jhSkill)) {
   }
 }
 
+// compat-matrix.md ↔ vendors.json 一致性
+const vendorsJson = JSON.parse(
+  readFileSync(join(root, "skills", "_meta", "_compat", "vendors.json"), "utf8"),
+);
+const jhCompat = vendorsJson.vendors.find((v) => v.id === "jh")?.compat || {};
+const compatMatrixPath = join(root, "docs", "compat-matrix.md");
+if (existsSync(compatMatrixPath)) {
+  const matrix = readFileSync(compatMatrixPath, "utf8");
+  if (jhCompat.elementPlus && !matrix.includes(jhCompat.elementPlus)) {
+    errors.push(
+      `docs/compat-matrix.md: 缺少推荐 element-plus 版本 ${jhCompat.elementPlus}（与 vendors.json jh.compat 不一致）`,
+    );
+  }
+  if (jhCompat.jhUi && !matrix.includes(jhCompat.jhUi)) {
+    errors.push(
+      `docs/compat-matrix.md: 缺少推荐 @jhlc/jh-ui 版本 ${jhCompat.jhUi}（与 vendors.json jh.compat 不一致）`,
+    );
+  }
+} else {
+  errors.push("docs/compat-matrix.md: 文件不存在，无法校验适配矩阵");
+}
+
 if (!readme.includes(`当前 v${pkg.version}`)) {
   errors.push(
     `README.md: 当前版本文案未同步 package.json version ${pkg.version}`,

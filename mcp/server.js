@@ -84,6 +84,21 @@ const TOOLS = [
     },
   },
   {
+    name: "wl_ui_detect_skin",
+    description:
+      "读取目标项目 package.json，识别 @jhlc/jh-ui 与 element-plus 版本配对，返回适配矩阵建议。",
+    inputSchema: {
+      type: "object",
+      properties: {
+        project: {
+          type: "string",
+          description: "项目根目录，默认 WL_PROJECT_ROOT 或当前目录",
+        },
+      },
+      required: [],
+    },
+  },
+  {
     name: "wl_ui_recommend_flow",
     description:
       "根据 wl_ui_scan --output json 的扫描结果推荐后续 flow、tool 和 wl-skills-kit 桥接动作。",
@@ -329,6 +344,14 @@ async function dispatchTool(id, name, args) {
       sendResult(id, {
         content: [
           { type: "text", text: JSON.stringify(routeIntent(args), null, 2) },
+        ],
+      });
+      return;
+    }
+    if (name === "wl_ui_detect_skin") {
+      sendResult(id, {
+        content: [
+          { type: "text", text: JSON.stringify(detectSkin(args), null, 2) },
         ],
       });
       return;

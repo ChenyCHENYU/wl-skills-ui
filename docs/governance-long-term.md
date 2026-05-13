@@ -78,24 +78,37 @@ npx wl-ui scan --target src --baseline .wl-baseline.json --fail-on=new-issues
 **目标**：让"逐渐变烂"可见，每次升级都能量化。
 
 ```bash
-# 每次 wl-skills-ui 升版后跑一次
-npx wl-ui audit --target src --output json --outFile .wl-drift-after.json
-node -e "console.log(require('@agile-team/wl-skills-ui/scanner/drift.mjs').report('.wl-baseline.json','.wl-drift-after.json'))"
+# 方式一：scan 一步到位（v1.8.2+）
+npx wl-ui scan --target src --baseline .wl-baseline.json --fail-on-error
+
+# 方式二：独立 drift 子命令
+npx wl-ui scan --target src --output json --outFile .wl-current.json
+npx wl-ui drift --baseline .wl-baseline.json --current .wl-current.json
 ```
 
-输出（示意）：
+输出示例：
 
 ```
-变化（基线 → 当前）
-  gained   +12  新增违规（红灯）
-  fixed    -45  消化历史（绿灯）
-  regressed +3  曾修过又破的（黄灯，最高优先级追查）
-  exempt    +0  豁免清单未扩张
-按规则 Top3：R017(+8) R001(+3) R009(+1)
-按目录 Top3：src/views/quote(+9) src/views/cost(+3)
+╭──────────────────────────────────────╮
+│        wl-skills-ui 漂移报告         │
+╰──────────────────────────────────────╯
+
+基线违规: 120  →  当前违规: 87  (-33)
+
+  🔴 gained   +3  新增违规
+  🟢 fixed    -36  消化历史
+
+新增 Top 规则:
+  R017  +2
+  R001  +1
+
+消化 Top 规则:
+  R009  -15
+  R004  -12
+  R016  -9
 ```
 
-> 实现入口：v1.8.0 起 `scanner/index.mjs` 已暴露 `--output json` 完整结构（含 `file/line/rule`），业务项目可基于该结构自实现 drift 报告；包内 `scanner/drift.mjs` 在 1.8.x 后续小版本提供。
+> 实现入口：`scanner/drift.mjs` 提供 `drift()` / `driftFromFiles()` / `formatDriftText()` / `formatDriftJson()` 四个 API。MCP 工具 `wl_ui_drift` 可供 AI 直接调用。
 
 ---
 

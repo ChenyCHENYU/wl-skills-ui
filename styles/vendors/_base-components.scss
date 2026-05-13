@@ -508,12 +508,25 @@
   word-break: keep-all;
 }
 
-.el-form-item.is-required:not(.is-no-asterisk).asterisk-left > .el-form-item__label::before,
-.el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::after,
-.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::before,
-.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::after {
+// 必填星号：只保留一颗 — 默认 asterisk-left（::before），asterisk-right 用 ::after
+// 旧写法同时 display:inline-block 两个伪元素导致 * * 重复
+.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::before {
   color: var(--el-color-danger, #f56c6c) !important;
   display: inline-block !important;
+}
+// asterisk-right 模式：显示 ::after，隐藏 ::before
+.el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::before {
+  display: none !important;
+}
+
+.el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::after {
+  color: var(--el-color-danger, #f56c6c) !important;
+  display: inline-block !important;
+}
+
+// 默认模式：隐藏 ::after 防止重复星号
+.el-form-item.is-required:not(.is-no-asterisk):not(.asterisk-right)>.el-form-item__label::after {
+  display: none !important;
 }
 
 .el-form-item.is-error {

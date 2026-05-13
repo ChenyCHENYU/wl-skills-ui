@@ -423,6 +423,30 @@ if (subcommand === "all") {
   } else {
     console.log(report);
   }
+
+  // ── baseline 漂移检测（--baseline <file>）────────────────────────────────
+  let driftResult = null;
+  if (values.baseline) {
+    const { existsSync: fileExists } = await import("node:fs");
+    const baselinePath = resolve(values.baseline);
+    if (fileExists(baselinePath)) {
+      const { drift, formatDriftText, formatDriftJson } =
+        await import("./drift.mjs");
+      const baseline = JSON.parse(readFileSync(baselinePath, "utf8"));
+      const currentData = { issues: filtered };
+      driftResult = drift(baseline, currentData);
+      console.error("");
+      if (values.output === "json") {
+        console.error(formatDriftJson(driftResult));
+      } else {
+        console.error(formatDriftText(driftResult));
+      }
+    } else {
+      console.error(`[wl-scan] 基线文件不存在: ${baselinePath}，跳过漂移检测`);
+    }
+  }
+
   const hasError = filtered.some((i) => i.severity === "error");
-  process.exit(values["fail-on-error"] && hasError ? 1 : 0);
+  const hasDriftNew = driftResult && driftResult.gained.count > 0;
+  process.exit(values["fail-on-error"] && (hasError || hasDriftNew) ? 1 : 0);
 }

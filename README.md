@@ -213,14 +213,14 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.1 版本完成 R-rule 治理体系单一事实源化，并落地业务项目长效治理方案：
+当前 v1.8.2：
 
-- 新增 **`standards/rules.json`** 作为 29 条 R-rule 的单一事实源；所有 standards 文档、SKILL.md、scanner、MCP、未来 ESLint 插件均从此派生
-- 新增 **`standards/rules-loader.mjs`** 共享加载器；新增 MCP 工具 **`wl_ui_list_rules`** / **`wl_ui_describe_rule`**，AI 写代码前一键查规则
-- 修复历史 ID 冲突与逻辑反转 bug：scanner `tag.mjs` 原 R017/R018 重号为 R019/R020（与 `color.mjs` 解耦，旧 ID 通过 `aliases` 兼容）；R011 由"必须放 #footer"反转为"不得放 #footer"，与 standards/ui/05 对齐
-- 清理 `_registry.md` 12 条幽灵 skill 引用；`runtime/style-align/SKILL.md` 改为指针式引用 rules.json，不再复述规则细节
-- `scripts/check-docs.mjs` 扩展为 R-rule / scanner / SKILL / registry 四向一致性守卫，CI 不一致直接红灯
-- 新增 **`docs/governance-long-term.md`**：业务项目长效治理方案（基线 / 豁免 / 漂移看板 / 版本钉死 / 写作期 AI 守护五机制），杜绝遗留累积与升级回归
+- **修复**搜索区字号 13px/12px 混杂 → 统一 12px；必填星号 `* *` 重复 → 精确单颗控制
+- 新增 **scanner fixture 测试集**（16 条自动化测试，`npm test`）和 **SCSS 链路检查**（`npm run check:scss`）
+- `scan --baseline` 一步到位：扫描后自动对比基线输出漂移报告，CI 增量门槛
+- **漂移检测** `scanner/drift.mjs` + CLI `wl-scan drift` + MCP `wl_ui_drift`
+- **R-rule 单一事实源** `standards/rules.json`（29 条），五向一致性守卫
+- **长效治理方案** `docs/governance-long-term.md`（基线 / 豁免 / 漂移 / 版本钉死 / AI 守护）
 
 历史亮点（v1.7.1）：
 

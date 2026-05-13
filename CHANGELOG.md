@@ -4,6 +4,20 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.2] - 2026-05-13
+
+### Fixed
+
+- **搜索区字号不一致**：`_base-query-toolbar.scss` 统一 label / input / select / placeholder 为 **12px**，消除 13px→12px 混杂导致的视觉跳动。
+- **必填星号重复 `* *`**：`_base-components.scss` 必填星号改为精确模式——默认只显示 `::before`，`asterisk-right` 仅显示 `::after`，避免 `display: inline-block !important` 同时作用于两个伪元素。`_jh-ui.scss` 同步精简为只声明颜色不控制 `display`。
+
+### Added
+
+- **scanner fixture 测试集**：`scanner/__tests__/` 覆盖 R001/R002/R006/R011/R016/R021 + drift 模块共 16 条自动化测试，`npm test` 一键跑。
+- **SCSS 链路检查**：`scripts/check-scss.mjs` 递归验证 `styles/index.scss` 和 `presets/skin.scss` 的 `@forward/@use` 链路完整性。
+- **scan --baseline 一步到位**：`wl-scan scan --target src --baseline .wl-baseline.json` 扫描后自动对比基线输出漂移报告，`--fail-on-error` 同时拦截新增违规。
+- `package.json` 新增 `test` 和 `check:scss` 脚本。
+
 ## [1.8.1] - 2026-05-13
 
 ### Added

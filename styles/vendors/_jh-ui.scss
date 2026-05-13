@@ -91,12 +91,9 @@
 }
 
 // 6) 必填星号兼容 jh-ui label 结构
-//    Element Plus 把 `::before` 放在 `.el-form-item__label` 上，
-//    jh-ui 没改这一点；但 label 自身是 inline-flex，部分浏览器下
-//    `::before` 会作为 flex 项参与排版，必须显式声明颜色/显示。
+//    颜色统一 danger 色；显示/隐藏由 _base-components.scss 总控，
+//    此处只负责颜色，不设 display，避免与总控冲突导致 * * 重复。
 .el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label::before,
-.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label::after,
-.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label > .com-text::before,
-.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label > .com-text::after {
+.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label>.com-text::before {
   color: var(--el-color-danger, #f56c6c) !important;
 }

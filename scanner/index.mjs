@@ -4,6 +4,8 @@
  *
  * 用法：
  *   wl-scan scan --target <path>          # 风格扫描
+ *   wl-scan scan --target <path> --only R001,R016
+ *   wl-scan scan --target <path> --skip R031-R037
  *   wl-scan scan --target <path> --outFile report.md
  *   wl-scan scan --target <path> --output json
  *   wl-scan check --project <path>        # 接入完整性检查
@@ -12,6 +14,7 @@
  *   wl-scan all --project <path>          # 接入检查 + 风格扫描 + 报告
  *   wl-scan init                          # 打印接入指引
  *   wl-scan drift --baseline <f> --current <f>  # 漂移检测
+ *   wl-scan exempt init --target <path>          # 生成 .wl-exempt.json 豁免模板
  *   wl-scan snapshot list                  # 列出快照
  *   wl-scan snapshot rollback [--id <id>]  # 回退到快照（默认最新）
  *   wl-scan snapshot diff [--id <id>]      # 查看快照与当前差异
@@ -45,6 +48,7 @@ const SUBCOMMANDS = new Set([
   "all",
   "init",
   "drift",
+  "exempt",
   "snapshot",
 ]);
 let subcommand = "scan";
@@ -71,6 +75,8 @@ const { values } = parseArgs({
     exempt: { type: "string", default: "" },
     baseline: { type: "string", default: "" },
     current: { type: "string", default: "" },
+    only: { type: "string", default: "" },
+    skip: { type: "string", default: "" },
   },
   strict: false,
 });
@@ -199,6 +205,24 @@ function runScan(targetDir, excludeDirs, exemptConfig) {
   };
 }
 
+// ── 公共：规则范围展开（R031-R037 → R031,R032,...,R037）────────────────────
+function expandRuleRange(input) {
+  const set = new Set();
+  for (const part of input.split(",").map((s) => s.trim())) {
+    const rangeMatch = part.match(/^(R)(\d+)-(R)?(\d+)$/i);
+    if (rangeMatch) {
+      const start = parseInt(rangeMatch[2]);
+      const end = parseInt(rangeMatch[4]);
+      for (let i = Math.min(start, end); i <= Math.max(start, end); i++) {
+        set.add("R" + String(i).padStart(3, "0"));
+      }
+    } else {
+      set.add(part.toUpperCase());
+    }
+  }
+  return set;
+}
+
 // ── 公共：按 layer / vendor / mode 过滤 ─────────────────────────────────────
 function applyFilters(issues) {
   let out = issues;
@@ -215,6 +239,16 @@ function applyFilters(issues) {
     out = out.filter((i) => ["L0", "L1", "L2"].includes(i.layer));
   } else if (values.mode === "native") {
     // 原生模式：全部 layer
+  }
+  // --only R001,R016 → 仅保留指定规则
+  if (values.only) {
+    const allow = expandRuleRange(values.only);
+    out = out.filter((i) => allow.has(i.rule));
+  }
+  // --skip R031-R037 → 排除指定规则
+  if (values.skip) {
+    const deny = expandRuleRange(values.skip);
+    out = out.filter((i) => !deny.has(i.rule));
   }
   return out;
 }
@@ -265,6 +299,76 @@ if (subcommand === "check") {
   }
   const hasError = checks.some((c) => !c.ok && c.severity === "error");
   process.exit(values["fail-on-error"] && hasError ? 1 : 0);
+}
+
+if (subcommand === "exempt") {
+  const sub = args[0] || "init";
+  if (sub === "init") {
+    const { existsSync } = await import("node:fs");
+    const projectRoot = resolve(values.project);
+    const targetDir = resolve(values.target);
+    const outPath = join(projectRoot, ".wl-exempt.json");
+    if (existsSync(outPath)) {
+      console.log(`⚠️  ${outPath} 已存在，跳过生成。如需重新生成请先删除。`);
+      process.exit(0);
+    }
+    // 智能扫描目标目录下常见的个性化子目录
+    const EXEMPT_KEYWORDS = [
+      "big-screen",
+      "dashboard",
+      "map-view",
+      "topology",
+      "flow-designer",
+      "report-designer",
+      "chart",
+      "3d",
+      "canvas",
+      "screen",
+      "monitor",
+      "cockpit",
+      "visual",
+    ];
+    const smartPaths = [];
+    function walkForExempt(dir, depth = 0) {
+      if (depth > 4) return;
+      try {
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+          if (!entry.isDirectory()) continue;
+          if (["node_modules", "dist", ".git"].includes(entry.name)) continue;
+          const rel = relative(targetDir, join(dir, entry.name)).replace(
+            /\\/g,
+            "/",
+          );
+          if (
+            EXEMPT_KEYWORDS.some((kw) => entry.name.toLowerCase().includes(kw))
+          ) {
+            smartPaths.push(rel + "/**");
+          } else {
+            walkForExempt(join(dir, entry.name), depth + 1);
+          }
+        }
+      } catch {
+        /* ignore permission errors */
+      }
+    }
+    if (existsSync(targetDir)) walkForExempt(targetDir);
+    const { generateExemptTemplate } = await import("./exempt.mjs");
+    const template = JSON.parse(generateExemptTemplate());
+    if (smartPaths.length > 0) {
+      template.exemptPaths = [
+        ...new Set([...smartPaths, ...template.exemptPaths]),
+      ];
+      template.description += `（自动扫描 ${targetDir} 发现 ${smartPaths.length} 个候选目录）`;
+    }
+    writeFileSync(outPath, JSON.stringify(template, null, 2) + "\n", "utf8");
+    console.log(`✅ 已生成 ${outPath}`);
+    if (smartPaths.length > 0) {
+      console.log(`   自动发现 ${smartPaths.length} 个候选豁免目录:`);
+      for (const p of smartPaths) console.log(`     ${p}`);
+    }
+    console.log(`   请人工审核后提交至版本库。`);
+  }
+  process.exit(0);
 }
 
 if (subcommand === "drift") {

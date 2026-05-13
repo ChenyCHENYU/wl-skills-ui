@@ -4,6 +4,13 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.3] - 2026-05-13
+
+### Added
+
+- **scan --only / --skip**：支持规则级过滤，`--only R001,R016` 仅跑指定规则，`--skip R031-R037` 排除范围（支持连字符范围展开）。
+- **exempt init 脚手架**：`wl-scan exempt init --target src` 智能扫描 src 下 big-screen/dashboard/chart 等个性化目录，自动生成 `.wl-exempt.json` 模板。
+
 ## [1.8.2] - 2026-05-13
 
 ### Fixed

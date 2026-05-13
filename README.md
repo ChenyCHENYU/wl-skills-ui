@@ -213,14 +213,15 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.2：
+当前 v1.8.3：
 
-- **修复**搜索区字号 13px/12px 混杂 → 统一 12px；必填星号 `* *` 重复 → 精确单颗控制
-- 新增 **scanner fixture 测试集**（16 条自动化测试，`npm test`）和 **SCSS 链路检查**（`npm run check:scss`）
-- `scan --baseline` 一步到位：扫描后自动对比基线输出漂移报告，CI 增量门槛
-- **漂移检测** `scanner/drift.mjs` + CLI `wl-scan drift` + MCP `wl_ui_drift`
+- `scan --only R001,R016` / `--skip R031-R037` 规则级过滤（支持范围展开）
+- `exempt init --target src` 智能扫描个性化目录，自动生成 `.wl-exempt.json`
+- **修复**搜索区字号统一 12px；必填星号 `* *` 去重
+- **scanner fixture 测试集**（16 条，`npm test`）+ **SCSS 链路检查**（`npm run check:scss`）
+- `scan --baseline` 一步漂移对比 + **drift.mjs** / MCP `wl_ui_drift`
 - **R-rule 单一事实源** `standards/rules.json`（29 条），五向一致性守卫
-- **长效治理方案** `docs/governance-long-term.md`（基线 / 豁免 / 漂移 / 版本钉死 / AI 守护）
+- **长效治理方案** `docs/governance-long-term.md`
 
 历史亮点（v1.7.1）：
 

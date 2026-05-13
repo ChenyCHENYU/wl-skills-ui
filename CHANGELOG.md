@@ -4,6 +4,14 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.1] - 2026-05-13
+
+### Added
+
+- 新增 **`scanner/drift.mjs`** 漂移检测模块：对比基线与当前扫描 JSON，输出 gained / fixed / regressed 结构化报告。
+- 新增 CLI `wl-scan drift --baseline <f> --current <f>` 子命令，支持 `--output json` 和 `--fail-on-error` 门槛。
+- 新增 MCP 工具 **`wl_ui_drift`**：AI 可直接传入两份扫描 JSON 拿漂移报告。
+
 ## [1.8.0] - 2026-05-12
 
 ### Added

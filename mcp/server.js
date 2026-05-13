@@ -134,6 +134,25 @@ const TOOLS = [
     },
   },
   {
+    name: "wl_ui_drift",
+    description:
+      "对比基线与当前扫描 JSON，输出漂移报告（gained / fixed / regressed）。用于 PR 级增量门槛。",
+    inputSchema: {
+      type: "object",
+      properties: {
+        baselineJson: {
+          type: "string",
+          description: "基线扫描 JSON 字符串（.wl-baseline.json 的内容）",
+        },
+        currentJson: {
+          type: "string",
+          description: "当前扫描 JSON 字符串",
+        },
+      },
+      required: ["baselineJson", "currentJson"],
+    },
+  },
+  {
     name: "wl_ui_recommend_flow",
     description:
       "根据 wl_ui_scan --output json 的扫描结果推荐后续 flow、tool 和 wl-skills-kit 桥接动作。",
@@ -493,6 +512,31 @@ async function dispatchTool(id, name, args) {
       sendResult(id, {
         content: [{ type: "text", text: JSON.stringify(rule, null, 2) }],
       });
+      return;
+    }
+    if (name === "wl_ui_drift") {
+      const { drift, formatDriftJson } = await import("../scanner/drift.mjs");
+      try {
+        const baseline = JSON.parse(args.baselineJson);
+        const current = JSON.parse(args.currentJson);
+        const result = drift(baseline, current);
+        sendResult(id, {
+          content: [{ type: "text", text: formatDriftJson(result) }],
+        });
+      } catch (e) {
+        sendResult(id, {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                { ok: false, reason: String(e.message) },
+                null,
+                2,
+              ),
+            },
+          ],
+        });
+      }
       return;
     }
     if (name === "wl_ui_recommend_flow") {

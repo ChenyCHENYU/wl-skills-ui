@@ -213,7 +213,7 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.0 版本完成 R-rule 治理体系单一事实源化，并落地业务项目长效治理方案：
+当前 v1.8.1 版本完成 R-rule 治理体系单一事实源化，并落地业务项目长效治理方案：
 
 - 新增 **`standards/rules.json`** 作为 29 条 R-rule 的单一事实源；所有 standards 文档、SKILL.md、scanner、MCP、未来 ESLint 插件均从此派生
 - 新增 **`standards/rules-loader.mjs`** 共享加载器；新增 MCP 工具 **`wl_ui_list_rules`** / **`wl_ui_describe_rule`**，AI 写代码前一键查规则

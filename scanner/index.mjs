@@ -11,6 +11,7 @@
  *   wl-scan fix --target <path> --dry-run
  *   wl-scan all --project <path>          # 接入检查 + 风格扫描 + 报告
  *   wl-scan init                          # 打印接入指引
+ *   wl-scan drift --baseline <f> --current <f>  # 漂移检测
  *   wl-scan snapshot list                  # 列出快照
  *   wl-scan snapshot rollback [--id <id>]  # 回退到快照（默认最新）
  *   wl-scan snapshot diff [--id <id>]      # 查看快照与当前差异
@@ -43,6 +44,7 @@ const SUBCOMMANDS = new Set([
   "fix",
   "all",
   "init",
+  "drift",
   "snapshot",
 ]);
 let subcommand = "scan";
@@ -67,6 +69,8 @@ const { values } = parseArgs({
     keep: { type: "string", default: "5" },
     "no-snapshot": { type: "boolean", default: false },
     exempt: { type: "string", default: "" },
+    baseline: { type: "string", default: "" },
+    current: { type: "string", default: "" },
   },
   strict: false,
 });
@@ -261,6 +265,27 @@ if (subcommand === "check") {
   }
   const hasError = checks.some((c) => !c.ok && c.severity === "error");
   process.exit(values["fail-on-error"] && hasError ? 1 : 0);
+}
+
+if (subcommand === "drift") {
+  const { driftFromFiles, formatDriftText, formatDriftJson } =
+    await import("./drift.mjs");
+  const baselinePath = resolve(values.baseline || ".wl-baseline.json");
+  const currentPath = resolve(values.current);
+  if (!values.current) {
+    console.error(
+      "用法: wl-scan drift --baseline .wl-baseline.json --current .wl-current.json",
+    );
+    process.exit(1);
+  }
+  const result = driftFromFiles(baselinePath, currentPath);
+  if (values.output === "json") {
+    console.log(formatDriftJson(result));
+  } else {
+    console.log(formatDriftText(result));
+  }
+  const hasNew = result.gained.count > 0;
+  process.exit(values["fail-on-error"] && hasNew ? 1 : 0);
 }
 
 if (subcommand === "snapshot") {

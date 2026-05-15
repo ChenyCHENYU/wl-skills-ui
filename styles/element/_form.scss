@@ -4,24 +4,24 @@ html body {
   --wk-form-control-radius: var(--el-border-radius-base, 6px);
 }
 
-.el-form-item--small {
+html body .el-form-item--small {
   margin-bottom: 8px;
 }
 
 // 解决 el-form-item 出现错误提示时底部 margin 增加的问题
-.is-error.el-form-item--small {
+html body .is-error.el-form-item--small {
   margin-bottom: 18px !important;
 }
 
 // ── 全局输入框圆角统一（6px，与搜索区保持一致）──────────────────────────────
-.el-input__wrapper,
-.el-select__wrapper,
-.el-select .el-select__wrapper,
-.el-date-editor.el-input__wrapper,
-.el-date-editor .el-input__wrapper,
-.el-input-number .el-input__wrapper,
-.el-cascader .el-input__wrapper,
-.el-autocomplete .el-input__wrapper,
-.el-textarea__inner {
+html body .el-input__wrapper,
+html body .el-select__wrapper,
+html body .el-select .el-select__wrapper,
+html body .el-date-editor.el-input__wrapper,
+html body .el-date-editor .el-input__wrapper,
+html body .el-input-number .el-input__wrapper,
+html body .el-cascader .el-input__wrapper,
+html body .el-autocomplete .el-input__wrapper,
+html body .el-textarea__inner {
   border-radius: var(--wk-form-control-radius) !important;
 }

@@ -1,7 +1,7 @@
 // styles/element/_table.scss — el-table 表头颜色覆盖
 // jh-ui table.scss 表头颜色为硬编码，此处用 CSS 变量覆盖
 
-html .el-table {
+html body .el-table {
   .el-table__header-wrapper th,
   .el-table__fixed-header-wrapper th {
     color: var(--el-text-color-primary, #303133);

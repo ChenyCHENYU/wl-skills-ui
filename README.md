@@ -213,15 +213,13 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.3：
+当前 v1.8.4：
 
-- `scan --only R001,R016` / `--skip R031-R037` 规则级过滤（支持范围展开）
-- `exempt init --target src` 智能扫描个性化目录，自动生成 `.wl-exempt.json`
-- **修复**搜索区字号统一 12px；必填星号 `* *` 去重
-- **scanner fixture 测试集**（16 条，`npm test`）+ **SCSS 链路检查**（`npm run check:scss`）
-- `scan --baseline` 一步漂移对比 + **drift.mjs** / MCP `wl_ui_drift`
-- **R-rule 单一事实源** `standards/rules.json`（29 条），五向一致性守卫
-- **长效治理方案** `docs/governance-long-term.md`
+- **R025** 语义合规：`options:[]` 退化检测 → 提示升级 `renderTagSlot` / `renderDictClassifyTag`
+- **R026** 原生 HTML 拦截：`<table>/<input>/<select>/<button>/<textarea>` → 提示替换 el-* 组件
+- `scan --only/--skip` 规则过滤 + `exempt init` 智能豁免脚手架
+- 搜索区字号统一 12px / 必填星号去重 / 20 条 fixture 自动化测试
+- `scan --baseline` 漂移对比 + SCSS 链路检查 + R-rule 单一事实源（31 条）
 
 历史亮点（v1.7.1）：
 

@@ -4,6 +4,14 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.4] - 2026-05-17
+
+### Added
+
+- **R025**：检测 defineColumns 列中 `options:[]` 纯文本退化，提示升级为 `renderTagSlot` / `renderDictClassifyTag` 彩色标签。
+- **R026**：检测模板中原生 HTML 元素（`<table>/<input>/<select>/<button>/<textarea>`），提示替换为对应 Element Plus 组件以纳入统一风格体系。
+- fixture 测试覆盖 R025/R026（20 条自动化测试）。
+
 ## [1.8.3] - 2026-05-13
 
 ### Added

@@ -387,6 +387,30 @@
       "autoFixable": false,
       "scanner": "scanner/rules/componentFamily.mjs",
       "skills": ["element/component-family"]
+    },
+    {
+      "id": "R025",
+      "category": "table",
+      "severity": "warning",
+      "title": "defineColumns 列禁止用 options:[] 纯文本渲染状态/分类",
+      "rationale": "options:[] 是 BaseTable 内建的最简字典渲染，只出文字无颜色区分；应升级为 renderTagSlot / renderDictClassifyTag 以获得彩色标签。",
+      "appliesTo": ["defineColumns", "columnsDef"],
+      "autoFixable": false,
+      "manualReason": "需确定字典 key 和颜色映射",
+      "scanner": "scanner/rules/semantic.mjs",
+      "skills": ["vendors/base-table", "element/el-table"]
+    },
+    {
+      "id": "R026",
+      "category": "form",
+      "severity": "warning",
+      "title": "模板禁止使用原生 HTML 元素（table/input/select/button/textarea）",
+      "rationale": "原生 HTML 元素不受 wl-skills-ui 样式体系覆盖（size/密度/圆角/token），必须替换为对应 Element Plus 组件。",
+      "appliesTo": ["<table>", "<input>", "<select>", "<button>", "<textarea>"],
+      "autoFixable": false,
+      "manualReason": "需根据业务场景选择正确的 el-* 组件和属性",
+      "scanner": "scanner/rules/semantic.mjs",
+      "skills": ["element/el-form", "element/el-table"]
     }
   ]
 }

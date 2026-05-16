@@ -4,7 +4,7 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.8.4] - 2026-05-17
+## [1.8.5] - 2026-05-17
 
 ### Added
 

@@ -213,7 +213,7 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.4：
+当前 v1.8.5：
 
 - **R025** 语义合规：`options:[]` 退化检测 → 提示升级 `renderTagSlot` / `renderDictClassifyTag`
 - **R026** 原生 HTML 拦截：`<table>/<input>/<select>/<button>/<textarea>` → 提示替换 el-* 组件

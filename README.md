@@ -213,13 +213,14 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.5：
+当前 v1.8.6：
 
-- **R025** 语义合规：`options:[]` 退化检测 → 提示升级 `renderTagSlot` / `renderDictClassifyTag`
-- **R026** 原生 HTML 拦截：`<table>/<input>/<select>/<button>/<textarea>` → 提示替换 el-* 组件
+- **loading 遮罩质感优化**：BaseTable / AG Grid 的 v-loading 由灰色蒙层改为毛玻璃半透明（backdrop-filter），数据切换无感
+- **R027** 检测业务代码硬编码 `.el-loading-mask` 背景色 → 提示删除，由包统一覆盖
+- **R025** 语义合规：`options:[]` 退化检测 → 升级 `renderTagSlot` / `renderDictClassifyTag`
+- **R026** 原生 HTML 拦截：`<table>/<input>/<select>/<button>/<textarea>` → 替换 el-* 组件
 - `scan --only/--skip` 规则过滤 + `exempt init` 智能豁免脚手架
-- 搜索区字号统一 12px / 必填星号去重 / 20 条 fixture 自动化测试
-- `scan --baseline` 漂移对比 + SCSS 链路检查 + R-rule 单一事实源（31 条）
+- `scan --baseline` 漂移对比 + SCSS 链路检查 + R-rule 单一事实源（32 条）
 
 历史亮点（v1.7.1）：
 

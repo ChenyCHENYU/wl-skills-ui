@@ -5,7 +5,7 @@
 //
 // 【识别规则（供 scanner / AI 使用）】
 //   - 标签：<BaseTable> / <base-table> / <BaseDataTable>
-//   - 类名：.base-table-wrapper / .base-table-container / .base-table-* 
+//   - 类名：.base-table-wrapper / .base-table-container / .base-table-*
 //   - props：通常包含 columns / data / hook / renderType
 //
 // 【设计语言】对齐 Element Plus el-table 的视觉规范（参见 element/_table.scss）
@@ -36,6 +36,42 @@
   }
 }
 
+// ── v-loading 遮罩层质感优化 ──────────────────────────────────────────────────
+// 目的：去除 BaseTable / AG Grid 切换数据时的灰色蒙层，替换为轻量毛玻璃 + 微透明效果
+// 体验：数据切换几乎无感，加载状态通过 spinner 动画暗示，不阻断阅读上下文
+.app-page-container,
+.base-table-wrapper,
+.base-table-container,
+.ag-root-wrapper {
+
+  >.el-loading-mask,
+  .el-loading-mask {
+    background-color: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(1px);
+    transition: opacity 0.2s ease;
+  }
+
+  .el-loading-spinner {
+
+    // 缩小默认 spinner，减少视觉干扰
+    .circular {
+      width: 28px;
+      height: 28px;
+    }
+
+    .el-loading-text {
+      font-size: 12px;
+      color: var(--el-color-primary);
+      margin-top: 4px;
+    }
+  }
+}
+
+// 全屏 loading 也统一（如 v-loading.fullscreen）
+body>.el-loading-mask {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(2px);
+}
 // ── 扩展位 ────────────────────────────────────────────────────────────────────
 // 当业务侧 BaseTable 有更多结构性 class（如 base-table__toolbar / base-table__footer），
 // 在这里继续追加，不要污染全局选择器。

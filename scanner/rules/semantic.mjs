@@ -24,9 +24,19 @@ export const semanticRules = [
         const blockEnd = Math.min(lines.length, i + 5);
         const block = lines.slice(blockStart, blockEnd).join("\n");
         // 必须在列定义上下文中（有 label: 或 name: 或 prop:）
-        if (!/\blabel\s*:/.test(block) && !/\bname\s*:/.test(block) && !/\bprop\s*:/.test(block)) continue;
+        if (
+          !/\blabel\s*:/.test(block) &&
+          !/\bname\s*:/.test(block) &&
+          !/\bprop\s*:/.test(block)
+        )
+          continue;
         // 已有渲染器则跳过
-        if (/defaultSlot|defaultNode|renderTag|renderDictClassify|renderBadge|renderEnable|cellRenderer/.test(block)) continue;
+        if (
+          /defaultSlot|defaultNode|renderTag|renderDictClassify|renderBadge|renderEnable|cellRenderer/.test(
+            block,
+          )
+        )
+          continue;
         // 排除 type: "selection" / "index" / "expand"
         if (/type\s*:\s*["'](selection|index|expand)["']/.test(block)) continue;
         const labelMatch = block.match(/label\s*:\s*["']([^"']+)["']/);
@@ -54,11 +64,26 @@ export const semanticRules = [
     check(template, file, lineOffset) {
       const issues = [];
       const NATIVE_TO_EL = {
-        table: { el: "el-table", reason: "原生 <table> 不受 wl-skills-ui 表格样式覆盖" },
-        input: { el: "el-input", reason: "原生 <input> 不受统一 size/密度/圆角控制" },
-        select: { el: "el-select", reason: "原生 <select> 不受统一下拉样式控制" },
-        textarea: { el: "el-input type=\"textarea\"", reason: "原生 <textarea> 不受统一输入框样式控制" },
-        button: { el: "el-button", reason: "原生 <button> 不受统一按钮样式控制" },
+        table: {
+          el: "el-table",
+          reason: "原生 <table> 不受 wl-skills-ui 表格样式覆盖",
+        },
+        input: {
+          el: "el-input",
+          reason: "原生 <input> 不受统一 size/密度/圆角控制",
+        },
+        select: {
+          el: "el-select",
+          reason: "原生 <select> 不受统一下拉样式控制",
+        },
+        textarea: {
+          el: 'el-input type="textarea"',
+          reason: "原生 <textarea> 不受统一输入框样式控制",
+        },
+        button: {
+          el: "el-button",
+          reason: "原生 <button> 不受统一按钮样式控制",
+        },
       };
       for (const [nativeTag, { el, reason }] of Object.entries(NATIVE_TO_EL)) {
         // 匹配 <table / <input / <select 等原生标签，排除 el-table / el-input 等
@@ -71,7 +96,7 @@ export const semanticRules = [
           // 排除注释
           const lineStart = template.lastIndexOf("\n", m.index) + 1;
           const lineText = template.slice(lineStart, m.index);
-          if (/<!--/.test(lineText) && !(/-->/.test(lineText))) continue;
+          if (/<!--/.test(lineText) && !/-->/.test(lineText)) continue;
           if (/^\s*\/\//.test(lineText)) continue;
           // 排除 slot/template 内嵌的特殊情况（如 <table> 在 rich-text/markdown 中）
           // 但不做过度排除，让开发者自行决定豁免
@@ -86,6 +111,50 @@ export const semanticRules = [
               `将 <${nativeTag}> 替换为 <${el}>，确保纳入 wl-skills-ui 风格体系`,
             ),
           );
+        }
+      }
+      return issues;
+    },
+  },
+
+  // R027: 检测业务代码中对 .el-loading-mask 的灰色背景覆盖（应由 wl-skills-ui 统一管控）
+  {
+    id: "R027",
+    category: "style",
+    severity: "warning",
+    name: "业务代码硬编码 el-loading-mask 背景色（应删除，由 wl-skills-ui 统一覆盖）",
+    check() {
+      return [];
+    },
+    checkStyle(styleBlock, file, lineOffset) {
+      const issues = [];
+      const lines = styleBlock.split("\n");
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        // 检测 .el-loading-mask 相关的 background 硬编码
+        if (
+          /\.el-loading-mask/.test(line) ||
+          (i > 0 &&
+            /\.el-loading-mask/.test(
+              lines.slice(Math.max(0, i - 5), i).join("\n"),
+            ))
+        ) {
+          if (
+            /background(-color)?\s*:/.test(line) &&
+            !/transparent/.test(line)
+          ) {
+            issues.push(
+              issue(
+                file,
+                lineOffset + i + 1,
+                "R027",
+                "style",
+                "warning",
+                "业务代码硬编码 .el-loading-mask 背景色，与 wl-skills-ui 统一遮罩层冲突",
+                "删除此规则，wl-skills-ui v1.8.5+ 已内置毛玻璃遮罩覆盖（styles/vendors/_base-table.scss）",
+              ),
+            );
+          }
         }
       }
       return issues;

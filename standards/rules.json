@@ -411,6 +411,17 @@
       "manualReason": "需根据业务场景选择正确的 el-* 组件和属性",
       "scanner": "scanner/rules/semantic.mjs",
       "skills": ["element/el-form", "element/el-table"]
+    },
+    {
+      "id": "R027",
+      "category": "style",
+      "severity": "warning",
+      "title": "禁止业务代码硬编码 .el-loading-mask 背景色",
+      "rationale": "wl-skills-ui v1.8.5+ 已内置毛玻璃遮罩覆盖（半透明白底 + backdrop-filter），业务侧硬编码会冲突或导致灰色蒙层残留。",
+      "appliesTo": [".el-loading-mask"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/semantic.mjs",
+      "skills": ["vendors/base-table", "element/el-table"]
     }
   ]
 }

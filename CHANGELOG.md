@@ -8,15 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **`renderOps` 运行时类型守门**：dev 模式下检测到 `OpItem.type` 不在 `view | edit | del | danger | log | ok | send | chip | link` 集合中时，`console.warn` 一次性提示并按 `link` 兜底渲染。修复下游项目（`strict: false`）传错 type 时图标静默降级为纯文字、毫无察觉的隐性体验问题。production 环境无任何副作用。
-
-## [1.8.5] - 2026-05-17
-
-### Added
-
+- **loading 遮罩质感优化**：`_base-table.scss` 统一覆盖 BaseTable / AG Grid 的 `v-loading` 遮罩，灰色蒙层 → 毛玻璃半透明（`backdrop-filter: blur(1px)` + `rgba(255,255,255,0.45)`），数据切换近乎无感。
 - **R025**：检测 defineColumns 列中 `options:[]` 纯文本退化，提示升级为 `renderTagSlot` / `renderDictClassifyTag` 彩色标签。
 - **R026**：检测模板中原生 HTML 元素（`<table>/<input>/<select>/<button>/<textarea>`），提示替换为对应 Element Plus 组件以纳入统一风格体系。
-- fixture 测试覆盖 R025/R026（20 条自动化测试）。
+- **R027**：检测业务代码硬编码 `.el-loading-mask` 背景色，提示删除（由 wl-skills-ui 统一覆盖）。
+- fixture 测试覆盖 R025/R026/R027（22 条自动化测试）。
 
 ## [1.8.3] - 2026-05-13
 

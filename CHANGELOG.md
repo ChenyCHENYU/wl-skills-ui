@@ -4,6 +4,12 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.6] - 2026-05-17
+
+### Added
+
+- **`renderOps` 运行时类型守门**：dev 模式下检测到 `OpItem.type` 不在 `view | edit | del | danger | log | ok | send | chip | link` 集合中时，`console.warn` 一次性提示并按 `link` 兜底渲染。修复下游项目（`strict: false`）传错 type 时图标静默降级为纯文字、毫无察觉的隐性体验问题。production 环境无任何副作用。
+
 ## [1.8.5] - 2026-05-17
 
 ### Added

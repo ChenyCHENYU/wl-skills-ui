@@ -288,9 +288,51 @@ function isOpVisible(item: OpItem): boolean {
   return item.show !== false;
 }
 
+// dev 模式下对未识别的 type 给出警告（生产环境无副作用）。
+// strict:false 的下游项目 TS 不会捕获，运行时守门必要。
+const KNOWN_OP_TYPES = new Set([
+  "view",
+  "edit",
+  "del",
+  "danger",
+  "log",
+  "ok",
+  "send",
+  "chip",
+  "link",
+]);
+const __opWarned = new Set<string>();
+function warnUnknownOpType(item: OpItem): void {
+  // dev 检测：浏览器环境 (import.meta.env.DEV) 或 Node (process.env.NODE_ENV)
+  // 用 globalThis 避免依赖 @types/node
+  let isDev = true;
+  try {
+    const g: any = globalThis as any;
+    if (g.process && g.process.env && g.process.env.NODE_ENV === "production") {
+      isDev = false;
+    }
+  } catch {
+    /* noop */
+  }
+  if (!isDev) return;
+  const t = (item as any).type;
+  if (t && KNOWN_OP_TYPES.has(t)) return;
+  const key = String(t);
+  if (__opWarned.has(key)) return;
+  __opWarned.add(key);
+  console.warn(
+    "[@agile-team/wl-skills-ui renderOps] 检测到未知的 type=\"" +
+      key +
+      "\"，将按 link 兜底渲染为文字按钮。\n" +
+      "  请改为：view | edit | del | danger | log | ok | send | chip | link\n" +
+      "  详见 runtime/core/types.ts OpItem 定义。"
+  );
+}
+
 /** 渲染操作列按钮组（图标 + 胶囊 + 文字链接，自动 stopPropagation） */
 export function renderOps(items: OpItem[]): VNode {
   const visible = items.filter(isOpVisible);
+  if (visible.length) visible.forEach(warnUnknownOpType);
   const iconItems = visible.filter((i) => i.type in ICON_PRESETS) as OpPreset[];
   const otherItems = visible.filter((i) => !(i.type in ICON_PRESETS)) as (
     | OpChip

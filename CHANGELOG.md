@@ -4,6 +4,12 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.8] - 2026-05-17
+
+### Fixed
+
+- **圆角统一**：`--el-border-radius-base` 从 4px 升级为 6px，所有 el-button / el-input / el-select / el-card 等页面级按钮与弹窗按钮圆角完全一致，修复页面场景与 dialog 不统一问题。
+
 ## [1.8.7] - 2026-05-17
 
 ### Added

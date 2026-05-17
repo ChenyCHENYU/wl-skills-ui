@@ -422,6 +422,17 @@
       "autoFixable": true,
       "scanner": "scanner/rules/semantic.mjs",
       "skills": ["vendors/base-table", "element/el-table"]
+    },
+    {
+      "id": "R028",
+      "category": "style",
+      "severity": "info",
+      "title": "业务代码 border-radius 应使用设计 token",
+      "rationale": "硬编码圆角数值无法随 --el-border-radius-base token 统一调整，升级 token 后业务侧残留旧值导致视觉不一致。",
+      "appliesTo": ["border-radius"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/semantic.mjs",
+      "skills": ["tokens/index"]
     }
   ]
 }

@@ -55,7 +55,7 @@
 .el-input > .el-input__inner,
 .el-textarea > .el-textarea__inner,
 .el-date-editor > .el-input__inner {
-  border-radius: 6px;
+  border-radius: var(--el-border-radius-base);
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
@@ -87,7 +87,7 @@
 .com-input > .el-input > .el-input__inner,
 .com-input > .el-textarea > .el-textarea__inner,
 .com-textarea > .el-textarea > .el-textarea__inner {
-  border-radius: 6px;
+  border-radius: var(--el-border-radius-base);
 }
 
 // 6) 必填星号兼容 jh-ui label 结构

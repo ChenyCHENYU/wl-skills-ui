@@ -4,6 +4,13 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.9] - 2026-05-17
+
+### Improved
+
+- **token 化圆角**：`_base-query-toolbar.scss` / `_jh-pagination.scss` / `_jh-ui.scss` / `_jh-tree.scss` 所有硬编码 `border-radius: 6px` / `4px` 全部替换为 `var(--el-border-radius-base)` / `var(--el-border-radius-small)` token 引用，未来调整圆角一处生效。
+- **R028** 新增：检测业务 `<style>` 中硬编码 `border-radius` 数值，提示改用 token，避免升级后残留旧值。
+
 ## [1.8.8] - 2026-05-17
 
 ### Fixed

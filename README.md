@@ -213,7 +213,7 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.8：
+当前 v1.8.9：
 
 - **loading 遮罩质感优化**：BaseTable / AG Grid 的 v-loading 由灰色蒙层改为毛玻璃半透明（backdrop-filter），数据切换无感
 - **R027** 检测业务代码硬编码 `.el-loading-mask` 背景色 → 提示删除，由包统一覆盖

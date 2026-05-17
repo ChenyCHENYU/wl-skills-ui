@@ -160,4 +160,43 @@ export const semanticRules = [
       return issues;
     },
   },
+
+  // R028: 检测业务 <style> 中硬编码 border-radius 数值（应使用 var(--el-border-radius-*)）
+  {
+    id: "R028",
+    category: "style",
+    severity: "info",
+    name: "业务代码硬编码 border-radius 数值（建议使用 --el-border-radius-base/small token）",
+    check() {
+      return [];
+    },
+    checkStyle(styleBlock, file, lineOffset) {
+      const issues = [];
+      const lines = styleBlock.split("\n");
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        // 匹配 border-radius: Npx 但不含 var(
+        if (!/border-radius\s*:/.test(line)) continue;
+        if (/var\(/.test(line)) continue;
+        // 排除注释
+        if (/^\s*\/\//.test(line)) continue;
+        // 排除 50% / 100% / 99px（圆形/胶囊，刻意设计）
+        if (/border-radius\s*:\s*(50%|100%|99px|999px)/.test(line)) continue;
+        // 排除 0（无圆角，刻意重置）
+        if (/border-radius\s*:\s*0[;\s]/.test(line)) continue;
+        issues.push(
+          issue(
+            file,
+            lineOffset + i + 1,
+            "R028",
+            "style",
+            "info",
+            "border-radius 使用硬编码数值，未引用设计 token",
+            "建议改为 var(--el-border-radius-base) 或 var(--el-border-radius-small)，确保圆角随 token 统一调整",
+          ),
+        );
+      }
+      return issues;
+    },
+  },
 ];

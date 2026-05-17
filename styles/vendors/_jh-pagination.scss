@@ -8,7 +8,7 @@
 
   // 页码按钮
   .el-pager .number {
-    border-radius: 4px !important;
+    border-radius: var(--el-border-radius-small) !important;
     font-size: 12px;
     min-width: 26px;
     height: 26px;
@@ -24,7 +24,7 @@
     &.is-active {
       background-color: var(--el-color-primary) !important;
       color: #ffffff !important;
-      border-radius: 4px !important;
+      border-radius: var(--el-border-radius-small) !important;
       font-weight: 600;
     }
   }
@@ -35,13 +35,13 @@
     min-width: 26px;
     height: 26px;
     line-height: 26px;
-    border-radius: 4px !important;
+    border-radius: var(--el-border-radius-small) !important;
   }
 
   // 上/下一页按钮
   .btn-prev,
   .btn-next {
-    border-radius: 4px !important;
+    border-radius: var(--el-border-radius-small) !important;
     min-width: 26px;
     height: 26px;
     line-height: 26px;
@@ -65,7 +65,7 @@
   .el-pagination__sizes .el-select__wrapper {
     font-size: 12px;
     height: 26px;
-    border-radius: 4px !important;
+    border-radius: var(--el-border-radius-small) !important;
   }
 
   // 跳页输入框
@@ -73,7 +73,7 @@
     font-size: 12px;
 
     .el-input__wrapper {
-      border-radius: 4px !important;
+      border-radius: var(--el-border-radius-small) !important;
       height: 26px;
     }
     .el-input__inner { font-size: 12px; }

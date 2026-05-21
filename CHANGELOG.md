@@ -4,6 +4,14 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.13] - 2026-05-21
+
+### Fixed
+
+- **表单间距统一**：label 与右侧 Element Plus / jh-* 单行控件间距统一为 `--wk-form-label-control-gap: 16px`，避免 22px / 26px / 28px 混杂。
+- **表单高度统一**：input / select / date-picker / cascader / input-number / autocomplete 等单行控件统一为 `--wk-form-control-height: 26px`，textarea 不强制固定高度。
+- **label 冒号统一**：屏蔽 `@jhlc/jh-ui` 的 `.has-colon .com-text::after` 冒号注入，picker / select / input label 不再出现有的带冒号、有的不带冒号。
+
 ## [1.8.9] - 2026-05-17
 
 ### Improved

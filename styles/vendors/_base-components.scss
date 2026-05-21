@@ -510,35 +510,75 @@
 
 // 必填星号：只保留一颗 — 默认 asterisk-left（::before），asterisk-right 用 ::after
 // 旧写法同时 display:inline-block 两个伪元素导致 * * 重复
-.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::before {
-  color: var(--el-color-danger, #f56c6c) !important;
+html body .el-form.el-form--label-left .el-form-item__label,
+html body .el-form.el-form--label-right .el-form-item__label {
+  align-items: baseline !important;
   font-size: 12px !important;
-  line-height: 1 !important;
-  display: inline-block !important;
-}
-.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label>.com-text::before {
-  color: var(--el-color-danger, #f56c6c) !important;
-  font-size: 12px !important;
-  line-height: 1 !important;
-  display: inline-block !important;
+  line-height: var(--wk-form-label-line-height, 22px) !important;
 }
 
-.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label:has(>.com-text)::before {
+html body .el-form.el-form--label-left .el-form-item__label>.com-text,
+html body .el-form.el-form--label-right .el-form-item__label>.com-text {
+  font-size: 12px !important;
+  line-height: var(--wk-form-label-line-height, 22px) !important;
+}
+
+.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::before,
+html body .el-form.el-form--label-left .el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::before,
+html body .el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::before {
+  content: "*" !important;
+  color: var(--el-color-danger, #f56c6c) !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+    line-height: var(--wk-form-label-line-height, 22px) !important;
+  display: inline-block !important;
+  margin-right: 2px !important;
+    vertical-align: baseline !important;
+    position: relative !important;
+    top: 0 !important;
+    align-self: baseline !important;
+}
+.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label>.com-text::before,
+html body .el-form.el-form--label-left .el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label>.com-text::before,
+html body .el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label>.com-text::before {
+  content: "*" !important;
+  color: var(--el-color-danger, #f56c6c) !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+    line-height: var(--wk-form-label-line-height, 22px) !important;
+  display: inline-block !important;
+  margin-right: 2px !important;
+    vertical-align: baseline !important;
+    position: relative !important;
+    top: 0 !important;
+    align-self: baseline !important;
+}
+
+.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label:has(>.com-text)::before,
+html body .el-form .el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label:has(>.com-text)::before {
   display: none !important;
 }
+
 // asterisk-right 模式：显示 ::after，隐藏 ::before
-.el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::before {
-  display: none !important;
-}
+.el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::before,
 .el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label>.com-text::before {
   display: none !important;
 }
 
-.el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::after {
+.el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::after,
+html body .el-form.el-form--label-left .el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::after,
+html body .el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::after {
+  content: "*" !important;
   color: var(--el-color-danger, #f56c6c) !important;
   font-size: 12px !important;
-  line-height: 1 !important;
+  font-weight: 400 !important;
+    line-height: var(--wk-form-label-line-height, 22px) !important;
   display: inline-block !important;
+  margin-left: 2px !important;
+    vertical-align: baseline !important;
+    position: relative !important;
+    top: 0 !important;
+    align-self: baseline !important;
 }
 
 // 默认模式：隐藏 ::after 防止重复星号

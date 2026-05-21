@@ -29,8 +29,8 @@ applyTo: "**/*.vue"
 
 项目同时安装 `@jhlc/jh-ui` 与 `element-plus@2.2.x` 时，输入控件 DOM 为 `.el-input > .el-input__inner`（**无 `.el-input__wrapper`**，EP 2.3.0 起才引入），表单 label 文本被包成 `<span class="com-text">`，并由 `.has-colon .com-text::after` 注入冒号。`_jh-ui.scss` 已精准覆盖：
 
-- label `.com-text` 单行省略 + has-colon 冒号保留
-- EP 2.2.x `.el-input__inner` 圆角 / focus / error 三态
+- label `.com-text` 单行省略 + has-colon 冒号屏蔽
+- EP 2.2.x `.el-input__inner` 26px 高度、圆角 / focus / error 三态
 - jh-select / jh-date-picker 的 `.el-select.is-focus` / `.el-input.is-focus` 兼容
 - 必填星号在 inline-flex label 下显式声明颜色
 
@@ -38,7 +38,7 @@ applyTo: "**/*.vue"
 
 - ❌ 在 jh-ui 项目里用 `.el-input__wrapper.is-focus` —— EP 2.2.x 没有 `__wrapper`，规则永不生效。
 - ❌ 直接给 `.el-form-item__label` 写 `text-overflow: ellipsis` —— jh-ui 把它设为 `inline-flex`，文本在 `.com-text` 里，省略不会触发。
-- ❌ 给 `.el-form-item__label` 加 `padding-right` 期望腾出冒号位 —— 冒号是 `.com-text::after`，应在 `.com-text` 上加 padding。
+- ❌ 给 `.el-form-item__label` 加 `padding-right` 期望腾出冒号位 —— 表单 label 不强制冒号，`.has-colon .com-text::after` 已由 `_jh-ui.scss` 统一屏蔽。
 - ❌ 在不确定 EP 版本的情况下下笔修复 —— 必须先跑 `wl_ui_detect_skin` 或 `wl-ui check` 看 I005 结果。
 
 ## Diagnose

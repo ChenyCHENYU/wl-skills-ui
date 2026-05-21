@@ -10,7 +10,7 @@
 //        `.el-form-item__label` 自身是 `display: inline-flex`。
 //        → 直接在 label 上写 ellipsis 不生效，必须落到 `.com-text`。
 //     2. `.has-colon .el-form-item__label .com-text::after` 注入冒号。
-//        → ellipsis 容器必须给 `::after` 预留空间。
+//        → wl-skills-ui 统一隐藏冒号，避免 picker / select / input label 风格不一致。
 //     3. 输入控件 DOM 为 `.el-input > .el-input__inner`（无 `.el-input__wrapper`）。
 //        → focus / error 必须命中 `.el-input__inner`，
 //          `.el-input__wrapper.is-focus` 这类 EP 2.6+ 规则在这里不生效。
@@ -44,17 +44,28 @@
   vertical-align: middle;
 }
 
-// has-colon 模式下，.com-text::after 注入冒号，
-// 给一点 padding 避免冒号被 ellipsis 裁掉
 .has-colon .el-form-item__label > .com-text,
 .has-colon .el-form-item__label .com-text {
-  padding-right: 6px;
+  padding-right: 0;
+  }
+
+  .has-colon .el-form-item__label>.com-text::after,
+  .has-colon .el-form-item__label .com-text::after {
+    content: "" !important;
+    display: none !important;
 }
 
 // 2) Element Plus 2.2.x 输入控件统一圆角（无 .el-input__wrapper）
 .el-input > .el-input__inner,
-.el-textarea > .el-textarea__inner,
-.el-date-editor > .el-input__inner {
+.el-date-editor>.el-input__inner,
+.el-select .el-input>.el-input__inner {
+  height: var(--wk-form-control-height, 26px);
+  line-height: var(--wk-form-control-height, 26px);
+  border-radius: var(--el-border-radius-base);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.el-textarea>.el-textarea__inner {
   border-radius: var(--el-border-radius-base);
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
@@ -85,6 +96,12 @@
 //    保留 jh-ui 自身 margin-bottom、has-tip 间距，不覆盖；
 //    仅对齐内部输入控件圆角，避免在 wrapper 内 fallback 成方角。
 .com-input > .el-input > .el-input__inner,
+.com-input>.el-select .el-input>.el-input__inner,
+.com-input>.el-date-editor>.el-input__inner {
+  height: var(--wk-form-control-height, 26px);
+  line-height: var(--wk-form-control-height, 26px);
+  border-radius: var(--el-border-radius-base);
+}
 .com-input > .el-textarea > .el-textarea__inner,
 .com-textarea > .el-textarea > .el-textarea__inner {
   border-radius: var(--el-border-radius-base);

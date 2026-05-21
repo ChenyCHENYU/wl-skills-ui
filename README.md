@@ -198,7 +198,7 @@ yarn add @agile-team/wl-skills-ui
 | 依赖 | 推荐版本 | 备注 |
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
-| `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入 |
+| `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
 | `@agile-team/wl-skills-ui` | `^1.7.0` | 已对齐上述组合的 DOM 假设 |
 
 三种识别方式，任选其一：
@@ -213,8 +213,10 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.9：
+当前 v1.8.13：
 
+- **表单密度统一**：label 与右侧控件间距统一 16px，单行 input / select / picker / jh-* 控件高度统一 26px
+- **label 冒号统一**：屏蔽 jh-ui `.has-colon .com-text::after` 冒号注入，picker / select / input 不再有的带冒号、有的不带冒号
 - **loading 遮罩质感优化**：BaseTable / AG Grid 的 v-loading 由灰色蒙层改为毛玻璃半透明（backdrop-filter），数据切换无感
 - **R027** 检测业务代码硬编码 `.el-loading-mask` 背景色 → 提示删除，由包统一覆盖
 - **R025** 语义合规：`options:[]` 退化检测 → 升级 `renderTagSlot` / `renderDictClassifyTag`

@@ -56,6 +56,30 @@ date-picker 默认宽度固定，在 grid 布局中需撑满列宽：
 
 ---
 
+## 规则：label 与控件间距、单行控件高度必须统一
+
+左侧 label 与右侧输入、选择、日期、数字输入、级联、自动完成等单行控件的横向间距统一为：
+
+```scss
+--wk-form-label-control-gap: 16px;
+```
+
+单行表单控件高度统一为：
+
+```scss
+--wk-form-control-height: 26px;
+```
+
+textarea 不强制 26px 高度，只继承统一圆角、字体和状态样式。
+
+---
+
+## 规则：表单 label 不强制冒号
+
+Element Plus 原生控件、picker 类控件和 jh-* 封装控件的 label 后不强制追加 `:`。`@jhlc/jh-ui` 的 `.has-colon .com-text::after` 冒号注入由 wl-skills-ui 统一屏蔽，避免 input / select / picker 之间出现有的带冒号、有的不带冒号。
+
+---
+
 ## 布局标准
 
 ### 搜索区（列表页顶部）

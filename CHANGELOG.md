@@ -4,6 +4,13 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.14] - 2026-06-28
+
+### Fixed
+
+- **jh-picker 高度统一**：补齐 `.com-picker` / `.com-reference-picker` / `jh-picker` trigger 输入结构，picker 类单行控件与 input / select 保持 `26px` 高度一致。
+- **label 冒号兜底**：扩展屏蔽 `@jhlc/jh-ui` 的 `.com-text:after` / `.text-line-2:after` 冒号注入，避免 picker label 残留 `:`。
+
 ## [1.8.13] - 2026-05-21
 
 ### Fixed

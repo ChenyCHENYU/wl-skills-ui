@@ -15,7 +15,7 @@ applyTo: "**/*.vue"
 
 | 类型 | 子组件 | 标签 | 关键类名 | 治理方式 |
 |---|---|---|---|---|
-| SCSS 皮肤适配 | `@jhlc/jh-ui` | — | `.com-text` / `.com-input` / `.com-textarea` / `.com-input-tip` | `styles/vendors/_jh-ui.scss` |
+| SCSS 皮肤适配 | `@jhlc/jh-ui` | — | `.com-text` / `.text-line-2` / `.com-input` / `.com-picker` / `.com-reference-picker` / `.com-textarea` / `.com-input-tip` | `styles/vendors/_jh-ui.scss` |
 | 专项样式覆盖 | jh-tree | `<jh-tree>` | `.jh-tree` / `.base-tree` | `styles/vendors/_jh-tree.scss` |
 | 专项样式覆盖 | jh-pagination | `<jh-pagination>` | `.jh-pagination` | `styles/vendors/_jh-pagination.scss` |
 | 专项样式覆盖 | jh-drag-col | `<jh-drag-col>` | `.drag-col-container` / `.drag-left` / `.slider-col` | `styles/vendors/_jh-drag-col.scss` |
@@ -27,10 +27,11 @@ applyTo: "**/*.vue"
 
 **推荐组合（钉死版本）**：`@jhlc/jh-ui@3.1.0` + `element-plus@2.2.6-prod.3`。详见 `docs/compat-matrix.md` 与 `skills/_meta/_compat/vendors.json` 的 `jh.compat` 字段。
 
-项目同时安装 `@jhlc/jh-ui` 与 `element-plus@2.2.x` 时，输入控件 DOM 为 `.el-input > .el-input__inner`（**无 `.el-input__wrapper`**，EP 2.3.0 起才引入），表单 label 文本被包成 `<span class="com-text">`，并由 `.has-colon .com-text::after` 注入冒号。`_jh-ui.scss` 已精准覆盖：
+项目同时安装 `@jhlc/jh-ui` 与 `element-plus@2.2.x` 时，输入控件 DOM 为 `.el-input > .el-input__inner`（**无 `.el-input__wrapper`**，EP 2.3.0 起才引入），表单 label 文本被包成 `<span class="com-text">` 或 `.text-line-2`，并由 `.has-colon .com-text:after` / `.text-line-2:after` 注入冒号。`_jh-ui.scss` 已精准覆盖：
 
-- label `.com-text` 单行省略 + has-colon 冒号屏蔽
+- label `.com-text` / `.text-line-2` 单行省略 + has-colon 冒号屏蔽
 - EP 2.2.x `.el-input__inner` 26px 高度、圆角 / focus / error 三态
+- jh-picker / reference-picker 的 `.com-picker` / `.com-reference-picker` 输入高度兜底
 - jh-select / jh-date-picker 的 `.el-select.is-focus` / `.el-input.is-focus` 兼容
 - 必填星号在 inline-flex label 下显式声明颜色
 
@@ -38,7 +39,7 @@ applyTo: "**/*.vue"
 
 - ❌ 在 jh-ui 项目里用 `.el-input__wrapper.is-focus` —— EP 2.2.x 没有 `__wrapper`，规则永不生效。
 - ❌ 直接给 `.el-form-item__label` 写 `text-overflow: ellipsis` —— jh-ui 把它设为 `inline-flex`，文本在 `.com-text` 里，省略不会触发。
-- ❌ 给 `.el-form-item__label` 加 `padding-right` 期望腾出冒号位 —— 表单 label 不强制冒号，`.has-colon .com-text::after` 已由 `_jh-ui.scss` 统一屏蔽。
+- ❌ 给 `.el-form-item__label` 加 `padding-right` 期望腾出冒号位 —— 表单 label 不强制冒号，`.has-colon .com-text:after` / `.text-line-2:after` 已由 `_jh-ui.scss` 统一屏蔽。
 - ❌ 在不确定 EP 版本的情况下下笔修复 —— 必须先跑 `wl_ui_detect_skin` 或 `wl-ui check` 看 I005 结果。
 
 ## Diagnose

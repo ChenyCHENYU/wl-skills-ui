@@ -213,8 +213,10 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.13：
+当前 v1.8.14：
 
+- **jh-picker 精准修复**：补齐 `.com-picker` / `.com-reference-picker` / `jh-picker` trigger 输入高度，客户等 picker 查询项与 input / select 保持一致
+- **label 冒号兜底**：同时屏蔽 jh-ui `.com-text:after` 与 `.text-line-2:after` 冒号注入，picker / select / input label 全部不带 `:`
 - **表单密度统一**：label 与右侧控件间距统一 16px，单行 input / select / picker / jh-* 控件高度统一 26px
 - **label 冒号统一**：屏蔽 jh-ui `.has-colon .com-text::after` 冒号注入，picker / select / input 不再有的带冒号、有的不带冒号
 - **loading 遮罩质感优化**：BaseTable / AG Grid 的 v-loading 由灰色蒙层改为毛玻璃半透明（backdrop-filter），数据切换无感

@@ -56,7 +56,9 @@
         "domAssumptions": [
           ".el-input>.el-input__inner",
           ".el-form-item__label>.com-text",
-          ".has-colon .com-text::after"
+          ".has-colon .com-text::after",
+          ".has-colon .text-line-2::after",
+          ".com-reference-picker .el-input__wrapper"
         ],
         "elementPlus": "2.2.6-prod.3",
         "elementPlusRange": "<2.3.0",

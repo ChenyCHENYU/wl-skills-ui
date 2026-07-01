@@ -4,6 +4,12 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.16] - 2026-07-01
+
+### Fixed
+
+- **label 冒号通杀（根治"就它带冒号"）**：此前冒号屏蔽仅覆盖 `.has-colon .el-form-item__label .com-text::after`（带 `.has-colon` 前缀）。但 jh-\* 组件（jh-select / jh-date / jh-picker / BaseForm 的自定义 component，如 CustomerPicker）的 `showColon` 默认 `true`，渲染的 label 走 `.com-text` 容器**但不一定带 `.has-colon` 类**，导致规则命不中、单点冒号残留。本次新增**不限 `.has-colon`** 的通杀规则，覆盖 `.el-form-item__label` 内所有 `.com-text` / `.text-line-2` 的 `:after`，特异性 `html body .el-form-item__label .com-text::after`（0,3,1）高于 jh-ui 注入，确定性咔嚓所有冒号伪元素
+
 ## [1.8.15] - 2026-07-01
 
 ### Added

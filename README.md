@@ -213,7 +213,11 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.15：
+当前 v1.8.16：
+
+- **label 冒号通杀（根治"就它带冒号"）**：jh-* 组件的 `showColon` 默认 true，渲染冒号走 `.com-text` 但不带 `.has-colon`，旧规则（仅 `.has-colon` 限定）命不中。新增不限 `.has-colon` 的通杀规则，咔嚓所有 `.el-form-item__label` 内冒号伪元素
+
+上一版 v1.8.15：
 
 - **jh-drag-row 上下分栏手柄覆盖**：新增 `styles/vendors/_jh-drag-row.scss`，补齐此前缺失的 `jh-drag-row`（上下/主从表）手柄覆盖，与 `_jh-drag-col.scss`（左右）同源风格。以本包主色 `#2254f4` 为准，用 `!important` 确定性层叠压过 common-core 组件 Props 默认值
 - **平台包职责澄清**：`@jhlc/jh-ui` 是纯 SCSS 包（零组件），所有 `jh-*`/`Base*`/`C_*` 组件来自 `@jhlc/common-core`。本包作为化妆层精准层叠覆盖二者视觉，不改平台层源码——L0 token 用 `:root body` 压过 jh-ui 编译产物的 `:root`（`#2254f4` > jh-ui `#4368ff`），L2 直接写目标属性 + `!important` 绕过组件 `var()` 引用。**项目装了本包后，一切以本包为准**

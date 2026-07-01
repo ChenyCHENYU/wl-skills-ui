@@ -65,6 +65,24 @@ html body .has-colon .el-form-item__label .text-line-2:after {
   display: none !important;
 }
 
+// 1-b) 通杀冒号（不限 .has-colon）
+//    背景：jh-* 组件（jh-select / jh-date / jh-picker / BaseForm 的自定义 component 等）
+//    内部 showColon 默认 true，渲染的 label 走 .com-text 容器但【不一定带 .has-colon】。
+//    仅 .has-colon 限定会漏掉这些组件，导致"就它带冒号"。
+//    → 此处取消 .has-colon 前缀，覆盖 .el-form-item__label 内所有 .com-text / .text-line-2 的 :after，
+//      一并咔嚓。特异性 `html body .el-form-item__label .com-text::after` (0,3,1) 高于 jh-ui 注入。
+html body .el-form-item__label > .com-text::after,
+html body .el-form-item__label > .com-text:after,
+html body .el-form-item__label .com-text::after,
+html body .el-form-item__label .com-text:after,
+html body .el-form-item__label > .text-line-2::after,
+html body .el-form-item__label > .text-line-2:after,
+html body .el-form-item__label .text-line-2::after,
+html body .el-form-item__label .text-line-2:after {
+  content: "" !important;
+  display: none !important;
+}
+
 // 2) Element Plus 2.2.x 输入控件统一圆角（无 .el-input__wrapper）
 html body .el-input > .el-input__inner,
 html body .el-date-editor > .el-input__inner,

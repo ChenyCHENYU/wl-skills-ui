@@ -4,6 +4,16 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.15] - 2026-07-01
+
+### Added
+
+- **jh-drag-row 上下分栏手柄覆盖**：新增 `styles/vendors/_jh-drag-row.scss`，把 `jh-drag-row`（来自 `@jhlc/common-core`，主从表/上下双表首选布局）的 `.slider_row` 手柄对齐到与 `_jh-drag-col.scss` 同源的极简细线 + grip dots 风格。此前 wl-skills-ui 只覆盖了 `jh-drag-col`（左右），缺少 `jh-drag-row`（上下），二者手柄风格不一致。覆盖以本包主色 `var(--el-color-primary)` / `rgba(34,84,244,...)`（`#2254f4`）为准，不读 common-core 组件 Props 默认值（硬编码 `#a7caec`/`#6f808d`），用 `html .drager_row > .slider_row { ... !important }` 确定性层叠压过。已注册进 `vendors/index.scss`，`jh-components/SKILL.md` 基线表与全局样式来源同步补充
+
+### Changed
+
+- **平台包职责澄清（文档）**：`@jhlc/jh-ui` 是**纯 SCSS 包（零组件）**，所有 `jh-*` / `Base*` / `C_*` 组件来自 `@jhlc/common-core`。本包作为化妆层，职责是**精准层叠覆盖**这两者的视觉，不改平台层源码：L0 token 用 `:root body`（特异性高于 jh-ui 编译产物的 `:root`）以本包 `#2254f4` 压过 jh-ui 的 `#4368ff`；L2 直接写目标属性（`background`/`border`）+ `!important` 绕过组件内部 `var()` 引用。**项目安装本包后，一切以本包为准**
+
 ## [1.8.14] - 2026-06-28
 
 ### Fixed

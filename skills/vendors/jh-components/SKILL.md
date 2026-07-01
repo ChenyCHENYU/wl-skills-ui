@@ -19,6 +19,7 @@ applyTo: "**/*.vue"
 | 专项样式覆盖 | jh-tree | `<jh-tree>` | `.jh-tree` / `.base-tree` | `styles/vendors/_jh-tree.scss` |
 | 专项样式覆盖 | jh-pagination | `<jh-pagination>` | `.jh-pagination` | `styles/vendors/_jh-pagination.scss` |
 | 专项样式覆盖 | jh-drag-col | `<jh-drag-col>` | `.drag-col-container` / `.drag-left` / `.slider-col` | `styles/vendors/_jh-drag-col.scss` |
+| 专项样式覆盖 | jh-drag-row | `<jh-drag-row>` | `.drager_row` / `.drager_top` / `.drager_bottom` / `.slider_row` | `styles/vendors/_jh-drag-row.scss` |
 | 通用规则治理 | jh-table | `<jh-table>` | `.jh-table` | 继承 L0 tokens + L1 table 视觉原则 |
 | 通用规则治理 | jh-form | `<jh-form>` | `.jh-form` | 继承 L0 tokens + L1 form 视觉原则 |
 | 通用规则治理 | 其它 jh-* | `<jh-*>` | `.jh-*` / 组件内部 Element Plus 类 | 先按 jh 通用规则治理，复杂结构再升级专项样式 |
@@ -46,6 +47,7 @@ applyTo: "**/*.vue"
 
 - ❌ 自行给 `.jh-tree` 写颜色覆盖（应用全局 `vendors/_jh-tree.scss`）
 - ❌ jh-drag-col 内自定义 padding 破坏拖拽条对齐
+- ❌ jh-drag-row 上下分栏缺 `.drager_row { height:100% }` 高度链（拖拽失效），或手柄未走统一 `.slider_row` 细线风格
 - ❌ jh-pagination 未对齐到右侧（同 R011）
 - ❌ jh-form 内不用 `size="small"` 控件（同 R006）
 - ❌ 发现新的复杂 `<jh-*>` 组件后只在页面局部写补丁，而不沉淀到 L2 Project Vendors
@@ -66,6 +68,7 @@ applyTo: "**/*.vue"
 - `styles/vendors/_jh-tree.scss`
 - `styles/vendors/_jh-pagination.scss`
 - `styles/vendors/_jh-drag-col.scss`
+- `styles/vendors/_jh-drag-row.scss`
 
 ## 新增 jh 专项覆盖准入
 

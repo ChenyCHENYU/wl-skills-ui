@@ -213,7 +213,12 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.14：
+当前 v1.8.15：
+
+- **jh-drag-row 上下分栏手柄覆盖**：新增 `styles/vendors/_jh-drag-row.scss`，补齐此前缺失的 `jh-drag-row`（上下/主从表）手柄覆盖，与 `_jh-drag-col.scss`（左右）同源风格。以本包主色 `#2254f4` 为准，用 `!important` 确定性层叠压过 common-core 组件 Props 默认值
+- **平台包职责澄清**：`@jhlc/jh-ui` 是纯 SCSS 包（零组件），所有 `jh-*`/`Base*`/`C_*` 组件来自 `@jhlc/common-core`。本包作为化妆层精准层叠覆盖二者视觉，不改平台层源码——L0 token 用 `:root body` 压过 jh-ui 编译产物的 `:root`（`#2254f4` > jh-ui `#4368ff`），L2 直接写目标属性 + `!important` 绕过组件 `var()` 引用。**项目装了本包后，一切以本包为准**
+
+上一版 v1.8.14：
 
 - **jh-picker 精准修复**：补齐 `.com-picker` / `.com-reference-picker` / `jh-picker` trigger 输入高度，客户等 picker 查询项与 input / select 保持一致
 - **label 冒号兜底**：同时屏蔽 jh-ui `.com-text:after` 与 `.text-line-2:after` 冒号注入，picker / select / input label 全部不带 `:`

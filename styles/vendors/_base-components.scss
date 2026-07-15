@@ -38,75 +38,72 @@
   outline: none;
   border: none;
   background: transparent;
+  color: var(--el-color-primary-light-2, #5178f6);
   transition: background-color 0.13s ease, color 0.13s ease;
   flex-shrink: 0;
 
   svg { width: 14px; height: 14px; }
-        &:active {
-          opacity: 0.6;
-        }
+  &:active:not(:disabled) { opacity: 0.6; }
 
   // 查看 — hover 蓝
   &.jh-op-view {
-    color: #C0C4CC;
-    &:hover {
+    &:hover:not(:disabled) {
         color: var(--el-color-primary);
         background: rgba(34, 84, 244, 0.09);
       }
   }
   // 编辑 — hover 翠绿
   &.jh-op-edit {
-    color: #C0C4CC;
-    &:hover {
+    &:hover:not(:disabled) {
         color: var(--el-color-success);
         background: rgba(43, 178, 104, 0.09);
       }
   }
   // 删除/作废 — hover 红
   &.jh-op-del {
-    color: #C0C4CC;
-    &:hover {
+    &:hover:not(:disabled) {
         color: var(--el-color-danger);
         background: rgba(187, 45, 63, 0.09);
       }
   }
   // 记录 — hover 靛蓝
   &.jh-op-log {
-    color: #C0C4CC;
-    &:hover {
+    &:hover:not(:disabled) {
         color: var(--el-color-primary);
         background: rgba(34, 84, 244, 0.09);
       }
   }
   // 审核 — hover 翠绿
   &.jh-op-ok {
-    color: #C0C4CC;
-    &:hover {
+    &:hover:not(:disabled) {
         color: var(--el-color-success);
         background: rgba(43, 178, 104, 0.09);
       }
   }
   // 提交 — hover 主色
   &.jh-op-send {
-    color: #C0C4CC;
-    &:hover {
+    &:hover:not(:disabled) {
         color: var(--el-color-primary, #2254f4);
         background: rgba(34, 84, 244, 0.09);
       }
   }
   // 保存（内联表格用）— hover 翠绿
   &.jh-op-save {
-    color: #C0C4CC;
-    &:hover {
+    &:hover:not(:disabled) {
         color: var(--el-color-success);
         background: rgba(43, 178, 104, 0.09);
       }
-    &:disabled { opacity: 0.45; cursor: not-allowed; }
   }
   // 取消（内联表格用）— hover 中灰
   &.jh-op-cancel {
-    color: #C0C4CC;
-    &:hover { color: #6B7280; background: rgba(107, 114, 128, 0.10); }
+    &:hover:not(:disabled) { color: #6B7280; background: rgba(107, 114, 128, 0.10); }
+  }
+
+  &:disabled {
+    color: var(--el-text-color-disabled, rgba(0, 0, 0, 0.25));
+    background: transparent;
+    opacity: 1;
+    cursor: not-allowed;
   }
 }
 
@@ -141,13 +138,17 @@
   flex-shrink: 0;
 
   svg { width: 12px; height: 12px; flex-shrink: 0; }
-  &:hover {
+  &:hover:not(:disabled) {
     background: rgba(34, 84, 244, 0.10);
       color: var(--el-color-primary, #2254f4);
   }
-        &:active {
-          opacity: 0.65;
-        }
+  &:active:not(:disabled) { opacity: 0.65; }
+  &:disabled {
+    color: var(--el-text-color-disabled, rgba(0, 0, 0, 0.25));
+    background: transparent;
+    opacity: 1;
+    cursor: not-allowed;
+  }
 }
 
 // ── 第三层：文字按钮（业务专属长名称）────────────────────────────────────────
@@ -172,11 +173,17 @@
   transition: background 0.13s, color 0.13s;
   flex-shrink: 0;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: rgba(34, 84, 244, 0.08);
       color: var(--el-color-primary, #2254f4);
   }
-  &:active { opacity: 0.55; }
+  &:active:not(:disabled) { opacity: 0.55; }
+  &:disabled {
+    color: var(--el-text-color-disabled, rgba(0, 0, 0, 0.25));
+    background: transparent;
+    opacity: 1;
+    cursor: not-allowed;
+  }
 }
 
 // ── 状态标签 — 精致小标签（GitHub/Linear label 风格）────────────────────────
@@ -337,20 +344,10 @@
 
 .ag-row-selected {
 
-  .jh-op-btn,
-  .jh-op-chip,
-  .jh-op-link {
+  .jh-op-btn:not(:disabled),
+  .jh-op-chip:not(:disabled),
+  .jh-op-link:not(:disabled) {
     background-color: rgba(255, 255, 255, 0.65);
-    color: var(--el-color-primary, #2254f4);
-  }
-
-  .jh-op-del {
-    color: var(--el-color-danger, #f5222d);
-  }
-
-  .jh-op-edit,
-  .jh-op-ok {
-    color: var(--el-color-success, #2bb268);
   }
 }
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

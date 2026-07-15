@@ -213,7 +213,12 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.16：
+当前 v1.8.17：
+
+- **操作列状态辨识**：可用图标默认使用柔和主题蓝，hover 保留蓝/绿/红语义色；禁用态统一浅灰且不响应 hover，选中行不再改变按钮语义色
+- **renderOps 禁用能力**：新增可选 `disabled` / `disabledReason`，旧调用无需修改
+
+上一版 v1.8.16：
 
 - **label 冒号通杀（根治"就它带冒号"）**：jh-* 组件的 `showColon` 默认 true，渲染冒号走 `.com-text` 但不带 `.has-colon`，旧规则（仅 `.has-colon` 限定）命不中。新增不限 `.has-colon` 的通杀规则，咔嚓所有 `.el-form-item__label` 内冒号伪元素
 
@@ -603,7 +608,7 @@ export const myRules = [
 | API                                              | 说明                                               |
 | ------------------------------------------------ | -------------------------------------------------- |
 | `defineColumns(cols)`                            | 列定义，自动应用 `COLUMN_AUTO_MAP`                 |
-| `renderOps(items)`                               | 操作列图标按钮组（view/edit/del/log/ok/send 预设） |
+| `renderOps(items)`                               | 操作列图标按钮组，支持预设图标、显隐、禁用及禁用原因 |
 | `renderTagNode(v, map)`                          | 状态 Tag 渲染                                      |
 | `renderClassifyTag(v, map)`                      | 分类 Tag 渲染                                      |
 | `renderBadge(v)` / `renderCountBadge(v)`         | 编号 / 计数徽标                                    |

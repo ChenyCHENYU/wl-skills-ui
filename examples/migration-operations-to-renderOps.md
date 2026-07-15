@@ -55,6 +55,7 @@ const columnsDef = [
 | `name: "删除"` | `type: "del"` | 预设图标按钮（红色） |
 | `click: fn` | `onClick: fn` | 回调函数 |
 | `show: fn/bool` | `show: fn/bool` | 控制显隐 |
+| `disabled: fn/bool` | `disabled: fn/bool` | 暂时不可用；可配 `disabledReason` |
 | `type: "danger"` | _(由 type 决定)_ | del 自动红色 |
 | 自定义文字 | `type: "chip"` 或 `type: "link"` | 胶囊/文字按钮 |
 
@@ -62,12 +63,12 @@ const columnsDef = [
 
 | type | 图标 | 标题 | 颜色 |
 |---|---|---|---|
-| `view` | Eye (View) | 查看 | 蓝色 |
-| `edit` | Edit | 编辑 | 绿色 |
-| `del` | Delete | 删除 | 红色 |
-| `log` | Document | 记录 | 灰色 |
-| `ok` | CircleCheck | 审核 | 绿色 |
-| `send` | Upload | 提交 | 蓝色 |
+| `view` | Eye (View) | 查看 | 默认主题淡蓝，hover 蓝色 |
+| `edit` | Edit | 编辑 | 默认主题淡蓝，hover 绿色 |
+| `del` | Delete | 删除 | 默认主题淡蓝，hover 红色 |
+| `log` | Document | 记录 | 默认主题淡蓝，hover 蓝色 |
+| `ok` | CircleCheck | 审核 | 默认主题淡蓝，hover 绿色 |
+| `send` | Upload | 提交 | 默认主题淡蓝，hover 蓝色 |
 
 ## 非预设操作（胶囊/文字）
 

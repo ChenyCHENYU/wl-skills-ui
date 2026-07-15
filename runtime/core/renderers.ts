@@ -288,6 +288,18 @@ function isOpVisible(item: OpItem): boolean {
   return item.show !== false;
 }
 
+function isOpDisabled(item: OpItem): boolean {
+  if (typeof item.disabled === "function") return item.disabled();
+  return item.disabled === true;
+}
+
+function getOpTitle(item: OpItem, fallback: string, disabled: boolean): string {
+  const title = item.title ?? item.label ?? fallback;
+  return disabled && item.disabledReason
+    ? `${title}（${item.disabledReason}）`
+    : title;
+}
+
 // dev 模式下对未识别的 type 给出警告（生产环境无副作用）。
 // strict:false 的下游项目 TS 不会捕获，运行时守门必要。
 const KNOWN_OP_TYPES = new Set([
@@ -342,15 +354,19 @@ export function renderOps(items: OpItem[]): VNode {
 
   for (const item of iconItems) {
     const preset = ICON_PRESETS[item.type as keyof typeof ICON_PRESETS];
+    const disabled = isOpDisabled(item);
     nodes.push(
       h(
         "button",
         {
           class: ["jh-op-btn", preset.cls],
           type: "button",
-          title: item.title ?? item.label ?? preset.title,
+          title: getOpTitle(item, preset.title, disabled),
+          "aria-label": item.label ?? item.title ?? preset.title,
+          disabled,
           onClick: (e: MouseEvent) => {
             e.stopPropagation();
+            if (disabled) return;
             item.onClick(e);
           },
         },
@@ -363,6 +379,7 @@ export function renderOps(items: OpItem[]): VNode {
     nodes.push(h("span", { class: "jh-op-sep", "aria-hidden": "true" }));
 
   for (const item of otherItems) {
+    const disabled = isOpDisabled(item);
     if (item.type === "chip") {
       const children: any[] = [];
       if (item.icon) children.push(h(item.icon as Component));
@@ -373,8 +390,11 @@ export function renderOps(items: OpItem[]): VNode {
           {
             class: "jh-op-chip",
             type: "button",
+            title: getOpTitle(item, item.label, disabled),
+            disabled,
             onClick: (e: MouseEvent) => {
               e.stopPropagation();
+              if (disabled) return;
               item.onClick(e);
             },
           },
@@ -388,8 +408,11 @@ export function renderOps(items: OpItem[]): VNode {
           {
             class: "jh-op-link",
             type: "button",
+            title: getOpTitle(item, item.label, disabled),
+            disabled,
             onClick: (e: MouseEvent) => {
               e.stopPropagation();
+              if (disabled) return;
               item.onClick(e);
             },
           },

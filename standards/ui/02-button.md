@@ -28,16 +28,24 @@
 
 ## 操作列按钮（表格行内）
 
-使用 `jh-op-btn` 类，**禁止** `<el-button>` 在行内使用：
+统一使用 `renderOps` 图标按钮系统，**禁止** `<el-button>` 在行内使用：
 
-```vue
-<!-- ❌ 错误 -->
-<el-button type="text" @click="handleEdit(row)">编辑</el-button>
-
-<!-- ✅ 正确 -->
-<span class="jh-op-btn primary" @click="handleEdit(row)">修改</span>
-<span class="jh-op-btn danger"  @click="handleVoid(row)">作废</span>
+```typescript
+// ✅ 正确
+renderOps([
+  { type: 'edit', onClick: () => handleEdit(row) },
+  { type: 'del', onClick: () => handleVoid(row) },
+])
 ```
+
+### 视觉状态
+
+| 状态 | 标准表现 |
+|---|---|
+| 默认可用 | 柔和主题蓝，透明背景 |
+| hover | 查看/记录/提交变主题蓝，编辑/审核变绿，删除/作废变红 |
+| 禁用 | 浅灰且 hover 不变色，使用原生 `disabled` |
+| 选中行 | 保持默认主题蓝，不因选中自动变为语义色 |
 
 ### 按钮标签严格对应原型
 
@@ -47,15 +55,19 @@
 | 软删除  | **作废** | ~~删除~~ |
 | 硬删除  | **删除** | ~~移除~~ |
 
-### 条件显示（不同状态不同按钮）
+### 显隐与禁用
 
 ```typescript
-// ✅ renderOps 中用 show 控制
-renderOps(p, [
-  { label: '修改', type: 'primary', show: (row) => row.status === 1 },
-  { label: '作废', type: 'danger',  show: (row) => row.status === 1 },
-  { label: '编辑', type: 'primary', show: (row) => row.status === 0 },
-  { label: '删除', type: 'danger',  show: (row) => row.status === 0 },
+renderOps([
+  // 无权限或对当前记录完全不适用：隐藏
+  { type: 'del', show: () => canDelete, onClick: () => handleDelete(row) },
+  // 因状态或前置条件暂时不可用：禁用并说明原因
+  {
+    type: 'edit',
+    disabled: () => row.status !== 'creating',
+    disabledReason: '仅建立中的数据可以编辑',
+    onClick: () => handleEdit(row),
+  },
 ])
 ```
 

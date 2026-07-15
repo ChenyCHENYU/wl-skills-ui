@@ -182,6 +182,19 @@ npx wl-ui check --project [项目根目录]
 + ])
 ```
 
+**操作状态规则**：无权限或对当前记录完全不适用时使用 `show: false`；因业务状态、前置条件暂时不可用时使用 `disabled`，并建议提供 `disabledReason`。`disabled` 为可选参数，旧调用无需修改。
+
+```typescript
+renderOps([
+  {
+    type: 'edit',
+    disabled: () => row.status !== 'creating',
+    disabledReason: '仅建立中的数据可以编辑',
+    onClick: () => modal.edit(row.id),
+  },
+])
+```
+
 **含 Upload / 自定义组件的操作（特殊案例，不能直接用 renderOps）**：
 将 Upload 操作从 operations[] 中抽出，改为 toolbarDef() 中的 `renderNode:` 按钮，操作列仍用 renderOps 承载其他操作。
 
@@ -454,7 +467,7 @@ columnsDef(): TableColumnDesc<any>[] {
 |---|---|
 | 状态列彩色 Tag | `defineColumns` COLUMN_AUTO_MAP 自动配置 |
 | 操作列图标按钮 | `renderOps([...])` 统一渲染系统 |
-| 操作列条件显示 | `show: condition` 替代 `disabled: (row) => !condition` |
+| 操作列状态控制 | 完全不适用用 `show`；暂时不可用用 `disabled` + `disabledReason` |
 | 自动分隔线 | 图标组与文字组之间 `renderOps` 自动插入 |
 | 点击阻止冒泡 | `renderOps` 内部自动 `e.stopPropagation()` |
 

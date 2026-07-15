@@ -6,14 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [1.8.17] - 2026-07-15
 
-### Added
-
-- **操作按钮禁用能力**：`renderOps` 新增可选 `disabled` / `disabledReason`，覆盖图标、胶囊和文字按钮；输出原生禁用态并保留禁用原因提示，旧调用无需修改。
-
 ### Changed
 
-- **操作列状态辨识**：可用图标默认改为柔和主题蓝 `--el-color-primary-light-2`，hover 继续使用原有蓝/绿/红语义色；禁用态统一浅灰且不响应 hover，选中行不再自动改变按钮语义色。
-- **AI 规范同步**：SKILL、标准、迁移示例和参考渲染器同步显隐与禁用规则。
+- **操作列状态辨识**：全局化妆层把可用图标默认色改为柔和主题蓝 `--el-color-primary-light-2`，hover 继续使用原有蓝/绿/红语义色；原生禁用态统一浅灰且不响应 hover，选中行不再自动改变按钮语义色。业务页面无需改造，升级样式包即可生效。
 
 ## [1.8.16] - 2026-07-01
 

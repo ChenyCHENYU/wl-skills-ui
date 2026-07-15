@@ -37,8 +37,6 @@ export interface OpPreset {
   label?: string;
   title?: string;
   show?: boolean | (() => boolean);
-  disabled?: boolean | (() => boolean);
-  disabledReason?: string;
   onClick: (e: MouseEvent) => void;
 }
 
@@ -46,11 +44,8 @@ export interface OpPreset {
 export interface OpChip {
   type: "chip";
   label: string;
-  title?: string;
   icon?: import("vue").Component;
   show?: boolean | (() => boolean);
-  disabled?: boolean | (() => boolean);
-  disabledReason?: string;
   onClick: (e: MouseEvent) => void;
 }
 
@@ -58,10 +53,7 @@ export interface OpChip {
 export interface OpLink {
   type: "link";
   label: string;
-  title?: string;
   show?: boolean | (() => boolean);
-  disabled?: boolean | (() => boolean);
-  disabledReason?: string;
   onClick: (e: MouseEvent) => void;
 }
 

@@ -55,19 +55,12 @@ renderOps([
 | 软删除  | **作废** | ~~删除~~ |
 | 硬删除  | **删除** | ~~移除~~ |
 
-### 显隐与禁用
+### 条件显示
 
 ```typescript
 renderOps([
-  // 无权限或对当前记录完全不适用：隐藏
   { type: 'del', show: () => canDelete, onClick: () => handleDelete(row) },
-  // 因状态或前置条件暂时不可用：禁用并说明原因
-  {
-    type: 'edit',
-    disabled: () => row.status !== 'creating',
-    disabledReason: '仅建立中的数据可以编辑',
-    onClick: () => handleEdit(row),
-  },
+  { type: 'edit', show: () => canEdit, onClick: () => handleEdit(row) },
 ])
 ```
 

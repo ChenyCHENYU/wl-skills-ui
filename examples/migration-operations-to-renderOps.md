@@ -55,7 +55,6 @@ const columnsDef = [
 | `name: "删除"` | `type: "del"` | 预设图标按钮（红色） |
 | `click: fn` | `onClick: fn` | 回调函数 |
 | `show: fn/bool` | `show: fn/bool` | 控制显隐 |
-| `disabled: fn/bool` | `disabled: fn/bool` | 暂时不可用；可配 `disabledReason` |
 | `type: "danger"` | _(由 type 决定)_ | del 自动红色 |
 | 自定义文字 | `type: "chip"` 或 `type: "link"` | 胶囊/文字按钮 |
 

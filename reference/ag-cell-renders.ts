@@ -398,15 +398,10 @@ type PresetType = keyof typeof ICON_PRESETS;
 /** 图标按钮（纯图标，type 为内置预设 key）*/
 export interface OpPreset {
   type: PresetType;
-  label?: string;
   /** 覆盖默认 tooltip */
   title?: string;
   /** false 时隐藏该按钮 */
-  show?: boolean | (() => boolean);
-  /** 因业务状态或前置条件暂时不可用 */
-  disabled?: boolean | (() => boolean);
-  /** 禁用原因，追加到 tooltip */
-  disabledReason?: string;
+  show?: boolean;
   onClick: (e: MouseEvent) => void;
 }
 
@@ -414,12 +409,9 @@ export interface OpPreset {
 export interface OpChip {
   type: "chip";
   label: string;
-  title?: string;
   /** 可选左侧图标，传入 Element Plus 图标组件 */
   icon?: Component;
-  show?: boolean | (() => boolean);
-  disabled?: boolean | (() => boolean);
-  disabledReason?: string;
+  show?: boolean;
   onClick: (e: MouseEvent) => void;
 }
 
@@ -427,31 +419,11 @@ export interface OpChip {
 export interface OpLink {
   type: "link";
   label: string;
-  title?: string;
-  show?: boolean | (() => boolean);
-  disabled?: boolean | (() => boolean);
-  disabledReason?: string;
+  show?: boolean;
   onClick: (e: MouseEvent) => void;
 }
 
 export type OpItem = OpPreset | OpChip | OpLink;
-
-function isOpVisible(item: OpItem): boolean {
-  return typeof item.show === "function" ? item.show() : item.show !== false;
-}
-
-function isOpDisabled(item: OpItem): boolean {
-  return typeof item.disabled === "function"
-    ? item.disabled()
-    : item.disabled === true;
-}
-
-function getOpTitle(item: OpItem, fallback: string, disabled: boolean): string {
-  const title = item.title ?? item.label ?? fallback;
-  return disabled && item.disabledReason
-    ? `${title}（${item.disabledReason}）`
-    : title;
-}
 
 /**
  * 渲染操作列按钮组（三层系统）
@@ -484,7 +456,7 @@ export function renderOps(items: OpItem[]): VNode {
   ) as OpPreset[];
   // chip/link 类按钮：有无 show 都直接过滤，无固定位置要求
   const otherItems = items.filter(
-    (i) => !(i.type in ICON_PRESETS) && isOpVisible(i),
+    (i) => !(i.type in ICON_PRESETS) && i.show !== false,
   ) as (OpChip | OpLink)[];
 
   const nodes: VNode[] = [];
@@ -492,26 +464,20 @@ export function renderOps(items: OpItem[]): VNode {
   // ── 第一层：纯图标按钮（含不可见占位以保持列对齐）──────────────────────
   for (const item of allIconItems) {
     const preset = ICON_PRESETS[item.type as PresetType];
-    const isVisible = isOpVisible(item);
-    const disabled = isOpDisabled(item);
+    const isVisible = item.show !== false;
     nodes.push(
       h(
         "button",
         {
           class: ["jh-op-btn", preset.cls],
           type: "button",
-          title: isVisible
-            ? getOpTitle(item, preset.title, disabled)
-            : undefined,
-          "aria-label": item.label ?? item.title ?? preset.title,
-          disabled,
+          title: isVisible ? (item.title ?? preset.title) : undefined,
           style: isVisible
             ? undefined
             : { visibility: "hidden", pointerEvents: "none" },
           onClick: isVisible
             ? (e: MouseEvent) => {
                 e.stopPropagation();
-                if (disabled) return;
                 item.onClick(e);
               }
             : undefined,
@@ -528,7 +494,6 @@ export function renderOps(items: OpItem[]): VNode {
 
   // ── 第二/三层：胶囊 & 文字按钮 ───────────────────────────────────────────
   for (const item of otherItems) {
-    const disabled = isOpDisabled(item);
     if (item.type === "chip") {
       const chipChildren: (VNode | string)[] = [];
       if (item.icon) chipChildren.push(h(item.icon as Component));
@@ -539,11 +504,8 @@ export function renderOps(items: OpItem[]): VNode {
           {
             class: "jh-op-chip",
             type: "button",
-            title: getOpTitle(item, item.label, disabled),
-            disabled,
             onClick: (e: MouseEvent) => {
               e.stopPropagation();
-              if (disabled) return;
               item.onClick(e);
             },
           },
@@ -557,11 +519,8 @@ export function renderOps(items: OpItem[]): VNode {
           {
             class: "jh-op-link",
             type: "button",
-            title: getOpTitle(item, item.label, disabled),
-            disabled,
             onClick: (e: MouseEvent) => {
               e.stopPropagation();
-              if (disabled) return;
               item.onClick(e);
             },
           },

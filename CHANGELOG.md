@@ -4,6 +4,28 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.0] - 2026-07-18
+
+### Added
+
+- 统一 CLI 正式暴露 `audit`、`drift`、`exempt`、`snapshot`，`audit --refresh-baseline` 可建立和收敛问题基线。
+- 新增自动修复、快照路径边界、回退与 CLI 转发测试；新增包导出/运行时导入/规则目录与 fixer 一致性发布检查。
+- 新增独立闭环与 kit 可选协同说明，明确 page-spec 只作为约定输入而非硬依赖。
+
+### Fixed
+
+- `./runtime` package export 改为真实 `es/index.js` 与类型声明，不再错误导出包根目录。
+- runtime 构建入口改为完整 `runtime/index.ts`，`createPreset/installPreset` 与文档一致；删除指向未发布 TypeScript 源码的失效 presets 通配导出。
+- `add-preset` 改为在消费项目的 `src/wl-ui/presets` 安全生成，不再尝试写入安装包目录；名称和输出路径均做边界校验。
+- 快照创建失败改为失败关闭；修复写入中断自动恢复本轮文件；快照和回退拒绝路径穿越及符号链接越界。
+- `autoFixable` 与实际 fixer 能力收口：脚本配色、图标、loading-mask 和圆角等语义修复不再误标为自动修复。
+- `fix` 完成后自动复检，`--fail-on-error` 在仍有强制问题时正确返回非零状态。
+
+### Changed
+
+- 最低 Node.js 版本提升为 22；新增统一 `verify`、`release:check` 与 `prepublishOnly` 发布门禁。
+- npm 发布白名单排除 scanner 测试夹具与维护脚本，只保留运行时 scanner/rules，避免发布包污染。
+
 ## [1.8.17] - 2026-07-15
 
 ### Changed
@@ -115,7 +137,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Notes
 
 - R013（Upload 嵌入 operations[]）由文档约束晋升为 `rules.json` 正式条目（`severity: review`，无 scanner 实现）。
-- 推荐业务项目跟进：跑一次 `npx wl-ui audit --target src --outFile .wl-baseline.json` 建立基线，配合 `--baseline` 增量门槛使用（详见 `docs/governance-long-term.md`）。
+- 推荐业务项目跟进：跑一次 `npx wl-ui audit --target src --refresh-baseline` 建立基线，配合 `--baseline` 增量门槛使用（详见 `docs/governance-long-term.md`）。
 
 ## [1.7.1] - 2026-05-12
 

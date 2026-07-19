@@ -9,6 +9,7 @@
  *   wl-ui check  → 委托给 scanner/index.mjs
  *   wl-ui fix    → 委托给 scanner/index.mjs
  *   wl-ui all    → 委托给 scanner/index.mjs
+ *   wl-ui audit/drift/exempt/snapshot → 委托给 scanner/index.mjs
  *
  * 向后兼容：wl-scan 仍可用（直接调用 scanner/index.mjs）
  */
@@ -22,7 +23,7 @@ import {
   rmSync,
   unlinkSync,
 } from "node:fs";
-import { join, resolve, dirname, relative } from "node:path";
+import { join, resolve, dirname, relative, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { createRequire } from "node:module";
@@ -53,12 +54,15 @@ const SUBCOMMANDS = new Set([
   "doctor",
   "prompts",
   "scan",
+  "audit",
   "check",
   "fix",
   "all",
   "add-preset",
   "add-vendor",
   "snapshot",
+  "drift",
+  "exempt",
 ]);
 let subcommand = "help";
 
@@ -66,10 +70,25 @@ if (rawArgs.length > 0 && SUBCOMMANDS.has(rawArgs[0])) {
   subcommand = rawArgs.shift();
 } else if (rawArgs.length === 0) {
   subcommand = "help";
+} else if (["--help", "-h", "--version", "-v"].includes(rawArgs[0])) {
+  subcommand = "help";
+} else {
+  console.error(`[wl-ui] 未知命令：${rawArgs[0]}`);
+  console.error("运行 wl-ui --help 查看可用命令。");
+  process.exit(1);
 }
 
 // 非 init 子命令：直接委托给 scanner/index.mjs
-const SCANNER_CMDS = new Set(["scan", "check", "fix", "all", "snapshot"]);
+const SCANNER_CMDS = new Set([
+  "scan",
+  "audit",
+  "check",
+  "fix",
+  "all",
+  "snapshot",
+  "drift",
+  "exempt",
+]);
 if (SCANNER_CMDS.has(subcommand)) {
   const scannerBin = join(PKG_ROOT, "scanner", "index.mjs");
   try {
@@ -88,6 +107,10 @@ if (
   rawArgs.includes("--help") ||
   rawArgs.includes("-h")
 ) {
+  if (rawArgs.includes("--version") || rawArgs.includes("-v")) {
+    console.log(PKG.version);
+    process.exit(0);
+  }
   printHelp();
   process.exit(0);
 }
@@ -235,7 +258,21 @@ if (subcommand === "add-preset") {
     );
     process.exit(1);
   }
-  scaffoldPreset(presetName);
+  const { values } = parseArgs({
+    args: rawArgs.slice(1),
+    options: {
+      project: { type: "string", default: "." },
+      output: { type: "string", default: "src/wl-ui/presets" },
+      "dry-run": { type: "boolean", default: false },
+    },
+    strict: true,
+  });
+  scaffoldPreset({
+    name: presetName,
+    projectRoot: resolve(values.project),
+    outputDir: values.output,
+    dryRun: values["dry-run"],
+  });
   process.exit(0);
 }
 
@@ -542,19 +579,28 @@ ${
 }
 
 /** 脚手架新预设文件 */
-function scaffoldPreset(name) {
-  const outPath = join(PKG_ROOT, "runtime", "presets", `${name}.ts`);
+function scaffoldPreset({ name, projectRoot, outputDir, dryRun }) {
+  if (!/^[a-z][a-z0-9-]*$/.test(name)) {
+    console.error("[wl-ui add-preset] 名称必须是小写 kebab-case");
+    process.exit(1);
+  }
+  const outPath = resolve(projectRoot, outputDir, `${name}.ts`);
+  const relPath = relative(projectRoot, outPath);
+  if (relPath.startsWith("..") || isAbsolute(relPath)) {
+    console.error("[wl-ui add-preset] 输出目录必须位于目标项目内");
+    process.exit(1);
+  }
   if (existsSync(outPath)) {
     console.error(`[wl-ui add-preset] 文件已存在：${outPath}`);
     process.exit(1);
   }
+  const symbol = toPascalCase(name);
   const template = `/**
- * runtime/presets/${name}.ts — ${name} 业务预设
- * 使用：import { install${capitalize(name)}Preset } from '@agile-team/wl-skills-ui/runtime/presets/${name}';
+ * ${relPath.replace(/\\/g, "/")} — ${name} 业务预设
+ * 使用：import { install${symbol}Preset } from '@/wl-ui/presets/${name}';
  */
-import type { TagMapItem } from '../core/types';
-import { renderTagNode } from '../core/renderers';
-import { registerColumnAutoMaps } from '../core/registry';
+import type { TagMapItem } from '@agile-team/wl-skills-ui/runtime';
+import { registerColumnAutoMaps, renderTagNode } from '@agile-team/wl-skills-ui/runtime';
 
 // ── 状态映射 ──────────────────────────────────────────────────────────────────
 export const MY_STATUS_MAP: Record<string | number, TagMapItem> = {
@@ -568,7 +614,7 @@ export const renderMyStatus = (v: string | number | null | undefined) =>
   renderTagNode(v, MY_STATUS_MAP);
 
 // ── 安装 ──────────────────────────────────────────────────────────────────────
-export function install${capitalize(name)}Preset(): void {
+export function install${symbol}Preset(): void {
   registerColumnAutoMaps({
     myStatus: {
       width: 90,
@@ -578,13 +624,22 @@ export function install${capitalize(name)}Preset(): void {
   });
 }
 `;
+  if (dryRun) {
+    console.log(`[wl-ui add-preset] [DRY-RUN] 将创建：${outPath}`);
+    return;
+  }
+  mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, template, "utf8");
   console.log(`[wl-ui add-preset] ✔ 创建预设文件：${outPath}`);
-  console.log(`  在 main.ts 中引入：install${capitalize(name)}Preset()`);
+  console.log(`  在 main.ts 中引入并调用：install${symbol}Preset()`);
 }
 
-function capitalize(s) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+function toPascalCase(value) {
+  return value
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
 }
 
 /** 根据 tag 名推断 vendor family（jh / base / c / ag-grid / custom） */
@@ -1023,6 +1078,8 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
   wl-ui scan   --target <src> [--layer L0,L1,L2] [--vendor base-table,jh]
                               [--mode skin|native] [--outFile report.md]
                               [--exempt <config.json>]
+  wl-ui audit  --target <src> [--output json] [--refresh-baseline]
+                scan 的只读审计别名；可显式刷新项目问题基线
   wl-ui check  --project <项目根目录>
   wl-ui fix    --target <src目录> [--dry-run] [--no-snapshot]
   wl-ui all    --project <项目根目录> [--outFile report.md]
@@ -1031,8 +1088,11 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
   wl-ui snapshot rollback [--id <id>] [--dry-run]  回退到快照（默认最新）
   wl-ui snapshot diff     [--id <id>]              查看快照与当前差异
   wl-ui snapshot clean    [--keep <N>]             清理旧快照
+  wl-ui drift --baseline <基线.json> --current <当前.json> [--fail-on-error]
+  wl-ui exempt init --project . --target src        生成豁免候选，需人工确认
 
-  wl-ui add-preset <name>   脚手架一个新的业务预设文件
+  wl-ui add-preset <name> [--project .] [--output src/wl-ui/presets] [--dry-run]
+                           在消费项目内脚手架业务预设文件
   wl-ui add-vendor <tag> [--family <id>] [--dry-run]
                            脚手架新 vendor 专项覆盖（SCSS + scanner 草稿 + vendors.json 注册）
 

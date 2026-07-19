@@ -2,7 +2,7 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: {
-    index: "runtime/core/index.ts",
+    index: "runtime/index.ts",
     "common-preset": "runtime/presets/common.ts",
     "presets/security": "runtime/presets/security.ts",
   },

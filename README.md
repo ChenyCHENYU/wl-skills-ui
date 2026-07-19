@@ -3,7 +3,7 @@
 > **企业级 UI 风格对齐框架** — 让 Vue + Element Plus 业务系统获得一致的视觉、可被 AI 精确识别和修复的设计规范，以及可演进的工程能力。
 
 [![npm version](https://img.shields.io/npm/v/@agile-team/wl-skills-ui.svg)](https://www.npmjs.com/package/@agile-team/wl-skills-ui)
-[![Node](https://img.shields.io/badge/node-%3E%3D18-green.svg)]()
+[![Node](https://img.shields.io/badge/node-%3E%3D22-green.svg)]()
 
 ---
 
@@ -187,7 +187,7 @@ npm i @agile-team/wl-skills-ui
 yarn add @agile-team/wl-skills-ui
 ```
 
-要求：Node ≥ 18，Vue ≥ 3.2，Element Plus ≥ 2.2。
+要求：Node ≥ 22，Vue ≥ 3.2，Element Plus ≥ 2.2。
 
 ---
 
@@ -199,7 +199,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.7.0` | 已对齐上述组合的 DOM 假设 |
+| `@agile-team/wl-skills-ui` | `^1.9.0` | 已对齐上述组合的 DOM 假设 |
 
 三种识别方式，任选其一：
 
@@ -213,7 +213,14 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.8.17：
+当前 v1.9.0：
+
+- **独立闭环**：不依赖 kit/design/bd 即可安装、审计、修复、复检、快照和回退；存在 kit 的 page-spec 时只复用页面模式与组件命名约定，不形成运行时硬依赖。
+- **CLI 真实一致**：统一入口正式支持 `audit/drift/exempt/snapshot`，未知命令非零退出，`audit --refresh-baseline` 可维护增量治理基线。
+- **修复失败安全**：快照失败即停止写入；快照与回退拒绝路径越界/符号链接越界；写入中断自动恢复本轮已写文件，修复结束自动复检。
+- **发布面闭环**：修复 `./runtime` 导出，新增构建产物导入烟测、规则/fixer 一致性校验和 `verify/release:check/prepublishOnly` 门禁。
+
+上一版 v1.8.17：
 
 - **操作列状态辨识**：可用图标默认使用柔和主题蓝，hover 保留蓝/绿/红语义色；禁用态统一浅灰且不响应 hover，选中行不再改变按钮语义色
 
@@ -404,7 +411,7 @@ npx wl-ui doctor --project .
 {
   "scripts": {
     "ui:check": "wl-ui check --project .",
-    "ui:audit": "wl-ui scan --target src --outFile ui-audit.md",
+    "ui:audit": "wl-ui audit --target src --outFile ui-audit.md",
     "ui:fix": "wl-ui fix --target src --dry-run"
   }
 }
@@ -424,9 +431,13 @@ wl-ui doctor  [--project .]
 wl-ui prompts
 wl-ui scan    --target src  [--layer L0,L1,L2] [--vendor base-table,jh]
                             [--mode skin|native] [--outFile report.md]
+wl-ui audit   --target src  [--output json] [--refresh-baseline]
 wl-ui check   --project .
 wl-ui fix     --target src  [--dry-run]
 wl-ui all     --project .
+wl-ui drift   --baseline .wl-baseline.json --current .wl-current.json
+wl-ui exempt init --project . --target src
+wl-ui snapshot list|diff|rollback|clean
 wl-ui add-preset <name>     # 脚手架新业务 preset
 ```
 
@@ -440,6 +451,8 @@ wl-ui add-preset <name>     # 脚手架新业务 preset
 - `.wl-skills-ui-manifest.json` 安装清单，供 `update/diff/clean/doctor` 使用
 
 > 可选桥接：如项目也安装了 `@agile-team/wl-skills-kit`，两者保持独立分工，不互相强依赖。kit 负责编码规范/页面生成/菜单字典权限，wl-skills-ui 负责 UI 风格/化妆层/Runtime 渲染。
+
+具体独立使用、可选 page-spec 协同和验证边界见 [`docs/delivery-compatibility.md`](docs/delivery-compatibility.md)。
 
 > 规范插件建议：项目可执行 `npx @robot-admin/git-standards init` 接入 ESLint/Prettier/Husky/提交规范，形成代码质量闭环。
 
@@ -485,12 +498,12 @@ Base* > jh-* > C_*/c_* > AG Grid > custom wrappers
 
 ```bash
 npx wl-ui add-preset my-biz
-# 生成 runtime/presets/my-biz.ts，按提示填字段映射，然后：
+# 在消费项目生成 src/wl-ui/presets/my-biz.ts，按提示填字段映射，然后：
 ```
 
 ```ts
 // main.ts
-import { installMyBizPreset } from "@agile-team/wl-skills-ui/runtime/presets/my-biz";
+import { installMyBizPreset } from "@/wl-ui/presets/my-biz";
 installMyBizPreset();
 ```
 

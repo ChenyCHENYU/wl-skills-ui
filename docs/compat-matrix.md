@@ -11,7 +11,7 @@
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版，搭配 `@jhlc/jh-ui` 使用，DOM 仍为 `.el-input > .el-input__inner` 直挂结构（**EP 2.3.0 起才引入 `.el-input__wrapper`**） |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹、`.has-colon ::after` 冒号注入、`.el-form-item--default { margin-bottom: 24px }` 等强约束 |
 | `@jhlc/common-core` | `3.1.0` 或 `3.1.0-prod.x` | 基础 util/types，`@jhlc/jh-ui` 间接依赖 |
-| `@agile-team/wl-skills-ui` | `^1.7.0` | 已对齐 jh-ui 3.1.0 + EP 2.2.6-prod.3 的 DOM 假设 |
+| `@agile-team/wl-skills-ui` | `^1.9.0` | 已对齐 jh-ui 3.1.0 + EP 2.2.6-prod.3 的 DOM 假设 |
 
 ## 项目集群当前实测
 

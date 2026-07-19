@@ -23,22 +23,22 @@
 
 ```bash
 # 在主干分支建立基线（团队第一次接入时执行一次）
-npx wl-ui audit --target src --output json --outFile .wl-baseline.json
+npx wl-ui audit --target src --refresh-baseline
 git add .wl-baseline.json && git commit -m "chore: wl-ui baseline snapshot"
 ```
 
-`.wl-baseline.json` 记录当前所有违规条目的 `(file, line, ruleId)` 指纹。后续：
+`.wl-baseline.json` 记录当前违规条目；漂移指纹使用 `(file, ruleId)` 和同类问题数量，行号变化不会制造假漂移。后续：
 
 ```bash
 # PR 检查（仅报新增违规）
-npx wl-ui scan --target src --baseline .wl-baseline.json --fail-on=new-issues
+npx wl-ui scan --target src --baseline .wl-baseline.json --fail-on-error
 ```
 
 - **历史条目不再阻塞构建**（团队按计划逐步消化）
 - **新代码引入新违规 → 立即红灯**
 - 团队修复历史条目后跑 `npx wl-ui audit --refresh-baseline` 收敛基线
 
-> 实现入口：`scanner/snapshot.mjs` 已具备文件级快照能力，issue 级 baseline 在 v1.8.0 起以 `audit --output json` 输出为契约，业务项目可自行 diff。
+> 实现入口：`audit --refresh-baseline` 生成问题基线，`scanner/drift.mjs` 负责增量比对；`scanner/snapshot.mjs` 是自动修复前的文件级回退快照，两种快照职责不同。
 
 ---
 
@@ -168,7 +168,7 @@ pnpm add -D @agile-team/wl-skills-ui
 npx wl-ui init --project . --mode skin
 
 # 3. 基线
-npx wl-ui audit --target src --outFile .wl-baseline.json --output json
+npx wl-ui audit --target src --refresh-baseline
 git add .wl-baseline.json
 
 # 4. 豁免（如有）
@@ -176,7 +176,7 @@ cp node_modules/@agile-team/wl-skills-ui/.wl-exempt.example.json .wl-exempt.json
 # 编辑为本项目实际豁免路径
 
 # 5. CI 加 PR gate
-#   npx wl-ui scan --target src --baseline .wl-baseline.json --fail-on=new-issues
+#   npx wl-ui scan --target src --baseline .wl-baseline.json --fail-on-error
 
 # 6. 每季度 / 每次升级
 npx wl-ui doctor --print-overrides     # 版本对齐

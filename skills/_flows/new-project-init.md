@@ -60,7 +60,7 @@ installCommonPreset();
 ### Phase 6 — 业务定制 preset（按需）
 ```bash
 npx wl-ui add-preset my-biz
-# 生成 runtime/presets/my-biz.ts，自定义业务字段映射
+# 在消费项目生成 src/wl-ui/presets/my-biz.ts，自定义业务字段映射
 ```
 
 ### Phase 7 — CI 接入

@@ -4,6 +4,7 @@
  *
  * 用法：
  *   wl-scan scan --target <path>          # 风格扫描
+ *   wl-scan audit --target <path>         # 只读全量审计（scan 别名）
  *   wl-scan scan --target <path> --only R001,R016
  *   wl-scan scan --target <path> --skip R031-R037
  *   wl-scan scan --target <path> --outFile report.md
@@ -43,6 +44,7 @@ import { loadExemptConfig } from "./exempt.mjs";
 const args = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
   "scan",
+  "audit",
   "check",
   "fix",
   "all",
@@ -54,7 +56,11 @@ const SUBCOMMANDS = new Set([
 let subcommand = "scan";
 if (args.length > 0 && SUBCOMMANDS.has(args[0])) {
   subcommand = args.shift();
+} else if (args.length > 0 && !args[0].startsWith("-")) {
+  console.error(`[wl-scan] 未知命令：${args[0]}`);
+  process.exit(1);
 }
+const isAudit = subcommand === "audit";
 
 const { values } = parseArgs({
   args,
@@ -72,6 +78,7 @@ const { values } = parseArgs({
     id: { type: "string", default: "" },
     keep: { type: "string", default: "5" },
     "no-snapshot": { type: "boolean", default: false },
+    "refresh-baseline": { type: "boolean", default: false },
     exempt: { type: "string", default: "" },
     baseline: { type: "string", default: "" },
     current: { type: "string", default: "" },
@@ -464,7 +471,15 @@ if (subcommand === "fix") {
     console.log(
       `\n[DRY-RUN 模式] 未实际写入文件。去掉 --dry-run 后重新运行即可应用。`,
     );
-  process.exit(0);
+  const verification = runScan(
+    targetDir,
+    excludeDirs,
+    loadExemptConfig(projectRoot, values.exempt || undefined),
+  );
+  const remaining = applyFilters(verification.allIssues);
+  const remainingErrors = remaining.filter((issue) => issue.severity === "error");
+  console.log(`\n复检：剩余 ${remaining.length} 项，其中 error ${remainingErrors.length} 项。`);
+  process.exit(values["fail-on-error"] && remainingErrors.length > 0 ? 1 : 0);
 }
 
 if (subcommand === "all") {
@@ -528,9 +543,20 @@ if (subcommand === "all") {
     console.log(report);
   }
 
+  if (isAudit && values["refresh-baseline"]) {
+    const baselinePath = resolve(projectRoot, values.baseline || ".wl-baseline.json");
+    const baseline = {
+      schemaVersion: 1,
+      generatedAt: new Date().toISOString(),
+      issues: filtered,
+    };
+    writeFileSync(baselinePath, `${JSON.stringify(baseline, null, 2)}\n`, "utf8");
+    console.error(`[wl-scan] 基线已刷新: ${baselinePath}`);
+  }
+
   // ── baseline 漂移检测（--baseline <file>）────────────────────────────────
   let driftResult = null;
-  if (values.baseline) {
+  if (values.baseline && !values["refresh-baseline"]) {
     const { existsSync: fileExists } = await import("node:fs");
     const baselinePath = resolve(values.baseline);
     if (fileExists(baselinePath)) {

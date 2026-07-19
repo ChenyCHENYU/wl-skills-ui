@@ -19,6 +19,12 @@ npx wl-ui fix --target src --dry-run
 # 3. 确认无误后执行
 npx wl-ui fix --target src
 
-# 4. 验证效果
+# 4. 命令会自动复检；需要留档时再导出报告
 npx wl-ui scan --target src --outFile /tmp/after.md
+
+# 若复检仍有 error 则非零退出
+npx wl-ui fix --target src --fail-on-error
+
+# 回退最近一次自动修复
+npx wl-ui snapshot rollback --project .
 ```

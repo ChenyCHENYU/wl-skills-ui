@@ -1,15 +1,19 @@
 {
   "name": "@agile-team/wl-skills-ui",
-  "version": "1.8.17",
+  "version": "1.9.0",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 项目通用化妆/原生双模式（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
   "main": "./es/index.js",
+  "types": "./es/index.d.ts",
   "exports": {
     ".": {
       "import": "./es/index.js",
       "types": "./es/index.d.ts"
     },
-    "./runtime": "./",
+    "./runtime": {
+      "import": "./es/index.js",
+      "types": "./es/index.d.ts"
+    },
     "./runtime/common-preset": {
       "import": "./es/common-preset.js",
       "types": "./es/common-preset.d.ts"
@@ -18,7 +22,6 @@
       "import": "./es/presets/security.js",
       "types": "./es/presets/security.d.ts"
     },
-    "./runtime/presets/*": "./runtime/presets/*",
     "./vite": "./runtime/vite/check.mjs",
     "./styles": "./styles/index.scss",
     "./styles/*": "./styles/*",
@@ -41,7 +44,7 @@
     "build": "tsup && npm run sync:tokens",
     "prepare": "npm run build",
     "sync:tokens": "node -e \"import('fs').then(fs=>fs.copyFileSync('design/tokens/base.css','dist/tokens.css'))\"",
-    "test": "node --test scanner/__tests__/scan.test.mjs",
+    "test": "node --test scanner/__tests__/*.test.mjs",
     "check:scss": "node scripts/check-scss.mjs",
     "docs:check": "node scripts/check-docs.mjs",
     "scan": "node scanner/index.mjs scan",
@@ -50,13 +53,19 @@
     "all": "node scanner/index.mjs all",
     "standards:init": "npx @robot-admin/git-standards init",
     "cz": "git-cz",
-    "lint": "eslint ."
+    "lint": "eslint . --max-warnings 0",
+    "verify:package": "node scripts/verify-package.mjs",
+    "verify": "npm run lint && npm test && npm run check:scss && npm run docs:check && npm run build && npm run verify:package",
+    "pack:dry": "npm pack --dry-run --ignore-scripts",
+    "release:check": "npm run verify && npm pack --dry-run --ignore-scripts",
+    "prepublishOnly": "npm run verify"
   },
   "files": [
     "dist",
     "es",
     "runtime/vite",
-    "scanner",
+    "scanner/*.mjs",
+    "scanner/rules",
     "standards",
     "styles",
     "design",
@@ -64,7 +73,6 @@
     "skills",
     "templates",
     "bin",
-    "scripts",
     "mcp",
     "reference",
     "examples",
@@ -105,7 +113,7 @@
     }
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "keywords": [
     "vue",

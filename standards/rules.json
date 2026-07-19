@@ -102,7 +102,8 @@
       "title": "工具栏 el-button 必须配 icon",
       "rationale": "类型化按钮需补 icon 提升可识别性（Plus/Edit/Search/Refresh/Download/Upload）。",
       "appliesTo": ["el-button[type=primary|success|warning|danger]"],
-      "autoFixable": true,
+      "autoFixable": false,
+      "manualReason": "需根据按钮业务语义选择 Plus/Edit/Search/Refresh/Download/Upload 等图标",
       "scanner": "scanner/rules/button.mjs",
       "skills": ["layouts/list-page"]
     },
@@ -254,7 +255,8 @@
       "title": "<script> 块禁止硬编码 hex 颜色",
       "rationale": "ECharts/inline 配色需统一 CHART_COLORS / Token。",
       "appliesTo": ["*.vue <script>", "*.ts"],
-      "autoFixable": true,
+      "autoFixable": false,
+      "manualReason": "脚本和 Canvas 图表不能直接使用 CSS var，需迁移到业务 CHART_COLORS 色板",
       "scanner": "scanner/rules/color.mjs",
       "skills": ["runtime/design-tokens"]
     },
@@ -352,6 +354,7 @@
       "rationale": "默认抽屉宽度跨页面不统一，详情 480px / 编辑 560px 是项目集群约定。",
       "appliesTo": ["el-drawer"],
       "autoFixable": false,
+      "manualReason": "需根据详情、编辑或宽表场景选择合适宽度",
       "scanner": "scanner/rules/componentFamily.mjs",
       "skills": ["element/component-family"]
     },
@@ -363,6 +366,7 @@
       "rationale": "附件场景缺失限制说明会导致用户上传非法格式后报错。",
       "appliesTo": ["el-upload"],
       "autoFixable": false,
+      "manualReason": "文件类型、数量与提示文案必须来自业务约束",
       "scanner": "scanner/rules/componentFamily.mjs",
       "skills": ["element/component-family"]
     },
@@ -419,7 +423,8 @@
       "title": "禁止业务代码硬编码 .el-loading-mask 背景色",
       "rationale": "wl-skills-ui v1.8.5+ 已内置毛玻璃遮罩覆盖（半透明白底 + backdrop-filter），业务侧硬编码会冲突或导致灰色蒙层残留。",
       "appliesTo": [".el-loading-mask"],
-      "autoFixable": true,
+      "autoFixable": false,
+      "manualReason": "需确认选择器作用域后删除冲突声明，避免误删同块内其他背景规则",
       "scanner": "scanner/rules/semantic.mjs",
       "skills": ["vendors/base-table", "element/el-table"]
     },
@@ -430,7 +435,8 @@
       "title": "业务代码 border-radius 应使用设计 token",
       "rationale": "硬编码圆角数值无法随 --el-border-radius-base token 统一调整，升级 token 后业务侧残留旧值导致视觉不一致。",
       "appliesTo": ["border-radius"],
-      "autoFixable": true,
+      "autoFixable": false,
+      "manualReason": "需按组件语义选择 base/small/round 等圆角 token",
       "scanner": "scanner/rules/semantic.mjs",
       "skills": ["tokens/index"]
     }

@@ -19,8 +19,25 @@ const FIXES = {
   "el-select": [{ attr: "size", value: "small" }],
   "el-date-picker": [{ attr: "style", value: "width:100%" }],
   "el-table": [{ attr: "empty-text", value: "暂无数据" }],
-  "el-table-column": [{ attr: "align", value: "center" }],
+  "el-table-column": [{ attr: "align", value: "center", replaceStatic: true }],
+  BaseTable: [
+    { attr: "empty-text", value: "暂无数据" },
+    { attr: "render-type", value: "agGrid", replaceStatic: true },
+  ],
 };
+
+export const FIXED_RULE_IDS = Object.freeze([
+  "R001",
+  "R002",
+  "R003",
+  "R006",
+  "R007",
+  "R012",
+  "R014",
+  "R016",
+  "R017",
+  "R021",
+]);
 
 function parseTag(content, pos, tagName) {
   let i = pos + tagName.length + 1;
@@ -40,12 +57,20 @@ function parseTag(content, pos, tagName) {
   return { text: content.slice(pos), end: content.length };
 }
 
-function addAttrIfMissing(tagText, tagName, attr, value) {
+function addAttrIfMissing(tagText, tagName, attr, value, replaceStatic = false) {
   // 已存在（含动态绑定 :attr=）则跳过
   const re = new RegExp(
     `:?${attr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*=`,
   );
-  if (re.test(tagText)) return { text: tagText, changed: false };
+  if (re.test(tagText)) {
+    if (!replaceStatic) return { text: tagText, changed: false };
+    const staticRe = new RegExp(
+      `(\\s${attr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*=\\s*)(["'])[^"']*\\2`,
+    );
+    if (!staticRe.test(tagText)) return { text: tagText, changed: false };
+    const text = tagText.replace(staticRe, `$1"${value}"`);
+    return { text, changed: text !== tagText };
+  }
   const newTag = tagText.replace(
     `<${tagName}`,
     `<${tagName} ${attr}="${value}"`,
@@ -76,8 +101,12 @@ function fixTemplateAttrs(content) {
     result += content.slice(pos, m.index);
     const tagName = m[1];
     let { text, end } = parseTag(content, m.index, tagName);
-    for (const { attr, value } of FIXES[tagName]) {
-      const r = addAttrIfMissing(text, tagName, attr, value);
+    const fixes = [...FIXES[tagName]];
+    if (tagName === "el-table-column" && text.includes('type="selection"')) {
+      fixes.push({ attr: "header-align", value: "center" });
+    }
+    for (const { attr, value, replaceStatic } of fixes) {
+      const r = addAttrIfMissing(text, tagName, attr, value, replaceStatic);
       text = r.text;
       if (r.changed) changes++;
     }
@@ -89,50 +118,25 @@ function fixTemplateAttrs(content) {
 
 function fixHexColors(content) {
   let changes = 0;
-  // 匹配 <style> 块和 template 中的 color="" / style="" 属性
-  let result = content.replace(
-    /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g,
-    (match) => {
-      const hex = match.toLowerCase();
-      const repl = TOKEN_MAP[hex];
-      if (!repl) return match;
+  let result = content;
+
+  function replaceMappedHex(body) {
+    return body.replace(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g, (match) => {
+      const replacement = TOKEN_MAP[match.toLowerCase()];
+      if (!replacement) return match;
       changes++;
-      return repl;
-    },
-  );
-  // 但仅在 <style> 块和 attribute 值中替换太激进，需要限制：
-  // 改为：只替换出现在 <style>...</style> 内、color="..."、style="..."、:style="..." 中
-  // 重新实现：
-  changes = 0;
-  result = content;
+      return replacement;
+    });
+  }
 
   // Style 块内
   result = result.replace(/<style[^>]*>([\s\S]*?)<\/style>/g, (full, body) => {
-    const newBody = body.replace(
-      /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g,
-      (match) => {
-        const hex = match.toLowerCase();
-        if (TOKEN_MAP[hex]) {
-          changes++;
-          return TOKEN_MAP[hex];
-        }
-        return match;
-      },
-    );
-    return full.replace(body, newBody);
+    return full.replace(body, replaceMappedHex(body));
   });
 
-  // template 中的 color="#xxx" / color='#xxx'
-  result = result.replace(
-    /(\bcolor\s*=\s*)(["'])(#[0-9a-fA-F]{3,8})\2/g,
-    (full, pre, q, hex) => {
-      const lo = hex.toLowerCase();
-      if (TOKEN_MAP[lo]) {
-        changes++;
-        return `${pre}${q}${TOKEN_MAP[lo]}${q}`;
-      }
-      return full;
-    },
+  // Template 中 scanner 可识别的映射色全部替换；script 颜色需业务色板语义，不自动改。
+  result = result.replace(/<template[^>]*>([\s\S]*?)<\/template>/g, (full, body) =>
+    full.replace(body, replaceMappedHex(body)),
   );
 
   return { content: result, changes };
@@ -180,36 +184,43 @@ export function runFix({
     content = r2.content;
     changes += r2.changes;
     if (changes > 0 && content !== original) {
-      pending.push({ filePath, content, changes });
+      pending.push({ filePath, original, content, changes });
       changedAbsPaths.push(filePath);
     }
   }
 
-  // 创建快照（fix 前保存原始内容）
+  // 创建快照（fix 前保存原始内容）。失败即停止，避免不可回退写入。
   let snapshotId = null;
   if (!dryRun && !noSnapshot && changedAbsPaths.length > 0) {
     const root = projectRoot || resolve(target, "..");
-    try {
-      const snap = createSnapshot({
-        projectRoot: root,
-        targetDir: target,
-        filePaths: changedAbsPaths,
-        command: "fix",
-      });
-      snapshotId = snap.id;
-    } catch {
-      /* snapshot 失败不阻断 fix */
-    }
+    const snap = createSnapshot({
+      projectRoot: root,
+      targetDir: target,
+      filePaths: changedAbsPaths,
+      command: "fix",
+    });
+    snapshotId = snap.id;
   }
 
   // 第二遍：写入文件
-  for (const { filePath, content, changes } of pending) {
-    if (!dryRun) writeFileSync(filePath, content, "utf8");
-    changedFiles.push({
-      file: relative(target, filePath).replace(/\\/g, "/"),
-      changes,
-    });
-    totalChanges += changes;
+  const written = [];
+  try {
+    for (const { filePath, original, content, changes } of pending) {
+      if (!dryRun) {
+        writeFileSync(filePath, content, "utf8");
+        written.push({ filePath, original });
+      }
+      changedFiles.push({
+        file: relative(target, filePath).replace(/\\/g, "/"),
+        changes,
+      });
+      totalChanges += changes;
+    }
+  } catch (error) {
+    for (const { filePath, original } of written.reverse()) {
+      writeFileSync(filePath, original, "utf8");
+    }
+    throw new Error(`自动修复写入失败，已回滚本轮改动：${error.message}`, { cause: error });
   }
 
   return { totalFiles, changedFiles, totalChanges, snapshotId };

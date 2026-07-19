@@ -2,3 +2,6 @@ node_modules/
 .npmrc
 es/
 bash.exe.stackdump
+
+# npm pack 产物不入库
+*.tgz

@@ -159,7 +159,7 @@ AI 会按照 6 个阶段依次执行：接入 tokens → 引入 skin preset → 
 pnpm add @agile-team/wl-skills-ui
 ```
 
-要求：Node ≥ 18，Vue ≥ 3.2，Element Plus ≥ 2.2
+要求：Node ≥ 22，Vue ≥ 3.2，Element Plus ≥ 2.2
 
 NPM：[@agile-team/wl-skills-ui](https://www.npmjs.com/package/@agile-team/wl-skills-ui)
 

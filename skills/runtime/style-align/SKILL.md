@@ -1,7 +1,7 @@
 ---
 description: |
   UI 风格对齐 Skill — 扫描业务系统 Vue SFC 文件，识别与 wl-skills-ui 标准不一致的写法，
-  生成整改清单，经用户确认后执行自动修复，最终验证归零。
+  生成整改清单，经用户确认后执行安全自动修复与语义人工修复，最终复检并记录未决项。
   覆盖：表格对齐/空状态、按钮图标化、表单控件尺寸、弹窗分页位置、颜色 Token。
 applyTo: "**/*.vue"
 ---
@@ -86,7 +86,7 @@ npx wl-ui check --project [项目根目录]
 
 ## 三、可否自动修复
 
-由 `standards/rules.json` 的 `autoFixable` 字段权威决定，不在此另行声明。`npx wl-ui fix --target src --dry-run` 会按该字段筛选可自动修复条目。
+由 `standards/rules.json` 的 `autoFixable` 字段权威决定，不在此另行声明。发布检查会把该字段与 `scanner/fix.mjs` 的实现清单逐项比对；`npx wl-ui fix --target src --dry-run` 仅预览这些已实现的安全修复。
 
 ---
 

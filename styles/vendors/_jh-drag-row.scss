@@ -47,10 +47,10 @@ html .drager_row > .slider_row {
   &:hover {
     background: linear-gradient(
       to bottom,
-      rgba(34, 84, 244, 0.06) 3px,
+      rgba(var(--el-color-primary-rgb), 0.06) 3px,
       var(--el-color-primary) 3px,
       var(--el-color-primary) 7px,
-      rgba(34, 84, 244, 0.06) 7px
+      rgba(var(--el-color-primary-rgb), 0.06) 7px
     ) !important;
 
     &::after {
@@ -63,10 +63,10 @@ html .drager_row > .slider_row {
   &:active {
     background: linear-gradient(
       to bottom,
-      rgba(34, 84, 244, 0.1) 2.5px,
+      rgba(var(--el-color-primary-rgb), 0.1) 2.5px,
       var(--el-color-primary) 2.5px,
       var(--el-color-primary) 7.5px,
-      rgba(34, 84, 244, 0.1) 7.5px
+      rgba(var(--el-color-primary-rgb), 0.1) 7.5px
     ) !important;
   }
 }

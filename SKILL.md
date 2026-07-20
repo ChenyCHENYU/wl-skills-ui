@@ -282,7 +282,7 @@ npx wl-ui check --project [项目根目录]
 - background: #fb2323;
 + background: var(--el-color-danger);
 ```
-**已覆盖颜色**：`#409eff/#3a7afe/#4368ff`→primary，`#fb2323/#f56c6c`→danger，`#0cc859/#67c23a`→success，`#ffaf27/#e6a23c`→warning，`#ecf5ff`→primary-light-9
+**已覆盖颜色**：`#409eff/#3a7afe/#4368ff/#2254f4/#002a8f`→primary，`#fb2323/#f56c6c/#bb2d3f`→danger，`#0cc859/#67c23a/#2bb268`→success，`#ffaf27/#e6a23c/#ea9a13`→warning，`#ecf5ff/#e5eaf4`→primary-light-9
 
 #### R017 — 编号/工号/证件号列缺少 renderBadge【高危】
 **检测**：`columnsDef()` / `columns` 数组中，label 含“编号”“工号”“证件号”但没有 `renderBadge` / `defaultSlot`（脚本式列定义）

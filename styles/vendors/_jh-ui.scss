@@ -107,8 +107,8 @@ html body .el-select .el-input > .el-input__inner {
 .el-select .el-input.is-focus > .el-input__inner,
 .el-date-editor.is-focus > .el-input__inner,
 .el-date-editor .el-input.is-focus > .el-input__inner {
-  border-color: var(--el-color-primary, #2254f4) !important;
-  box-shadow: 0 0 0 1px var(--el-color-primary, #2254f4) inset;
+  border-color: var(--el-color-primary, #002a8f) !important;
+  box-shadow: 0 0 0 1px var(--el-color-primary, #002a8f) inset;
 }
 
 // 4) error 红色边框（兼容 EP 2.2.x DOM；

@@ -18,11 +18,14 @@ applyTo: "**/*.{vue,scss,css}"
 ### 品牌色
 
 ```css
---el-color-primary        /* #4368ff — 主色：按钮/链接/激活 */
---el-color-primary-light-9 /* #f0f3ff — 主色浅底：Tag背景 */
---el-color-success        /* #0cc859 — 成功/正常/启用 */
---el-color-warning        /* #ffaf27 — 警告/待处理 */
---el-color-danger         /* #FB2323 — 危险/失败/停用 */
+--el-color-primary         /* #002a8f — 主按钮常规/链接/选中 */
+--el-color-primary-light-1 /* #1a3f9a — 主按钮悬停 */
+--el-color-primary-dark-1  /* #002681 — 主按钮点击 */
+--el-color-primary-light-7 /* #b2bfdd — 主按钮禁用 */
+--el-color-primary-light-9 /* #e5eaf4 — 主色浅底/Tag背景 */
+--el-color-success         /* #2bb268 — 成功/正常/启用 */
+--el-color-warning         /* #ea9a13 — 警告/待处理 */
+--el-color-danger          /* #bb2d3f — 危险/失败/停用 */
 --el-color-info           /* #909399 — 中性/辅助 */
 ```
 
@@ -81,7 +84,7 @@ npx wl-ui fix --target src
 
 | hex                           | → CSS Token                       |
 | ----------------------------- | --------------------------------- |
-| `#409eff` `#3a7afe` `#4368ff` | `var(--el-color-primary)`         |
+| `#409eff` `#3a7afe` `#4368ff` `#2254f4` `#002a8f` | `var(--el-color-primary)`         |
 | `#fb2323` `#f56c6c`           | `var(--el-color-danger)`          |
 | `#0cc859` `#67c23a`           | `var(--el-color-success)`         |
 | `#ffaf27` `#e6a23c`           | `var(--el-color-warning)`         |

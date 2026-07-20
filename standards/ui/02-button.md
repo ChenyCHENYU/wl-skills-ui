@@ -8,6 +8,15 @@
 
 ### 类型规则
 
+主按钮色值严格遵循客户 UI 规范，禁止使用 `#2254F4`、`#4368FF` 或 Element Plus 默认蓝替代：
+
+| 状态 | Token | 规范色值 |
+|---|---|---|
+| 常规 | `--el-color-primary` | `#002A8F` |
+| hover / focus | `--el-color-primary-light-1` | `#1A3F9A` |
+| active / 点击 | `--el-color-primary-dark-1` | `#002681` |
+| disabled | `--el-color-primary-light-7` | `#B2BFDD` |
+
 | 操作语义   | type        | plain  | 说明           |
 |----------|-------------|--------|----------------|
 | 新增/添加 | `primary`   | false  | 蓝色填充        |

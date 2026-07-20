@@ -19,6 +19,9 @@ import {
 } from "../snapshot.mjs";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const packageVersion = JSON.parse(
+  readFileSync(join(repoRoot, "package.json"), "utf8"),
+).version;
 const cleanup = [];
 
 function tempProject() {
@@ -106,7 +109,7 @@ describe("统一 CLI", () => {
     writeFileSync(join(root, "src", "Clean.vue"), "<template><div /></template>\n", "utf8");
     const version = runCli(["--version"], root);
     assert.equal(version.status, 0);
-    assert.match(version.stdout, /^1\.9\.0\s*$/);
+    assert.equal(version.stdout.trim(), packageVersion);
 
     const unknown = runCli(["unknown"], root);
     assert.notEqual(unknown.status, 0);

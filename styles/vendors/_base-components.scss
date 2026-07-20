@@ -38,7 +38,7 @@
   outline: none;
   border: none;
   background: transparent;
-  color: var(--el-color-primary-light-2, #5178f6);
+  color: var(--el-color-primary-light-2, #3355a5);
   transition: background-color 0.13s ease, color 0.13s ease;
   flex-shrink: 0;
 
@@ -49,7 +49,7 @@
   &.jh-op-view {
     &:hover:not(:disabled) {
         color: var(--el-color-primary);
-        background: rgba(34, 84, 244, 0.09);
+        background: rgba(var(--el-color-primary-rgb), 0.09);
       }
   }
   // 编辑 — hover 翠绿
@@ -70,7 +70,7 @@
   &.jh-op-log {
     &:hover:not(:disabled) {
         color: var(--el-color-primary);
-        background: rgba(34, 84, 244, 0.09);
+        background: rgba(var(--el-color-primary-rgb), 0.09);
       }
   }
   // 审核 — hover 翠绿
@@ -83,8 +83,8 @@
   // 提交 — hover 主色
   &.jh-op-send {
     &:hover:not(:disabled) {
-        color: var(--el-color-primary, #2254f4);
-        background: rgba(34, 84, 244, 0.09);
+        color: var(--el-color-primary, #002a8f);
+        background: rgba(var(--el-color-primary-rgb), 0.09);
       }
   }
   // 保存（内联表格用）— hover 翠绿
@@ -139,8 +139,8 @@
 
   svg { width: 12px; height: 12px; flex-shrink: 0; }
   &:hover:not(:disabled) {
-    background: rgba(34, 84, 244, 0.10);
-      color: var(--el-color-primary, #2254f4);
+    background: rgba(var(--el-color-primary-rgb), 0.10);
+      color: var(--el-color-primary, #002a8f);
   }
   &:active:not(:disabled) { opacity: 0.65; }
   &:disabled {
@@ -163,7 +163,7 @@
   border-radius: 4px;
   border: none;
   background: transparent;
-  color: var(--el-color-primary, #2254f4);
+  color: var(--el-color-primary, #002a8f);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -174,8 +174,8 @@
   flex-shrink: 0;
 
   &:hover:not(:disabled) {
-    background: rgba(34, 84, 244, 0.08);
-      color: var(--el-color-primary, #2254f4);
+    background: rgba(var(--el-color-primary-rgb), 0.08);
+      color: var(--el-color-primary, #002a8f);
   }
   &:active:not(:disabled) { opacity: 0.55; }
   &:disabled {
@@ -248,14 +248,14 @@
 .jh-riskno-badge {
   display: inline-block;
   padding: 2px 6px;
-  background: rgba(34, 84, 244, 0.08);
+  background: rgba(var(--el-color-primary-rgb), 0.08);
     color: var(--el-color-primary);
   border-radius: 4px;
   font-family: 'SFMono-Regular', 'Consolas', 'Monaco', monospace;
   font-size: 11.5px;
   font-weight: 600;
   letter-spacing: 0.03em;
-  border: 1px solid rgba(34, 84, 244, 0.18);
+  border: 1px solid rgba(var(--el-color-primary-rgb), 0.18);
   white-space: nowrap;
   max-width: 100%;
   overflow: hidden;
@@ -308,12 +308,12 @@
     }
 
     &--info {
-      background: rgba(34, 84, 244, 0.10);
+      background: rgba(var(--el-color-primary-rgb), 0.10);
       color: var(--el-color-primary);
     }
 
     &--default {
-      background: rgba(34, 84, 244, 0.10);
+      background: rgba(var(--el-color-primary-rgb), 0.10);
       color: var(--el-color-primary);
     }
 }
@@ -328,7 +328,7 @@
   transition: background-color 0.15s, color 0.15s;
 
   &:not(.el-button--danger):hover {
-    background-color: rgba(34, 84, 244, 0.08) !important;
+    background-color: rgba(var(--el-color-primary-rgb), 0.08) !important;
     color: var(--el-color-primary) !important;
   }
 }
@@ -401,7 +401,7 @@
       &:hover {
         border-color: var(--el-color-primary);
         color: var(--el-color-primary);
-        background: rgba(34, 84, 244, 0.04);
+        background: rgba(var(--el-color-primary-rgb), 0.04);
       }
     }
   }
@@ -437,7 +437,7 @@
       &:hover {
         border-color: var(--el-color-primary) !important;
         color: var(--el-color-primary) !important;
-        background: rgba(34, 84, 244, 0.04) !important;
+        background: rgba(var(--el-color-primary-rgb), 0.04) !important;
       }
     }
   }
@@ -460,7 +460,7 @@
     }
     &:focus {
       border-color: var(--el-color-primary) !important;
-      box-shadow: 0 0 0 2px rgba(34, 84, 244, 0.12) !important;
+      box-shadow: 0 0 0 2px rgba(var(--el-color-primary-rgb), 0.12) !important;
     }
   }
 
@@ -493,7 +493,7 @@
 .el-date-editor.el-input__wrapper.is-focus,
 .el-date-editor.el-input__wrapper:focus-within,
 .el-textarea__inner:focus {
-  box-shadow: 0 0 0 1.5px var(--el-color-primary, #2254f4) inset !important;
+  box-shadow: 0 0 0 1.5px var(--el-color-primary, #002a8f) inset !important;
 }
 
 .el-form-item__label,

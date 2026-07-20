@@ -95,15 +95,15 @@
     line-height: 1 !important;
     padding: 0 10px !important;
     font-size: 12px !important;
-    background-color: var(--el-color-primary, #2254f4) !important;
-      border-color: var(--el-color-primary, #2254f4) !important;
+    background-color: var(--el-color-primary, #002a8f) !important;
+      border-color: var(--el-color-primary, #002a8f) !important;
     color: #ffffff !important;
     transition: background-color 0.15s, box-shadow 0.15s;
 
     &:hover {
-      background-color: var(--el-color-primary-light-3, #7a98f8) !important;
-        border-color: var(--el-color-primary-light-3, #7a98f8) !important;
-      box-shadow: 0 2px 8px rgba(34, 84, 244, 0.25);
+      background-color: var(--el-color-primary-light-1, #1a3f9a) !important;
+        border-color: var(--el-color-primary-light-1, #1a3f9a) !important;
+      box-shadow: 0 2px 8px rgba(var(--el-color-primary-rgb), 0.25);
     }
     &:active { opacity: 0.85; }
   }
@@ -123,7 +123,7 @@
     &:hover {
       color: var(--el-color-primary) !important;
       border-color: var(--el-color-primary-light-5) !important;
-      background-color: rgba(34, 84, 244, 0.04) !important;
+      background-color: rgba(var(--el-color-primary-rgb), 0.04) !important;
     }
   }
 }
@@ -178,14 +178,14 @@
 
     // ── 主操作：填充蓝（新增/新建/申请）─────────────────────────────────
     &.el-button--primary {
-      background-color: var(--el-color-primary, #2254f4) !important;
-        border-color: var(--el-color-primary, #2254f4) !important;
+      background-color: var(--el-color-primary, #002a8f) !important;
+        border-color: var(--el-color-primary, #002a8f) !important;
       color: #ffffff !important;
 
       &:hover {
-        background-color: var(--el-color-primary-light-3, #7a98f8) !important;
-          border-color: var(--el-color-primary-light-3, #7a98f8) !important;
-        box-shadow: 0 2px 8px rgba(34, 84, 244, 0.28);
+        background-color: var(--el-color-primary-light-1, #1a3f9a) !important;
+          border-color: var(--el-color-primary-light-1, #1a3f9a) !important;
+        box-shadow: 0 2px 8px rgba(var(--el-color-primary-rgb), 0.28);
       }
       &:active { opacity: 0.85; }
     }
@@ -225,7 +225,7 @@
       &:hover {
         color: var(--el-color-primary) !important;
         border-color: var(--el-color-primary-light-5) !important;
-        background-color: rgba(34, 84, 244, 0.04) !important;
+        background-color: rgba(var(--el-color-primary-rgb), 0.04) !important;
       }
     }
 
@@ -312,8 +312,8 @@
 
 .el-dropdown-menu .el-dropdown-menu__item:hover,
 .el-dropdown-menu .el-dropdown-menu__item:focus {
-  color: var(--el-color-primary, #2254f4) !important;
-  background-color: rgba(34, 84, 244, 0.08) !important;
+  color: var(--el-color-primary, #002a8f) !important;
+  background-color: rgba(var(--el-color-primary-rgb), 0.08) !important;
 }
 
 .el-dropdown-menu .el-dropdown-menu__item .el-icon,

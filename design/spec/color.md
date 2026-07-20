@@ -2,14 +2,29 @@
 
 ## 品牌色系
 
-| Token                        | 值        | 用途                       |
-| ---------------------------- | --------- | -------------------------- |
-| `--el-color-primary`         | `#4368ff` | 主色调：按钮、链接、激活态 |
-| `--el-color-primary-light-9` | `#f0f3ff` | 主色浅底：Tag 背景         |
-| `--el-color-success`         | `#0cc859` | 成功/正常/启用状态         |
-| `--el-color-warning`         | `#ffaf27` | 警告/待处理状态            |
-| `--el-color-danger`          | `#FB2323` | 危险/失败/停用状态         |
-| `--el-color-info`            | `#909399` | 中性/辅助信息              |
+> 单一依据：《烟台华新数智化信息化改造项目 UI 规范 v1》“颜色-主色/功能色”页。
+
+| Token                         | 值              | 用途                         |
+| ----------------------------- | --------------- | ---------------------------- |
+| `--el-color-primary`          | `#002a8f`       | 主按钮常规、链接、选中态     |
+| `--el-color-primary-rgb`      | `0, 42, 143`    | 主色透明背景、阴影和选中底色 |
+| `--el-color-primary-light-1`  | `#1a3f9a`       | 主按钮悬停                   |
+| `--el-color-primary-light-2`  | `#3355a5`       | 柔和主题蓝                   |
+| `--el-color-primary-light-3`  | `#4d6ab1`       | 辅助高亮                     |
+| `--el-color-primary-light-4`  | `#667fbc`       | 辅助高亮                     |
+| `--el-color-primary-light-5`  | `#8094c7`       | 主色边框                     |
+| `--el-color-primary-light-6`  | `#99aad2`       | 浅色辅助                     |
+| `--el-color-primary-light-7`  | `#b2bfdd`       | 主按钮禁用                   |
+| `--el-color-primary-light-8`  | `#ccd4e9`       | 浅色辅助                     |
+| `--el-color-primary-light-9`  | `#e5eaf4`       | 浅色/白底悬浮                |
+| `--el-color-primary-dark-1`   | `#002681`       | 主按钮点击                   |
+| `--el-color-primary-dark-2`   | `#002272`       | 深色辅助                     |
+| `--el-color-primary-dark-3`   | `#001d64`       | 深色辅助                     |
+| `--el-color-primary-dark-4`   | `#001956`       | 最深品牌蓝                   |
+| `--el-color-success`          | `#2bb268`       | 成功/正常/启用状态           |
+| `--el-color-warning`          | `#ea9a13`       | 警告/待处理状态              |
+| `--el-color-danger`           | `#bb2d3f`       | 危险/失败/停用状态           |
+| `--el-color-info`             | `#909399`       | 中性/辅助信息                |
 
 ## 文本色系
 

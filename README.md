@@ -62,6 +62,7 @@ wl-skills-ui/
 ├── styles/                       # L1+L2+L3 SCSS 实现
 │   ├── tokens/                   # SCSS 变量映射层（$wk-* → CSS 变量）
 │   ├── element/                  # L1 Element Plus 控件对齐
+│   │   ├── _button.scss           # 主按钮四态强覆盖（设计规范色阶）
 │   │   ├── _table.scss
 │   │   ├── _form.scss
 │   │   ├── _dialog.scss
@@ -199,7 +200,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.0` | 已对齐上述组合的 DOM 假设 |
+| `@agile-team/wl-skills-ui` | `^1.9.1` | 已对齐上述组合的 DOM 假设与客户主色色阶 |
 
 三种识别方式，任选其一：
 
@@ -213,7 +214,13 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.0：
+当前 v1.9.1：
+
+- **客户主色纠偏**：严格按《烟台华新数智化信息化改造项目 UI 规范 v1》统一主色为 `#002A8F`，并同步完整深浅色阶。
+- **按钮四态强覆盖**：主按钮常规 `#002A8F`、悬停 `#1A3F9A`、点击 `#002681`、禁用 `#B2BFDD`；`html body` 高特异性和填充按钮 `!important` 抵御 Element Plus、jh-ui 与旧业务皮肤覆盖。
+- **单源防漂移**：主色半透明场景统一读取 `--el-color-primary-rgb`，发布校验会阻断 token、SCSS、按钮状态或文档重新漂移到旧亮蓝。
+
+上一版 v1.9.0：
 
 - **独立闭环**：不依赖 kit/design/bd 即可安装、审计、修复、复检、快照和回退；存在 kit 的 page-spec 时只复用页面模式与组件命名约定，不形成运行时硬依赖。
 - **CLI 真实一致**：统一入口正式支持 `audit/drift/exempt/snapshot`，未知命令非零退出，`audit --refresh-baseline` 可维护增量治理基线。
@@ -230,8 +237,8 @@ yarn add @agile-team/wl-skills-ui
 
 上一版 v1.8.15：
 
-- **jh-drag-row 上下分栏手柄覆盖**：新增 `styles/vendors/_jh-drag-row.scss`，补齐此前缺失的 `jh-drag-row`（上下/主从表）手柄覆盖，与 `_jh-drag-col.scss`（左右）同源风格。以本包主色 `#2254f4` 为准，用 `!important` 确定性层叠压过 common-core 组件 Props 默认值
-- **平台包职责澄清**：`@jhlc/jh-ui` 是纯 SCSS 包（零组件），所有 `jh-*`/`Base*`/`C_*` 组件来自 `@jhlc/common-core`。本包作为化妆层精准层叠覆盖二者视觉，不改平台层源码——L0 token 用 `:root body` 压过 jh-ui 编译产物的 `:root`（`#2254f4` > jh-ui `#4368ff`），L2 直接写目标属性 + `!important` 绕过组件 `var()` 引用。**项目装了本包后，一切以本包为准**
+- **jh-drag-row 上下分栏手柄覆盖**：新增 `styles/vendors/_jh-drag-row.scss`，补齐此前缺失的 `jh-drag-row`（上下/主从表）手柄覆盖，与 `_jh-drag-col.scss`（左右）同源风格。手柄颜色统一跟随 `--el-color-primary`，不再保留独立色值
+- **平台包职责澄清**：`@jhlc/jh-ui` 是纯 SCSS 包（零组件），所有 `jh-*`/`Base*`/`C_*` 组件来自 `@jhlc/common-core`。本包作为化妆层精准层叠覆盖二者视觉，不改平台层源码——L0 token 用 `:root body` 压过 jh-ui 编译产物的 `:root`，L2 直接写目标属性 + `!important` 绕过组件 `var()` 引用。**项目装了本包后，一切以本包为准**
 
 上一版 v1.8.14：
 
@@ -642,7 +649,7 @@ export const myRules = [
 | 字号 | [design/spec/typography.md](design/spec/typography.md) |
 | 间距 | [design/spec/spacing.md](design/spec/spacing.md)       |
 
-主色：`#4368ff` → `--el-color-primary`（与 Element Plus 默认蓝对齐）
+客户规范主色：`#002a8f` → `--el-color-primary`；业务代码只引用 token，不直接硬编码色值。
 
 ---
 

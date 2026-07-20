@@ -1,0 +1,39 @@
+// Element Plus 主按钮 — 严格对齐《烟台华新数智化信息化改造项目 UI 规范 v1》
+// 常规 #002A8F / 悬停 #1A3F9A / 点击 #002681 / 禁用 #B2BFDD。
+// 使用 html body 提升 token 覆盖特异性；填充按钮同时以 !important 抵御 jh-ui/业务旧皮肤硬编码。
+
+html body .el-button--primary {
+  --el-button-bg-color: var(--el-color-primary);
+  --el-button-border-color: var(--el-color-primary);
+  --el-button-hover-bg-color: var(--el-color-primary-light-1);
+  --el-button-hover-border-color: var(--el-color-primary-light-1);
+  --el-button-active-color: var(--el-color-primary-dark-1);
+  --el-button-active-bg-color: var(--el-color-primary-dark-1);
+  --el-button-active-border-color: var(--el-color-primary-dark-1);
+  --el-button-disabled-bg-color: var(--el-color-primary-light-7);
+  --el-button-disabled-border-color: var(--el-color-primary-light-7);
+  --el-button-outline-color: var(--el-color-primary-light-5);
+}
+
+html body
+  .el-button.el-button--primary:not(.is-link):not(.is-text):not(.is-plain):not(.is-disabled) {
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+
+  &:hover,
+  &:focus {
+    background-color: var(--el-color-primary-light-1) !important;
+    border-color: var(--el-color-primary-light-1) !important;
+  }
+
+  &:active {
+    background-color: var(--el-color-primary-dark-1) !important;
+    border-color: var(--el-color-primary-dark-1) !important;
+  }
+}
+
+html body
+  .el-button.el-button--primary.is-disabled:not(.is-link):not(.is-text):not(.is-plain) {
+  background-color: var(--el-color-primary-light-7) !important;
+  border-color: var(--el-color-primary-light-7) !important;
+}

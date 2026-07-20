@@ -12,9 +12,9 @@
   --ag-header-foreground-color: #374151;
   --ag-border-color: rgba(0, 0, 0, 0.06);
     --ag-row-border-color: rgba(0, 0, 0, 0.06);
-    --ag-row-hover-color: rgba(34, 84, 244, 0.06);
-    --ag-selected-row-background-color: rgba(34, 84, 244, 0.10);
-    --ag-range-selection-border-color: rgba(34, 84, 244, 0.4);
+    --ag-row-hover-color: rgba(var(--el-color-primary-rgb), 0.06);
+    --ag-selected-row-background-color: rgba(var(--el-color-primary-rgb), 0.10);
+    --ag-range-selection-border-color: rgba(var(--el-color-primary-rgb), 0.4);
   --ag-font-size: 13px;
   --ag-font-family: inherit;
   --ag-row-height: 26px;
@@ -98,11 +98,11 @@
 
 .ag-row:hover,
 .ag-row.ag-row-hover {
-  background-color: rgba(34, 84, 244, 0.06) !important;
+  background-color: rgba(var(--el-color-primary-rgb), 0.06) !important;
 }
 
 .ag-row.ag-row-selected {
-  background-color: rgba(34, 84, 244, 0.10) !important;
+  background-color: rgba(var(--el-color-primary-rgb), 0.10) !important;
 }
 
 // ── 单元格 ────────────────────────────────────────────────────────────────────
@@ -266,9 +266,9 @@
   height: 12px;
   // 三个点用 box-shadow 模拟
   width: 36px;
-  background: radial-gradient(circle at 6px 6px, #2254f4 3.5px, transparent 3.5px),
-      radial-gradient(circle at 18px 6px, #2254f4 3.5px, transparent 3.5px),
-      radial-gradient(circle at 30px 6px, #2254f4 3.5px, transparent 3.5px);
+  background: radial-gradient(circle at 6px 6px, var(--el-color-primary) 3.5px, transparent 3.5px),
+      radial-gradient(circle at 18px 6px, var(--el-color-primary) 3.5px, transparent 3.5px),
+      radial-gradient(circle at 30px 6px, var(--el-color-primary) 3.5px, transparent 3.5px);
   animation: ag-dot-bounce 1.2s ease-in-out infinite;
   opacity: 0.7;
 }

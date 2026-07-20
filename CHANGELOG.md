@@ -4,6 +4,15 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.1] - 2026-07-20
+
+### Fixed
+
+- 按《烟台华新数智化信息化改造项目 UI 规范 v1》纠正主色色阶：常规 `#002A8F`、悬停 `#1A3F9A`、点击 `#002681`、禁用 `#B2BFDD`，不再把 PPT 元数据中的 `#2254F4` 当作业务按钮主色。
+- 新增 Element Plus 主按钮四态强覆盖；BaseQuery/BaseToolbar 查询与主操作按钮的 hover 从旧 `primary-light-3` 改为客户规范 `primary-light-1`。
+- 所有 vendor 半透明主色效果统一读取 `--el-color-primary-rgb`，清除 SCSS 中旧亮蓝 RGB 和 fallback，避免 token 已改但阴影、选中态仍有色差。
+- 同步颜色规范、Design Token Skill、README 和发布产物；发布校验新增客户主色色阶与旧亮蓝残留检查。
+
 ## [1.9.0] - 2026-07-18
 
 ### Added

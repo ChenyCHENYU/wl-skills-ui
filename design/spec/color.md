@@ -26,6 +26,8 @@
 | `--el-color-danger`           | `#bb2d3f`       | 危险/失败/停用状态           |
 | `--el-color-info`             | `#909399`       | 中性/辅助信息                |
 
+品牌色及成功、警告、危险色阶属于客户固定主题契约。样式层以 `!important` 抵御平台普通内联主题，调用 `installCommonPreset()`、`installSecurityPreset()` 或 `installBrandThemeLock()` 后，运行时还会监测并恢复 `html/body` 上的动态改写。
+
 ## 文本色系
 
 | Token                         | 值                 | 用途     |

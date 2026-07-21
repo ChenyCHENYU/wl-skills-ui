@@ -75,6 +75,17 @@ const CUSTOMER_PRIMARY_TOKENS = {
   "--el-color-primary-dark-4": "#001956",
 };
 
+const CUSTOMER_FIXED_TOKENS = {
+  "--el-color-success": "#2bb268",
+  "--el-color-warning": "#ea9a13",
+  "--el-color-danger": "#bb2d3f",
+  "--el-color-error": "#bb2d3f",
+  "--el-border-radius-base": "6px",
+  "--el-border-radius-small": "2px",
+  "--el-border-radius-round": "20px",
+  "--el-border-radius-circle": "100%",
+};
+
 function collectFiles(dir, extensions, result = []) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const full = join(dir, entry.name);
@@ -96,10 +107,36 @@ function verifyCustomerTheme() {
   for (const relPath of tokenFiles) {
     const content = readFileSync(join(root, relPath), "utf8").toLowerCase();
     for (const [token, value] of Object.entries(CUSTOMER_PRIMARY_TOKENS)) {
-      const declaration = `${token}: ${value};`.toLowerCase();
+      const declaration = `${token}: ${value} !important;`.toLowerCase();
       if (!content.includes(declaration)) {
-        errors.push(`${relPath}: 客户主色 token 漂移，缺少 "${declaration}"`);
+        errors.push(`${relPath}: 客户主色未锁定或发生漂移，缺少 "${declaration}"`);
       }
+    }
+  }
+
+  for (const relPath of [
+    "design/tokens/base.css",
+    "styles/tokens/index.scss",
+    "dist/tokens.css",
+  ]) {
+    const content = readFileSync(join(root, relPath), "utf8").toLowerCase();
+    for (const [token, value] of Object.entries(CUSTOMER_FIXED_TOKENS)) {
+      const declaration = `${token}: ${value} !important;`.toLowerCase();
+      if (!content.includes(declaration)) {
+        errors.push(`${relPath}: 固定主题 token 未锁定或发生漂移，缺少 "${declaration}"`);
+      }
+    }
+  }
+
+  const themeLock = readFileSync(join(root, "runtime/theme-lock.ts"), "utf8");
+  for (const required of [
+    "BRAND_THEME_TOKENS",
+    'style.setProperty(name, value, "important")',
+    "new MutationObserver",
+    '"--el-border-radius-base": "6px"',
+  ]) {
+    if (!themeLock.includes(required)) {
+      errors.push(`runtime/theme-lock.ts: 动态主题锁缺少 ${required}`);
     }
   }
 
@@ -160,9 +197,64 @@ if (errors.length > 0) {
 const runtime = await import("../es/index.js");
 await import("../es/common-preset.js");
 await import("../es/presets/security.js");
-for (const api of ["defineColumns", "renderOps", "createPreset", "installPreset"]) {
+for (const api of [
+  "defineColumns",
+  "renderOps",
+  "createPreset",
+  "installPreset",
+  "installBrandThemeLock",
+]) {
   if (typeof runtime[api] !== "function") errors.push(`runtime 缺少公共 API：${api}`);
 }
+
+class FakeStyle {
+  #values = new Map();
+  #priorities = new Map();
+
+  getPropertyValue(name) {
+    return this.#values.get(name) || "";
+  }
+
+  getPropertyPriority(name) {
+    return this.#priorities.get(name) || "";
+  }
+
+  setProperty(name, value, priority = "") {
+    this.#values.set(name, value);
+    this.#priorities.set(name, priority);
+  }
+}
+
+let observerCallback;
+const fakeRoot = { style: new FakeStyle() };
+const fakeBody = { style: new FakeStyle() };
+globalThis.document = {
+  documentElement: fakeRoot,
+  body: fakeBody,
+  addEventListener() {},
+};
+globalThis.MutationObserver = class {
+  constructor(callback) {
+    observerCallback = callback;
+  }
+  disconnect() {}
+  observe() {}
+};
+
+runtime.installBrandThemeLock();
+fakeBody.style.setProperty("--el-color-primary", "#4368ff");
+fakeBody.style.setProperty("--el-border-radius-base", "2px");
+observerCallback?.([{ type: "attributes" }]);
+if (
+  fakeBody.style.getPropertyValue("--el-color-primary") !== "#002a8f" ||
+  fakeBody.style.getPropertyPriority("--el-color-primary") !== "important" ||
+  fakeBody.style.getPropertyValue("--el-border-radius-base") !== "6px" ||
+  fakeBody.style.getPropertyPriority("--el-border-radius-base") !== "important"
+) {
+  errors.push("runtime 主题锁未能恢复平台动态主色或基础圆角");
+}
+delete globalThis.document;
+delete globalThis.MutationObserver;
 if (errors.length > 0) {
   console.error(errors.map((item) => `✖ ${item}`).join("\n"));
   process.exit(1);

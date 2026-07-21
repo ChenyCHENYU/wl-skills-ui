@@ -12,3 +12,4 @@
  */
 export * from "./core";
 export * from "./presets/registry";
+export * from "./theme-lock";

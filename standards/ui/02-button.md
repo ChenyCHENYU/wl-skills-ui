@@ -17,6 +17,8 @@
 | active / 点击 | `--el-color-primary-dark-1` | `#002681` |
 | disabled | `--el-color-primary-light-7` | `#B2BFDD` |
 
+平台动态主题不得改写品牌按钮体系。包内 L0 token 使用 `!important`，runtime 主题锁负责恢复后续写入 `document.body.style` 的旧主色及功能色；业务页面不要再用局部选择器与主题锁对冲。
+
 | 操作语义   | type        | plain  | 说明           |
 |----------|-------------|--------|----------------|
 | 新增/添加 | `primary`   | false  | 蓝色填充        |

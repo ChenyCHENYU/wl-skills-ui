@@ -20,6 +20,7 @@
 import type { TagMapItem } from "../core/types";
 import { renderTagNode, registerDictColorMaps } from "../core/renderers";
 import { registerColumnAutoMaps } from "../core/registry";
+import { installBrandThemeLock } from "../theme-lock";
 
 // ── 违章处理状态 ─────────────────────────────────────────────────────────────
 export const VIOLATION_STATUS_MAP: Record<string | number, TagMapItem> = {
@@ -110,6 +111,7 @@ const SECURITY_DICT_COLORS: Record<string, Record<string, string>> = {
 
 // ── 一键安装 ─────────────────────────────────────────────────────────────────
 export function installSecurityPreset(): void {
+  installBrandThemeLock();
   registerDictColorMaps(SECURITY_DICT_COLORS);
   registerColumnAutoMaps({
     violationStatus: {

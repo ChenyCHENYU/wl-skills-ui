@@ -4,6 +4,15 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.2] - 2026-07-21
+
+### Fixed
+
+- 新增客户品牌主题锁：L0 的品牌色、功能色和圆角 token 使用 `!important`，运行时再监听 `html/body` 的主题变量改写，阻止平台 `/system/theme/list` 动态主题把包值改回旧亮色。
+- `installCommonPreset()` / `installSecurityPreset()` 自动安装主题锁；同时公开 `installBrandThemeLock()`，纯 runtime 接入也可显式启用。
+- 恢复按钮、输入框等基础控件的 `6px` 圆角，保留圆形、胶囊和按钮组的语义圆角，不再被 jh-ui 的 `2px` 基础值压平。
+- 功能按钮锁定克制的成功 `#2BB268`、警告 `#EA9A13`、危险 `#BB2D3F`，并把彩色发光阴影收敛为轻量中性阴影，保持语义辨识但降低突兀感。
+
 ## [1.9.1] - 2026-07-20
 
 ### Fixed

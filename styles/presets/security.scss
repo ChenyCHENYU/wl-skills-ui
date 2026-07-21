@@ -13,26 +13,26 @@
 @forward '../vendors/index';
 
 :root body {
-  --el-color-primary: #002a8f;
-  --el-color-primary-rgb: 0, 42, 143;
-  --el-color-primary-light-1: #1a3f9a;
-  --el-color-primary-light-2: #3355a5;
-  --el-color-primary-light-3: #4d6ab1;
-  --el-color-primary-light-4: #667fbc;
-  --el-color-primary-light-5: #8094c7;
-  --el-color-primary-light-6: #99aad2;
-  --el-color-primary-light-7: #b2bfdd;
-  --el-color-primary-light-8: #ccd4e9;
-  --el-color-primary-light-9: #e5eaf4;
-  --el-color-primary-dark-1: #002681;
-  --el-color-primary-dark-2: #002272;
-  --el-color-primary-dark-3: #001d64;
-  --el-color-primary-dark-4: #001956;
+  --el-color-primary: #002a8f !important;
+  --el-color-primary-rgb: 0, 42, 143 !important;
+  --el-color-primary-light-1: #1a3f9a !important;
+  --el-color-primary-light-2: #3355a5 !important;
+  --el-color-primary-light-3: #4d6ab1 !important;
+  --el-color-primary-light-4: #667fbc !important;
+  --el-color-primary-light-5: #8094c7 !important;
+  --el-color-primary-light-6: #99aad2 !important;
+  --el-color-primary-light-7: #b2bfdd !important;
+  --el-color-primary-light-8: #ccd4e9 !important;
+  --el-color-primary-light-9: #e5eaf4 !important;
+  --el-color-primary-dark-1: #002681 !important;
+  --el-color-primary-dark-2: #002272 !important;
+  --el-color-primary-dark-3: #001d64 !important;
+  --el-color-primary-dark-4: #001956 !important;
 
-  --el-color-danger: #bb2d3f;
-  --el-color-danger-light-3: #d16b78;
-  --el-color-danger-light-5: #dd969f;
-  --el-color-danger-light-7: #e8c0c5;
-  --el-color-danger-light-8: #f0d5d9;
-  --el-color-danger-light-9: #f7eaec;
+  --el-color-danger: #bb2d3f !important;
+  --el-color-danger-light-3: #d16b78 !important;
+  --el-color-danger-light-5: #dd969f !important;
+  --el-color-danger-light-7: #e8c0c5 !important;
+  --el-color-danger-light-8: #f0d5d9 !important;
+  --el-color-danger-light-9: #f7eaec !important;
 }

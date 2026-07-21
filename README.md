@@ -200,7 +200,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.1` | 已对齐上述组合的 DOM 假设与客户主色色阶 |
+| `@agile-team/wl-skills-ui` | `^1.9.2` | 已对齐上述组合的 DOM 假设、客户主题锁与圆角契约 |
 
 三种识别方式，任选其一：
 
@@ -214,7 +214,13 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.1：
+当前 v1.9.2：
+
+- **动态主题不可反覆盖**：品牌色、功能色和圆角使用 CSS `!important` + runtime `MutationObserver` 双保险；平台登录后写入 `document.body.style` 也会立即恢复为包内规范值。
+- **圆角契约恢复**：按钮、输入框等基础控件统一 `6px`，不再回退到 jh-ui 的 `2px`；圆形、胶囊、按钮组仍保留各自语义。
+- **语义色降噪**：成功 `#2BB268`、警告 `#EA9A13`、危险 `#BB2D3F` 均被主题锁保护，按钮彩色强阴影调整为轻量中性阴影，整体更稳重。
+
+上一版 v1.9.1：
 
 - **客户主色纠偏**：严格按《烟台华新数智化信息化改造项目 UI 规范 v1》统一主色为 `#002A8F`，并同步完整深浅色阶。
 - **按钮四态强覆盖**：主按钮常规 `#002A8F`、悬停 `#1A3F9A`、点击 `#002681`、禁用 `#B2BFDD`；`html body` 高特异性和填充按钮 `!important` 抵御 Element Plus、jh-ui 与旧业务皮肤覆盖。

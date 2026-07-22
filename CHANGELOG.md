@@ -4,6 +4,13 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.4] - 2026-07-22
+
+### Fixed
+
+- 修复浏览器运行时通过成员链读取 Node 环境变量时被 Vite 4 开发转换误替换为非法语法的问题；改用安全的动态属性访问，兼容依赖预构建与直接 ESM 加载。
+- 发布校验新增浏览器产物扫描，阻止 `process.env.NODE_ENV` 成员链再次进入 ESM 产物。
+
 ## [1.9.3] - 2026-07-22
 
 ### Fixed

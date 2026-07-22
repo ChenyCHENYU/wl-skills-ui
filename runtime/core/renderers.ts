@@ -303,12 +303,11 @@ const KNOWN_OP_TYPES = new Set([
 ]);
 const __opWarned = new Set<string>();
 function warnUnknownOpType(item: OpItem): void {
-  // dev 检测：浏览器环境 (import.meta.env.DEV) 或 Node (process.env.NODE_ENV)
-  // 用 globalThis 避免依赖 @types/node
+  // 使用方可能通过 Vite define 注入 process.env；方括号访问可避免被其文本替换误伤。
   let isDev = true;
   try {
-    const g: any = globalThis as any;
-    if (g.process && g.process.env && g.process.env.NODE_ENV === "production") {
+    const nodeEnv = (globalThis as any)["process"]?.["env"]?.["NODE_ENV"];
+    if (nodeEnv === "production") {
       isDev = false;
     }
   } catch {

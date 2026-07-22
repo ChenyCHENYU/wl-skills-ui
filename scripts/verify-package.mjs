@@ -57,6 +57,18 @@ function verifyPublishAllowlist() {
   if (pkg.files?.includes("scripts")) errors.push("维护期 scripts 不应进入运行时 npm 包");
 }
 
+function verifyViteDefineCompatibility() {
+  const browserBundles = collectFiles(join(root, "es"), [".js"]);
+  for (const file of browserBundles) {
+    const content = readFileSync(file, "utf8");
+    if (/\bprocess\.env\.NODE_ENV\b/.test(content)) {
+      errors.push(
+        `${file.slice(root.length + 1)}: 浏览器产物含 process.env.NODE_ENV，Vite 4 开发转换可能破坏成员访问语法`,
+      );
+    }
+  }
+}
+
 const CUSTOMER_PRIMARY_TOKENS = {
   "--el-color-primary": "#002a8f",
   "--el-color-primary-rgb": "0, 42, 143",
@@ -213,6 +225,7 @@ verifyVersions();
 verifyExports();
 verifyRules();
 verifyPublishAllowlist();
+verifyViteDefineCompatibility();
 verifyCustomerTheme();
 verifyManagedScope();
 for (const relPath of ["es/index.js", "es/index.d.ts", "bin/wl-ui.js", "scanner/index.mjs"] ) {

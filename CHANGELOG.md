@@ -4,6 +4,14 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.3] - 2026-07-22
+
+### Fixed
+
+- 登录页 `.lp-root` 与二次登录 `.session-login` 退出高权重表单、按钮和 jh-ui 组件化妆，恢复各登录页自身的高度、圆角、配色、焦点态与校验态，不再被业务页紧凑规则压制。
+- 新增 `.wl-ui-skin-exempt` / `[data-wl-ui-skin="off"]` 通用定制页边界；边界内仅停用组件级强覆盖，边界外业务页面仍保持包内样式最高优先级，品牌主题锁继续全局生效。
+- 将豁免贯穿 Element Plus 新旧输入 DOM、主按钮、textarea、必填标记及 jh-ui picker 适配，避免只恢复默认态、聚焦或报错后再次被覆盖。
+
 ## [1.9.2] - 2026-07-21
 
 ### Fixed

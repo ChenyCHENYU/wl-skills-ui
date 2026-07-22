@@ -180,11 +180,41 @@ function verifyCustomerTheme() {
   }
 }
 
+function verifyManagedScope() {
+  const scope = readFileSync(join(root, "styles/_scope.scss"), "utf8");
+  for (const required of [
+    ".lp-root",
+    ".session-login",
+    ".wl-ui-skin-exempt",
+    "[data-wl-ui-skin='off']",
+  ]) {
+    if (!scope.includes(required)) {
+      errors.push(`styles/_scope.scss: 定制页样式边界缺少 ${required}`);
+    }
+  }
+
+  for (const relPath of [
+    "styles/element/_form.scss",
+    "styles/element/_button.scss",
+    "styles/vendors/_base-components.scss",
+    "styles/vendors/_jh-ui.scss",
+  ]) {
+    const content = readFileSync(join(root, relPath), "utf8");
+    if (
+      !content.includes('@use "../scope" as skin;') ||
+      !content.includes("#{skin.$managed-scope-selector}")
+    ) {
+      errors.push(`${relPath}: 表单/按钮强覆盖未接入定制页样式边界`);
+    }
+  }
+}
+
 verifyVersions();
 verifyExports();
 verifyRules();
 verifyPublishAllowlist();
 verifyCustomerTheme();
+verifyManagedScope();
 for (const relPath of ["es/index.js", "es/index.d.ts", "bin/wl-ui.js", "scanner/index.mjs"] ) {
   requireFile(relPath);
 }

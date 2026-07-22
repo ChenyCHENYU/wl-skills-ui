@@ -1,3 +1,5 @@
+@use "../scope" as skin;
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // @jhlc/jh-ui adapter — L2 vendor 化妆层（项目集群专用）
 //
@@ -28,158 +30,152 @@
 //     `_base-components.scss` 统一处理。
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// 1) label 文本容器（.com-text） — 单行省略，允许收缩
-//    .el-form-item__label 在 jh-ui 中是 inline-flex，
-//    必须放开 min-width 才能让内部 .com-text 真的 shrink。
-.el-form-item__label {
-  min-width: 0;
-}
+#{skin.$managed-scope-selector} {
+  // 1) label 文本容器（.com-text） — 单行省略，允许收缩
+  //    .el-form-item__label 在 jh-ui 中是 inline-flex，
+  //    必须放开 min-width 才能让内部 .com-text 真的 shrink。
+  &.el-form-item__label {
+    min-width: 0;
+  }
 
-.el-form-item__label > .com-text,
-.el-form-item__label .com-text {
-  display: inline-block;
-  min-width: 0;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
-}
+  &.el-form-item__label > .com-text,
+  &.el-form-item__label .com-text {
+    display: inline-block;
+    min-width: 0;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+  }
 
-html body .has-colon .el-form-item__label > .com-text,
-html body .has-colon .el-form-item__label .com-text,
-html body .has-colon .el-form-item__label > .text-line-2,
-html body .has-colon .el-form-item__label .text-line-2 {
-  padding-right: 0;
-}
+  &.has-colon .el-form-item__label > .com-text,
+  &.has-colon .el-form-item__label .com-text,
+  &.has-colon .el-form-item__label > .text-line-2,
+  &.has-colon .el-form-item__label .text-line-2 {
+    padding-right: 0;
+  }
 
-html body .has-colon .el-form-item__label > .com-text::after,
-html body .has-colon .el-form-item__label > .com-text:after,
-html body .has-colon .el-form-item__label .com-text::after,
-html body .has-colon .el-form-item__label .com-text:after,
-html body .has-colon .el-form-item__label > .text-line-2::after,
-html body .has-colon .el-form-item__label > .text-line-2:after,
-html body .has-colon .el-form-item__label .text-line-2::after,
-html body .has-colon .el-form-item__label .text-line-2:after {
-  content: "" !important;
-  display: none !important;
-}
+  &.has-colon .el-form-item__label > .com-text::after,
+  &.has-colon .el-form-item__label > .com-text:after,
+  &.has-colon .el-form-item__label .com-text::after,
+  &.has-colon .el-form-item__label .com-text:after,
+  &.has-colon .el-form-item__label > .text-line-2::after,
+  &.has-colon .el-form-item__label > .text-line-2:after,
+  &.has-colon .el-form-item__label .text-line-2::after,
+  &.has-colon .el-form-item__label .text-line-2:after {
+    content: "" !important;
+    display: none !important;
+  }
 
-// 1-b) 通杀冒号（不限 .has-colon）
-//    背景：jh-* 组件（jh-select / jh-date / jh-picker / BaseForm 的自定义 component 等）
-//    内部 showColon 默认 true，渲染的 label 走 .com-text 容器但【不一定带 .has-colon】。
-//    仅 .has-colon 限定会漏掉这些组件，导致"就它带冒号"。
-//    → 此处取消 .has-colon 前缀，覆盖 .el-form-item__label 内所有 .com-text / .text-line-2 的 :after，
-//      一并咔嚓。特异性 `html body .el-form-item__label .com-text::after` (0,3,1) 高于 jh-ui 注入。
-html body .el-form-item__label > .com-text::after,
-html body .el-form-item__label > .com-text:after,
-html body .el-form-item__label .com-text::after,
-html body .el-form-item__label .com-text:after,
-html body .el-form-item__label > .text-line-2::after,
-html body .el-form-item__label > .text-line-2:after,
-html body .el-form-item__label .text-line-2::after,
-html body .el-form-item__label .text-line-2:after {
-  content: "" !important;
-  display: none !important;
-}
+  // 1-b) 通杀冒号（不限 .has-colon）
+  // jh-* 的 showColon 默认 true，但不一定带 .has-colon，需覆盖 label 内全部注入。
+  &.el-form-item__label > .com-text::after,
+  &.el-form-item__label > .com-text:after,
+  &.el-form-item__label .com-text::after,
+  &.el-form-item__label .com-text:after,
+  &.el-form-item__label > .text-line-2::after,
+  &.el-form-item__label > .text-line-2:after,
+  &.el-form-item__label .text-line-2::after,
+  &.el-form-item__label .text-line-2:after {
+    content: "" !important;
+    display: none !important;
+  }
 
-// 2) Element Plus 2.2.x 输入控件统一圆角（无 .el-input__wrapper）
-html body .el-input > .el-input__inner,
-html body .el-date-editor > .el-input__inner,
-html body .el-select .el-input > .el-input__inner {
-  height: var(--wk-form-control-height, 26px) !important;
-  line-height: var(--wk-form-control-height, 26px) !important;
-  border-radius: var(--el-border-radius-base) !important;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
-}
+  // 2) Element Plus 2.2.x 输入控件统一圆角（无 .el-input__wrapper）
+  &.el-input > .el-input__inner,
+  &.el-date-editor > .el-input__inner,
+  &.el-select .el-input > .el-input__inner {
+    height: var(--wk-form-control-height, 26px) !important;
+    line-height: var(--wk-form-control-height, 26px) !important;
+    border-radius: var(--el-border-radius-base) !important;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  }
 
-.el-textarea>.el-textarea__inner {
-  border-radius: var(--el-border-radius-base);
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
-}
+  &.el-textarea > .el-textarea__inner {
+    border-radius: var(--el-border-radius-base);
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  }
 
-// 3) focus 品牌色边框（兼容 EP 2.2.x DOM 与 jh-select / jh-date-picker）
-.el-input.is-focus > .el-input__inner,
-.el-input > .el-input__inner:focus,
-.el-textarea.is-focus > .el-textarea__inner,
-.el-textarea > .el-textarea__inner:focus,
-.el-select.is-focus .el-input > .el-input__inner,
-.el-select .el-input.is-focus > .el-input__inner,
-.el-date-editor.is-focus > .el-input__inner,
-.el-date-editor .el-input.is-focus > .el-input__inner {
-  border-color: var(--el-color-primary, #002a8f) !important;
-  box-shadow: 0 0 0 1px var(--el-color-primary, #002a8f) inset;
-}
+  // 3) focus 品牌色边框（兼容 EP 2.2.x DOM 与 jh-select / jh-date-picker）
+  &.el-input.is-focus > .el-input__inner,
+  &.el-input > .el-input__inner:focus,
+  &.el-textarea.is-focus > .el-textarea__inner,
+  &.el-textarea > .el-textarea__inner:focus,
+  &.el-select.is-focus .el-input > .el-input__inner,
+  &.el-select .el-input.is-focus > .el-input__inner,
+  &.el-date-editor.is-focus > .el-input__inner,
+  &.el-date-editor .el-input.is-focus > .el-input__inner {
+    border-color: var(--el-color-primary, #002a8f) !important;
+    box-shadow: 0 0 0 1px var(--el-color-primary, #002a8f) inset;
+  }
 
-// 4) error 红色边框（兼容 EP 2.2.x DOM；
-//    error label / message 颜色由 _base-components.scss 已统一处理）
-.el-form-item.is-error .el-input > .el-input__inner,
-.el-form-item.is-error .el-textarea > .el-textarea__inner,
-.el-form-item.is-error .el-date-editor > .el-input__inner {
-  border-color: var(--el-color-danger, #f56c6c) !important;
-  box-shadow: 0 0 0 1px var(--el-color-danger, #f56c6c) inset !important;
-}
+  // 4) error 红色边框（兼容 EP 2.2.x DOM）
+  &.el-form-item.is-error .el-input > .el-input__inner,
+  &.el-form-item.is-error .el-textarea > .el-textarea__inner,
+  &.el-form-item.is-error .el-date-editor > .el-input__inner {
+    border-color: var(--el-color-danger, #f56c6c) !important;
+    box-shadow: 0 0 0 1px var(--el-color-danger, #f56c6c) inset !important;
+  }
 
-// 5) com-input / com-textarea / com-input-tip — jh-ui form-item wrapper
-//    保留 jh-ui 自身 margin-bottom、has-tip 间距，不覆盖；
-//    仅对齐内部输入控件圆角，避免在 wrapper 内 fallback 成方角。
-.com-input > .el-input > .el-input__inner,
-.com-input>.el-select .el-input>.el-input__inner,
-.com-input>.el-date-editor>.el-input__inner {
-  height: var(--wk-form-control-height, 26px) !important;
-  line-height: var(--wk-form-control-height, 26px) !important;
-  border-radius: var(--el-border-radius-base) !important;
-}
-.com-input > .el-textarea > .el-textarea__inner,
-.com-textarea > .el-textarea > .el-textarea__inner {
-  border-radius: var(--el-border-radius-base);
-}
+  // 5) com-input / com-textarea / com-input-tip — jh-ui form-item wrapper
+  &.com-input > .el-input > .el-input__inner,
+  &.com-input > .el-select .el-input > .el-input__inner,
+  &.com-input > .el-date-editor > .el-input__inner {
+    height: var(--wk-form-control-height, 26px) !important;
+    line-height: var(--wk-form-control-height, 26px) !important;
+    border-radius: var(--el-border-radius-base) !important;
+  }
 
-// 6) jh-picker / reference-picker — 不走 .com-input wrapper，也要继承单行控件高度
-html body .com-picker .el-input,
-html body .com-reference-picker .el-input,
-html body .com-reference-picker-input .el-input,
-html body .com-user-picker .el-input,
-html body .com-dept-picker .el-input,
-html body .com-userPicker .el-input,
-html body .com-deptPicker .el-input,
-html body .jh-picker .el-input,
-html body .jh-picker-trigger.el-input {
-  height: var(--wk-form-control-height, 26px) !important;
-}
+  &.com-input > .el-textarea > .el-textarea__inner,
+  &.com-textarea > .el-textarea > .el-textarea__inner {
+    border-radius: var(--el-border-radius-base);
+  }
 
-html body .com-picker .el-input__wrapper,
-html body .com-reference-picker .el-input__wrapper,
-html body .com-reference-picker-input .el-input__wrapper,
-html body .com-user-picker .el-input__wrapper,
-html body .com-dept-picker .el-input__wrapper,
-html body .com-userPicker .el-input__wrapper,
-html body .com-deptPicker .el-input__wrapper,
-html body .jh-picker .el-input__wrapper,
-html body .jh-picker-trigger.el-input .el-input__wrapper {
-  height: var(--wk-form-control-height, 26px) !important;
-  min-height: var(--wk-form-control-height, 26px) !important;
-  border-radius: var(--el-border-radius-base) !important;
-}
+  // 6) jh-picker / reference-picker — 不走 .com-input wrapper，也要继承单行控件高度
+  &.com-picker .el-input,
+  &.com-reference-picker .el-input,
+  &.com-reference-picker-input .el-input,
+  &.com-user-picker .el-input,
+  &.com-dept-picker .el-input,
+  &.com-userPicker .el-input,
+  &.com-deptPicker .el-input,
+  &.jh-picker .el-input,
+  &.jh-picker-trigger.el-input {
+    height: var(--wk-form-control-height, 26px) !important;
+  }
 
-html body .com-picker .el-input > .el-input__inner,
-html body .com-reference-picker .el-input > .el-input__inner,
-html body .com-reference-picker-input .el-input > .el-input__inner,
-html body .com-user-picker .el-input > .el-input__inner,
-html body .com-dept-picker .el-input > .el-input__inner,
-html body .com-userPicker .el-input > .el-input__inner,
-html body .com-deptPicker .el-input > .el-input__inner,
-html body .jh-picker .el-input > .el-input__inner,
-html body .jh-picker-trigger.el-input > .el-input__inner {
-  height: var(--wk-form-control-height, 26px) !important;
-  line-height: var(--wk-form-control-height, 26px) !important;
-  border-radius: var(--el-border-radius-base) !important;
-}
+  &.com-picker .el-input__wrapper,
+  &.com-reference-picker .el-input__wrapper,
+  &.com-reference-picker-input .el-input__wrapper,
+  &.com-user-picker .el-input__wrapper,
+  &.com-dept-picker .el-input__wrapper,
+  &.com-userPicker .el-input__wrapper,
+  &.com-deptPicker .el-input__wrapper,
+  &.jh-picker .el-input__wrapper,
+  &.jh-picker-trigger.el-input .el-input__wrapper {
+    height: var(--wk-form-control-height, 26px) !important;
+    min-height: var(--wk-form-control-height, 26px) !important;
+    border-radius: var(--el-border-radius-base) !important;
+  }
 
-// 7) 必填星号兼容 jh-ui label 结构
-//    颜色统一 danger 色；显示/隐藏由 _base-components.scss 总控，
-//    此处只负责颜色，不设 display，避免与总控冲突导致 * * 重复。
-.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label::before,
-.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label>.com-text::before {
-  color: var(--el-color-danger, #f56c6c) !important;
+  &.com-picker .el-input > .el-input__inner,
+  &.com-reference-picker .el-input > .el-input__inner,
+  &.com-reference-picker-input .el-input > .el-input__inner,
+  &.com-user-picker .el-input > .el-input__inner,
+  &.com-dept-picker .el-input > .el-input__inner,
+  &.com-userPicker .el-input > .el-input__inner,
+  &.com-deptPicker .el-input > .el-input__inner,
+  &.jh-picker .el-input > .el-input__inner,
+  &.jh-picker-trigger.el-input > .el-input__inner {
+    height: var(--wk-form-control-height, 26px) !important;
+    line-height: var(--wk-form-control-height, 26px) !important;
+    border-radius: var(--el-border-radius-base) !important;
+  }
+
+  // 7) 必填星号兼容 jh-ui label 结构
+  &.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label::before,
+  &.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label > .com-text::before {
+    color: var(--el-color-danger, #f56c6c) !important;
+  }
 }

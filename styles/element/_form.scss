@@ -1,5 +1,7 @@
 // styles/element/_form.scss — el-form / el-input 覆盖
 
+@use "../scope" as skin;
+
 html body {
   --wk-form-control-radius: var(--el-border-radius-base, 6px);
   --wk-form-control-height: 26px;
@@ -7,41 +9,45 @@ html body {
     --wk-form-label-line-height: 22px;
 }
 
-html body .el-form-item--small {
-  margin-bottom: 8px;
-}
+#{skin.$managed-scope-selector} {
+  &.el-form-item--small {
+    margin-bottom: 8px;
+  }
 
-// 解决 el-form-item 出现错误提示时底部 margin 增加的问题
-html body .is-error.el-form-item--small {
-  margin-bottom: 18px !important;
-}
+  // 解决 el-form-item 出现错误提示时底部 margin 增加的问题
+  &.is-error.el-form-item--small {
+    margin-bottom: 18px !important;
+  }
 
-// ── 全局输入框圆角统一（6px，与搜索区保持一致）──────────────────────────────
-html body .el-form:not(.el-form--label-top) .el-form-item__label {
-  padding-right: var(--wk-form-label-control-gap) !important;
-}
-html body .el-input__wrapper,
-html body .el-select__wrapper,
-html body .el-select .el-select__wrapper,
-html body .el-date-editor.el-input__wrapper,
-html body .el-date-editor .el-input__wrapper,
-html body .el-input-number .el-input__wrapper,
-html body .el-cascader .el-input__wrapper,
-html body .el-autocomplete .el-input__wrapper {
-  height: var(--wk-form-control-height) !important;
-  min-height: var(--wk-form-control-height) !important;
-  border-radius: var(--wk-form-control-radius) !important;
-}
+  // ── 全局输入框圆角统一（6px，与搜索区保持一致）────────────────────────────
+  &.el-form:not(.el-form--label-top) .el-form-item__label {
+    padding-right: var(--wk-form-label-control-gap) !important;
+  }
 
-html body .el-input__inner,
-html body .el-select__selected-item,
-html body .el-date-editor .el-input__inner,
-html body .el-input-number .el-input__inner,
-html body .el-cascader .el-input__inner,
-html body .el-autocomplete .el-input__inner {
-  height: calc(var(--wk-form-control-height) - 2px) !important;
-  line-height: calc(var(--wk-form-control-height) - 2px) !important;
-}
-html body .el-textarea__inner {
-  border-radius: var(--wk-form-control-radius) !important;
+  &.el-input__wrapper,
+  &.el-select__wrapper,
+  &.el-select .el-select__wrapper,
+  &.el-date-editor.el-input__wrapper,
+  &.el-date-editor .el-input__wrapper,
+  &.el-input-number .el-input__wrapper,
+  &.el-cascader .el-input__wrapper,
+  &.el-autocomplete .el-input__wrapper {
+    height: var(--wk-form-control-height) !important;
+    min-height: var(--wk-form-control-height) !important;
+    border-radius: var(--wk-form-control-radius) !important;
+  }
+
+  &.el-input__inner,
+  &.el-select__selected-item,
+  &.el-date-editor .el-input__inner,
+  &.el-input-number .el-input__inner,
+  &.el-cascader .el-input__inner,
+  &.el-autocomplete .el-input__inner {
+    height: calc(var(--wk-form-control-height) - 2px) !important;
+    line-height: calc(var(--wk-form-control-height) - 2px) !important;
+  }
+
+  &.el-textarea__inner {
+    border-radius: var(--wk-form-control-radius) !important;
+  }
 }

@@ -3,54 +3,56 @@
 // 使用 html body 提升组件覆盖特异性；品牌 token 由 L0 + runtime 双层锁定，
 // 填充按钮同时以 !important 抵御 jh-ui/业务旧皮肤硬编码。
 
-html body .el-button:not(.is-round):not(.is-circle) {
-  border-radius: var(--el-border-radius-base, 6px) !important;
-}
+@use "../scope" as skin;
 
-html body .el-button.is-round {
-  border-radius: var(--el-border-radius-round, 20px) !important;
-}
-
-html body .el-button.is-circle {
-  border-radius: var(--el-border-radius-circle, 100%) !important;
-}
-
-html body .el-button--primary {
-  --el-button-bg-color: var(--el-color-primary);
-  --el-button-border-color: var(--el-color-primary);
-  --el-button-hover-bg-color: var(--el-color-primary-light-1);
-  --el-button-hover-border-color: var(--el-color-primary-light-1);
-  --el-button-active-color: var(--el-color-primary-dark-1);
-  --el-button-active-bg-color: var(--el-color-primary-dark-1);
-  --el-button-active-border-color: var(--el-color-primary-dark-1);
-  --el-button-disabled-bg-color: var(--el-color-primary-light-7);
-  --el-button-disabled-border-color: var(--el-color-primary-light-7);
-  --el-button-outline-color: var(--el-color-primary-light-5);
-}
-
-html body
-  .el-button.el-button--primary:not(.is-link):not(.is-text):not(.is-plain):not(.is-disabled) {
-  background-color: var(--el-color-primary) !important;
-  border-color: var(--el-color-primary) !important;
-  box-shadow: 0 1px 2px rgba(var(--el-color-primary-rgb), 0.16);
-
-  &:hover,
-  &:focus {
-    background-color: var(--el-color-primary-light-1) !important;
-    border-color: var(--el-color-primary-light-1) !important;
-    box-shadow: 0 2px 6px rgba(var(--el-color-primary-rgb), 0.2);
+#{skin.$managed-scope-selector} {
+  &.el-button:not(.is-round):not(.is-circle) {
+    border-radius: var(--el-border-radius-base, 6px) !important;
   }
 
-  &:active {
-    background-color: var(--el-color-primary-dark-1) !important;
-    border-color: var(--el-color-primary-dark-1) !important;
-    box-shadow: 0 1px 2px rgba(var(--el-color-primary-rgb), 0.14);
+  &.el-button.is-round {
+    border-radius: var(--el-border-radius-round, 20px) !important;
   }
-}
 
-html body
-  .el-button.el-button--primary.is-disabled:not(.is-link):not(.is-text):not(.is-plain) {
-  background-color: var(--el-color-primary-light-7) !important;
-  border-color: var(--el-color-primary-light-7) !important;
-  box-shadow: none !important;
+  &.el-button.is-circle {
+    border-radius: var(--el-border-radius-circle, 100%) !important;
+  }
+
+  &.el-button--primary {
+    --el-button-bg-color: var(--el-color-primary);
+    --el-button-border-color: var(--el-color-primary);
+    --el-button-hover-bg-color: var(--el-color-primary-light-1);
+    --el-button-hover-border-color: var(--el-color-primary-light-1);
+    --el-button-active-color: var(--el-color-primary-dark-1);
+    --el-button-active-bg-color: var(--el-color-primary-dark-1);
+    --el-button-active-border-color: var(--el-color-primary-dark-1);
+    --el-button-disabled-bg-color: var(--el-color-primary-light-7);
+    --el-button-disabled-border-color: var(--el-color-primary-light-7);
+    --el-button-outline-color: var(--el-color-primary-light-5);
+  }
+
+  &.el-button.el-button--primary:not(.is-link):not(.is-text):not(.is-plain):not(.is-disabled) {
+    background-color: var(--el-color-primary) !important;
+    border-color: var(--el-color-primary) !important;
+    box-shadow: 0 1px 2px rgba(var(--el-color-primary-rgb), 0.16);
+
+    &:hover,
+    &:focus {
+      background-color: var(--el-color-primary-light-1) !important;
+      border-color: var(--el-color-primary-light-1) !important;
+      box-shadow: 0 2px 6px rgba(var(--el-color-primary-rgb), 0.2);
+    }
+
+    &:active {
+      background-color: var(--el-color-primary-dark-1) !important;
+      border-color: var(--el-color-primary-dark-1) !important;
+      box-shadow: 0 1px 2px rgba(var(--el-color-primary-rgb), 0.14);
+    }
+  }
+
+  &.el-button.el-button--primary.is-disabled:not(.is-link):not(.is-text):not(.is-plain) {
+    background-color: var(--el-color-primary-light-7) !important;
+    border-color: var(--el-color-primary-light-7) !important;
+    box-shadow: none !important;
+  }
 }

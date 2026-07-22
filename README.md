@@ -200,7 +200,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.2` | 已对齐上述组合的 DOM 假设、客户主题锁与圆角契约 |
+| `@agile-team/wl-skills-ui` | `^1.9.3` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约与定制页样式边界 |
 
 三种识别方式，任选其一：
 
@@ -214,7 +214,21 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.2：
+当前 v1.9.3：
+
+- **登录页精准退出**：内置识别 `.lp-root` 与 `.session-login`，其内部表单、按钮、焦点和校验态保留登录页自身设计；业务页面仍由包高权重统一管控。
+- **通用定制页边界**：其他定制页在根节点增加 `.wl-ui-skin-exempt` 或 `data-wl-ui-skin="off"` 即可退出组件级强覆盖，不需要删除全局化妆包。
+- **主题锁不降级**：豁免只作用于 Element Plus / vendor 的直接组件覆盖；全局客户品牌 token 和平台动态主题防反覆盖继续生效。定制页若需独立色，可在自己的根节点重新声明 token 或直接编写局部样式。
+
+```vue
+<template>
+  <main class="wl-ui-skin-exempt">
+    <!-- 登录、大屏等定制内容 -->
+  </main>
+</template>
+```
+
+上一版 v1.9.2：
 
 - **动态主题不可反覆盖**：品牌色、功能色和圆角使用 CSS `!important` + runtime `MutationObserver` 双保险；平台登录后写入 `document.body.style` 也会立即恢复为包内规范值。
 - **圆角契约恢复**：按钮、输入框等基础控件统一 `6px`，不再回退到 jh-ui 的 `2px`；圆形、胶囊、按钮组仍保留各自语义。

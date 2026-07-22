@@ -1,3 +1,5 @@
+@use "../scope" as skin;
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 通用组件样式 — wl-ui-safe 统一设计规范
 // 包含：操作按钮组、状态标签、徽标、兼容旧按钮
@@ -444,161 +446,166 @@
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// el-textarea 编辑模式精致化
+// 表单组件统一化妆（登录页 / 显式定制页除外）
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-.el-textarea {
-  .el-textarea__inner {
+#{skin.$managed-scope-selector} {
+  // el-textarea 编辑模式精致化
+  &.el-textarea {
+    .el-textarea__inner {
+      border-radius: 6px !important;
+      font-size: 13px !important;
+      line-height: 1.65 !important;
+      padding: 7px 10px !important;
+      resize: vertical !important; // 只允许垂直拉伸，不允许水平
+      transition: border-color 0.15s, box-shadow 0.15s;
+
+      &:hover:not(:focus) {
+        border-color: var(--el-border-color-hover, #c0c4cc) !important;
+      }
+
+      &:focus {
+        border-color: var(--el-color-primary) !important;
+        box-shadow: 0 0 0 2px rgba(var(--el-color-primary-rgb), 0.12) !important;
+      }
+    }
+
+    // 字数统计：更小、更淡、不遮挡内容
+    .el-input__count {
+      font-size: 10px !important;
+      color: #c0c4cc !important;
+      background: transparent !important;
+      line-height: 1 !important;
+      bottom: 5px !important;
+      right: 8px !important;
+      padding: 0 !important;
+    }
+  }
+
+  &.el-input__wrapper,
+  &.el-select__wrapper,
+  &.el-date-editor.el-input__wrapper,
+  &.el-textarea__inner {
     border-radius: 6px !important;
-    font-size: 13px !important;
-    line-height: 1.65 !important;
-    padding: 7px 10px !important;
-    resize: vertical !important;         // 只允许垂直拉伸，不允许水平
-    transition: border-color 0.15s, box-shadow 0.15s;
-
-    &:hover:not(:focus) {
-      border-color: var(--el-border-color-hover, #c0c4cc) !important;
-    }
-    &:focus {
-      border-color: var(--el-color-primary) !important;
-      box-shadow: 0 0 0 2px rgba(var(--el-color-primary-rgb), 0.12) !important;
-    }
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
   }
 
-  // 字数统计：更小、更淡、不遮挡内容
-  .el-input__count {
-    font-size: 10px !important;
-    color: #c0c4cc !important;
-    background: transparent !important;
-    line-height: 1 !important;
-    bottom: 5px !important;
-    right: 8px !important;
-    padding: 0 !important;
+  &.el-input__wrapper.is-focus,
+  &.el-input__wrapper:focus-within,
+  &.el-select__wrapper.is-focus,
+  &.el-select__wrapper.is-focused,
+  &.el-select__wrapper:focus-within,
+  &.el-date-editor.el-input__wrapper.is-focus,
+  &.el-date-editor.el-input__wrapper:focus-within,
+  &.el-textarea__inner:focus {
+    box-shadow: 0 0 0 1.5px var(--el-color-primary, #002a8f) inset !important;
   }
-}
 
-.el-input__wrapper,
-.el-select .el-input__wrapper,
-.el-select__wrapper,
-.el-date-editor.el-input__wrapper,
-.el-textarea__inner {
-  border-radius: 6px !important;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
-}
+  &.el-form-item__label,
+  &.base-query-box .el-form-item__label,
+  &[class*='base-form'] .el-form-item__label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: keep-all;
+  }
 
-.el-input__wrapper.is-focus,
-.el-input__wrapper:focus-within,
-.el-select__wrapper.is-focus,
-.el-select__wrapper.is-focused,
-.el-select__wrapper:focus-within,
-.el-date-editor.el-input__wrapper.is-focus,
-.el-date-editor.el-input__wrapper:focus-within,
-.el-textarea__inner:focus {
-  box-shadow: 0 0 0 1.5px var(--el-color-primary, #002a8f) inset !important;
-}
-
-.el-form-item__label,
-.base-query-box .el-form-item__label,
-[class*='base-form'] .el-form-item__label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: keep-all;
-}
-
-// 必填星号：只保留一颗 — 默认 asterisk-left（::before），asterisk-right 用 ::after
-// 旧写法同时 display:inline-block 两个伪元素导致 * * 重复
-html body .el-form.el-form--label-left .el-form-item__label,
-html body .el-form.el-form--label-right .el-form-item__label {
-  align-items: baseline !important;
-  font-size: 12px !important;
-  line-height: var(--wk-form-label-line-height, 22px) !important;
-}
-
-html body .el-form.el-form--label-left .el-form-item__label>.com-text,
-html body .el-form.el-form--label-right .el-form-item__label>.com-text {
-  font-size: 12px !important;
-  line-height: var(--wk-form-label-line-height, 22px) !important;
-}
-
-.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::before,
-html body .el-form.el-form--label-left .el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::before,
-html body .el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label::before {
-  content: "*" !important;
-  color: var(--el-color-danger, #f56c6c) !important;
-  font-size: 12px !important;
-  font-weight: 400 !important;
+  // 必填星号：只保留一颗 — 默认 asterisk-left（::before），asterisk-right 用 ::after
+  // 旧写法同时 display:inline-block 两个伪元素导致 * * 重复
+  &.el-form.el-form--label-left .el-form-item__label,
+  &.el-form.el-form--label-right .el-form-item__label {
+    align-items: baseline !important;
+    font-size: 12px !important;
     line-height: var(--wk-form-label-line-height, 22px) !important;
-  display: inline-block !important;
-  margin-right: 2px !important;
-    vertical-align: baseline !important;
-    position: relative !important;
-    top: 0 !important;
-    align-self: baseline !important;
-}
-.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label>.com-text::before,
-html body .el-form.el-form--label-left .el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label>.com-text::before,
-html body .el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label>.com-text::before {
-  content: "*" !important;
-  color: var(--el-color-danger, #f56c6c) !important;
-  font-size: 12px !important;
-  font-weight: 400 !important;
+  }
+
+  &.el-form.el-form--label-left .el-form-item__label > .com-text,
+  &.el-form.el-form--label-right .el-form-item__label > .com-text {
+    font-size: 12px !important;
     line-height: var(--wk-form-label-line-height, 22px) !important;
-  display: inline-block !important;
-  margin-right: 2px !important;
-    vertical-align: baseline !important;
-    position: relative !important;
-    top: 0 !important;
-    align-self: baseline !important;
-}
+  }
 
-.el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label:has(>.com-text)::before,
-html body .el-form .el-form-item.is-required:not(.is-no-asterisk)>.el-form-item__label:has(>.com-text)::before {
-  display: none !important;
-}
-
-// asterisk-right 模式：显示 ::after，隐藏 ::before
-.el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::before,
-.el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label>.com-text::before {
-  display: none !important;
-}
-
-.el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::after,
-html body .el-form.el-form--label-left .el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::after,
-html body .el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk).asterisk-right>.el-form-item__label::after {
-  content: "*" !important;
-  color: var(--el-color-danger, #f56c6c) !important;
-  font-size: 12px !important;
-  font-weight: 400 !important;
-    line-height: var(--wk-form-label-line-height, 22px) !important;
-  display: inline-block !important;
-  margin-left: 2px !important;
-    vertical-align: baseline !important;
-    position: relative !important;
-    top: 0 !important;
-    align-self: baseline !important;
-}
-
-// 默认模式：隐藏 ::after 防止重复星号
-.el-form-item.is-required:not(.is-no-asterisk):not(.asterisk-right)>.el-form-item__label::after {
-  display: none !important;
-}
-.el-form-item.is-required.is-no-asterisk>.el-form-item__label::before,
-.el-form-item.is-required.is-no-asterisk>.el-form-item__label::after,
-.el-form-item.is-required.is-no-asterisk>.el-form-item__label>.com-text::before {
-  display: none !important;
-}
-
-.el-form-item.is-error {
-  .el-form-item__label,
-  .el-form-item__error {
+  &.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label::before,
+  &.el-form.el-form--label-left .el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label::before,
+  &.el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label::before {
+    content: "*" !important;
     color: var(--el-color-danger, #f56c6c) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: var(--wk-form-label-line-height, 22px) !important;
+    display: inline-block !important;
+    margin-right: 2px !important;
+    vertical-align: baseline !important;
+    position: relative !important;
+    top: 0 !important;
+    align-self: baseline !important;
   }
 
-  .el-input__wrapper,
-  .el-select__wrapper,
-  .el-date-editor.el-input__wrapper,
-  .el-textarea__inner {
-    box-shadow: 0 0 0 1px var(--el-color-danger, #f56c6c) inset !important;
+  &.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label > .com-text::before,
+  &.el-form.el-form--label-left .el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label > .com-text::before,
+  &.el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label > .com-text::before {
+    content: "*" !important;
+    color: var(--el-color-danger, #f56c6c) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: var(--wk-form-label-line-height, 22px) !important;
+    display: inline-block !important;
+    margin-right: 2px !important;
+    vertical-align: baseline !important;
+    position: relative !important;
+    top: 0 !important;
+    align-self: baseline !important;
+  }
+
+  &.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label:has(> .com-text)::before,
+  &.el-form .el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label:has(> .com-text)::before {
+    display: none !important;
+  }
+
+  // asterisk-right 模式：显示 ::after，隐藏 ::before
+  &.el-form-item.is-required:not(.is-no-asterisk).asterisk-right > .el-form-item__label::before,
+  &.el-form-item.is-required:not(.is-no-asterisk).asterisk-right > .el-form-item__label > .com-text::before {
+    display: none !important;
+  }
+
+  &.el-form-item.is-required:not(.is-no-asterisk).asterisk-right > .el-form-item__label::after,
+  &.el-form.el-form--label-left .el-form-item.is-required:not(.is-no-asterisk).asterisk-right > .el-form-item__label::after,
+  &.el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk).asterisk-right > .el-form-item__label::after {
+    content: "*" !important;
+    color: var(--el-color-danger, #f56c6c) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: var(--wk-form-label-line-height, 22px) !important;
+    display: inline-block !important;
+    margin-left: 2px !important;
+    vertical-align: baseline !important;
+    position: relative !important;
+    top: 0 !important;
+    align-self: baseline !important;
+  }
+
+  // 默认模式：隐藏 ::after 防止重复星号
+  &.el-form-item.is-required:not(.is-no-asterisk):not(.asterisk-right) > .el-form-item__label::after {
+    display: none !important;
+  }
+
+  &.el-form-item.is-required.is-no-asterisk > .el-form-item__label::before,
+  &.el-form-item.is-required.is-no-asterisk > .el-form-item__label::after,
+  &.el-form-item.is-required.is-no-asterisk > .el-form-item__label > .com-text::before {
+    display: none !important;
+  }
+
+  &.el-form-item.is-error {
+    .el-form-item__label,
+    .el-form-item__error {
+      color: var(--el-color-danger, #f56c6c) !important;
+    }
+
+    .el-input__wrapper,
+    .el-select__wrapper,
+    .el-date-editor.el-input__wrapper,
+    .el-textarea__inner {
+      box-shadow: 0 0 0 1px var(--el-color-danger, #f56c6c) inset !important;
+    }
   }
 }
 

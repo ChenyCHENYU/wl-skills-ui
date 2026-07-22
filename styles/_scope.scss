@@ -1,0 +1,8 @@
+// Component-level skin rules are intentionally strict on business pages, but
+// custom presentation pages (login, large screens, etc.) must be able to keep
+// their own component geometry and colors.
+//
+// Brand tokens remain globally locked. This selector only limits the direct
+// Element Plus / vendor component overrides that use high specificity or
+// !important.
+$managed-scope-selector: "html body :not(:where(.lp-root, .lp-root *, .session-login, .session-login *, .wl-ui-skin-exempt, .wl-ui-skin-exempt *, [data-wl-ui-skin='off'], [data-wl-ui-skin='off'] *))";

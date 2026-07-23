@@ -13,16 +13,16 @@ applyTo: "**/*.vue"
 
 所有 `<jh-*>` 标签均归入本 Skill。下表是当前项目集群的代表性基线，不是完整清单。
 
-| 类型 | 子组件 | 标签 | 关键类名 | 治理方式 |
-|---|---|---|---|---|
-| SCSS 皮肤适配 | `@jhlc/jh-ui` | — | `.com-text` / `.text-line-2` / `.com-input` / `.com-picker` / `.com-reference-picker` / `.com-textarea` / `.com-input-tip` | `styles/vendors/_jh-ui.scss` |
-| 专项样式覆盖 | jh-tree | `<jh-tree>` | `.jh-tree` / `.base-tree` | `styles/vendors/_jh-tree.scss` |
-| 专项样式覆盖 | jh-pagination | `<jh-pagination>` | `.jh-pagination` | `styles/vendors/_jh-pagination.scss` |
-| 专项样式覆盖 | jh-drag-col | `<jh-drag-col>` | `.drag-col-container` / `.drag-left` / `.slider-col` | `styles/vendors/_jh-drag-col.scss` |
-| 专项样式覆盖 | jh-drag-row | `<jh-drag-row>` | `.drager_row` / `.drager_top` / `.drager_bottom` / `.slider_row` | `styles/vendors/_jh-drag-row.scss` |
-| 通用规则治理 | jh-table | `<jh-table>` | `.jh-table` | 继承 L0 tokens + L1 table 视觉原则 |
-| 通用规则治理 | jh-form | `<jh-form>` | `.jh-form` | 继承 L0 tokens + L1 form 视觉原则 |
-| 通用规则治理 | 其它 jh-* | `<jh-*>` | `.jh-*` / 组件内部 Element Plus 类 | 先按 jh 通用规则治理，复杂结构再升级专项样式 |
+| 类型          | 子组件        | 标签              | 关键类名                                                                                                                   | 治理方式                                     |
+| ------------- | ------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| SCSS 皮肤适配 | `@jhlc/jh-ui` | —                 | `.com-text` / `.text-line-2` / `.com-input` / `.com-picker` / `.com-reference-picker` / `.com-textarea` / `.com-input-tip` | `styles/vendors/_jh-ui.scss`                 |
+| 专项样式覆盖  | jh-tree       | `<jh-tree>`       | `.jh-tree` / `.base-tree`                                                                                                  | `styles/vendors/_jh-tree.scss`               |
+| 专项样式覆盖  | jh-pagination | `<jh-pagination>` | `.jh-pagination`                                                                                                           | `styles/vendors/_jh-pagination.scss`         |
+| 专项样式覆盖  | jh-drag-col   | `<jh-drag-col>`   | `.drag-col-container` / `.drag-left` / `.slider-col`                                                                       | `styles/vendors/_jh-drag-col.scss`           |
+| 专项样式覆盖  | jh-drag-row   | `<jh-drag-row>`   | `.drager_row` / `.drager_top` / `.drager_bottom` / `.slider_row`                                                           | `styles/vendors/_jh-drag-row.scss`           |
+| 通用规则治理  | jh-table      | `<jh-table>`      | `.jh-table`                                                                                                                | 继承 L0 tokens + L1 table 视觉原则           |
+| 通用规则治理  | jh-form       | `<jh-form>`       | `.jh-form`                                                                                                                 | 继承 L0 tokens + L1 form 视觉原则            |
+| 通用规则治理  | 其它 jh-\*    | `<jh-*>`          | `.jh-*` / 组件内部 Element Plus 类                                                                                         | 先按 jh 通用规则治理，复杂结构再升级专项样式 |
 
 ### `@jhlc/jh-ui` SCSS 皮肤包识别
 
@@ -47,7 +47,7 @@ applyTo: "**/*.vue"
 
 - ❌ 自行给 `.jh-tree` 写颜色覆盖（应用全局 `vendors/_jh-tree.scss`）
 - ❌ jh-drag-col 内自定义 padding 破坏拖拽条对齐
-- ❌ jh-drag-row 上下分栏缺 `.drager_row { height:100% }` 高度链（拖拽失效），或手柄未走统一 `.slider_row` 细线风格
+- ❌ jh-drag-row 上下分栏缺 `.drager_row { height:100% }` 高度链（拖拽失效），或页面自行重画 `.slider_row`；手柄必须统一使用 `_jh-drag-row.scss` 的细分隔线 + 三点胶囊
 - ❌ jh-pagination 未对齐到右侧（同 R011）
 - ❌ jh-form 内不用 `size="small"` 控件（同 R006）
 - ❌ 发现新的复杂 `<jh-*>` 组件后只在页面局部写补丁，而不沉淀到 L2 Project Vendors
@@ -55,10 +55,12 @@ applyTo: "**/*.vue"
 ## Repair
 
 ### A 类
+
 - 控件 size 缺失 → 补 `size="small"`
 - 表单内日期选择器无宽度 → `style="width:100%"`（R007）
 
 ### B 类
+
 - 直接全局覆盖 `.jh-*` → 改为引入 `wl-skills-ui/styles` 由 vendors 层处理
 - 新的复杂 `<jh-*>` 组件 → 先判断是否只是 Element Plus 薄封装；若不是，应新增 `styles/vendors/_jh-xxx.scss` 和对应 Skill/检测规则
 

@@ -6,10 +6,7 @@
 
 ```vue
 <!-- ❌ 错误：100px 会截断9字标签 -->
-<el-form :model="form" label-width="100px">
-
-<!-- ✅ 正确 -->
-<el-form :model="form" label-width="150px">
+<el-form :model="form" label-width="100px"></el-form>
 ```
 
 ---
@@ -21,11 +18,7 @@
 ```vue
 <!-- ❌ 错误 -->
 <el-input v-model="form.name" />
-<el-select v-model="form.type">
-
-<!-- ✅ 正确 -->
-<el-input v-model="form.name" size="small" />
-<el-select v-model="form.type" size="small">
+<el-select v-model="form.type"></el-select>
 ```
 
 ---
@@ -76,11 +69,18 @@ textarea 不强制 26px 高度，只继承统一圆角、字体和状态样式�
 
 ## 规则：表单 label 不强制冒号
 
-Element Plus 原生控件、picker 类控件和 jh-* 封装控件的 label 后不强制追加 `:`。`@jhlc/jh-ui` 的 `.has-colon .com-text:after` / `.text-line-2:after` 冒号注入由 wl-skills-ui 统一屏蔽，避免 input / select / picker 之间出现有的带冒号、有的不带冒号。
+Element Plus 原生控件、picker 类控件和 jh-\* 封装控件的 label 后不强制追加 `:`。`@jhlc/jh-ui` 的 `.has-colon .com-text:after` / `.text-line-2:after` 冒号注入由 wl-skills-ui 统一屏蔽，避免 input / select / picker 之间出现有的带冒号、有的不带冒号。
 
 ---
 
 ## 布局标准
+
+### 列数与可用宽度
+
+- 独立作业页/实绩页的主表单最多 4 列；不得为了“一行塞完”使用 5～8 列。
+- 单个控件的实际可输入宽度应不小于 160px；标签较长、单位较多或容器变窄时，应主动降为 3 列。
+- 字段很多时优先分区、Tab 或“展开更多”，不要压缩输入框。默认区域建议控制在 4～6 行。
+- 数字输入若业务不依赖步进操作，应设置 `controls=false`，避免步进按钮挤占内容宽度。
 
 ### 搜索区（列表页顶部）
 
@@ -105,12 +105,7 @@ Element Plus 原生控件、picker 类控件和 jh-* 封装控件的 label 后�
 ### 弹窗表单（新增/修改）
 
 ```vue
-<el-form
-  ref="formRef"
-  :model="form"
-  :rules="rules"
-  label-width="150px"
->
+<el-form ref="formRef" :model="form" :rules="rules" label-width="150px">
   <el-row :gutter="20">
     <el-col :span="12">
       <el-form-item label="名称" prop="name">
@@ -135,11 +130,11 @@ Element Plus 原生控件、picker 类控件和 jh-* 封装控件的 label 后�
 
 ## 复杂表单判断
 
-| 条件 | 方案 |
-|-----|------|
-| 字段 ≤ 15，无子表 | 弹窗（`el-dialog`） |
+| 条件                    | 方案                      |
+| ----------------------- | ------------------------- |
+| 字段 ≤ 15，无子表       | 弹窗（`el-dialog`）       |
 | 字段 > 15，或含多个子表 | 独立路由页（`/xxx-form`） |
-| Tab > 3 个 | 独立路由页 |
+| Tab > 3 个              | 独立路由页                |
 
 ---
 
@@ -147,8 +142,8 @@ Element Plus 原生控件、picker 类控件和 jh-* 封装控件的 label 后�
 
 ```typescript
 const rules = {
-  name:   [{ required: true, message: '请输入名称', trigger: 'blur' }],
-  type:   [{ required: true, message: '请选择类型', trigger: 'change' }],
-  date:   [{ required: true, message: '请选择日期', trigger: 'change' }],
-}
+  name: [{ required: true, message: "请输入名称", trigger: "blur" }],
+  type: [{ required: true, message: "请选择类型", trigger: "change" }],
+  date: [{ required: true, message: "请选择日期", trigger: "change" }],
+};
 ```

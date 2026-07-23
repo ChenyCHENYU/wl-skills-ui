@@ -9,13 +9,14 @@ applyTo: "**/*.vue"
 
 ## 适用场景
 
-页面结构为：**搜索栏 → 工具栏（增删按钮） → 数据表格 → 分页器** 的经典 CRUD 列表页。
+页面结构为：**搜索栏 → 工具栏（增删按钮） → 列表标题 → 数据表格 → 分页器** 的经典 CRUD 列表页。
 
 ---
 
 ## Detect — 识别列表页
 
 ### 方式一：结构特征识别
+
 ```
 检测条件（满足任意 2 项即判定为列表页）：
 ✓ 根节点或第一子节点含 class="list-page" / "page-wrapper" / "table-page"
@@ -26,6 +27,7 @@ applyTo: "**/*.vue"
 ```
 
 ### 方式二：命令触发
+
 ```
 用 wl-ui 的 layouts/list-page skill 检查这个文件
 → AI 加载本 SKILL.md，对当前文件做 Detect → Diagnose → Repair
@@ -37,13 +39,15 @@ applyTo: "**/*.vue"
 
 ### 结构层问题
 
-| 问题 | 规则 | 说明 |
-|---|---|---|
-| 根节点缺少 `.list-page` | L-001 | 应为 `<div class="list-page">` |
-| 搜索区未用 `.list-page__query` | L-002 | 内部结构应遵循 BEM |
-| 工具栏未用 `.list-page__toolbar` | L-003 | 按钮组应在 `.list-page__toolbar` 内 |
-| 表格区未用 `.list-page__table` | L-004 | 表格容器应有独立 class |
-| 分页区未用 `.list-page__pagination` | L-005 | 分页器位置需在 **内容区**，不得在 dialog footer |
+| 问题                                | 规则  | 说明                                             |
+| ----------------------------------- | ----- | ------------------------------------------------ |
+| 根节点缺少 `.list-page`             | L-001 | 应为 `<div class="list-page">`                   |
+| 搜索区未用 `.list-page__query`      | L-002 | 内部结构应遵循 BEM                               |
+| 工具栏未用 `.list-page__toolbar`    | L-003 | 按钮组应在 `.list-page__toolbar` 内              |
+| 工具栏与标题同排或位于标题下方      | L-006 | 工具栏应在标题上、表格上独占一行并左对齐         |
+| 分页列表标题重复显示“共 N 条”       | L-007 | 分页器已有总数，仅非分页短列表可在标题旁显示条数 |
+| 表格区未用 `.list-page__table`      | L-004 | 表格容器应有独立 class                           |
+| 分页区未用 `.list-page__pagination` | L-005 | 分页器位置需在 **内容区**，不得在 dialog footer  |
 
 ### 内容层问题（复用 scanner 规则）
 
@@ -66,11 +70,19 @@ applyTo: "**/*.vue"
       <BaseQuery :params="searchParams" @search="reload" @reset="reset" />
     </div>
 
-    <!-- 工具栏 -->
+    <!-- 工具栏：标题上方、表格上方、左对齐，独占一行 -->
     <div class="list-page__toolbar">
-      <el-button type="primary" icon="Plus" @click="modal.add()">新增</el-button>
+      <el-button type="primary" icon="Plus" @click="modal.add()"
+        >新增</el-button
+      >
+      <el-button type="warning" plain icon="Edit" @click="modal.edit()"
+        >修改</el-button
+      >
       <el-button icon="Download" @click="handleExport">导出</el-button>
     </div>
+
+    <!-- 列表标题：位于按钮组下方，不与按钮同排 -->
+    <div class="list-page__title">[列表标题]</div>
 
     <!-- 表格 -->
     <div class="list-page__table">
@@ -85,7 +97,7 @@ applyTo: "**/*.vue"
 </template>
 ```
 
-### SCSS 对应（由 styles/layouts/_list-page.scss 提供）
+### SCSS 对应（由 styles/layouts/\_list-page.scss 提供）
 
 ```scss
 // 业务侧无需手写，全局 @use 后自动生效
@@ -106,6 +118,6 @@ applyTo: "**/*.vue"
 
 ## 关联资源
 
-- 样式实现：[styles/layouts/_list-page.scss](../../../styles/layouts/_list-page.scss)
+- 样式实现：[styles/layouts/\_list-page.scss](../../../styles/layouts/_list-page.scss)
 - 代码模板：[templates/list-page/TPL-LIST.md](../../../templates/list-page/TPL-LIST.md)
 - 相关 skills：[vendors/base-table](../../vendors/base-table/SKILL.md) | [vendors/jh-components](../../vendors/jh-components/SKILL.md)

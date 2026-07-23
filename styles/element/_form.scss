@@ -5,8 +5,8 @@
 html body {
   --wk-form-control-radius: var(--el-border-radius-base, 6px);
   --wk-form-control-height: 26px;
-    --wk-form-label-control-gap: 16px;
-    --wk-form-label-line-height: 22px;
+  --wk-form-label-control-gap: 16px;
+  --wk-form-label-line-height: 22px;
 }
 
 #{skin.$managed-scope-selector} {
@@ -45,6 +45,98 @@ html body {
   &.el-autocomplete .el-input__inner {
     height: calc(var(--wk-form-control-height) - 2px) !important;
     line-height: calc(var(--wk-form-control-height) - 2px) !important;
+  }
+
+  // common-core 的 InputNumberComponent 即使传入 controls=false，部分版本仍会
+  // 输出 controls-right 步进按钮。数值框保留 Element Plus 的 wrapper 作为唯一
+  // 可见边框，根节点仅负责尺寸，避免 wrapper 聚焦阴影与根边框叠成双层描边。
+  &.el-input-number,
+  &.el-input-number:focus,
+  &.el-input-number:focus-within {
+    width: 100% !important;
+    height: var(--wk-form-control-height) !important;
+    line-height: var(--wk-form-control-height) !important;
+    border: 0 !important;
+    border-radius: var(--wk-form-control-radius) !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  &.el-input-number .el-input {
+    width: 100% !important;
+    height: 100% !important;
+    border: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  &.el-input-number .el-input__wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 0 11px !important;
+    border: 0 !important;
+    border-radius: calc(var(--wk-form-control-radius) - 1px) !important;
+    box-sizing: border-box !important;
+    background: var(--el-bg-color, #fff) !important;
+    box-shadow: 0 0 0 1px var(--el-border-color, #dcdfe6) inset !important;
+    transition: box-shadow 0.15s ease !important;
+  }
+
+  &.el-input-number:not(.is-disabled):hover .el-input__wrapper {
+    box-shadow:
+      0 0 0 1px var(--el-border-color-hover, #c0c4cc) inset !important;
+  }
+
+  &.el-input-number .el-input__wrapper.is-focus,
+  &.el-input-number:focus-within .el-input__wrapper {
+    box-shadow:
+      0 0 0 1.5px var(--el-color-primary, #002a8f) inset !important;
+  }
+
+  &.el-input-number.is-disabled .el-input__wrapper {
+    background: var(--el-disabled-bg-color, #f5f7fa) !important;
+    box-shadow:
+      0 0 0 1px var(--el-disabled-border-color, #e4e7ed) inset !important;
+  }
+
+  &.el-input-number .el-input__inner,
+  &.el-input-number .el-input__inner:focus,
+  &.el-input-number .el-input__inner:focus-visible {
+    width: 100% !important;
+    height: 100% !important;
+    line-height: calc(var(--wk-form-control-height) - 2px) !important;
+    padding: 0 11px !important;
+    border: 0 !important;
+    border-radius: calc(var(--wk-form-control-radius) - 1px) !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-align: left !important;
+  }
+
+  &.el-input-number .el-input__wrapper .el-input__inner {
+    padding: 0 !important;
+  }
+
+  &.el-input-number .el-input-number__increase,
+  &.el-input-number .el-input-number__decrease {
+    display: none !important;
+  }
+
+  &.el-input-number .el-input__inner::-webkit-inner-spin-button,
+  &.el-input-number .el-input__inner::-webkit-outer-spin-button {
+    margin: 0 !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+  }
+
+  &.el-input-number .el-input__inner[type="number"] {
+    appearance: textfield !important;
+    -moz-appearance: textfield !important;
   }
 
   &.el-textarea__inner {

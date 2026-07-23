@@ -56,6 +56,9 @@ src/views/[模块]/
       >
     </div>
 
+    <!-- 列表标题：位于按钮组下方，独占一行 -->
+    <div class="list-title">[列表标题]</div>
+
     <!-- 表格 -->
     <BaseTable :hook="page" empty-text="暂无数据" :columns="columnsDef()" />
 
@@ -137,3 +140,4 @@ async function handleDel(id: string) {
 2. `usePageHook` 需替换为项目实际的分页 Hook
 3. `enableStatus` 字段在 `installCommonPreset()` 后自动渲染为彩色 Tag，无需手写 defaultNode
 4. 工具栏按钮必须带 `icon`（R005 规则）
+5. 标准顺序固定为“查询区 → 工具栏 → 列表标题 → 表格 → 分页器”；工具栏不得放到标题右侧或标题下方

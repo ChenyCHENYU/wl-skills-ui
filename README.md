@@ -200,7 +200,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.4` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约与定制页样式边界 |
+| `@agile-team/wl-skills-ui` | `^1.9.6` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约与定制页样式边界 |
 
 三种识别方式，任选其一：
 
@@ -214,7 +214,7 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.4：
+当前 v1.9.6：
 
 - **Vite 4 运行时兼容**：浏览器 ESM 产物不再暴露可被开发转换误替换的 Node 环境变量成员链，预构建与直接加载均保持合法语法。
 - **登录页精准退出**：内置识别 `.lp-root` 与 `.session-login`，其内部表单、按钮、焦点和校验态保留登录页自身设计；业务页面仍由包高权重统一管控。

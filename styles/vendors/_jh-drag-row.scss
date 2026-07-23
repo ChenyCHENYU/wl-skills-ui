@@ -1,78 +1,83 @@
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// jh-drag-row 上下分栏拖拽手柄 — 与 _jh-drag-col 视觉同源
-//
-// 背景
-//   `jh-drag-row`（来自 @jhlc/common-core）是主从表/上下双表的首选布局组件
-//   （见 wl-skills-kit standards/14）。其拖拽手柄 `.slider_row` 默认使用 jh-ui
-//   内置蓝（#a7caec），与项目集群统一细线手柄风格不一致。
-//
-//   本文件把 `.slider_row` 对齐到与 `_jh-drag-col.scss` 同一套极简细线 +
-//   grip dots 设计语言，只是方向改为水平分割线（row-resize）。
-//
-// 源码 CSS 类名参考（common-core/src/components/drag-row/drag-row.vue）
-//   .drager_row（主容器）/ .drager_top（上区）/ .drager_bottom（下区）/ .slider_row（手柄）
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-// ── 上下拖拽分割条 — 极简细线 + grip dots（垂直方向）────────────────────────
+// jh-drag-row 上下分栏拖拽手柄
+// 统一为“细分隔线 + 三点胶囊”，既保留足够的拖拽热区，也避免视觉喧宾夺主。
 html .drager_row > .slider_row {
+  position: relative;
+  height: 20px !important;
+  min-height: 20px !important;
+  flex: 0 0 20px !important;
+  cursor: row-resize !important;
   background: linear-gradient(
     to bottom,
-    transparent 4px,
-    var(--el-border-color-light) 4px,
-    var(--el-border-color-light) 5px,
-    transparent 5px
+    transparent 9px,
+    var(--el-border-color-lighter) 9px,
+    var(--el-border-color-lighter) 10px,
+    transparent 10px
   ) !important;
-  transition: background 0.2s !important;
+  transition: background-color 0.18s ease !important;
 
-  &::before { display: none !important; }
-
-  &::after {
-    content: '' !important;
+  &::before {
     position: absolute !important;
-    left: 50% !important;
-    right: auto !important;
+    z-index: 1;
     top: 50% !important;
+    left: 50% !important;
+    display: block !important;
+    width: 92px !important;
+    min-width: 92px !important;
+    max-width: 92px !important;
+    height: 16px !important;
+    content: "" !important;
     transform: translate(-50%, -50%) !important;
-    width: 4px !important;
-    height: 4px !important;
-    min-height: unset !important;
-    max-height: unset !important;
-    border-radius: 50% !important;
-    background-color: var(--el-border-color) !important;
-    box-shadow: -8px 0 0 var(--el-border-color), 8px 0 0 var(--el-border-color) !important;
-    transition: background-color 0.2s, box-shadow 0.2s !important;
-    opacity: 0.6;
+    border: 1px solid var(--el-border-color) !important;
+    border-radius: 999px !important;
+    background: var(--el-bg-color) !important;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 5%) !important;
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease !important;
   }
 
-  &:hover {
-    background: linear-gradient(
-      to bottom,
-      rgba(var(--el-color-primary-rgb), 0.06) 3px,
-      var(--el-color-primary) 3px,
-      var(--el-color-primary) 7px,
-      rgba(var(--el-color-primary-rgb), 0.06) 7px
-    ) !important;
+  &::after {
+    position: absolute !important;
+    z-index: 2;
+    top: 50% !important;
+    left: 50% !important;
+    display: block !important;
+    width: 4px !important;
+    min-width: 4px !important;
+    max-width: 4px !important;
+    height: 4px !important;
+    min-height: 4px !important;
+    max-height: 4px !important;
+    content: "" !important;
+    transform: translate(-50%, -50%) !important;
+    border-radius: 50% !important;
+    background: var(--el-text-color-placeholder) !important;
+    box-shadow:
+      -12px 0 0 var(--el-text-color-placeholder),
+      12px 0 0 var(--el-text-color-placeholder) !important;
+    opacity: 0.72;
+    transition:
+      background-color 0.18s ease,
+      box-shadow 0.18s ease !important;
+  }
+
+  &:hover,
+  &:active {
+    &::before {
+      border-color: var(--el-color-primary-light-5) !important;
+      box-shadow: 0 2px 6px rgb(15 23 42 / 10%) !important;
+    }
 
     &::after {
-      background-color: var(--el-color-primary) !important;
-      box-shadow: -8px 0 0 var(--el-color-primary), 8px 0 0 var(--el-color-primary) !important;
+      background: var(--el-color-primary) !important;
+      box-shadow:
+        -12px 0 0 var(--el-color-primary),
+        12px 0 0 var(--el-color-primary) !important;
       opacity: 1;
     }
   }
-
-  &:active {
-    background: linear-gradient(
-      to bottom,
-      rgba(var(--el-color-primary-rgb), 0.1) 2.5px,
-      var(--el-color-primary) 2.5px,
-      var(--el-color-primary) 7.5px,
-      rgba(var(--el-color-primary-rgb), 0.1) 7.5px
-    ) !important;
-  }
 }
 
-// ── 容器高度链兜底：确保上下区域能正常撑满（kit standards/14 强制项）────────
-//    父容器/Tab 已由业务页负责设高度；此处仅确保 .drager_row 自身不塌缩。
 html .drager_row {
   min-height: 0;
 }

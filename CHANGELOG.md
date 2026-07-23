@@ -4,6 +4,26 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.6] - 2026-07-23
+
+### Fixed
+
+- 数值输入框统一由 Element Plus wrapper 绘制唯一边框，隐藏 common-core 残留步进按钮及浏览器原生数字步进器，保留 `type=number` 语义并修复焦点双边框、内容压盖和输入后边框消失。
+- 固定 AG Grid 空数据插图与文案的紧凑尺寸并轻微下移视觉中心，避免不同表格高度导致空态大小不一或位置偏上。
+
+## [1.9.5] - 2026-07-23
+
+### Fixed
+
+- 兼容 Element Plus 2.2 的数字输入框 DOM，修复输入后边框消失、焦点双边框、上下控制器压盖内容等问题。
+- 重构 `jh-drag-row` 横向拖拽手柄为稳定的三点胶囊样式，并恢复上下分栏边界的精细层次。
+- 修正 AG Grid 空数据覆盖层的定位上下文，使“没有可显示的行”在实际可视表格区域内水平、垂直居中。
+- 完善 BaseToolbar 多按钮语义色、禁用态、图标间距以及 BaseQuery 展开/收起按钮视觉。
+
+### Changed
+
+- 列表页规范统一为“查询区 → 工具栏 → 列表标题 → 表格 → 分页器”，工具栏独占一行并左对齐。
+
 ## [1.9.4] - 2026-07-22
 
 ### Fixed

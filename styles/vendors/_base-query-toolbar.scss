@@ -33,21 +33,24 @@
     }
   }
 
-    // ── 搜索区字号统一 12px（紧凑密度，与 label / button 一致）────────────────
-    .el-form-item__label {
-      font-size: 12px !important;
-    }
+  // ── 搜索区字号统一 12px（紧凑密度，与 label / button 一致）────────────────
+  .el-form-item__label {
+    font-size: 12px !important;
+  }
   .el-input__inner {
     font-size: 12px;
     color: var(--el-text-color-primary);
-    &::placeholder { color: var(--el-text-color-placeholder); font-size: 12px; }
-  }
-
-    .el-select__placeholder,
-    .el-select__tags-text,
-    .el-select .el-select__selected-item {
+    &::placeholder {
+      color: var(--el-text-color-placeholder);
       font-size: 12px;
     }
+  }
+
+  .el-select__placeholder,
+  .el-select__tags-text,
+  .el-select .el-select__selected-item {
+    font-size: 12px;
+  }
   // ── 选择框 ────────────────────────────────────────────────────────────────
   .el-select .el-select__wrapper {
     border-radius: var(--el-border-radius-base) !important;
@@ -84,6 +87,19 @@
     justify-content: flex-end;
     gap: 8px;
     padding-bottom: 8px;
+
+    // BaseQuery 的第 3 个按钮固定为展开/收起；使用轻量胶囊与查询/重置拉开层级。
+    > .el-button:nth-child(3):last-child {
+      color: var(--el-color-primary) !important;
+      border-color: var(--el-color-primary-light-7) !important;
+      border-radius: 999px !important;
+      background-color: var(--el-color-primary-light-9) !important;
+
+      &:hover {
+        border-color: var(--el-color-primary-light-5) !important;
+        background-color: var(--el-color-primary-light-8) !important;
+      }
+    }
   }
 
   // 查询按钮（type=primary）→ 品牌蓝填充
@@ -96,16 +112,20 @@
     padding: 0 10px !important;
     font-size: 12px !important;
     background-color: var(--el-color-primary, #002a8f) !important;
-      border-color: var(--el-color-primary, #002a8f) !important;
+    border-color: var(--el-color-primary, #002a8f) !important;
     color: #ffffff !important;
-    transition: background-color 0.15s, box-shadow 0.15s;
+    transition:
+      background-color 0.15s,
+      box-shadow 0.15s;
 
     &:hover {
       background-color: var(--el-color-primary-light-1, #1a3f9a) !important;
-        border-color: var(--el-color-primary-light-1, #1a3f9a) !important;
+      border-color: var(--el-color-primary-light-1, #1a3f9a) !important;
       box-shadow: 0 2px 6px rgba(var(--el-color-primary-rgb), 0.18);
     }
-    &:active { opacity: 0.85; }
+    &:active {
+      opacity: 0.85;
+    }
   }
 
   // 重置按钮（type=default）→ 轻线框样式
@@ -118,7 +138,10 @@
     color: var(--el-text-color-regular) !important;
     border-color: var(--el-border-color) !important;
     background-color: #ffffff !important;
-    transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+    transition:
+      border-color 0.15s,
+      color 0.15s,
+      background-color 0.15s;
 
     &:hover {
       color: var(--el-color-primary) !important;
@@ -144,6 +167,7 @@
   .base-toolbar-content {
     display: flex !important;
     align-items: center !important;
+    justify-content: flex-start !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
     margin: 0 !important;
@@ -174,7 +198,10 @@
     padding: 0 8px !important;
     margin: 0 !important; // 覆盖 jh-ui 的 margin-right:8px
     letter-spacing: 0.01em;
-    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      box-shadow 0.15s;
 
     // 图标 + 文字间距
     .el-icon + span,
@@ -196,6 +223,18 @@
       &:active {
         opacity: 0.85;
       }
+
+      &.is-plain {
+        color: var(--el-color-primary, #002a8f) !important;
+        border-color: var(--el-color-primary-light-5) !important;
+        background-color: rgba(var(--el-color-primary-rgb), 0.06) !important;
+
+        &:hover {
+          color: #ffffff !important;
+          border-color: var(--el-color-primary, #002a8f) !important;
+          background-color: var(--el-color-primary, #002a8f) !important;
+        }
+      }
     }
 
     // ── 危险操作：填充红（删除/作废/驳回）───────────────────────────────
@@ -213,6 +252,18 @@
       &:active {
         opacity: 0.85;
       }
+
+      &.is-plain {
+        color: var(--el-color-danger, #bb2d3f) !important;
+        border-color: var(--el-color-danger-light-5, #df9ca5) !important;
+        background-color: var(--el-color-danger-light-9, #fdf2f3) !important;
+
+        &:hover {
+          color: #ffffff !important;
+          border-color: var(--el-color-danger, #bb2d3f) !important;
+          background-color: var(--el-color-danger, #bb2d3f) !important;
+        }
+      }
     }
 
     // ── 警告操作：填充橙（提醒/预警相关）───────────────────────────────
@@ -227,10 +278,24 @@
         border-color: var(--el-color-warning-light-3, #f1b85a) !important;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       }
+
+      &.is-plain {
+        color: var(--el-color-warning, #ea9a13) !important;
+        border-color: var(--el-color-warning-light-5, #f4c97f) !important;
+        background-color: var(--el-color-warning-light-9, #fef8ed) !important;
+
+        &:hover {
+          color: #ffffff !important;
+          border-color: var(--el-color-warning, #ea9a13) !important;
+          background-color: var(--el-color-warning, #ea9a13) !important;
+        }
+      }
     }
 
     // ── 次级操作：线框灰→hover 品牌色（导入/导出/模板下载）──────────────
-    &.el-button--default:not(.el-button--primary):not(.el-button--danger):not(.el-button--warning) {
+    &.el-button--default:not(.el-button--primary):not(.el-button--danger):not(
+        .el-button--warning
+      ) {
       color: var(--el-text-color-regular) !important;
       border-color: var(--el-border-color) !important;
       background-color: #ffffff !important;
@@ -253,6 +318,18 @@
         background-color: var(--el-color-success-light-3, #6bcb95) !important;
         border-color: var(--el-color-success-light-3, #6bcb95) !important;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      }
+
+      &.is-plain {
+        color: var(--el-color-success, #2bb268) !important;
+        border-color: var(--el-color-success-light-5, #8dd8ae) !important;
+        background-color: var(--el-color-success-light-9, #effaf4) !important;
+
+        &:hover {
+          color: #ffffff !important;
+          border-color: var(--el-color-success, #2bb268) !important;
+          background-color: var(--el-color-success, #2bb268) !important;
+        }
       }
     }
   }
@@ -298,12 +375,12 @@
 
   .el-button:first-child {
     border-top-left-radius: var(--el-border-radius-base) !important;
-      border-bottom-left-radius: var(--el-border-radius-base) !important;
+    border-bottom-left-radius: var(--el-border-radius-base) !important;
   }
 
   .el-button:last-child {
     border-top-right-radius: var(--el-border-radius-base) !important;
-      border-bottom-right-radius: var(--el-border-radius-base) !important;
+    border-bottom-right-radius: var(--el-border-radius-base) !important;
     margin-left: -1px !important;
   }
 }

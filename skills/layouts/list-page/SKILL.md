@@ -53,6 +53,8 @@ applyTo: "**/*.vue"
 
 - R001 ~ R003：表格列对齐 + empty-text
 - R005：工具栏按钮缺 icon
+- R038：新增/新建/添加/创建类主按钮缺 primary 填充主题色
+- R039：普通数据列缺少省略号与悬停完整内容提示
 - R006：搜索区输入框缺 `size="small"`
 - R011：分页在 footer 内（严重）
 
@@ -96,6 +98,10 @@ applyTo: "**/*.vue"
   </div>
 </template>
 ```
+
+“新增”类按钮必须保持 `type="primary"` 且不得带 `plain`；生成完成后运行
+`wl-ui scan` / `wl-ui fix` 复核 R038。表格列统一由 `defineColumns()` 包裹，
+普通文本列的 R039 行为由 runtime 自动补齐。
 
 ### SCSS 对应（由 styles/layouts/\_list-page.scss 提供）
 

@@ -28,12 +28,14 @@ applyTo: "**/*.vue"
 - ❌ 用 `<el-button type="primary">` 当操作按钮（应用 `is-text` 文字按钮，沿用 R004）
 - ❌ 列头未居中（同 R001）
 - ❌ 缺 `empty-text="暂无数据"`（同 R003）
+- ❌ 普通文本列未通过 `defineColumns()` 获得超长省略与悬停完整提示（同 R039）
 - ❌ 在 `<BaseTable>` 外层包裹自定义 padding 容器，破坏整体节奏
 
 ## Repair（修复）
 
 ### A 类（自动修）
 - 缺失 `empty-text` → 补 `empty-text="暂无数据"`
+- 普通文本列统一经 `defineColumns()` 自动补 `showOverflowTooltip: true`
 - 操作列按钮 `type="primary"` → 改为 `link` + `is-text`
 - 内联 hex → CSS 变量
 
@@ -51,7 +53,8 @@ applyTo: "**/*.vue"
 
 ## 全局样式来源
 
-`styles/vendors/_base-table.scss` — 已注入容器圆角、表头颜色、操作按钮间距。
+`styles/vendors/_base-table.scss` — 已注入容器圆角、表头颜色、操作按钮间距；
+`runtime.defineColumns()` 统一控制普通文本列的 overflow tooltip。
 项目侧无需重复写样式，遵循 DOM 约定即可。
 
 ## 未来源码迁移

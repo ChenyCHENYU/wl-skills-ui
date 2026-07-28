@@ -250,6 +250,26 @@ for (const api of [
   if (typeof runtime[api] !== "function") errors.push(`runtime 缺少公共 API：${api}`);
 }
 
+const overflowColumns = runtime.defineColumns([
+  { name: "customerName", label: "客户名称" },
+  { name: "remark", label: "备注", wrapText: true },
+  { name: "custom", label: "自定义", defaultSlot: () => "custom" },
+  { name: "disabled", label: "关闭提示", showOverflowTooltip: false },
+  {
+    label: "分组",
+    children: [{ name: "nestedName", label: "分组内名称" }],
+  },
+]);
+if (
+  overflowColumns[0].showOverflowTooltip !== true ||
+  overflowColumns[1].showOverflowTooltip !== undefined ||
+  overflowColumns[2].showOverflowTooltip !== undefined ||
+  overflowColumns[3].showOverflowTooltip !== false ||
+  overflowColumns[4].children?.[0]?.showOverflowTooltip !== true
+) {
+  errors.push("runtime defineColumns 未正确补齐普通文本列 overflow tooltip");
+}
+
 class FakeStyle {
   #values = new Map();
   #priorities = new Map();

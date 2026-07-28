@@ -11,6 +11,11 @@
 
 ### 类型规则
 
+**R038 强制约束**：凡按钮文案表达“新增 / 新建 / 添加 / 创建”主操作，
+必须使用 `type="primary"` 的填充样式，不得漏写 `type`，也不得同时设置
+`plain`。只有明确属于行内次级交互时，才允许显式改用 `link` / `text`。
+`wl-ui scan` 会报错，`wl-ui fix` 可机械纠正静态按钮。
+
 主按钮色值严格遵循客户 UI 规范，禁止使用 `#2254F4`、`#4368FF` 或 Element Plus 默认蓝替代：
 
 | 状态          | Token                        | 规范色值  |
@@ -36,7 +41,7 @@
 
 ```vue
 <!-- ✅ 工具栏按钮组 -->
-<el-button type="primary" @click="handleCreate">新增</el-button>
+<el-button type="primary" icon="Plus" @click="handleCreate">新增</el-button>
 <el-button type="warning" plain icon="Edit" @click="handleEdit">修改</el-button>
 <el-button type="success" icon="Save" @click="handleSave">保存</el-button>
 <el-button icon="Download" @click="handleExport">导出</el-button>

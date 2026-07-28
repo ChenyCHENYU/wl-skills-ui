@@ -24,7 +24,7 @@ columnsDef(): TableColumnDesc<any>[] {
 
     // ── 数据列（已注册字段自动映射，无需 defaultNode）──
     { name: 'riskNo',    label: '编号',     width: 100 },  // → renderBadge
-    { name: 'name',      label: '名称',     minWidth: 150 },
+    { name: 'name',      label: '名称',     minWidth: 150 }, // → 自动省略 + 悬停完整提示
     { name: 'riskLevel', label: '风险分级', width: 90 },   // → renderRiskLevel Tag
     { name: 'riskStatus', label: '状态',   width: 90 },    // → renderRiskStatus Tag
 
@@ -74,3 +74,4 @@ toolbarDef() {
 2. 操作列用 `renderOps([...])` — 图标按钮 + 自动 stopPropagation
 3. selection 列必须同时设置 `align: 'center'` + `headerAlign: 'center'`（R014）
 4. 分类字段（type/level）用 `renderClassifyTag`，状态字段用 `renderTagNode`
+5. `defineColumns()` 自动为普通文本列补 `showOverflowTooltip: true`；自定义渲染、结构列和换行列除外

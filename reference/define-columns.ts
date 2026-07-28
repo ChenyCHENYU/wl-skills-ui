@@ -172,14 +172,46 @@ export function defineColumns<T = any>(
   columns: TableColumnDesc<T>[]
 ): TableColumnDesc<T>[] {
   return columns.map((col) => {
+    const normalized = Array.isArray(col.children)
+      ? ({
+          ...col,
+          children: defineColumns(col.children),
+        } as TableColumnDesc<T>)
+      : col;
     // 多选列：统一宽度 55px（页面已手写 width 时不覆盖）
-    if ((col as any).type === "selection" && !(col as any).width) {
-      return { width: 55, ...(col as any) } as unknown as TableColumnDesc<T>;
+    if ((normalized as any).type === "selection" && !(normalized as any).width) {
+      return {
+        width: 55,
+        ...(normalized as any),
+      } as unknown as TableColumnDesc<T>;
     }
-    if (!col.name) return col;
-    const auto = COLUMN_AUTO_MAP[col.name as string];
-    if (!auto) return col;
+    if (!normalized.name) return normalized;
+    const auto = COLUMN_AUTO_MAP[normalized.name as string];
+    if (!auto) return withOverflowTooltip(normalized);
     // 自动配置 < 手写配置（手写的属性不被覆盖）
-    return { ...auto, ...col } as TableColumnDesc<T>;
+    return withOverflowTooltip({
+      ...auto,
+      ...normalized,
+    } as TableColumnDesc<T>);
   });
+}
+
+function withOverflowTooltip<T>(
+  col: TableColumnDesc<T>
+): TableColumnDesc<T> {
+  if (
+    !col.name ||
+    col.showOverflowTooltip !== undefined ||
+    col.tooltipValueGetter !== undefined ||
+    col.wrapText === true ||
+    col.autoHeight === true ||
+    ["selection", "index", "radio", "expand"].includes(
+      String((col as any).type ?? "")
+    ) ||
+    col.defaultNode !== undefined ||
+    col.defaultSlot !== undefined
+  ) {
+    return col;
+  }
+  return { ...col, showOverflowTooltip: true };
 }

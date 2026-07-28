@@ -7,12 +7,23 @@
  *   - el-input / el-select: 缺 size="small"     → 添加
  *   - el-date-picker: 缺 style="width:100%"     → 添加
  *   - el-table: 缺 empty-text="暂无数据"        → 添加
+ *   - 创建类主按钮: 缺 primary / 误用 plain    → 纠正
+ *   - el-table 普通数据列: 缺 overflow tooltip → 添加
  *   - <style>/<template> 内可映射 hex 颜色      → 替换为 var(--el-color-*)
  */
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { createSnapshot } from "./snapshot.mjs";
 import { TOKEN_MAP } from "./rules/_shared.mjs";
+
+const CREATE_ACTION_LABEL =
+  /(?:新增|新建|添加|创建)(?:申请|记录|数据|客户|项目|任务|明细|行)?/;
+
+function hasTrueBooleanAttr(tagText, attr) {
+  return new RegExp(
+    `(?:^|\\s)(?::${attr}\\s*=\\s*["']true["']|${attr}(?:\\s*=\\s*["'](?:true|)["'])?)(?=\\s|/?>)`,
+  ).test(tagText);
+}
 
 const FIXES = {
   "el-input": [{ attr: "size", value: "small" }],
@@ -37,6 +48,8 @@ export const FIXED_RULE_IDS = Object.freeze([
   "R016",
   "R017",
   "R021",
+  "R038",
+  "R039",
 ]);
 
 function parseTag(content, pos, tagName) {
@@ -57,10 +70,24 @@ function parseTag(content, pos, tagName) {
   return { text: content.slice(pos), end: content.length };
 }
 
-function addAttrIfMissing(tagText, tagName, attr, value, replaceStatic = false) {
+function addAttrIfMissing(
+  tagText,
+  tagName,
+  attr,
+  value,
+  replaceStatic = false,
+  booleanAttr = false,
+) {
   // 已存在（含动态绑定 :attr=）则跳过
+  const escapedAttr = attr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (
+    booleanAttr &&
+    new RegExp(`(?:^|\\s):?${escapedAttr}(?=\\s|=|/?>)`).test(tagText)
+  ) {
+    return { text: tagText, changed: false };
+  }
   const re = new RegExp(
-    `:?${attr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*=`,
+    `:?${escapedAttr}\\s*=`,
   );
   if (re.test(tagText)) {
     if (!replaceStatic) return { text: tagText, changed: false };
@@ -70,6 +97,12 @@ function addAttrIfMissing(tagText, tagName, attr, value, replaceStatic = false) 
     if (!staticRe.test(tagText)) return { text: tagText, changed: false };
     const text = tagText.replace(staticRe, `$1"${value}"`);
     return { text, changed: text !== tagText };
+  }
+  if (booleanAttr) {
+    return {
+      text: tagText.replace(`<${tagName}`, `<${tagName} ${attr}`),
+      changed: true,
+    };
   }
   const newTag = tagText.replace(
     `<${tagName}`,
@@ -105,14 +138,70 @@ function fixTemplateAttrs(content) {
     if (tagName === "el-table-column" && text.includes('type="selection"')) {
       fixes.push({ attr: "header-align", value: "center" });
     }
-    for (const { attr, value, replaceStatic } of fixes) {
-      const r = addAttrIfMissing(text, tagName, attr, value, replaceStatic);
+    if (
+      tagName === "el-table-column" &&
+      /(?:^|\s):?prop\s*=/.test(text) &&
+      !/(?:^|\s)type\s*=\s*["'](?:selection|index|expand)["']/.test(text)
+    ) {
+      fixes.push({
+        attr: "show-overflow-tooltip",
+        value: "",
+        booleanAttr: true,
+      });
+    }
+    for (const { attr, value, replaceStatic, booleanAttr } of fixes) {
+      const r = addAttrIfMissing(
+        text,
+        tagName,
+        attr,
+        value,
+        replaceStatic,
+        booleanAttr,
+      );
       text = r.text;
       if (r.changed) changes++;
     }
     result += text;
     pos = end;
   }
+  return { content: result, changes };
+}
+
+function fixPrimaryActionButtons(content) {
+  let changes = 0;
+  const result = content.replace(
+    /<el-button\b[\s\S]*?<\/el-button>/g,
+    (button) => {
+      const openEnd = button.indexOf(">");
+      if (openEnd < 0) return button;
+      let opening = button.slice(0, openEnd + 1);
+      const label = button.slice(openEnd + 1, button.lastIndexOf("</el-button>"));
+      if (!CREATE_ACTION_LABEL.test(label)) return button;
+      if (/:type\s*=/.test(opening)) return button;
+      if (hasTrueBooleanAttr(opening, "link") || hasTrueBooleanAttr(opening, "text"))
+        return button;
+
+      const typeResult = addAttrIfMissing(
+        opening,
+        "el-button",
+        "type",
+        "primary",
+        true,
+      );
+      opening = typeResult.text;
+      if (typeResult.changed) changes++;
+
+      const withoutPlain = opening
+        .replace(/\s+:plain\s*=\s*["']true["']/g, "")
+        .replace(/\s+plain\s*=\s*["'](?:true|)["']/g, "")
+        .replace(/\s+plain(?=\s|\/?>)/g, "");
+      if (withoutPlain !== opening) {
+        opening = withoutPlain;
+        changes++;
+      }
+      return opening + button.slice(openEnd + 1);
+    },
+  );
   return { content: result, changes };
 }
 
@@ -180,9 +269,12 @@ export function runFix({
     const r1 = fixTemplateAttrs(content);
     content = r1.content;
     changes += r1.changes;
-    const r2 = fixHexColors(content);
+    const r2 = fixPrimaryActionButtons(content);
     content = r2.content;
     changes += r2.changes;
+    const r3 = fixHexColors(content);
+    content = r3.content;
+    changes += r3.changes;
     if (changes > 0 && content !== original) {
       pending.push({ filePath, original, content, changes });
       changedAbsPaths.push(filePath);

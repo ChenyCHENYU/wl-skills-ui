@@ -107,6 +107,7 @@ const modal = ref();
 function columnsDef() {
   return defineColumns([
     { type: "index", label: "序号", width: 60, align: "center" },
+    // 普通文本列由 defineColumns 自动补 showOverflowTooltip: true
     { name: "name", label: "名称", minWidth: 120 },
     { name: "status", label: "状态", width: 80 }, // enableStatus 已自动映射
     { name: "remark", label: "备注", minWidth: 160 },
@@ -141,3 +142,5 @@ async function handleDel(id: string) {
 3. `enableStatus` 字段在 `installCommonPreset()` 后自动渲染为彩色 Tag，无需手写 defaultNode
 4. 工具栏按钮必须带 `icon`（R005 规则）
 5. 标准顺序固定为“查询区 → 工具栏 → 列表标题 → 表格 → 分页器”；工具栏不得放到标题右侧或标题下方
+6. 新增/新建/添加/创建类主按钮必须 `type="primary"` 且不得使用 `plain`（R038）
+7. 普通文本列由 `defineColumns()` 自动启用省略号与悬停完整提示；原生 `el-table-column` 必须加 `show-overflow-tooltip`（R039）

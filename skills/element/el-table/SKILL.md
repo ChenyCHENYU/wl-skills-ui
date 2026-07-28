@@ -1,7 +1,7 @@
 ---
 description: |
   表格组件规范 Skill — el-table / BaseTable / el-table-column 的对齐、空状态、selection 列标准。
-  覆盖规则：R001 R002 R003 R014。
+  覆盖规则：R001 R002 R003 R014 R039。
 applyTo: "**/*.vue"
 ---
 
@@ -55,6 +55,19 @@ applyTo: "**/*.vue"
 
 ---
 
+## R039 — 普通数据列必须超长省略并悬停显示完整内容 【中危】
+
+```diff
+- <el-table-column prop="customerName" label="客户名称" align="center" />
++ <el-table-column prop="customerName" label="客户名称" align="center" show-overflow-tooltip />
+```
+
+BaseTable / AG Grid 使用 `defineColumns()` 后由 runtime 自动为普通文本列补齐
+`showOverflowTooltip: true`。自定义渲染、结构列、换行列不强制；需要主动关闭时
+显式声明 `showOverflowTooltip: false`。
+
+---
+
 ## 完整标准写法示例
 
 ```html
@@ -67,7 +80,13 @@ applyTo: "**/*.vue"
     header-align="center"
   />
   <el-table-column type="index" align="center" width="60" label="序号" />
-  <el-table-column align="center" prop="name" label="名称" min-width="120" />
+  <el-table-column
+    align="center"
+    prop="name"
+    label="名称"
+    min-width="120"
+    show-overflow-tooltip
+  />
   <el-table-column align="center" prop="status" label="状态" width="90">
     <template #default="{ row }">
       <!-- 使用 renderTagSlot 渲染彩色 Tag，见 tag-status/SKILL.md -->

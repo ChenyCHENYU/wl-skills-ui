@@ -200,7 +200,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.6` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约与定制页样式边界 |
+| `@agile-team/wl-skills-ui` | `^1.9.7` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约与定制页样式边界 |
 
 三种识别方式，任选其一：
 
@@ -214,8 +214,10 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.6：
+当前 v1.9.7：
 
+- **主操作按钮不再漏色**：新增/新建/添加/创建类按钮强制使用客户主题 `primary` 填充样式，扫描器可识别并自动修复漏写 `type` 或误带 `plain` 的存量代码。
+- **长文本交互统一**：普通数据列在空间不足时单行省略，悬停显示完整内容；Tag、操作列、自定义渲染和主动换行列不被机械覆盖。
 - **Vite 4 运行时兼容**：浏览器 ESM 产物不再暴露可被开发转换误替换的 Node 环境变量成员链，预构建与直接加载均保持合法语法。
 - **登录页精准退出**：内置识别 `.lp-root` 与 `.session-login`，其内部表单、按钮、焦点和校验态保留登录页自身设计；业务页面仍由包高权重统一管控。
 - **通用定制页边界**：其他定制页在根节点增加 `.wl-ui-skin-exempt` 或 `data-wl-ui-skin="off"` 即可退出组件级强覆盖，不需要删除全局化妆包。
@@ -676,7 +678,7 @@ export const myRules = [
 
 ## 规范清单
 
-### UI 规则（R001-R037，按 layer 自动分组）
+### UI 规则（R001-R039，按 layer 自动分组）
 
 | Rule | Layer | Vendor    | 说明                                 |
 | ---- | ----- | --------- | ------------------------------------ |
@@ -707,6 +709,8 @@ export const myRules = [
 | R035 | L1    | element   | el-upload 建议配置 tip/限制说明      |
 | R036 | L1    | element   | el-steps 建议明确状态来源            |
 | R037 | L1    | element   | 空/异常反馈建议统一操作入口          |
+| R038 | L1    | element   | 创建类主按钮缺 primary 填充主题色    |
+| R039 | L1    | element   | 普通数据列缺省略与悬停完整提示       |
 
 ### 工程规范
 

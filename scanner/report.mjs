@@ -63,6 +63,8 @@ const RULE_NAME = {
   R018: "<script> 块硬编码 hex 颜色",
   R021: 'BaseTable 缺少 render-type="agGrid"',
   R022: "BaseTable 缺少唯一 cid",
+  R038: "创建类主操作缺少 primary 填充主题色",
+  R039: "普通数据列缺少超长省略与悬停完整提示",
   R031: "详情/统计卡片建议使用统一场景 class",
   R032: "el-tabs 建议明确页面场景",
   R033: "el-descriptions 建议使用 bordered 或统一容器",

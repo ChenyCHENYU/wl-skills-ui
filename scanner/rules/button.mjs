@@ -1,5 +1,19 @@
-/** scanner/rules/button.mjs — 按钮规则：R004 R005 R015 */
+/** scanner/rules/button.mjs — 按钮规则：R004 R005 R015 R038 */
 import { lineOf, issue, findTags } from "./_shared.mjs";
+
+const CREATE_ACTION_LABEL = /(?:新增|新建|添加|创建)(?:申请|记录|数据|客户|项目|任务|明细|行)?/;
+
+function buttonContent(template, tag) {
+  const start = tag.index + tag.text.length;
+  const end = template.indexOf("</el-button>", start);
+  return end < 0 ? "" : template.slice(start, end);
+}
+
+function hasTrueBooleanAttr(tagText, attr) {
+  return new RegExp(
+    `(?:^|\\s)(?::${attr}\\s*=\\s*["']true["']|${attr}(?:\\s*=\\s*["'](?:true|)["'])?)(?=\\s|/?>)`,
+  ).test(tagText);
+}
 
 export const buttonRules = [
   // R004: 操作列文字按钮
@@ -54,6 +68,46 @@ export const buttonRules = [
               '添加 icon="Plus / Edit / Search / Refresh" 等语义图标',
             ),
           );
+      }
+      return issues;
+    },
+  },
+
+  // R038: 新增/新建/添加/创建类主操作必须使用填充主题色
+  {
+    id: "R038",
+    category: "button",
+    severity: "error",
+    name: "创建类主操作缺少 primary 填充主题色",
+    check(template, file, lineOffset) {
+      const issues = [];
+      for (const tag of findTags(template, "el-button")) {
+        const label = buttonContent(template, tag);
+        if (!CREATE_ACTION_LABEL.test(label)) continue;
+        if (/:type\s*=/.test(tag.text)) continue;
+        if (
+          hasTrueBooleanAttr(tag.text, "link") ||
+          hasTrueBooleanAttr(tag.text, "text")
+        ) {
+          continue;
+        }
+        const isPrimary = /(?:^|\s)type\s*=\s*["']primary["']/.test(
+          tag.text,
+        );
+        const isPlain = hasTrueBooleanAttr(tag.text, "plain");
+        if (!isPrimary || isPlain) {
+          issues.push(
+            issue(
+              file,
+              lineOf(template, tag.index, lineOffset),
+              "R038",
+              "button",
+              "error",
+              "新增/新建/添加/创建类主操作必须是 primary 填充按钮",
+              '设置 type="primary" 并移除 plain；行内次级操作应显式使用 link/text',
+            ),
+          );
+        }
       }
       return issues;
     },

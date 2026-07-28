@@ -53,26 +53,56 @@ export function clearColumnAutoMap(name?: string): void {
  */
 export function defineColumns<T extends ColumnLike>(columns: T[]): T[] {
   return columns.map((col) => {
-    const fieldName = col.name ?? col.label ?? "";
+    const normalized = Array.isArray(col.children)
+      ? ({
+          ...col,
+          children: defineColumns(col.children as T[]),
+        } as T)
+      : col;
+    const fieldName = normalized.name ?? normalized.label ?? "";
     const preset = COLUMN_AUTO_MAP[fieldName];
     const hasRenderer =
-      col.defaultNode !== undefined || col.defaultSlot !== undefined;
-    if (hasRenderer) return col;
-    if (!preset && isDictColumn(col)) {
+      normalized.defaultNode !== undefined ||
+      normalized.defaultSlot !== undefined;
+    if (hasRenderer) return normalized;
+    if (!preset && isDictColumn(normalized)) {
       return {
-        ...col,
+        ...normalized,
         defaultSlot: ({ row }) =>
-          renderDictClassifyTag(row?.[fieldName], String(col.logicValue)),
+          renderDictClassifyTag(
+            row?.[fieldName],
+            String(normalized.logicValue),
+          ),
       };
     }
-    if (!preset) return col;
-    return { ...preset, ...col };
+    if (!preset) return withOverflowTooltip(normalized);
+    return withOverflowTooltip({ ...preset, ...normalized } as T);
   });
 }
 
 function isDictColumn(col: ColumnLike): boolean {
   const logicType = String(col.logicType ?? "").toLowerCase();
   return Boolean(col.logicValue) && logicType.includes("dict");
+}
+
+/**
+ * 普通文本列默认启用“超长省略 + 悬停完整内容”。
+ * 自定义渲染、结构列、换行列及显式配置始终以业务声明为准。
+ */
+function withOverflowTooltip<T extends ColumnLike>(col: T): T {
+  if (
+    !col.name ||
+    col.showOverflowTooltip !== undefined ||
+    col.tooltipValueGetter !== undefined ||
+    col.wrapText === true ||
+    col.autoHeight === true ||
+    ["selection", "index", "radio", "expand"].includes(String(col.type ?? "")) ||
+    col.defaultNode !== undefined ||
+    col.defaultSlot !== undefined
+  ) {
+    return col;
+  }
+  return { ...col, showOverflowTooltip: true };
 }
 
 // ── 内置注册：通用字段 ────────────────────────────────────────────────────────

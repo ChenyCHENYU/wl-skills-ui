@@ -108,6 +108,17 @@
       "skills": ["layouts/list-page"]
     },
     {
+      "id": "R038",
+      "category": "button",
+      "severity": "error",
+      "title": "新增/新建/添加/创建类主操作必须使用 primary 填充按钮",
+      "rationale": "创建类动作是列表页首要操作，必须稳定使用客户主题深蓝填充，禁止漏写 type 或误用 plain 退化为线框。",
+      "appliesTo": ["el-button[label~=新增|新建|添加|创建]"],
+      "autoFixable": true,
+      "scanner": "scanner/rules/button.mjs",
+      "skills": ["layouts/list-page"]
+    },
+    {
       "id": "R006",
       "category": "form",
       "severity": "warning",
@@ -312,6 +323,20 @@
       "manualReason": "需按页面命名规范分配唯一 cid",
       "scanner": "scanner/rules/table.mjs",
       "skills": ["vendors/base-table"]
+    },
+    {
+      "id": "R039",
+      "category": "table",
+      "severity": "warning",
+      "title": "普通数据列必须支持超长省略与悬停完整提示",
+      "rationale": "列宽不足时统一单行省略，悬停显示完整内容，避免长名称撑破布局或信息不可读。",
+      "appliesTo": [
+        "el-table-column[prop]",
+        "BaseTable defineColumns ordinary data column"
+      ],
+      "autoFixable": true,
+      "scanner": "scanner/rules/table.mjs",
+      "skills": ["element/el-table", "vendors/base-table"]
     },
     {
       "id": "R031",

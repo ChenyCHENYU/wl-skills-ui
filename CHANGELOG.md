@@ -4,6 +4,19 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.7] - 2026-07-28
+
+### Added
+
+- 新增 R038 创建类主按钮门禁与自动修复：新增/新建/添加/创建类操作统一使用客户主题 `primary` 填充按钮，自动移除误用的 `plain`。
+- 新增 R039 表格长文本门禁与自动修复：原生 `el-table-column` 普通数据列统一补齐 `show-overflow-tooltip`。
+- `defineColumns()` 为 BaseTable/AG Grid 普通文本列递归补齐超长省略与悬停完整提示；结构列、自定义渲染列、换行列及显式配置保持业务声明。
+
+### Changed
+
+- 表格样式仅对启用 overflow tooltip 的单元格补齐单行省略，避免影响 Tag、操作列和自定义内容。
+- 列表页、按钮、Element Table、BaseTable 规范与模板同步声明主按钮和长文本交互契约。
+
 ## [1.9.6] - 2026-07-23
 
 ### Fixed

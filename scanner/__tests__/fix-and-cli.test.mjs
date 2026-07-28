@@ -48,7 +48,11 @@ describe("fixer 闭环", () => {
     const file = join(root, "src", "Demo.vue");
     const original = `<template>
   <BaseTable cid="demo" render-type="elTable" />
-  <el-table><el-table-column type="selection" align="left" /></el-table>
+  <el-table>
+    <el-table-column type="selection" align="left" />
+    <el-table-column prop="customerName" label="客户名称" />
+  </el-table>
+  <el-button plain icon="Plus">新增</el-button>
   <el-input /><el-select /><el-date-picker />
   <span style="color:#409eff">示例</span>
 </template>
@@ -63,6 +67,12 @@ describe("fixer 闭环", () => {
     assert.ok(result.snapshotId);
     assert.match(fixed, /BaseTable[^>]*render-type="agGrid"[^>]*empty-text="暂无数据"|BaseTable[^>]*empty-text="暂无数据"[^>]*render-type="agGrid"/);
     assert.match(fixed, /el-table-column[^>]*align="center"[^>]*header-align="center"|el-table-column[^>]*header-align="center"[^>]*align="center"/);
+    assert.match(
+      fixed,
+      /el-table-column[^>]*prop="customerName"[^>]*show-overflow-tooltip|el-table-column[^>]*show-overflow-tooltip[^>]*prop="customerName"/,
+    );
+    assert.match(fixed, /el-button[^>]*type="primary"[^>]*>新增<\/el-button>/);
+    assert.doesNotMatch(fixed, /el-button[^>]*\splain(?:\s|=|>)/);
     assert.match(fixed, /el-input[^>]*size="small"/);
     assert.match(fixed, /el-date-picker[^>]*style="width:100%"/);
     assert.doesNotMatch(fixed, /<template>[\s\S]*#409eff[\s\S]*<\/template>/);

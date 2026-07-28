@@ -32,6 +32,27 @@
 
 ---
 
+## 规则 R039：长文本统一省略并悬停显示完整内容
+
+原生 Element Plus 普通数据列必须声明 `show-overflow-tooltip`：
+
+```vue
+<el-table-column
+  prop="customerName"
+  label="客户名称"
+  min-width="160"
+  align="center"
+  show-overflow-tooltip
+/>
+```
+
+BaseTable / AG Grid 列必须通过 `defineColumns()` 声明。普通文本列会自动补
+`showOverflowTooltip: true`；自定义渲染列、selection/index/expand、`wrapText`
+或 `autoHeight` 列不会被强制。业务可显式设置 `showOverflowTooltip: false`
+退出。
+
+---
+
 ## 规则 R004：操作列使用 renderOps / jh-op-btn
 
 操作列按钮**不得**直接使用 `<el-button>` 或裸文本，必须通过 `renderOps` 渲染：

@@ -1,4 +1,4 @@
-/** scanner/rules/table.mjs — 表格相关规则：R001 R002 R003 R014 R021 R022 */
+/** scanner/rules/table.mjs — 表格相关规则：R001 R002 R003 R014 R021 R022 R039 */
 import { lineOf, issue, findTags } from "./_shared.mjs";
 
 export const tableRules = [
@@ -30,6 +30,41 @@ export const tableRules = [
             ),
           );
         }
+      }
+      return issues;
+    },
+  },
+
+  // R039: 原生 el-table 普通数据列必须支持超长省略与悬停完整提示
+  {
+    id: "R039",
+    category: "table",
+    severity: "warning",
+    name: "el-table 普通数据列缺少 show-overflow-tooltip",
+    check(template, file, lineOffset) {
+      const issues = [];
+      for (const tag of findTags(template, "el-table-column")) {
+        if (!/(?:^|\s):?prop\s*=/.test(tag.text)) continue;
+        if (
+          /(?:^|\s)type\s*=\s*["'](?:selection|index|expand)["']/.test(
+            tag.text,
+          )
+        ) {
+          continue;
+        }
+        if (/(?:^|\s):?show-overflow-tooltip(?:\s|=|\/?>)/.test(tag.text))
+          continue;
+        issues.push(
+          issue(
+            file,
+            lineOf(template, tag.index, lineOffset),
+            "R039",
+            "table",
+            "warning",
+            "普通数据列缺少超长省略与悬停完整内容提示",
+            "添加 show-overflow-tooltip；BaseTable/AG Grid 列统一使用 defineColumns() 自动补齐",
+          ),
+        );
       }
       return issues;
     },

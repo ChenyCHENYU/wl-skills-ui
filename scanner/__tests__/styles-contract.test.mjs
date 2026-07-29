@@ -125,6 +125,55 @@ describe("长文本省略与悬停契约", () => {
   });
 });
 
+describe("表格行状态色契约", () => {
+  const table = read("styles/element/_table.scss");
+  const agGrid = read("styles/vendors/_ag-grid.scss");
+
+  it("Element Table 与 AG Grid 使用同一套柔和 hover/selected 色阶", () => {
+    for (const source of [table, agGrid]) {
+      assert.match(
+        source,
+        /row-hover-bg:\s*rgba\(var\(--el-color-primary-rgb\),\s*0\.04\)/,
+      );
+      assert.match(
+        source,
+        /row-selected-bg:\s*rgba\(var\(--el-color-primary-rgb\),\s*0\.07\)/,
+      );
+    }
+    assert.match(
+      table,
+      /--el-table-row-hover-bg-color:\s*var\(--wk-table-row-hover-bg\)\s*!important/,
+    );
+    assert.match(
+      table,
+      /--el-table-current-row-bg-color:\s*var\(--wk-table-row-selected-bg\)\s*!important/,
+    );
+    assert.match(
+      agGrid,
+      /--ag-row-hover-color:\s*var\(--wk-grid-row-hover-bg\)\s*!important/,
+    );
+    assert.match(
+      agGrid,
+      /--ag-selected-row-background-color:\s*var\(--wk-grid-row-selected-bg\)\s*!important/,
+    );
+  });
+
+  it("AG Grid 选中态优先于 hover，且不覆盖编辑控件与业务单元格背景", () => {
+    assert.match(
+      agGrid,
+      /\.ag-row:not\(\.ag-row-selected\):hover,[\s\S]*?\.ag-row\.ag-row-hover:not\(\.ag-row-selected\)/,
+    );
+    assert.match(
+      agGrid,
+      /\.ag-row\.ag-row-selected,[\s\S]*?\.ag-row\.ag-row-selected:hover,[\s\S]*?\.ag-row\.ag-row-selected\.ag-row-hover/,
+    );
+    assert.doesNotMatch(
+      agGrid,
+      /\.ag-row[^{]*\{[^}]*\.el-input__wrapper/,
+    );
+  });
+});
+
 describe("BaseToolbar 分裂下拉契约", () => {
   const toolbar = read("styles/vendors/_base-query-toolbar.scss");
 

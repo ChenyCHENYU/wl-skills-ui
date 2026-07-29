@@ -66,6 +66,10 @@ BaseTable / AG Grid 使用 `defineColumns()` 后由 runtime 自动为普通文�
 `showOverflowTooltip: true`。自定义渲染、结构列、换行列不强制；需要主动关闭时
 显式声明 `showOverflowTooltip: false`。
 
+行 hover/selected 色由包内表格 token 统一管理，业务页面不要重写
+`hover-row`、`current-row` 或直接覆盖 `td.el-table__cell` 背景，以免编辑控件、
+校验态和语义单元格底色发生冲突。
+
 ---
 
 ## 完整标准写法示例

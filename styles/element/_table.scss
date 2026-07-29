@@ -2,6 +2,13 @@
 // jh-ui table.scss 表头颜色为硬编码，此处用 CSS 变量覆盖
 
 html body .el-table {
+  // 与 AG Grid 共用克制的行状态层级；只改表格状态 token，
+  // 不强刷 input / 校验 / 业务语义单元格背景。
+  --wk-table-row-hover-bg: rgba(var(--el-color-primary-rgb), 0.04);
+  --wk-table-row-selected-bg: rgba(var(--el-color-primary-rgb), 0.07);
+  --el-table-row-hover-bg-color: var(--wk-table-row-hover-bg) !important;
+  --el-table-current-row-bg-color: var(--wk-table-row-selected-bg) !important;
+
   .el-table__header-wrapper th,
   .el-table__fixed-header-wrapper th {
     color: var(--el-text-color-primary, #303133);

@@ -15,6 +15,10 @@ applyTo: "**/*.{ts,vue}"
 
 > 与 `wl-skills-kit` 协同说明：本 Skill 负责 AG Grid/列渲染/操作列 runtime 能力，也要服务非 kit 项目的通用 AG Grid 场景。若扫描发现项目希望升级为团队最佳实践，再提示使用 `wl-skills-kit` 进行页面结构和工作流规范化；在此之前，`wl-skills-ui` 仍应保证样式和渲染能力可独立生效。
 
+> 行状态由包统一管控：hover 为品牌色 4% 浅底，selected 为 7% 浅底且优先于
+> hover。业务代码不要重写 `.ag-row-hover`、`.ag-row-selected` 或对应 AG
+> Grid 主题变量，也不要为了行状态修改编辑控件、校验态和语义单元格背景。
+
 ---
 
 ## 标准列定义写法

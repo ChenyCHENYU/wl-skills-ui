@@ -200,7 +200,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.8` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约与定制页样式边界 |
+| `@agile-team/wl-skills-ui` | `^1.9.9` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约与定制页样式边界 |
 
 三种识别方式，任选其一：
 
@@ -214,10 +214,11 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.8：
+当前 v1.9.9：
 
 - **主操作按钮不再漏色**：新增/新建/添加/创建类按钮强制使用客户主题 `primary` 填充样式，扫描器可识别并自动修复漏写 `type` 或误带 `plain` 的存量代码。
 - **长文本交互统一**：普通数据列在空间不足时单行省略，悬停显示完整内容；Tag、操作列、自定义渲染和主动换行列不被机械覆盖。
+- **表格行状态降噪**：Element Table 与 AG Grid 的 hover/selected 统一为品牌色 4%/7% 浅层，选中态优先于悬停，同时保留编辑控件、校验态、Tag 和业务语义单元格底色。
 - **紧凑表单字号闭环**：业务表单 label、输入值、选择值、placeholder、textarea 与数字输入统一为 12px；登录页和显式定制区域继续保持项目自身设计。
 - **输入边框状态闭环**：textarea 聚焦始终显示品牌色边框；数字输入兼容 Element Plus 新旧及混合 wrapper DOM，默认、hover、focus、错误、禁用态均只保留一层正确边框。
 - **分裂操作保持一体**：BaseToolbar 的主动作与下拉箭头共用外轮廓和状态色，下拉菜单中的业务按钮扁平化为菜单项；规则精准限定在平台工具栏结构，不污染普通按钮组和普通下拉菜单。

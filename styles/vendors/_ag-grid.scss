@@ -6,14 +6,18 @@
 
 // ── CSS 变量注入（AG Grid 28+ 支持）──────────────────────────────────────────
 .ag-root-wrapper {
+  // 深品牌蓝在大面积行底色中只保留轻提示：hover 4%，selected 7%。
+  // 同时回写 AG Grid 变量，避免平台主题继续使用默认亮蓝。
+  --wk-grid-row-hover-bg: rgba(var(--el-color-primary-rgb), 0.04);
+  --wk-grid-row-selected-bg: rgba(var(--el-color-primary-rgb), 0.07);
   --ag-background-color: #ffffff;
   --ag-odd-row-background-color: #ffffff;
   --ag-header-background-color: #fafafa;
   --ag-header-foreground-color: #374151;
   --ag-border-color: rgba(0, 0, 0, 0.06);
   --ag-row-border-color: rgba(0, 0, 0, 0.06);
-  --ag-row-hover-color: rgba(var(--el-color-primary-rgb), 0.06);
-  --ag-selected-row-background-color: rgba(var(--el-color-primary-rgb), 0.1);
+  --ag-row-hover-color: var(--wk-grid-row-hover-bg) !important;
+  --ag-selected-row-background-color: var(--wk-grid-row-selected-bg) !important;
   --ag-range-selection-border-color: rgba(var(--el-color-primary-rgb), 0.4);
   --ag-font-size: 13px;
   --ag-font-family: inherit;
@@ -88,7 +92,7 @@
   font-size: 13px !important;
   color: var(--el-text-color-primary) !important;
   border-bottom-color: var(--el-border-color-lighter) !important;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.12s ease;
 }
 
 .ag-row-even {
@@ -98,13 +102,21 @@
   background-color: #ffffff;
 }
 
-.ag-row:hover,
-.ag-row.ag-row-hover {
-  background-color: rgba(var(--el-color-primary-rgb), 0.06) !important;
+.ag-row:not(.ag-row-selected):hover,
+.ag-row.ag-row-hover:not(.ag-row-selected) {
+  background-color: var(
+    --wk-grid-row-hover-bg,
+    rgba(var(--el-color-primary-rgb), 0.04)
+  ) !important;
 }
 
-.ag-row.ag-row-selected {
-  background-color: rgba(var(--el-color-primary-rgb), 0.1) !important;
+.ag-row.ag-row-selected,
+.ag-row.ag-row-selected:hover,
+.ag-row.ag-row-selected.ag-row-hover {
+  background-color: var(
+    --wk-grid-row-selected-bg,
+    rgba(var(--el-color-primary-rgb), 0.07)
+  ) !important;
 }
 
 // ── 单元格 ────────────────────────────────────────────────────────────────────

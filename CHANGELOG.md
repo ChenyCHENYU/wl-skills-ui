@@ -4,6 +4,12 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.9] - 2026-07-29
+
+### Fixed
+
+- 将 Element Table 与 AG Grid 的行 hover/selected 底色统一为品牌色 4%/7% 浅层，并保证 AG Grid 选中态优先于 hover，缓解可编辑控件下方色带过重且不覆盖校验态或业务语义单元格。
+
 ## [1.9.8] - 2026-07-29
 
 ### Fixed

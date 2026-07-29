@@ -53,6 +53,16 @@ BaseTable / AG Grid 列必须通过 `defineColumns()` 声明。普通文本列�
 
 ---
 
+## 行悬停与选中状态
+
+- hover 使用客户品牌色 4% 透明度，只提示当前位置，不形成整条亮蓝色块。
+- selected 使用客户品牌色 7% 透明度，并始终优先于 hover。
+- 状态色只作用于数据行背景，不覆盖编辑输入框、校验态、Tag 和业务语义单元格底色。
+- 不在业务页面重写 `.ag-row-hover`、`.ag-row-selected`、`hover-row` 或
+  `current-row`；Element Table 与 AG Grid 均由化妆包统一管控。
+
+---
+
 ## 规则 R004：操作列使用 renderOps / jh-op-btn
 
 操作列按钮**不得**直接使用 `<el-button>` 或裸文本，必须通过 `renderOps` 渲染：

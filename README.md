@@ -109,12 +109,14 @@ wl-skills-ui/
 │   ├── index.mjs                 # CLI（含 --layer/--vendor/--mode 过滤）
 │   ├── rules/                    # 规则集
 │   │   ├── _shared.mjs           # 公共工具 + inferMeta(layer/vendor)
-│   │   ├── table.mjs             # R001 R002 R003 R014
+│   │   ├── table.mjs             # R001 R002 R003 R014 R039
 │   │   ├── form.mjs              # R006 R007 R008
-│   │   ├── button.mjs            # R004 R005 R015
+│   │   ├── button.mjs            # R004 R005 R015 R038
 │   │   ├── tag.mjs               # R009 R010 R012
 │   │   ├── dialog.mjs            # R011
 │   │   ├── color.mjs             # R016 R017 R018
+│   │   ├── semantic.mjs          # R025 R026 R027
+│   │   ├── componentFamily.mjs   # R031 R032 R033 R034 R035 R036 R037
 │   │   └── index.mjs             # 聚合 + addRules() 插件机制
 │   ├── fix.mjs                   # 自动修复引擎
 │   ├── integration.mjs           # 接入完整性检查
@@ -134,7 +136,8 @@ wl-skills-ui/
 │   │   ├── el-table/SKILL.md
 │   │   ├── el-form/SKILL.md
 │   │   ├── el-dialog/SKILL.md
-│   │   └── el-tag/SKILL.md
+│   │   ├── el-tag/SKILL.md
+│   │   └── component-family/      # 扩展组件族（card/tabs/descriptions/drawer/upload/steps/feedback）
 │   ├── vendors/                  # ⭐ L2 封装识别 SKILL
 │   │   ├── base-table/SKILL.md       # 优先级 #1
 │   │   ├── jh-components/SKILL.md    # 优先级 #2
@@ -149,7 +152,9 @@ wl-skills-ui/
 │   │   └── migration/SKILL.md
 │   └── ops/                      # 操作类 SKILL
 │       ├── scan/SKILL.md
-│       └── fix/SKILL.md
+│       ├── audit/SKILL.md
+│       ├── fix/SKILL.md
+│       └── migrate/SKILL.md
 │
 ├── templates/                    # 代码生成模板
 │   ├── list-page/TPL-LIST.md
@@ -278,7 +283,7 @@ yarn add @agile-team/wl-skills-ui
 - **R025** 语义合规：`options:[]` 退化检测 → 升级 `renderTagSlot` / `renderDictClassifyTag`
 - **R026** 原生 HTML 拦截：`<table>/<input>/<select>/<button>/<textarea>` → 替换 el-* 组件
 - `scan --only/--skip` 规则过滤 + `exempt init` 智能豁免脚手架
-- `scan --baseline` 漂移对比 + SCSS 链路检查 + R-rule 单一事实源（32 条）
+- `scan --baseline` 漂移对比 + SCSS 链路检查 + R-rule 单一事实源（35 条）
 
 历史亮点（v1.7.1）：
 
@@ -625,15 +630,19 @@ export const myRules = [
 
 ---
 
-## AI/MCP 智能引导
+## AI/MCP 智能引导（10 个工具）
 
 | MCP Tool                | 作用                                                       |
 | ----------------------- | ---------------------------------------------------------- |
 | `wl_ui_check`          | 检查 tokens/styles/runtime 接入完整性                      |
 | `wl_ui_scan`           | 扫描 UI 风格偏差，输出 Markdown 或 JSON                    |
 | `wl_ui_fix_dry_run`    | 预览自动修复，不实际写入                                   |
+| `wl_ui_detect_skin`    | 检测项目 vendor 版本配对                                   |
 | `wl_ui_skill_prompt`   | 输出 AI 触发提示                                           |
 | `wl_ui_route_intent`   | 根据自然语言识别 UI 治理意图并推荐 flow/tool/skill         |
+| `wl_ui_list_rules`     | 列出全部扫描规则及说明                                     |
+| `wl_ui_describe_rule`  | 查询单条规则详情                                           |
+| `wl_ui_drift`          | 对比基线漂移                                               |
 | `wl_ui_recommend_flow` | 根据扫描 JSON 推荐 nextActions 和 `wl-skills-kit` 桥接动作 |
 
 推荐智能体流程：

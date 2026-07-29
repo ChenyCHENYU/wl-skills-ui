@@ -59,6 +59,18 @@ el-date-picker 默认宽度不会自动撑满 el-form-item，必须显式设置�
 
 ---
 
+## 表单字号与状态边框一致性 【中危】
+
+- 紧凑业务表单的 label、输入值、选择值、picker、textarea、数字值和 placeholder
+  统一使用 `--wk-form-font-size: 12px`；不要在某一种组件上单独保留 13px/14px。
+- textarea focus 必须是清晰的品牌色实线与轻外环，不能只改 `border-color` 或依赖
+  平台默认阴影。
+- 数字输入框必须同时检查社区版“wrapper 子节点”和 jh-ui“wrapper 与
+  input-number 同节点”两种 DOM，并确保只存在一层可见边框。
+- 登录页和显式定制页继续使用自身样式，不套用上述高权重规则。
+
+---
+
 ## 表单列数与输入宽度 【中危】
 
 - 全宽业务表单默认 4 列，严禁使用 5～8 列把输入框压缩到无法阅读或填写。

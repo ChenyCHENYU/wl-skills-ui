@@ -15,6 +15,7 @@ html body .el-table {
   // 仅命中 show-overflow-tooltip 生成的单元格，不压制 Tag/操作列等自定义内容。
   .el-table__body .cell.el-tooltip {
     min-width: 0;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

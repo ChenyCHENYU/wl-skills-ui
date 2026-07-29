@@ -67,6 +67,31 @@ textarea 不强制 26px 高度，只继承统一圆角、字体和状态样式�
 
 ---
 
+## 规则：紧凑业务表单字号统一为 12px
+
+页面正文仍使用 14px；业务表单的 label、输入值、选择值、picker、textarea、
+数字输入框和 placeholder 统一使用：
+
+```scss
+--wk-form-font-size: 12px;
+```
+
+该规则同时覆盖 Element Plus 2.2 直挂 input DOM、2.3+ wrapper DOM 与 jh-* 封装，
+登录页及 `.wl-ui-skin-exempt` / `data-wl-ui-skin="off"` 定制页不参与覆盖。
+
+---
+
+## 规则：textarea 与数字输入框只保留一层状态边框
+
+- textarea 默认使用中性 1px 边框，hover 使用 hover 边框色，focus 强制使用品牌色
+  1px 实线与轻外环，不能只依赖平台已有 box-shadow。
+- 数字输入框兼容 `.el-input-number > .el-input__wrapper` 和
+  `.el-input-number.el-input__wrapper` 两种 DOM；由 wrapper 层绘制唯一边框，
+  内部 input 不得再画第二层边框。
+- error / disabled 状态继续分别使用危险色和禁用色，不得被 focus 覆盖。
+
+---
+
 ## 规则：表单 label 不强制冒号
 
 Element Plus 原生控件、picker 类控件和 jh-\* 封装控件的 label 后不强制追加 `:`。`@jhlc/jh-ui` 的 `.has-colon .com-text:after` / `.text-line-2:after` 冒号注入由 wl-skills-ui 统一屏蔽，避免 input / select / picker 之间出现有的带冒号、有的不带冒号。

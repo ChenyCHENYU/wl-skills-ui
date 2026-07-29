@@ -354,7 +354,7 @@
   cursor: not-allowed !important;
 }
 
-// ── 下拉菜单按钮（工具栏内的 el-dropdown 触发器）────────────────────────────
+// ── 工具栏下拉 / 分裂按钮 ──────────────────────────────────────────────────
 .base-toolbar-box .el-dropdown > .el-button,
 .base-toolbar-box .el-button-group .el-button {
   height: 24px !important;
@@ -363,25 +363,68 @@
   font-weight: 500;
 }
 
-.base-toolbar-box .el-button-group {
+// BaseToolbar 仅在“主动作有 onClick 且还有 children”时生成 split-button。
+// 精确限定 action-button-wrap，避免影响页面自行编排的普通 el-button-group。
+.base-toolbar-box
+  .action-button-wrap
+  > .el-dropdown
+  > .el-button-group {
   display: inline-flex !important;
   align-items: center !important;
   vertical-align: middle !important;
+  gap: 0 !important;
+  overflow: hidden;
+  border-radius: var(--el-border-radius-base) !important;
 
-  .el-button {
+  > .el-button {
     border-radius: 0 !important;
     margin: 0 !important;
+    box-shadow: none !important;
   }
 
-  .el-button:first-child {
+  > .el-button:first-child {
     border-top-left-radius: var(--el-border-radius-base) !important;
     border-bottom-left-radius: var(--el-border-radius-base) !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right-color: transparent !important;
   }
 
-  .el-button:last-child {
+  > .el-button.el-dropdown__caret-button {
+    width: 24px !important;
+    min-width: 24px !important;
+    padding: 0 !important;
+    margin-left: 0 !important;
+    border-left: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
     border-top-right-radius: var(--el-border-radius-base) !important;
     border-bottom-right-radius: var(--el-border-radius-base) !important;
-    margin-left: -1px !important;
+
+    // Element Plus 默认用 ::before 画分割线，会让箭头看起来像独立色块。
+    &::before {
+      display: none !important;
+      content: none !important;
+    }
+  }
+
+  // 鼠标或键盘进入任一分段时，两段同步使用同一状态色，视觉保持一个按钮。
+  &:hover > .el-button:not(.is-disabled):not([disabled]),
+  &:focus-within > .el-button:not(.is-disabled):not([disabled]) {
+    color: var(--el-button-hover-text-color) !important;
+    border-color: var(--el-button-hover-border-color) !important;
+    background-color: var(--el-button-hover-bg-color) !important;
+  }
+
+  &:hover > .el-button:first-child:not(.is-disabled):not([disabled]),
+  &:focus-within > .el-button:first-child:not(.is-disabled):not([disabled]) {
+    border-right-color: transparent !important;
+  }
+
+  &:active > .el-button:not(.is-disabled):not([disabled]) {
+    color: var(--el-button-active-text-color, #ffffff) !important;
+    border-color: var(--el-button-active-border-color) !important;
+    background-color: var(--el-button-active-bg-color) !important;
   }
 }
 
@@ -393,23 +436,84 @@
   margin: 0 !important;
 }
 
-.el-dropdown-menu .el-dropdown-menu__item {
+// BaseToolbar V1 会在 action-dropdown-menu 的 item 内再渲染一个 jh-button。
+// 只扁平化这个已知结构，不影响普通 el-dropdown 和业务自定义下拉。
+html body .el-dropdown-menu.action-dropdown-menu .el-dropdown-menu__item {
   display: flex;
   align-items: center;
   gap: 6px;
   min-height: 28px;
   line-height: 1.3;
+  padding: 0 !important;
   color: var(--el-text-color-regular, #606266);
 }
 
-.el-dropdown-menu .el-dropdown-menu__item:hover,
-.el-dropdown-menu .el-dropdown-menu__item:focus {
+html
+  body
+  .el-dropdown-menu.action-dropdown-menu
+  .el-dropdown-menu__item
+  > .el-button {
+  width: 100% !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  justify-content: flex-start !important;
+  margin: 0 !important;
+  padding: 0 10px !important;
+  border: 0 !important;
+  border-radius: inherit !important;
+  color: inherit !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.3 !important;
+  transform: none !important;
+}
+
+html
+  body
+  .el-dropdown-menu.action-dropdown-menu
+  .el-dropdown-menu__item
+  > .el-button:hover,
+html
+  body
+  .el-dropdown-menu.action-dropdown-menu
+  .el-dropdown-menu__item
+  > .el-button:focus,
+html
+  body
+  .el-dropdown-menu.action-dropdown-menu
+  .el-dropdown-menu__item
+  > .el-button:active {
+  color: inherit !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+html
+  body
+  .el-dropdown-menu.action-dropdown-menu
+  .el-dropdown-menu__item:not(.is-disabled):hover,
+html
+  body
+  .el-dropdown-menu.action-dropdown-menu
+  .el-dropdown-menu__item:not(.is-disabled):focus {
   color: var(--el-color-primary, #002a8f) !important;
   background-color: rgba(var(--el-color-primary-rgb), 0.08) !important;
 }
 
-.el-dropdown-menu .el-dropdown-menu__item .el-icon,
-.el-dropdown-menu .el-dropdown-menu__item svg {
+html
+  body
+  .el-dropdown-menu.action-dropdown-menu
+  .el-dropdown-menu__item
+  .el-icon,
+html
+  body
+  .el-dropdown-menu.action-dropdown-menu
+  .el-dropdown-menu__item
+  svg {
   color: currentColor !important;
   fill: currentColor;
   flex: 0 0 auto;

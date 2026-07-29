@@ -453,20 +453,11 @@
   &.el-textarea {
     .el-textarea__inner {
       border-radius: 6px !important;
-      font-size: 13px !important;
+      font-size: var(--wk-form-font-size, 12px) !important;
       line-height: 1.65 !important;
       padding: 7px 10px !important;
       resize: vertical !important; // 只允许垂直拉伸，不允许水平
       transition: border-color 0.15s, box-shadow 0.15s;
-
-      &:hover:not(:focus) {
-        border-color: var(--el-border-color-hover, #c0c4cc) !important;
-      }
-
-      &:focus {
-        border-color: var(--el-color-primary) !important;
-        box-shadow: 0 0 0 2px rgba(var(--el-color-primary-rgb), 0.12) !important;
-      }
     }
 
     // 字数统计：更小、更淡、不遮挡内容
@@ -495,8 +486,7 @@
   &.el-select__wrapper.is-focused,
   &.el-select__wrapper:focus-within,
   &.el-date-editor.el-input__wrapper.is-focus,
-  &.el-date-editor.el-input__wrapper:focus-within,
-  &.el-textarea__inner:focus {
+  &.el-date-editor.el-input__wrapper:focus-within {
     box-shadow: 0 0 0 1.5px var(--el-color-primary, #002a8f) inset !important;
   }
 
@@ -514,13 +504,13 @@
   &.el-form.el-form--label-left .el-form-item__label,
   &.el-form.el-form--label-right .el-form-item__label {
     align-items: baseline !important;
-    font-size: 12px !important;
+    font-size: var(--wk-form-font-size, 12px) !important;
     line-height: var(--wk-form-label-line-height, 22px) !important;
   }
 
   &.el-form.el-form--label-left .el-form-item__label > .com-text,
   &.el-form.el-form--label-right .el-form-item__label > .com-text {
-    font-size: 12px !important;
+    font-size: var(--wk-form-font-size, 12px) !important;
     line-height: var(--wk-form-label-line-height, 22px) !important;
   }
 
@@ -529,7 +519,7 @@
   &.el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label::before {
     content: "*" !important;
     color: var(--el-color-danger, #f56c6c) !important;
-    font-size: 12px !important;
+    font-size: var(--wk-form-font-size, 12px) !important;
     font-weight: 400 !important;
     line-height: var(--wk-form-label-line-height, 22px) !important;
     display: inline-block !important;
@@ -545,7 +535,7 @@
   &.el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label > .com-text::before {
     content: "*" !important;
     color: var(--el-color-danger, #f56c6c) !important;
-    font-size: 12px !important;
+    font-size: var(--wk-form-font-size, 12px) !important;
     font-weight: 400 !important;
     line-height: var(--wk-form-label-line-height, 22px) !important;
     display: inline-block !important;
@@ -572,7 +562,7 @@
   &.el-form.el-form--label-right .el-form-item.is-required:not(.is-no-asterisk).asterisk-right > .el-form-item__label::after {
     content: "*" !important;
     color: var(--el-color-danger, #f56c6c) !important;
-    font-size: 12px !important;
+    font-size: var(--wk-form-font-size, 12px) !important;
     font-weight: 400 !important;
     line-height: var(--wk-form-label-line-height, 22px) !important;
     display: inline-block !important;
@@ -605,6 +595,20 @@
     .el-date-editor.el-input__wrapper,
     .el-textarea__inner {
       box-shadow: 0 0 0 1px var(--el-color-danger, #f56c6c) inset !important;
+    }
+
+    // InputNumber 的 focus 兼容规则权重较高；非禁用 error 必须最终覆盖 focus。
+    .el-input-number:not(.is-disabled) .el-input__wrapper,
+    .el-input-number.el-input__wrapper:not(.is-disabled) {
+      box-shadow:
+        0 0 0 1px var(--el-color-danger, #f56c6c) inset !important;
+    }
+
+    // 过渡版双 wrapper 由外层表达 error，内层不得出现第二道危险色边框。
+    .el-input-number.el-input__wrapper:not(.is-disabled)
+      > .el-input
+      > .el-input__wrapper {
+      box-shadow: none !important;
     }
   }
 }

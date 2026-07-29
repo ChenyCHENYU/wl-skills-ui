@@ -49,6 +49,21 @@
 
 ---
 
+## BaseToolbar 分裂下拉按钮
+
+当一个工具栏动作同时包含主动作 `onClick` 与子动作 `children` 时，BaseToolbar
+会生成 split-button。它在交互语义上仍是两个点击区域，但视觉上必须表现为一个
+完整按钮：
+
+- 主动作与箭头段共用同一背景色、hover/focus/active 状态和外轮廓。
+- 箭头段不得拥有独立圆角、外边距、阴影或 Element Plus 默认分割线。
+- `action-dropdown-menu` 中的 jh-button 必须扁平为菜单内容，边框和背景由
+  `el-dropdown-menu__item` 统一承担。
+- 上述规则不得扩散到普通 `el-button-group`、普通 `el-dropdown-menu` 或页面
+  自定义编辑器工具栏。
+
+---
+
 ## 操作列按钮（表格行内）
 
 统一使用 `renderOps` 图标按钮系统，**禁止** `<el-button>` 在行内使用：

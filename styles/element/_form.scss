@@ -5,6 +5,7 @@
 html body {
   --wk-form-control-radius: var(--el-border-radius-base, 6px);
   --wk-form-control-height: 26px;
+  --wk-form-font-size: 12px !important;
   --wk-form-label-control-gap: 16px;
   --wk-form-label-line-height: 22px;
 }
@@ -22,6 +23,31 @@ html body {
   // ── 全局输入框圆角统一（6px，与搜索区保持一致）────────────────────────────
   &.el-form:not(.el-form--label-top) .el-form-item__label {
     padding-right: var(--wk-form-label-control-gap) !important;
+  }
+
+  // ── 紧凑业务表单字号统一 ──────────────────────────────────────────────────
+  // 正文仍使用 14px；这里只治理表单 label、控件值与 placeholder。
+  &.el-form-item__label,
+  &.el-form-item__label > .com-text,
+  &.el-form-item__label .com-text,
+  &.el-form-item__label > .text-line-2,
+  &.el-form-item__label .text-line-2,
+  &.el-input__inner,
+  &.el-textarea__inner,
+  &.el-select__selected-item,
+  &.el-select__placeholder,
+  &.el-select__tags-text,
+  &.el-date-editor .el-range-input,
+  &.el-date-editor .el-range-separator,
+  &.el-radio__label,
+  &.el-checkbox__label {
+    font-size: var(--wk-form-font-size, 12px) !important;
+  }
+
+  &.el-input__inner::placeholder,
+  &.el-textarea__inner::placeholder,
+  &.el-date-editor .el-range-input::placeholder {
+    font-size: var(--wk-form-font-size, 12px) !important;
   }
 
   &.el-input__wrapper,
@@ -47,9 +73,10 @@ html body {
     line-height: calc(var(--wk-form-control-height) - 2px) !important;
   }
 
-  // common-core 的 InputNumberComponent 即使传入 controls=false，部分版本仍会
-  // 输出 controls-right 步进按钮。数值框保留 Element Plus 的 wrapper 作为唯一
-  // 可见边框，根节点仅负责尺寸，避免 wrapper 聚焦阴影与根边框叠成双层描边。
+  // common-core / jh-ui 有两种数字框 DOM：
+  // A. .el-input-number > .el-input > .el-input__wrapper（社区版）
+  // B. .el-input-number.el-input__wrapper > .el-input（jh 同节点 wrapper）
+  // 两种结构都只允许 wrapper 层绘制唯一可见边框。
   &.el-input-number,
   &.el-input-number:focus,
   &.el-input-number:focus-within {
@@ -61,6 +88,11 @@ html body {
     outline: none !important;
     box-sizing: border-box !important;
     background: transparent !important;
+  }
+
+  &.el-input-number:not(.el-input__wrapper),
+  &.el-input-number:not(.el-input__wrapper):focus,
+  &.el-input-number:not(.el-input__wrapper):focus-within {
     box-shadow: none !important;
   }
 
@@ -73,7 +105,8 @@ html body {
     box-shadow: none !important;
   }
 
-  &.el-input-number .el-input__wrapper {
+  &.el-input-number .el-input__wrapper,
+  &.el-input-number.el-input__wrapper {
     width: 100% !important;
     height: 100% !important;
     min-height: 0 !important;
@@ -86,21 +119,33 @@ html body {
     transition: box-shadow 0.15s ease !important;
   }
 
-  &.el-input-number:not(.is-disabled):hover .el-input__wrapper {
+  &.el-input-number:not(.is-disabled):hover .el-input__wrapper,
+  &.el-input-number.el-input__wrapper:not(.is-disabled):hover {
     box-shadow:
       0 0 0 1px var(--el-border-color-hover, #c0c4cc) inset !important;
   }
 
-  &.el-input-number .el-input__wrapper.is-focus,
-  &.el-input-number:focus-within .el-input__wrapper {
+  &.el-input-number:not(.is-disabled) .el-input__wrapper.is-focus,
+  &.el-input-number:not(.is-disabled):focus-within .el-input__wrapper,
+  &.el-input-number.el-input__wrapper:not(.is-disabled).is-focus,
+  &.el-input-number.el-input__wrapper:not(.is-disabled):focus,
+  &.el-input-number.el-input__wrapper:not(.is-disabled):focus-within {
     box-shadow:
       0 0 0 1.5px var(--el-color-primary, #002a8f) inset !important;
   }
 
-  &.el-input-number.is-disabled .el-input__wrapper {
+  &.el-input-number.is-disabled .el-input__wrapper,
+  &.el-input-number.el-input__wrapper.is-disabled {
     background: var(--el-disabled-bg-color, #f5f7fa) !important;
     box-shadow:
       0 0 0 1px var(--el-disabled-border-color, #e4e7ed) inset !important;
+  }
+
+  // 极少数过渡版本会同时输出“同节点 wrapper + 子 wrapper”；
+  // 此时由外层绘制边框，明确清掉内层，防止双描边。
+  &.el-input-number.el-input__wrapper > .el-input > .el-input__wrapper {
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   &.el-input-number .el-input__inner,
@@ -139,7 +184,35 @@ html body {
     -moz-appearance: textfield !important;
   }
 
-  &.el-textarea__inner {
+  // ── textarea 默认 / hover / focus ─────────────────────────────────────────
+  // focus 使用“品牌色实线 + 轻外环”，不依赖平台原有 border-width/box-shadow。
+  &.el-textarea > .el-textarea__inner,
+  &.com-input > .el-textarea > .el-textarea__inner,
+  &.com-textarea > .el-textarea > .el-textarea__inner {
+    border: 1px solid var(--el-border-color, #dcdfe6) !important;
     border-radius: var(--wk-form-control-radius) !important;
+    box-shadow: none !important;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease !important;
+  }
+
+  &.el-textarea:not(.is-disabled) > .el-textarea__inner:hover:not(:focus),
+  &.com-input > .el-textarea:not(.is-disabled) > .el-textarea__inner:hover:not(:focus),
+  &.com-textarea > .el-textarea:not(.is-disabled) > .el-textarea__inner:hover:not(:focus) {
+    border-color: var(--el-border-color-hover, #c0c4cc) !important;
+  }
+
+  &.el-textarea.is-focus > .el-textarea__inner,
+  &.el-textarea > .el-textarea__inner:focus,
+  &.el-textarea > .el-textarea__inner:focus-visible,
+  &.com-input > .el-textarea.is-focus > .el-textarea__inner,
+  &.com-input > .el-textarea > .el-textarea__inner:focus,
+  &.com-textarea > .el-textarea.is-focus > .el-textarea__inner,
+  &.com-textarea > .el-textarea > .el-textarea__inner:focus {
+    border: 1px solid var(--el-color-primary, #002a8f) !important;
+    outline: none !important;
+    box-shadow:
+      0 0 0 2px rgba(var(--el-color-primary-rgb, 0, 42, 143), 0.12) !important;
   }
 }

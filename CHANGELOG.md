@@ -4,6 +4,15 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.8] - 2026-07-29
+
+### Fixed
+
+- 统一紧凑业务表单 label、输入值、选择值、placeholder、textarea 与数字值为 12px，并继续豁免登录页和显式定制区域。
+- 修复 textarea 聚焦后品牌色边框不清晰，以及数字输入框在不同 wrapper DOM、hover + focus 组合态下边框消失或双描边的问题。
+- 补强原生 Element Table 与 AG Grid 长文本单行省略样式，继续由 R039 / `defineColumns()` 负责悬停完整提示与业务例外。
+- 修复 BaseToolbar 分裂下拉按钮的箭头独立色块与菜单项内嵌按钮描边；规则仅命中 `action-button-wrap` 和 `action-dropdown-menu`，不影响普通按钮组与普通下拉菜单。
+
 ## [1.9.7] - 2026-07-28
 
 ### Added

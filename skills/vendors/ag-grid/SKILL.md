@@ -13,6 +13,11 @@ applyTo: "**/*.{ts,vue}"
 2. 操作列统一用 `renderOps([...])` — 图标按钮系统，自动分隔线 + stopPropagation
 3. 状态字段用 `renderTagNode()` / `renderClassifyTag()` — 彩色 Tag，见 tag-status/SKILL.md
 
+Skin/历史项目必须在 `main.ts` 引入一次
+`@agile-team/wl-skills-ui/runtime/auto`。它修复普通纯文本 flex 单元格的省略号，
+并在未配置平台原生 Tooltip 且真实溢出时兜底完整内容。编辑列、操作列、Tag、
+复选框、自定义 renderer、主动换行列和皮肤豁免区域不会被接管。
+
 > 与 `wl-skills-kit` 协同说明：本 Skill 负责 AG Grid/列渲染/操作列 runtime 能力，也要服务非 kit 项目的通用 AG Grid 场景。若扫描发现项目希望升级为团队最佳实践，再提示使用 `wl-skills-kit` 进行页面结构和工作流规范化；在此之前，`wl-skills-ui` 仍应保证样式和渲染能力可独立生效。
 
 > 行状态由包统一管控：hover 为品牌色 4% 浅底，selected 为 7% 浅底且优先于

@@ -1,3 +1,5 @@
+@use "../scope" as skin;
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // AG Grid 全局样式 — wl-ui-safe 统一设计规范
 // 适用：所有使用 BaseTable renderType="agGrid" 的页面
@@ -136,6 +138,33 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+}
+
+// 平台把 .ag-cell 与 .ag-cell-value 复用在同一个 flex 节点上；flex 容器的
+// 直接文本不会稳定绘制 text-overflow。仅对没有子元素的普通文本单元格切回
+// block，编辑器、操作列、自定义 renderer、复选框与主动换行列保持原结构。
+#{skin.$managed-scope-selector} {
+  &.ag-root-wrapper
+    .ag-cell-value:not(.editable-cell):not(.always-editable-cell):not(
+      .default-slot-cell
+    ):not(.operations-cell):not(.ag-cell-inline-editing):not(
+      .ag-cell-wrap-text
+    ):not(.ag-checkbox-cell):not(
+      :where(
+        .wl-ui-overflow-ignore,
+        .wl-ui-overflow-ignore *,
+        [data-wl-ui-overflow="off"],
+        [data-wl-ui-overflow="off"] *
+      )
+    ):not(:has(> *)) {
+    display: block !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    line-height: var(--ag-row-height, 26px);
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
 }
 
 // 复选框单元格（header 与 body 使用相同规则，确保视觉对齐）

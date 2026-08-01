@@ -4,6 +4,22 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.10] - 2026-08-01
+
+### Added
+
+- 新增 `@agile-team/wl-skills-ui/runtime/auto` 包级保护入口；Skin 项目一次引入即可获得主题锁和普通表格真实溢出 Tooltip 兜底，Native 项目的 `installCommonPreset()` 自动安装相同保护。
+- 新增长文本 DOM 回归测试，覆盖真实溢出、未溢出、动态/虚拟行、Element 原生 Tooltip 优先以及操作列、Tag、定制区域等排除边界。
+
+### Fixed
+
+- 修复平台将 `.ag-cell` 与 `.ag-cell-value` 复用为 flex 节点时 `text-overflow: ellipsis` 只裁切、不绘制省略号的问题。
+- 普通 Element Table、BaseTable 与 AG Grid 不再依赖页面是否调用 `defineColumns()` 才能获得长文本兜底；运行时仅在真实溢出时创建统一提示，不接管已有 Tooltip 或语义组件。
+
+### Changed
+
+- SCSS 发布门禁由引用路径检查升级为 full/skin 入口真实编译，避免合法性问题进入 npm 包。
+
 ## [1.9.9] - 2026-07-29
 
 ### Fixed

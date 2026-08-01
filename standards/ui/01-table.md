@@ -46,10 +46,11 @@
 />
 ```
 
-BaseTable / AG Grid 列必须通过 `defineColumns()` 声明。普通文本列会自动补
-`showOverflowTooltip: true`；自定义渲染列、selection/index/expand、`wrapText`
-或 `autoHeight` 列不会被强制。业务可显式设置 `showOverflowTooltip: false`
-退出。
+BaseTable / AG Grid 仍推荐通过 `defineColumns()` 声明，普通文本列会自动补
+`showOverflowTooltip: true` 并优先使用平台原生 Tooltip。对于动态 Picker 或未经过
+`defineColumns()` 的历史列，项目启动入口必须安装 `runtime/auto` 包级保护；其仅在
+真实溢出时提供兜底。自定义渲染列、selection/index/expand、`wrapText`、`autoHeight`、
+Tag、编辑列和操作列不会被强制。局部可用 `data-wl-ui-overflow="off"` 显式退出。
 
 ---
 

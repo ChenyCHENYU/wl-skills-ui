@@ -1,6 +1,6 @@
 {
   "name": "@agile-team/wl-skills-ui",
-  "version": "1.9.9",
+  "version": "1.9.10",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 项目通用化妆/原生双模式（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
   "main": "./es/index.js",
@@ -13,6 +13,9 @@
     "./runtime": {
       "import": "./es/index.js",
       "types": "./es/index.d.ts"
+    },
+    "./runtime/auto": {
+      "import": "./es/auto.js"
     },
     "./runtime/common-preset": {
       "import": "./es/common-preset.js",
@@ -82,7 +85,8 @@
   ],
   "sideEffects": [
     "*.css",
-    "*.scss"
+    "*.scss",
+    "./es/auto.js"
   ],
   "devDependencies": {
     "@commitlint/cli": "^20.5.3",
@@ -96,8 +100,10 @@
     "element-plus": "^2.7.0",
     "eslint": "^10.3.0",
     "eslint-plugin-vue": "^10.9.0",
+    "happy-dom": "20.11.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
+    "sass": "1.77.8",
     "tsup": "^8.3.0",
     "typescript": "^5.4.0",
     "vue": "^3.4.0"

@@ -128,7 +128,7 @@ export function checkIntegration(projectRoot) {
       : "未发现 runtime 引入（无 src/util/ag-cell-renders.ts，main.ts 也未 import runtime）",
     suggestion: runtimeOk
       ? ""
-      : '推荐：在 main.ts 中 import { installCommonPreset } from "@agile-team/wl-skills-ui/runtime/common-preset"; installCommonPreset();',
+      : 'Skin 项目在 main.ts 中 import "@agile-team/wl-skills-ui/runtime/auto"；Native 项目调用 installCommonPreset()（已包含包级保护）。',
   });
 
   // ── I004: element-plus 已安装 ────────────────────────────────────────

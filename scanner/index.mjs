@@ -276,9 +276,10 @@ if (subcommand === "init") {
    @use '@agile-team/wl-skills-ui/styles' as *;
    // 化妆模式：@use '@agile-team/wl-skills-ui/styles/presets/skin' as *;
 
-4. 在 src/main.ts 中注册 runtime（可选，仅当业务侧用到 defineColumns）：
-   import { installCommonPreset } from '@agile-team/wl-skills-ui/runtime/common-preset';
-   installCommonPreset();
+4. 在 src/main.ts 中安装包级保护：
+   // Skin / 老项目：
+   import '@agile-team/wl-skills-ui/runtime/auto';
+   // Native 项目改为调用 installCommonPreset()，其已包含相同保护。
 
 5. 业务列定义改用 defineColumns：
    import { defineColumns, renderOps } from '@agile-team/wl-skills-ui/runtime';

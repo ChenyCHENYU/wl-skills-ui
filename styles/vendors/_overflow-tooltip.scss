@@ -1,0 +1,35 @@
+// 普通表格长文本兜底 Tooltip。
+// 仅由 runtime/auto 在真实溢出且组件没有原生 Tooltip 时创建。
+
+.wl-ui-overflow-tooltip {
+  position: fixed;
+  z-index: 2147483000;
+  box-sizing: border-box;
+  max-width: min(520px, calc(100vw - 24px));
+  padding: 7px 10px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  background: rgba(17, 24, 39, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(2px);
+  transition:
+    opacity 0.12s ease,
+    transform 0.12s ease,
+    visibility 0.12s ease;
+
+  &.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+}
+

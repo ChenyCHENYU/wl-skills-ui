@@ -573,7 +573,8 @@ ${
      installCommonPreset();
 `
     : `
-  ℹ️  skin 模式不需要引入 runtime，页面布局 / 业务代码均保持现状。
+  ⚠️  请手动在 src/main.ts 添加包级保护（不接管页面布局 / 业务列定义）：
+     import '@agile-team/wl-skills-ui/runtime/auto';
 `
 }`);
 }

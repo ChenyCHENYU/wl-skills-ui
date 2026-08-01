@@ -23,7 +23,7 @@ import {
   renderRatingLevel,
 } from "../core/renderers";
 import { registerColumnAutoMaps } from "../core/registry";
-import { installBrandThemeLock } from "../theme-lock";
+import { installUiRuntimeGuards } from "../guards";
 export {
   setDictResolver,
   renderDictClassifyTag,
@@ -148,7 +148,7 @@ export const DRILL_TYPE_COLOR_MAP: Record<string, string> = {
 // ── 一键安装 ─────────────────────────────────────────────────────────────────
 /** 把通用业务字段映射批量注册到核心 COLUMN_AUTO_MAP（main.ts 调用一次） */
 export function installCommonPreset(): void {
-  installBrandThemeLock();
+  installUiRuntimeGuards();
   registerColumnAutoMaps({
     riskLevel: {
       width: 90,

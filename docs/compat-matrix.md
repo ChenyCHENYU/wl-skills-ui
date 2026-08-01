@@ -11,7 +11,7 @@
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版，搭配 `@jhlc/jh-ui` 使用，DOM 仍为 `.el-input > .el-input__inner` 直挂结构（**EP 2.3.0 起才引入 `.el-input__wrapper`**） |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹、`.has-colon ::after` 冒号注入、`.el-form-item--default { margin-bottom: 24px }` 等强约束 |
 | `@jhlc/common-core` | `3.1.0` 或 `3.1.0-prod.x` | 基础 util/types，`@jhlc/jh-ui` 间接依赖 |
-| `@agile-team/wl-skills-ui` | `^1.9.9` | 已对齐 jh-ui 3.1.0 + EP 2.2.6-prod.3 的 DOM 假设、客户主题锁、6px 基础圆角、紧凑表单、表格行状态、分裂按钮、长文本提示、定制页样式边界与 Vite 4 开发转换 |
+| `@agile-team/wl-skills-ui` | `^1.9.10` | 已对齐 jh-ui 3.1.0 + EP 2.2.6-prod.3 的 DOM 假设、客户主题锁、6px 基础圆角、紧凑表单、表格行状态、分裂按钮、包级长文本提示、定制页样式边界与 Vite 4 开发转换 |
 
 ## 项目集群当前实测
 
@@ -35,7 +35,8 @@
 
 ## 适配建议
 
-- 集团内项目：**统一锚定 `element-plus@2.2.6-prod.3` + `@jhlc/jh-ui@3.1.0`**，与 wl-skills-ui v1.9.9 三方对齐。
+- 集团内项目：**统一锚定 `element-plus@2.2.6-prod.3` + `@jhlc/jh-ui@3.1.0`**，与 wl-skills-ui v1.9.10 三方对齐。
+- Skin 项目除全局样式外，在 `main.ts` 引入一次 `@agile-team/wl-skills-ui/runtime/auto`；Native 项目的 `installCommonPreset()` 已包含相同包级保护，不要重复安装。
 - 升级 `element-plus` 到 2.3+ 前，必须同步升级 `@jhlc/jh-ui` 到对应支持版本，否则 `.com-text` / `.el-input__inner` DOM 与 EP `__wrapper` 体系不兼容。
 - 新项目接入：见 README 「快速接入」章节，默认会按本表声明 peerDependency 范围。
 

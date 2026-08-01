@@ -95,6 +95,7 @@ describe("长文本省略与悬停契约", () => {
   const table = read("styles/element/_table.scss");
   const agGrid = read("styles/vendors/_ag-grid.scss");
   const registry = read("runtime/core/registry.ts");
+  const overflowRuntime = read("runtime/overflow-tooltip.ts");
   const tableRule = read("scanner/rules/table.mjs");
 
   it("原生表格和 AG Grid 都具备单行省略样式", () => {
@@ -105,6 +106,14 @@ describe("长文本省略与悬停契约", () => {
     assert.match(
       agGrid,
       /\.ag-cell-value\s*\{[\s\S]*?overflow:\s*hidden;[\s\S]*?text-overflow:\s*ellipsis;[\s\S]*?white-space:\s*nowrap;/,
+    );
+    assert.match(
+      agGrid,
+      /\.ag-cell-value:not\(\.editable-cell\)[\s\S]*?display:\s*block\s*!important/,
+    );
+    assert.match(
+      table,
+      /\.cell:not\(\.el-tooltip\)[\s\S]*?:not\(:has\(> \*\)\)[\s\S]*?text-overflow:\s*ellipsis/,
     );
   });
 
@@ -122,6 +131,26 @@ describe("长文本省略与悬停契约", () => {
     }
     assert.match(tableRule, /id:\s*"R039"/);
     assert.match(tableRule, /show-overflow-tooltip/);
+  });
+
+  it("包级兜底仅按需处理普通文本，并覆盖动态/虚拟表格", () => {
+    assert.match(overflowRuntime, /doc\.addEventListener\("pointerover"/);
+    assert.doesNotMatch(overflowRuntime, /new MutationObserver/);
+    assert.match(overflowRuntime, /scrollWidth - cell\.clientWidth > 1/);
+    for (const boundary of [
+      ".operations-cell",
+      ".always-editable-cell",
+      ".default-slot-cell",
+      ".ag-cell-wrap-text",
+      ".el-tag",
+      ".wl-ui-skin-exempt",
+      "[data-wl-ui-skin='off']",
+    ]) {
+      assert.ok(
+        overflowRuntime.includes(boundary),
+        `缺少包级长文本边界：${boundary}`,
+      );
+    }
   });
 });
 

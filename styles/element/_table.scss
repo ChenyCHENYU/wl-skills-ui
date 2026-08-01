@@ -1,6 +1,8 @@
 // styles/element/_table.scss — el-table 表头颜色覆盖
 // jh-ui table.scss 表头颜色为硬编码，此处用 CSS 变量覆盖
 
+@use "../scope" as skin;
+
 html body .el-table {
   // 与 AG Grid 共用克制的行状态层级；只改表格状态 token，
   // 不强刷 input / 校验 / 业务语义单元格背景。
@@ -43,5 +45,27 @@ html body .el-table {
   .el-empty {
     width: 100%;
     margin: 0 auto;
+  }
+}
+
+// 未显式配置 show-overflow-tooltip 的普通纯文本列也获得视觉省略。
+// :not(:has(> *)) 将 Tag、按钮、复选框、自定义 renderer 和编辑控件排除在外；
+// Tooltip 由 runtime/auto 在真实溢出时按需兜底。
+#{skin.$managed-scope-selector} {
+  &.el-table__body
+    .cell:not(.el-tooltip):not(
+      :where(
+        .wl-ui-overflow-ignore,
+        .wl-ui-overflow-ignore *,
+        [data-wl-ui-overflow="off"],
+        [data-wl-ui-overflow="off"] *
+      )
+    ):not(:has(> *)) {
+    display: block !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
 }

@@ -62,7 +62,7 @@ export const tableRules = [
             "table",
             "warning",
             "普通数据列缺少超长省略与悬停完整内容提示",
-            "添加 show-overflow-tooltip；BaseTable/AG Grid 列统一使用 defineColumns() 自动补齐",
+            "添加 show-overflow-tooltip；BaseTable/AG Grid 优先使用 defineColumns()，并在项目启动入口安装 runtime/auto 包级兜底",
           ),
         );
       }

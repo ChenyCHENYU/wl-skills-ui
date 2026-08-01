@@ -30,6 +30,12 @@ function verifyExports() {
   if (pkg.exports?.["./runtime"]?.import !== "./es/index.js") {
     errors.push("./runtime 必须指向已构建的 es/index.js，不能导出包根目录");
   }
+  if (pkg.exports?.["./runtime/auto"]?.import !== "./es/auto.js") {
+    errors.push("./runtime/auto 必须指向包级运行时保护入口 es/auto.js");
+  }
+  if (!pkg.sideEffects?.includes("./es/auto.js")) {
+    errors.push("sideEffects 必须保留 ./es/auto.js，避免包级保护被 tree-shaking");
+  }
 }
 
 function verifyRules() {
@@ -208,7 +214,9 @@ function verifyManagedScope() {
   for (const relPath of [
     "styles/element/_form.scss",
     "styles/element/_button.scss",
+    "styles/element/_table.scss",
     "styles/vendors/_base-components.scss",
+    "styles/vendors/_ag-grid.scss",
     "styles/vendors/_jh-ui.scss",
   ]) {
     const content = readFileSync(join(root, relPath), "utf8");
@@ -240,12 +248,16 @@ if (errors.length > 0) {
 const runtime = await import("../es/index.js");
 await import("../es/common-preset.js");
 await import("../es/presets/security.js");
+await import("../es/auto.js");
 for (const api of [
   "defineColumns",
   "renderOps",
   "createPreset",
   "installPreset",
   "installBrandThemeLock",
+  "installOverflowTooltipGuard",
+  "uninstallOverflowTooltipGuard",
+  "installUiRuntimeGuards",
 ]) {
   if (typeof runtime[api] !== "function") errors.push(`runtime 缺少公共 API：${api}`);
 }

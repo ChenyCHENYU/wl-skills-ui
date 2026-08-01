@@ -6,6 +6,7 @@
 // → 但 SCSS 加载顺序里我们反过来：兜底先加载，让高优先级覆盖
 
 @forward './_portal';            // 弹层/popper 通用（基础设施层）
+@forward './_overflow-tooltip';  // 普通长文本真实溢出 Tooltip 兜底
 @forward './_ag-grid';           // AG Grid 完整主题
 @forward './_custom-wrappers';   // 兜底：野路子自封装
 @forward './_c-components';      // C_/c_ 前缀

@@ -11,6 +11,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join, dirname, resolve, basename } from "node:path";
 import { fileURLToPath } from "node:url";
+import { compile } from "sass";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -89,6 +90,17 @@ for (const entry of entryPoints) {
     continue;
   }
   checkImportChain(entry);
+  try {
+    compile(entry, {
+      loadPaths: [ROOT],
+      quietDeps: true,
+      silenceDeprecations: ["mixed-decls"],
+      style: "compressed",
+    });
+  } catch (error) {
+    console.error(`❌ SCSS 编译失败 ${entry}: ${error.message}`);
+    errors++;
+  }
 }
 
 if (errors > 0) {

@@ -103,6 +103,9 @@ wl-skills-ui/
 │   │   ├── registry.ts           # createPreset / installPreset
 │   │   ├── common.ts             # 通用业务预设（enable/audit/verify + 起步包）
 │   │   └── index.ts
+│   ├── auto.ts                   # Skin/老项目包级保护自动入口
+│   ├── guards.ts                 # 主题锁 + 长文本溢出保护聚合
+│   ├── overflow-tooltip.ts       # 普通表格真实溢出 Tooltip 兜底
 │   └── index.ts                  # 公共 API 入口
 │
 ├── scanner/                      # 自动化扫描 / 修复
@@ -205,7 +208,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.9` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约与定制页样式边界 |
+| `@agile-team/wl-skills-ui` | `^1.9.10` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、表格长文本兜底与定制页样式边界 |
 
 三种识别方式，任选其一：
 
@@ -219,7 +222,13 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.9：
+当前 v1.9.10：
+
+- **长文本真正包级闭环**：普通 Element Table、BaseTable 与 AG Grid 即使没有经过 `defineColumns()`，真实超宽时也会稳定显示省略号，并由 `runtime/auto` 在悬停或键盘聚焦时兜底完整文本提示；动态行和虚拟滚动无需额外处理。
+- **严格防污染边界**：已有组件 Tooltip 优先，编辑列、操作列、Tag、复选框、自定义 renderer、主动换行列、登录页及显式皮肤豁免区域均不接管；没有溢出时不创建 Tooltip。
+- **发布验证补强**：新增真实 DOM 行为测试，并将 SCSS 门禁从路径存在检查升级为完整入口编译，防止 flex 省略冲突或无效选择器再次漏发。
+
+上一版 v1.9.9：
 
 - **主操作按钮不再漏色**：新增/新建/添加/创建类按钮强制使用客户主题 `primary` 填充样式，扫描器可识别并自动修复漏写 `type` 或误带 `plain` 的存量代码。
 - **长文本交互统一**：普通数据列在空间不足时单行省略，悬停显示完整内容；Tag、操作列、自定义渲染和主动换行列不被机械覆盖。
@@ -378,6 +387,7 @@ npx wl-ui init --mode native
 // 4. src/main.ts
 import { installCommonPreset } from "@agile-team/wl-skills-ui/runtime/common-preset";
 installCommonPreset();
+// installCommonPreset 已包含主题锁和普通表格长文本包级保护，无需重复引入 runtime/auto。
 ```
 
 ```vue
@@ -417,8 +427,13 @@ npx wl-ui init --mode skin
 @use "@agile-team/wl-skills-ui/styles/presets/skin" as *;
 ```
 
+```ts
+// 3. src/main.ts：只安装包级保护，不接管页面布局或业务列定义
+import "@agile-team/wl-skills-ui/runtime/auto";
+```
+
 ```bash
-# 3. AI 编辑器中触发：
+# 4. AI 编辑器中触发：
 #    "用 wl-ui 的 legacy-skin-align 流程跑一下当前项目"
 # → AI 按 _flows/legacy-skin-align.md 顺序执行 6 个 phase
 
@@ -670,8 +685,13 @@ export const myRules = [
 | `renderRatingLevel(v)`                           | 评级颜色                                           |
 | `registerColumnAutoMap(field, config)`           | 注册新字段自动渲染                                 |
 | `installCommonPreset()`                          | 安装通用业务预设                                   |
+| `installUiRuntimeGuards()`                       | 安装主题锁与普通表格长文本包级保护                 |
+| `installOverflowTooltipGuard()`                  | 单独安装真实溢出 Tooltip 兜底                      |
 | `setDictResolver(fn)`                            | 解耦动态字典查询                                   |
 | `createPreset(config)` / `installPreset(config)` | 自定义 preset 工厂                                 |
+
+长文本兜底的接入方式、排除边界和验收方法见
+[表格长文本包级兜底机制](docs/table-overflow-tooltip.md)。
 
 ---
 

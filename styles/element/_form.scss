@@ -50,7 +50,9 @@ html body {
     font-size: var(--wk-form-font-size, 12px) !important;
   }
 
-  &.el-input__wrapper,
+  // 复合多标签输入把外壳复用了 .el-input__wrapper，但它需要随标签换行自然增高；
+  // 这里只固定真正的单行 wrapper，复合外壳交给 L2 vendor 适配。
+  &.el-input__wrapper:not(.com-input-multi-tag-wrap),
   &.el-select__wrapper,
   &.el-select .el-select__wrapper,
   &.el-date-editor.el-input__wrapper,

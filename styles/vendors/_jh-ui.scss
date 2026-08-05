@@ -132,31 +132,58 @@
     border-radius: var(--el-border-radius-base);
   }
 
-  // 6) jh-picker / reference-picker — 不走 .com-input wrapper，也要继承单行控件高度
-  &.com-picker .el-input,
-  &.com-reference-picker .el-input,
-  &.com-reference-picker-input .el-input,
-  &.com-user-picker .el-input,
-  &.com-dept-picker .el-input,
-  &.com-userPicker .el-input,
-  &.com-deptPicker .el-input,
+  // 6) jh-picker / reference-picker — 不走 .com-input wrapper，也要继承单行控件高度。
+  // 多标签组件会把外壳同时声明成 .el-input / .el-input__wrapper；外壳不是单行输入，
+  // 必须允许内容换行增高，只固定它内部真正负责编辑的 input。
+  &.com-picker .el-input:not(.com-input-multi-tag-wrap),
+  &.com-reference-picker .el-input:not(.com-input-multi-tag-wrap),
+  &.com-reference-picker-input .el-input:not(.com-input-multi-tag-wrap),
+  &.com-user-picker .el-input:not(.com-input-multi-tag-wrap),
+  &.com-dept-picker .el-input:not(.com-input-multi-tag-wrap),
+  &.com-userPicker .el-input:not(.com-input-multi-tag-wrap),
+  &.com-deptPicker .el-input:not(.com-input-multi-tag-wrap),
   &.jh-picker .el-input,
   &.jh-picker-trigger.el-input {
     height: var(--wk-form-control-height, 26px) !important;
   }
 
-  &.com-picker .el-input__wrapper,
-  &.com-reference-picker .el-input__wrapper,
-  &.com-reference-picker-input .el-input__wrapper,
-  &.com-user-picker .el-input__wrapper,
-  &.com-dept-picker .el-input__wrapper,
-  &.com-userPicker .el-input__wrapper,
-  &.com-deptPicker .el-input__wrapper,
+  &.com-picker .el-input__wrapper:not(.com-input-multi-tag-wrap),
+  &.com-reference-picker .el-input__wrapper:not(.com-input-multi-tag-wrap),
+  &.com-reference-picker-input .el-input__wrapper:not(.com-input-multi-tag-wrap),
+  &.com-user-picker .el-input__wrapper:not(.com-input-multi-tag-wrap),
+  &.com-dept-picker .el-input__wrapper:not(.com-input-multi-tag-wrap),
+  &.com-userPicker .el-input__wrapper:not(.com-input-multi-tag-wrap),
+  &.com-deptPicker .el-input__wrapper:not(.com-input-multi-tag-wrap),
   &.jh-picker .el-input__wrapper,
   &.jh-picker-trigger.el-input .el-input__wrapper {
     height: var(--wk-form-control-height, 26px) !important;
     min-height: var(--wk-form-control-height, 26px) !important;
     border-radius: var(--el-border-radius-base) !important;
+  }
+
+  // common-core 多标签输入：外层负责唯一边框和统一圆角，内容负责自然换行。
+  // 不设置固定 height，避免标签/内部输入覆盖外层 inset 边框或被裁切。
+  &.com-input-multi-tag-wrap.el-input__wrapper {
+    height: auto !important;
+    min-height: var(--wk-form-control-height, 26px) !important;
+    border-radius: var(--wk-form-control-radius, var(--el-border-radius-base, 6px)) !important;
+    box-sizing: border-box !important;
+    background: var(--el-input-bg-color, var(--el-fill-color-blank, #fff)) !important;
+    box-shadow:
+      0 0 0 1px var(--el-input-border-color, var(--el-border-color, #dcdfe6)) inset !important;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease !important;
+  }
+
+  // hover 保持低于后加载的 focus/error 契约，组合状态下由品牌焦点色或危险色胜出。
+  &.com-input-multi-tag-wrap.el-input__wrapper:not(.is-disabled):hover {
+    box-shadow:
+      0 0 0 1px var(--el-input-hover-border-color, var(--el-border-color-hover, #c0c4cc)) inset !important;
+  }
+
+  &.com-input-multi-tag-wrap.el-input__wrapper.is-disabled {
+    background: var(--el-disabled-bg-color, #f5f7fa) !important;
+    box-shadow:
+      0 0 0 1px var(--el-disabled-border-color, #e4e7ed) inset !important;
   }
 
   &.com-picker .el-input > .el-input__inner,

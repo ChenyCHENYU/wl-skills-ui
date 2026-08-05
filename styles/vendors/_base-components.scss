@@ -480,8 +480,10 @@
     transition: box-shadow 0.15s ease, border-color 0.15s ease;
   }
 
-  &.el-input__wrapper.is-focus,
-  &.el-input__wrapper:focus-within,
+  // 复合多标签输入只允许最外层 wrapper 绘制焦点边框；
+  // 内层编辑 input 保持无边框，避免出现双描边。
+  &.el-input__wrapper:not(.com-input-multi-tag-wrap .el-input__wrapper).is-focus,
+  &.el-input__wrapper:not(.com-input-multi-tag-wrap .el-input__wrapper):focus-within,
   &.el-select__wrapper.is-focus,
   &.el-select__wrapper.is-focused,
   &.el-select__wrapper:focus-within,
@@ -590,7 +592,7 @@
       color: var(--el-color-danger, #f56c6c) !important;
     }
 
-    .el-input__wrapper,
+    .el-input__wrapper:not(.com-input-multi-tag-wrap .el-input__wrapper),
     .el-select__wrapper,
     .el-date-editor.el-input__wrapper,
     .el-textarea__inner {

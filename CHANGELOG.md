@@ -4,6 +4,17 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.11] - 2026-08-06
+
+### Fixed
+
+- 精准识别 common-core 多标签输入的复合 wrapper，不再把 `.com-input-multi-tag-wrap.el-input.el-input__wrapper` 当成普通单行输入框强制固定高度；空值保持统一紧凑高度，标签换行时允许容器自然增长，避免外层边框消失或内容裁切。
+- 复合输入严格保持“外层唯一描边、内层编辑器无描边”契约；默认、hover、focus、error、disabled 状态继续使用统一边框色、客户品牌色、危险色、禁用色与 6px 圆角，不产生双描边。
+
+### Changed
+
+- 新增复合多标签输入真实 DOM 分类测试，并同时锁定普通输入仍保持 26px 固定高度，防止专项修复放宽其他正常表单规则。
+
 ## [1.9.10] - 2026-08-01
 
 ### Added

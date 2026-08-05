@@ -33,6 +33,7 @@ applyTo: "**/*.vue"
 - label `.com-text` / `.text-line-2` 单行省略 + has-colon 冒号屏蔽
 - EP 2.2.x `.el-input__inner` 26px 高度、圆角 / focus / error 三态
 - jh-picker / reference-picker 的 `.com-picker` / `.com-reference-picker` 输入高度兜底
+- common-core 多标签/人员选择器的 `.com-input-multi-tag-wrap` 使用 26px 最小高度并允许标签换行自然增高；只由外层绘制统一状态边框，内部编辑 input 不重复描边
 - jh-select / jh-date-picker 的 `.el-select.is-focus` / `.el-input.is-focus` 兼容
 - 必填星号在 inline-flex label 下显式声明颜色
 

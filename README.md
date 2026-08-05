@@ -208,7 +208,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.10` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、表格长文本兜底与定制页样式边界 |
+| `@agile-team/wl-skills-ui` | `^1.9.11` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、复合输入、表格长文本兜底与定制页样式边界 |
 
 三种识别方式，任选其一：
 
@@ -222,7 +222,13 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.10：
+当前 v1.9.11：
+
+- **复合输入不再误伤**：common-core 多标签/人员选择器不再被普通 input 的固定高度压缩；无标签时保持 26px 紧凑基线，标签换行时容器自然增高。
+- **视觉契约保持统一**：复合输入外层继续使用统一 6px 圆角及默认、hover、品牌 focus、error、disabled 边框，内部编辑 input 不重复描边；普通 input/select/date/input-number 原有规则不变。
+- **结构级防回归**：新增与 common-core 实际 DOM 一致的分类测试，明确区分复合外壳、内部编辑器和普通输入框，防止后续通用选择器再次误命中。
+
+上一版 v1.9.10：
 
 - **长文本真正包级闭环**：普通 Element Table、BaseTable 与 AG Grid 即使没有经过 `defineColumns()`，真实超宽时也会稳定显示省略号，并由 `runtime/auto` 在悬停或键盘聚焦时兜底完整文本提示；动态行和虚拟滚动无需额外处理。
 - **严格防污染边界**：已有组件 Tooltip 优先，编辑列、操作列、Tag、复选框、自定义 renderer、主动换行列、登录页及显式皮肤豁免区域均不接管；没有溢出时不创建 Tooltip。
@@ -316,7 +322,7 @@ yarn add @agile-team/wl-skills-ui
 - 优化 BaseToolbar 下拉/分裂按钮组，让“主动作 + 下拉动作”按一个动作组展示，避免视觉割裂
 - 优化 AG Grid 操作列 `jh-op-*` 图标/胶囊/文字按钮，取消按压缩放抖动，并提升选中行下的可读性
 - 补齐输入控件 focus 品牌色边框、统一圆角、长 label 单行省略和自定义弹窗图标居中尺寸规则
-- 全量移除旧 `wk-` 前缀命名（包名 / CLI / 快照目录 / 豁免配置 / MCP 工具名），不再兼容（详见 CHANGELOG v1.6.10）
+- 移除旧 `wk-` 工程命名（包名 / CLI / 快照目录 / 豁免配置 / MCP 工具名）；`--wk-*` 设计 token 作为既有公共契约继续保留，避免破坏消费项目的变量覆盖，它不代表加载了旧包
 - 新增 `skills/_meta/_compat/vendors.json` 作为 L2 Project Vendors 的单一事实源（id / priority / patterns / baseline / styles），`scanner/coverage.mjs` 启动时一次性编译 RegExp，零运行时开销
 - 新增 `wl-ui add-vendor <tag> [--family <id>] [--dry-run]` 脚手架命令：一键生成专项 SCSS、`@forward` 注册、`vendors.json` baseline 追加、scanner 规则草稿
 - MCP 工具前缀统一为 `wl_ui_*`（`wl_ui_check` / `wl_ui_scan` / `wl_ui_fix_dry_run` / `wl_ui_skill_prompt` / `wl_ui_route_intent` / `wl_ui_recommend_flow`）

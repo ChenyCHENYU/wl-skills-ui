@@ -1,6 +1,8 @@
 node_modules/
 .npmrc
 es/
+test-results/
+playwright-report/
 bash.exe.stackdump
 
 # npm pack 产物不入库

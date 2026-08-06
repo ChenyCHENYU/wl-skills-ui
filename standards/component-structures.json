@@ -1,0 +1,220 @@
+{
+  "version": "1.0.0",
+  "description": "复合/组合控件结构契约单一事实源。登记边框所有者、高度策略、内部无描边层和 Teleport 出口，防止普通 Element 选择器误识别。",
+  "heightPolicies": [
+    "fixed-control-height",
+    "auto-with-control-min-height",
+    "content-driven"
+  ],
+  "contracts": [
+    {
+      "id": "common-core.multi-tag-input",
+      "vendor": "common-core",
+      "family": "form-composite",
+      "source": "lowcode-engine/packages/common/common-lowcode/components/src/schema-component/base-input-group/input/com/multi-tag-input.vue",
+      "fixture": "scanner/__tests__/component-fixtures/common-core-multi-tag-input.html",
+      "rootSelector": ".com-input-multi-tag-wrap.el-input.el-input__wrapper",
+      "ownerSelector": ".com-input-multi-tag-wrap.el-input__wrapper",
+      "innerBorderlessSelectors": [
+        ".com-input-multi-tag-wrap .el-input__wrapper"
+      ],
+      "knownRootClasses": [
+        "com-input-multi-tag-wrap"
+      ],
+      "heightPolicy": "auto-with-control-min-height",
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "error",
+        "disabled"
+      ],
+      "assertions": [
+        {
+          "target": "root",
+          "selector": ".el-input__wrapper:not(.com-input-multi-tag-wrap)",
+          "matches": false
+        },
+        {
+          "target": "inner",
+          "selector": ".com-input-multi-tag-wrap .el-input__wrapper",
+          "matches": true
+        }
+      ],
+      "risk": "外壳同时携带 el-input 与 el-input__wrapper，内部又包含真实 input wrapper；误套固定高度会裁切标签，内外同时描边会出现双边框。"
+    },
+    {
+      "id": "common-core.user-picker-multiple",
+      "vendor": "common-core",
+      "family": "picker-composite",
+      "source": "lowcode-engine/packages/common/common-lowcode/components/src/schema-component/base-input-group/user-picker/com/multiple-picker.vue",
+      "fixture": "scanner/__tests__/component-fixtures/common-core-user-picker-multiple.html",
+      "rootSelector": ".com-userPicker.picker-wrap",
+      "ownerSelector": ".com-userPicker .com-input-multi-tag-wrap.el-input__wrapper",
+      "innerBorderlessSelectors": [
+        ".com-userPicker .com-input-multi-tag-wrap .el-input__wrapper"
+      ],
+      "portalSelectors": [
+        ".user-picker-popper",
+        ".com-userPicker-dialog"
+      ],
+      "knownRootClasses": [
+        "com-userPicker"
+      ],
+      "heightPolicy": "auto-with-control-min-height",
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "error",
+        "disabled",
+        "open"
+      ],
+      "risk": "多标签外壳、Tooltip 和 append-to-body Dialog 同时存在，页面内样式与 Teleport 浮层必须分别验证。"
+    },
+    {
+      "id": "common-core.dept-picker-multiple",
+      "vendor": "common-core",
+      "family": "picker-composite",
+      "source": "lowcode-engine/packages/common/common-lowcode/components/src/schema-component/base-input-group/dept-picker/com/multiple-picker.vue",
+      "fixture": "scanner/__tests__/component-fixtures/common-core-dept-picker-multiple.html",
+      "rootSelector": ".com-deptPicker.picker-wrap",
+      "ownerSelector": ".com-deptPicker .el-input__wrapper",
+      "innerBorderlessSelectors": [],
+      "portalSelectors": [
+        ".com-deptPicker-dialog"
+      ],
+      "knownRootClasses": [
+        "com-deptPicker"
+      ],
+      "heightPolicy": "fixed-control-height",
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "error",
+        "disabled",
+        "open"
+      ],
+      "risk": "输入触发器与 append-to-body Dialog 分离，作用域或弹层规则调整时容易只覆盖一侧。"
+    },
+    {
+      "id": "common-core.tree-picker",
+      "vendor": "common-core",
+      "family": "picker-composite",
+      "source": "lowcode-engine/packages/common/common-lowcode/components/src/schema-component/base-input-group/tree-picker/com-pc/tree-picker.vue",
+      "fixture": "scanner/__tests__/component-fixtures/common-core-tree-picker.html",
+      "rootSelector": ".com-treePicker.picker-wrap",
+      "ownerSelector": ".com-treePicker-input .el-input__wrapper",
+      "innerBorderlessSelectors": [],
+      "portalSelectors": [
+        ".com-treePicker-dialog"
+      ],
+      "knownRootClasses": [
+        "com-treePicker"
+      ],
+      "heightPolicy": "fixed-control-height",
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "error",
+        "disabled",
+        "open"
+      ],
+      "risk": "外部触发输入、树弹窗和弹窗内搜索输入属于不同层级，通用输入规则不能把三者视为一个边框所有者。"
+    },
+    {
+      "id": "common-core.select-multiple",
+      "vendor": "common-core",
+      "family": "select-composite",
+      "source": "lowcode-engine/packages/common/common-lowcode/components/src/schema-component/base-input-group/select/com/select.vue",
+      "fixture": "scanner/__tests__/component-fixtures/common-core-select-multiple.html",
+      "rootSelector": ".el-select.com-select-multiple",
+      "ownerSelector": ".el-select.com-select-multiple .el-select__wrapper",
+      "innerBorderlessSelectors": [
+        ".el-select.com-select-multiple .el-select__input"
+      ],
+      "portalSelectors": [
+        ".el-select__popper"
+      ],
+      "knownRootClasses": [
+        "com-select-multiple"
+      ],
+      "heightPolicy": "auto-with-control-min-height",
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "error",
+        "disabled",
+        "open"
+      ],
+      "risk": "Tag、过滤输入和 Teleport 下拉层共存；必须保留多选自然增高并避免内部 editor 重复描边。"
+    },
+    {
+      "id": "common-core.input-number-mixed-wrapper",
+      "vendor": "common-core",
+      "family": "number-composite",
+      "source": "lowcode-engine/packages/common/common-lowcode/components/src/schema-component/base-input-group/input-number/com/input-number.vue",
+      "fixture": "scanner/__tests__/component-fixtures/common-core-input-number-mixed.html",
+      "rootSelector": ".el-input-number.el-input__wrapper",
+      "ownerSelector": ".el-input-number.el-input__wrapper",
+      "innerBorderlessSelectors": [
+        ".el-input-number.el-input__wrapper > .el-input > .el-input__wrapper"
+      ],
+      "knownRootClasses": [
+        "el-input-number"
+      ],
+      "heightPolicy": "fixed-control-height",
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "error",
+        "disabled"
+      ],
+      "assertions": [
+        {
+          "target": "root",
+          "selector": ".el-input-number.el-input__wrapper",
+          "matches": true
+        },
+        {
+          "target": "inner",
+          "selector": ".el-input-number.el-input__wrapper > .el-input > .el-input__wrapper",
+          "matches": true
+        }
+      ],
+      "risk": "根节点本身是 wrapper，内部仍含 Element input wrapper；只能由根节点绘制唯一状态边框。"
+    },
+    {
+      "id": "common-core.base-toolbar-split-button",
+      "vendor": "common-core",
+      "family": "action-composite",
+      "source": "common-core BaseToolbar split-button rendered DOM",
+      "fixture": "scanner/__tests__/component-fixtures/common-core-base-toolbar-split.html",
+      "rootSelector": ".base-toolbar-box .action-button-wrap > .el-dropdown > .el-button-group",
+      "ownerSelector": ".base-toolbar-box .action-button-wrap > .el-dropdown > .el-button-group",
+      "innerBorderlessSelectors": [
+        ".base-toolbar-box .action-button-wrap > .el-dropdown > .el-button-group > .el-dropdown__caret-button"
+      ],
+      "portalSelectors": [
+        ".el-dropdown-menu.action-dropdown-menu"
+      ],
+      "knownRootClasses": [
+        "action-button-wrap"
+      ],
+      "heightPolicy": "content-driven",
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "active",
+        "disabled",
+        "open"
+      ],
+      "risk": "主动作和箭头是两个交互区但必须共享一个视觉外轮廓；下拉菜单中的业务按钮需扁平化且不能污染普通菜单。"
+    }
+  ]
+}

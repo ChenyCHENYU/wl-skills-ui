@@ -4,6 +4,22 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.12] - 2026-08-06
+
+### Added
+
+- 新增 `standards/component-structures.json` 复合控件结构契约，首批登记 common-core 多标签、人员/部门/树选择、多选、混合数字输入与 BaseToolbar 分裂按钮的边框所有者、高度策略、状态、内部无描边层和 Teleport 出口。
+- 新增 R040 未知复合结构审查规则与真实 DOM fixtures；已登记结构正常通过，疑似新结构要求人工核对后再增加精准适配，不执行机械修复。
+- 新增 Chromium 浏览器视觉回归及发布门禁，覆盖主题防反覆盖、按钮/圆角、textarea focus、数字输入单描边、复合输入自然增高、长文本提示、表格行状态和定制区域豁免。
+
+### Changed
+
+- `prepublishOnly` 升级为完整 `release:check`，npm 发布前必须同时通过代码、文档、构建、包内容及真实浏览器视觉回归；测试页和截图不进入 npm 包。
+
+### Fixed
+
+- 真实浏览器回归发现并修复复合多标签内部 editor 仍继承 Element Plus 默认 inset 的问题；仅在已登记的 `.com-input-multi-tag-wrap` 结构中清除子 wrapper 描边，普通输入与其他 picker 不受影响。
+
 ## [1.9.11] - 2026-08-06
 
 ### Fixed

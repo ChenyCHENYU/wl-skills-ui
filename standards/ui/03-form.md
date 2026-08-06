@@ -70,6 +70,10 @@ textarea 不强制 26px 高度，只继承统一圆角、字体和状态样式�
 复合控件只能由最外层 wrapper 绘制默认、hover、focus、error、disabled 边框；内部编辑 input
 必须保持无描边，避免边框消失、内容裁切或出现双描边。
 
+所有非薄封装复合控件必须登记到 `standards/component-structures.json`，明确根节点、边框
+所有者、内部无描边层、高度策略、状态与 Teleport 出口，并提供真实 DOM fixture。R040
+发现疑似未知结构时只要求人工评审，不自动改写；禁止在结构未确认前扩大全局 Element 选择器。
+
 ---
 
 ## 规则：紧凑业务表单字号统一为 12px

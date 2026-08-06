@@ -8,6 +8,11 @@ const root = join(__dirname, "..");
 const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const readme = readFileSync(join(root, "README.md"), "utf8");
 const changelog = readFileSync(join(root, "CHANGELOG.md"), "utf8");
+const componentRegistryPath = join(
+  root,
+  "standards",
+  "component-structures.json",
+);
 const editorConfig = JSON.parse(
   readFileSync(
     join(root, "skills", "_meta", "_compat", "editors.json"),
@@ -127,6 +132,41 @@ if (!readme.includes(`当前 v${pkg.version}`)) {
 
 if (!changelog.includes(`## [${pkg.version}]`)) {
   errors.push(`CHANGELOG.md: 缺少 ${pkg.version} 版本记录`);
+}
+
+// 复合控件结构清单必须可发布、ID 唯一，并且每项真实 DOM fixture 存在。
+if (!existsSync(componentRegistryPath)) {
+  errors.push("standards/component-structures.json: 复合控件结构清单不存在");
+} else {
+  const componentRegistry = JSON.parse(
+    readFileSync(componentRegistryPath, "utf8"),
+  );
+  const contracts = componentRegistry.contracts || [];
+  const contractIds = new Set(contracts.map((contract) => contract.id));
+  if (contractIds.size !== contracts.length) {
+    errors.push("standards/component-structures.json: 存在重复结构 ID");
+  }
+  for (const contract of contracts) {
+    for (const field of [
+      "id",
+      "source",
+      "fixture",
+      "rootSelector",
+      "ownerSelector",
+      "heightPolicy",
+    ]) {
+      if (!contract[field]) {
+        errors.push(
+          `standards/component-structures.json: ${contract.id || "<unknown>"} 缺少 ${field}`,
+        );
+      }
+    }
+    if (contract.fixture && !existsSync(join(root, contract.fixture))) {
+      errors.push(
+        `standards/component-structures.json: ${contract.id} fixture 不存在：${contract.fixture}`,
+      );
+    }
+  }
 }
 
 for (const editor of editorConfig.editors) {

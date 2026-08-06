@@ -44,6 +44,10 @@
     "layout": {
       "label": "页面骨架 / 操作组合",
       "standardsDoc": "skills/layouts/list-page/SKILL.md"
+    },
+    "composite": {
+      "label": "复合控件结构契约",
+      "standardsDoc": "standards/component-structures.json"
     }
   },
   "rules": [
@@ -464,6 +468,22 @@
       "manualReason": "需按组件语义选择 base/small/round 等圆角 token",
       "scanner": "scanner/rules/semantic.mjs",
       "skills": ["tokens/index"]
+    },
+    {
+      "id": "R040",
+      "category": "composite",
+      "severity": "review",
+      "title": "未知复合控件结构必须先登记边框与高度契约",
+      "rationale": "复合输入可能同时包含 Element 外壳、内部 editor 与 Teleport 浮层；直接套用普通 input 规则会造成固定高度裁切、边框消失或双描边。",
+      "appliesTo": [
+        "project-owned composite input wrapper",
+        ".el-input.el-input__wrapper",
+        "picker/multiple/tag wrapper containing Element input"
+      ],
+      "autoFixable": false,
+      "manualReason": "必须核对真实 DOM，明确边框所有者、高度策略、内部无描边层与 Teleport 出口",
+      "scanner": "scanner/rules/componentStructure.mjs",
+      "skills": ["vendors/jh-components"]
     }
   ]
 }

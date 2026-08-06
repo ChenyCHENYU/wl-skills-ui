@@ -115,6 +115,7 @@ wl-skills-ui/
 │   │   ├── table.mjs             # R001 R002 R003 R014 R039
 │   │   ├── form.mjs              # R006 R007 R008
 │   │   ├── button.mjs            # R004 R005 R015 R038
+│   │   ├── componentStructure.mjs # R040 复合结构登记审查
 │   │   ├── tag.mjs               # R009 R010 R012
 │   │   ├── dialog.mjs            # R011
 │   │   ├── color.mjs             # R016 R017 R018
@@ -166,8 +167,11 @@ wl-skills-ui/
 │   └── ag-grid-page/TPL-AG-GRID.md
 │
 ├── standards/                    # 团队规范文档
+│   ├── component-structures.json # 复合控件结构契约单一事实源
 │   ├── ui/                       # UI 规范（01-table / 02-button / ...）
 │   └── engineering/              # 工程规范（import 顺序 / 命名 / SCSS 结构）
+│
+├── tests/visual/                 # Chromium 真实浏览器视觉回归与基准图
 │
 ├── bin/                          # CLI
 │   └── wl-ui.js                  # 统一入口（init/update/diff/clean/doctor/prompts/scan/fix/add-preset）
@@ -208,7 +212,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.11` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、复合输入、表格长文本兜底与定制页样式边界 |
+| `@agile-team/wl-skills-ui` | `^1.9.12` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、复合输入、表格长文本兜底与定制页样式边界 |
 
 三种识别方式，任选其一：
 
@@ -222,7 +226,13 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.11：
+当前 v1.9.12：
+
+- **复合结构有清单**：`standards/component-structures.json` 登记边框所有者、内部无描边层、高度策略、状态与 Teleport 出口；首批覆盖 common-core 多标签、人员/部门/树选择、多选、混合数字框及 BaseToolbar 分裂按钮。
+- **未知结构先评审**：新增 R040，对疑似复合 Element wrapper 只报告、不自动修复，要求先核对真实 DOM 并登记契约，禁止继续放大普通 Element 选择器。
+- **发版前真实浏览器门禁**：新增 Chromium 视觉回归，验证客户主题防反覆盖、按钮与圆角、textarea focus、数字框单描边、复合输入自然增高、长文本省略/提示、表格行状态和定制区域豁免；截图基准不进入 npm 产物。
+
+上一版 v1.9.11：
 
 - **复合输入不再误伤**：common-core 多标签/人员选择器不再被普通 input 的固定高度压缩；无标签时保持 26px 紧凑基线，标签换行时容器自然增高。
 - **视觉契约保持统一**：复合输入外层继续使用统一 6px 圆角及默认、hover、品牌 focus、error、disabled 边框，内部编辑 input 不重复描边；普通 input/select/date/input-number 原有规则不变。
@@ -717,7 +727,7 @@ export const myRules = [
 
 ## 规范清单
 
-### UI 规则（R001-R039，按 layer 自动分组）
+### UI 规则（R001-R040，按 layer 自动分组）
 
 | Rule | Layer | Vendor    | 说明                                 |
 | ---- | ----- | --------- | ------------------------------------ |
@@ -750,6 +760,30 @@ export const myRules = [
 | R037 | L1    | element   | 空/异常反馈建议统一操作入口          |
 | R038 | L1    | element   | 创建类主按钮缺 primary 填充主题色    |
 | R039 | L1    | element   | 普通数据列缺省略与悬停完整提示       |
+| R040 | L2    | common-core | 未登记复合控件结构需人工评审       |
+
+### 维护者防回归
+
+复合控件必须先登记结构契约，再增加精准样式；包发版必须经过 Chromium 基准图对比：
+
+```bash
+# Windows 默认使用已安装的 Edge Chromium；非 Windows 首次安装一次
+pnpm exec playwright install chromium
+
+# 日常验证
+pnpm test
+pnpm test:visual
+
+# 仅在设计变更已经人工确认时更新基准图
+pnpm test:visual:update
+
+# 完整发版门禁（含 lint、契约、SCSS、文档、构建、包校验、视觉回归）
+pnpm release:check
+```
+
+机制与准入细则见 [复合控件结构契约](docs/composite-component-contracts.md) 和
+[浏览器视觉回归](docs/visual-regression.md)。视觉基准依赖字体、浏览器与操作系统渲染，
+必须在相同环境中比较；当前项目基准由 Windows Edge Chromium 生成。
 
 ### 工程规范
 

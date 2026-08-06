@@ -106,6 +106,10 @@ describe("复合多标签输入样式契约", () => {
       baseComponents,
       /box-shadow:\s*0 0 0 1px var\(--el-color-danger,\s*#f56c6c\) inset !important/,
     );
+    assert.match(
+      jhUi,
+      /&\.com-input-multi-tag-wrap\.el-input__wrapper[\s\S]*?\.el-input[\s\S]*?> \.el-input__wrapper\s*\{[\s\S]*?box-shadow:\s*none !important/,
+    );
     assert.ok(
       vendorIndex.indexOf("@forward './_jh-ui'") <
         vendorIndex.indexOf("@forward './_base-components'"),

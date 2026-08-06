@@ -186,6 +186,17 @@
       0 0 0 1px var(--el-disabled-border-color, #e4e7ed) inset !important;
   }
 
+  // 内部 editor 只负责文字录入。Element Plus 默认会给子 wrapper 再画一层 inset，
+  // 必须在已登记的复合结构内精准清除；不触碰普通 input 或其他 picker。
+  &.com-input-multi-tag-wrap.el-input__wrapper
+    .el-input
+    > .el-input__wrapper {
+    border: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
   &.com-picker .el-input > .el-input__inner,
   &.com-reference-picker .el-input > .el-input__inner,
   &.com-reference-picker-input .el-input > .el-input__inner,

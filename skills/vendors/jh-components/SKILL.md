@@ -34,6 +34,7 @@ applyTo: "**/*.vue"
 - EP 2.2.x `.el-input__inner` 26px 高度、圆角 / focus / error 三态
 - jh-picker / reference-picker 的 `.com-picker` / `.com-reference-picker` 输入高度兜底
 - common-core 多标签/人员选择器的 `.com-input-multi-tag-wrap` 使用 26px 最小高度并允许标签换行自然增高；只由外层绘制统一状态边框，内部编辑 input 不重复描边
+- common-core 复合结构统一登记在 `standards/component-structures.json`；R040 遇到未登记的疑似 picker/multiple/tag 混合 wrapper 时只提示人工核对，不允许直接放大通用 Element 选择器
 - jh-select / jh-date-picker 的 `.el-select.is-focus` / `.el-input.is-focus` 兼容
 - 必填星号在 inline-flex label 下显式声明颜色
 
@@ -52,6 +53,7 @@ applyTo: "**/*.vue"
 - ❌ jh-pagination 未对齐到右侧（同 R011）
 - ❌ jh-form 内不用 `size="small"` 控件（同 R006）
 - ❌ 发现新的复杂 `<jh-*>` 组件后只在页面局部写补丁，而不沉淀到 L2 Project Vendors
+- ❌ 新复合结构未登记边框所有者、高度策略、内部无描边层与 Teleport 出口就直接写全局覆盖（R040）
 
 ## Repair
 

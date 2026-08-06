@@ -1,6 +1,6 @@
 {
   "name": "@agile-team/wl-skills-ui",
-  "version": "1.9.11",
+  "version": "1.9.12",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 项目通用化妆/原生双模式（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
   "main": "./es/index.js",
@@ -48,6 +48,9 @@
     "prepare": "npm run build",
     "sync:tokens": "node -e \"import('fs').then(fs=>fs.copyFileSync('design/tokens/base.css','dist/tokens.css'))\"",
     "test": "node --test scanner/__tests__/*.test.mjs",
+    "test:visual": "playwright test --config tests/visual/playwright.config.ts",
+    "test:visual:ui": "playwright test --config tests/visual/playwright.config.ts --ui",
+    "test:visual:update": "playwright test --config tests/visual/playwright.config.ts --update-snapshots",
     "check:scss": "node scripts/check-scss.mjs",
     "docs:check": "node scripts/check-docs.mjs",
     "scan": "node scanner/index.mjs scan",
@@ -60,8 +63,8 @@
     "verify:package": "node scripts/verify-package.mjs",
     "verify": "npm run lint && npm test && npm run check:scss && npm run docs:check && npm run build && npm run verify:package",
     "pack:dry": "npm pack --dry-run --ignore-scripts",
-    "release:check": "npm run verify && npm pack --dry-run --ignore-scripts",
-    "prepublishOnly": "npm run verify"
+    "release:check": "npm run verify && npm run test:visual && npm pack --dry-run --ignore-scripts",
+    "prepublishOnly": "npm run release:check"
   },
   "files": [
     "dist",
@@ -92,8 +95,10 @@
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
     "@element-plus/icons-vue": "^2.3.0",
+    "@playwright/test": "^1.62.1",
     "@typescript-eslint/eslint-plugin": "^8.59.2",
     "@typescript-eslint/parser": "^8.59.2",
+    "@vitejs/plugin-vue": "^6.0.8",
     "@vue/eslint-config-typescript": "^14.7.0",
     "commitizen": "^4.3.1",
     "cz-customizable": "^7.5.4",
@@ -106,6 +111,7 @@
     "sass": "1.77.8",
     "tsup": "^8.3.0",
     "typescript": "^5.4.0",
+    "vite": "^8.2.0",
     "vue": "^3.4.0"
   },
   "peerDependencies": {

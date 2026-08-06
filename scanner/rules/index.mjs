@@ -17,6 +17,7 @@ import { colorRules } from "./color.mjs";
 import { dialogRules } from "./dialog.mjs";
 import { tagRules } from "./tag.mjs";
 import { componentFamilyRules } from "./componentFamily.mjs";
+import { componentStructureRules } from "./componentStructure.mjs";
 import { semanticRules } from "./semantic.mjs";
 
 export const BUILT_IN_RULES = [
@@ -27,6 +28,7 @@ export const BUILT_IN_RULES = [
   ...dialogRules,
   ...tagRules,
   ...componentFamilyRules,
+  ...componentStructureRules,
   ...semanticRules,
 ];
 

@@ -13,6 +13,8 @@
 - textarea focus 品牌边框与轻焦点环。
 - 数字输入只有一个边框所有者。
 - common-core 复合多标签外壳自然增高、内层无双描边。
+- input-group 输入主体、前后附加段、左右图标的统一高度/尺寸/圆角与 focus 描边。
+- jh-drag-row 收缩后 AG Grid host 跟随变高，纵向滚动只发生在内部 viewport。
 - Element Table 长文本真实溢出、省略号与按需完整提示。
 - 表格选中行柔和状态色、BaseToolbar 分裂按钮与定制区域豁免。
 

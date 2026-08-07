@@ -4,6 +4,22 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.13] - 2026-08-07
+
+### Added
+
+- 新增 `runtime/split-grid-resize` 分屏表格尺寸守护：只观察 `jh-drag-row` 的直接 pane，支持动态路由晚挂载，连续 Resize 按动画帧合并，并向 grid host 派发局部 `wl-ui:split-grid-resize` 事件。
+- 复合结构清单新增 Element Plus input-group 新旧 DOM 与 common-core drag-row/AG Grid 契约，并补充 Node 行为测试和真实浏览器回归。
+
+### Fixed
+
+- 修复带 prefix/append 的输入框主体与右侧图标高度、圆角、边框不一致；组合根统一 26px、6px 和五态描边，左右图标统一 14px，纯图标附加段统一 32px，同时兼容旧版 input 直挂和新版 wrapper DOM。
+- 修复上下分屏拖动后 AG Grid 宿主未沿 pane 收缩、上表只被外层 `overflow:hidden` 裁切且缺少内部纵向滚动的问题；只补齐已识别 AG Grid 的 flex 高度链，让 AG Grid 自身 ResizeObserver 完成内部布局。
+
+### Changed
+
+- 分屏守护不增加外层滚动条、不广播全局 `window.resize`、不访问 Vue 私有实例或猜测 gridApi；普通分屏、普通表格、非分屏 AG Grid、登录页和显式豁免区域不接管，卸载时清理包内结构标记。
+
 ## [1.9.12] - 2026-08-06
 
 ### Added

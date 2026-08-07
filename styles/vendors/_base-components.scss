@@ -612,6 +612,23 @@
       > .el-input__wrapper {
       box-shadow: none !important;
     }
+
+    // 输入组合框由最外层统一绘制轮廓；错误态必须覆盖其 focus-within 品牌色，
+    // 同时清空内部 wrapper，避免 append/prepend 场景出现双描边。
+    .el-input.el-input-group:not(.is-disabled),
+    .el-input.el-input-group:not(.is-disabled):hover {
+      box-shadow: 0 0 0 1px var(--el-color-danger, #f56c6c) inset !important;
+    }
+
+    .el-input.el-input-group:not(.is-disabled):focus-within {
+      box-shadow:
+        0 0 0 1.5px var(--el-color-danger, #f56c6c) inset,
+        0 0 0 2px rgba(var(--el-color-danger-rgb, 245, 108, 108), 0.1) !important;
+    }
+
+    .el-input.el-input-group > .el-input__wrapper {
+      box-shadow: none !important;
+    }
   }
 }
 

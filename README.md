@@ -104,8 +104,9 @@ wl-skills-ui/
 │   │   ├── common.ts             # 通用业务预设（enable/audit/verify + 起步包）
 │   │   └── index.ts
 │   ├── auto.ts                   # Skin/老项目包级保护自动入口
-│   ├── guards.ts                 # 主题锁 + 长文本溢出保护聚合
+│   ├── guards.ts                 # 主题锁 + 长文本 + 分屏表格尺寸保护聚合
 │   ├── overflow-tooltip.ts       # 普通表格真实溢出 Tooltip 兜底
+│   ├── split-grid-resize.ts      # jh-drag-row 内 AG Grid Resize/高度链守护
 │   └── index.ts                  # 公共 API 入口
 │
 ├── scanner/                      # 自动化扫描 / 修复
@@ -212,7 +213,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.12` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、复合输入、表格长文本兜底与定制页样式边界 |
+| `@agile-team/wl-skills-ui` | `^1.9.13` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、input-group 附加段、分屏 AG Grid 重布局、表格长文本兜底与定制页边界 |
 
 三种识别方式，任选其一：
 
@@ -226,7 +227,14 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.12：
+当前 v1.9.13：
+
+- **输入附加段不再割裂**：`el-input-group` 由组合根统一 26px 高度、6px 外圆角和 default/hover/focus/error/disabled 描边；左侧 prefix、右侧 append 图标统一 14px，纯图标附加段 32px，文字/单位/按钮仍按内容宽度。
+- **新旧 DOM 同时覆盖**：兼容 jh-ui 配套旧版 input 直挂结构和新版 `.el-input__wrapper` 结构，内部输入不再重复描边；普通 input、普通按钮、登录页和显式豁免区保持原行为。
+- **分屏表格真正重布局**：`runtime/auto` 只观察 `jh-drag-row` 内真实 AG Grid pane，补齐可收缩高度链并按帧派发局部重布局事件；AG Grid 自身 ResizeObserver 生成内部滚动条，不给外层加滚动条、不广播全局 resize、不访问 Vue 私有实例。
+- **回归边界闭环**：结构清单新增 input-group 新旧 DOM 与 drag-row/AG Grid 契约；Node 行为测试覆盖动态挂载、批量 Resize、豁免区，真实浏览器验证附加段计算样式及 220px→120px 收缩后的内部滚动。
+
+上一版 v1.9.12：
 
 - **复合结构有清单**：`standards/component-structures.json` 登记边框所有者、内部无描边层、高度策略、状态与 Teleport 出口；首批覆盖 common-core 多标签、人员/部门/树选择、多选、混合数字框及 BaseToolbar 分裂按钮。
 - **未知结构先评审**：新增 R040，对疑似复合 Element wrapper 只报告、不自动修复，要求先核对真实 DOM 并登记契约，禁止继续放大普通 Element 选择器。
@@ -403,7 +411,7 @@ npx wl-ui init --mode native
 // 4. src/main.ts
 import { installCommonPreset } from "@agile-team/wl-skills-ui/runtime/common-preset";
 installCommonPreset();
-// installCommonPreset 已包含主题锁和普通表格长文本包级保护，无需重复引入 runtime/auto。
+// 已包含主题锁、普通表格长文本和分屏 AG Grid 尺寸保护，无需重复引入 runtime/auto。
 ```
 
 ```vue

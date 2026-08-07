@@ -14,4 +14,5 @@ export * from "./core";
 export * from "./presets/registry";
 export * from "./theme-lock";
 export * from "./overflow-tooltip";
+export * from "./split-grid-resize";
 export * from "./guards";

@@ -75,6 +75,130 @@ html body {
     line-height: calc(var(--wk-form-control-height) - 2px) !important;
   }
 
+  // ── 带前/后附加段的输入框 ────────────────────────────────────────────────
+  // Element input-group 把输入主体与 append/prepend 分成多个描边节点；平台或
+  // 业务局部高度只改其中一段时，就会出现截图中的右侧图标高低、圆角和边框不齐。
+  // 仅命中真实 .el-input.el-input-group，由组合根绘制唯一外轮廓，内部只保留分隔线。
+  &.el-input.el-input-group {
+    display: inline-flex !important;
+    align-items: stretch !important;
+    height: var(--wk-form-control-height) !important;
+    min-height: var(--wk-form-control-height) !important;
+    border: 0 !important;
+    border-radius: var(--wk-form-control-radius) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    background: var(--el-bg-color, #fff) !important;
+    box-shadow: 0 0 0 1px var(--el-border-color, #dcdfe6) inset !important;
+    transition: box-shadow 0.15s ease !important;
+  }
+
+  &.el-input.el-input-group > .el-input__wrapper {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  // jh-ui 配套的 Element Plus 2.2.x 仍可能使用 input 直挂结构。
+  &.el-input.el-input-group > .el-input__inner {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  &.el-input.el-input-group > .el-input-group__prepend,
+  &.el-input.el-input-group > .el-input-group__append {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 0 8px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    color: var(--el-text-color-secondary, #909399) !important;
+    background: var(--el-fill-color-light, #f5f7fa) !important;
+    box-shadow: none !important;
+  }
+
+  &.el-input.el-input-group > .el-input-group__prepend {
+    box-shadow: -1px 0 0 var(--el-border-color, #dcdfe6) inset !important;
+  }
+
+  &.el-input.el-input-group > .el-input-group__append {
+    box-shadow: 1px 0 0 var(--el-border-color, #dcdfe6) inset !important;
+  }
+
+  &.el-input.el-input-group
+    > :where(.el-input-group__prepend, .el-input-group__append):has(
+      > .el-icon:only-child
+    ) {
+    flex-basis: 32px !important;
+    width: 32px !important;
+    padding: 0 !important;
+  }
+
+  &.el-input.el-input-group
+    > :where(.el-input-group__prepend, .el-input-group__append)
+    > .el-icon,
+  &.el-input .el-input__prefix-inner > .el-icon,
+  &.el-input .el-input__suffix-inner > .el-icon,
+  &.el-input .el-input__prefix > .el-icon,
+  &.el-input .el-input__suffix > .el-icon {
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 14px !important;
+    line-height: 14px !important;
+  }
+
+  &.el-input.el-input-group
+    > :where(.el-input-group__prepend, .el-input-group__append)
+    > .el-button {
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 -8px !important;
+    padding: 0 8px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  &.el-input.el-input-group:not(.is-disabled):hover {
+    box-shadow: 0 0 0 1px var(--el-border-color-hover, #c0c4cc) inset !important;
+  }
+
+  &.el-input.el-input-group:not(.is-disabled):focus-within {
+    box-shadow:
+      0 0 0 1.5px var(--el-color-primary, #002a8f) inset,
+      0 0 0 2px rgba(var(--el-color-primary-rgb, 0, 42, 143), 0.1) !important;
+  }
+
+  &.el-input.el-input-group.is-disabled {
+    background: var(--el-disabled-bg-color, #f5f7fa) !important;
+    box-shadow: 0 0 0 1px var(--el-disabled-border-color, #e4e7ed) inset !important;
+  }
+
+  &.el-input.el-input-group.is-disabled
+    > :where(.el-input-group__prepend, .el-input-group__append) {
+    color: var(--el-disabled-text-color, #a8abb2) !important;
+    background: var(--el-disabled-bg-color, #f5f7fa) !important;
+  }
+
   // common-core / jh-ui 有两种数字框 DOM：
   // A. .el-input-number > .el-input > .el-input__wrapper（社区版）
   // B. .el-input-number.el-input__wrapper > .el-input（jh 同节点 wrapper）
@@ -217,4 +341,5 @@ html body {
     box-shadow:
       0 0 0 2px rgba(var(--el-color-primary-rgb, 0, 42, 143), 0.12) !important;
   }
+
 }

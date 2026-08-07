@@ -89,6 +89,72 @@ describe("表单样式契约", () => {
       /\.el-input-number\.el-input__wrapper:not\(\.is-disabled\)[\s\S]*?> \.el-input__wrapper \{[\s\S]*?box-shadow:\s*none !important/,
     );
   });
+
+  it("input-group 由组合根统一附加段高度、圆角、图标和状态描边", () => {
+    for (const selector of [
+      "&.el-input.el-input-group",
+      "&.el-input.el-input-group > .el-input__wrapper",
+      "&.el-input.el-input-group > .el-input__inner",
+      "&.el-input.el-input-group > .el-input-group__append",
+      "&.el-input.el-input-group > .el-input-group__prepend",
+      "&.el-input .el-input__prefix-inner > .el-icon",
+      "&.el-input .el-input__suffix-inner > .el-icon",
+    ]) {
+      assert.ok(form.includes(selector), `缺少 input-group 分支：${selector}`);
+    }
+    assert.match(
+      form,
+      /&\.el-input\.el-input-group\s*\{[\s\S]*?height:\s*var\(--wk-form-control-height\)\s*!important;[\s\S]*?border-radius:\s*var\(--wk-form-control-radius\)\s*!important;[\s\S]*?box-shadow:/,
+    );
+    assert.match(
+      form,
+      /&\.el-input\.el-input-group > \.el-input__wrapper\s*\{[\s\S]*?border-radius:\s*0\s*!important;[\s\S]*?box-shadow:\s*none\s*!important/,
+    );
+    assert.match(
+      form,
+      /\.el-icon,[\s\S]*?width:\s*14px\s*!important;[\s\S]*?height:\s*14px\s*!important/,
+    );
+  });
+});
+
+describe("上下分屏 AG Grid 高度链契约", () => {
+  const dragRow = read("styles/vendors/_jh-drag-row.scss");
+  const resizeRuntime = read("runtime/split-grid-resize.ts");
+
+  it("只在运行时识别的分屏 AG Grid 内补齐收缩链，不给外层制造滚动条", () => {
+    for (const marker of [
+      "[data-wl-ui-split-pane]",
+      "[data-wl-ui-split-grid-chain]",
+      "[data-wl-ui-split-grid-flex-parent]",
+      "[data-wl-ui-split-grid-host]",
+    ]) {
+      assert.ok(dragRow.includes(marker), `缺少分屏结构标记：${marker}`);
+    }
+    assert.match(
+      dragRow,
+      /\[data-wl-ui-split-grid-flex-parent\][\s\S]*?> \[data-wl-ui-split-grid-host\][\s\S]*?flex:\s*1 1 0\s*!important;[\s\S]*?height:\s*0\s*!important/,
+    );
+    assert.doesNotMatch(dragRow, /\.drager_(top|bottom)[^{]*\{[^}]*overflow:\s*(auto|scroll)/);
+  });
+
+  it("ResizeObserver 按帧合并并通知 AG Grid 自己重布局", () => {
+    assert.match(resizeRuntime, /new window\.ResizeObserver/);
+    assert.match(resizeRuntime, /window\.requestAnimationFrame\(flushPendingPanes\)/);
+    assert.match(resizeRuntime, /host\.dispatchEvent\(/);
+    assert.doesNotMatch(
+      resizeRuntime,
+      /window\.dispatchEvent\(new window\.Event\("resize"\)\)/,
+    );
+    assert.ok(resizeRuntime.includes('const SPLIT_ROOT_SELECTOR = ".drager_row"'));
+    for (const exempt of [
+      ".lp-root",
+      ".session-login",
+      ".wl-ui-skin-exempt",
+      "[data-wl-ui-skin='off']",
+    ]) {
+      assert.ok(resizeRuntime.includes(exempt), `缺少分屏豁免：${exempt}`);
+    }
+  });
 });
 
 describe("长文本省略与悬停契约", () => {

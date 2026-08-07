@@ -38,6 +38,14 @@ wrapper 时，应先按上述流程确认，不能直接扩大全局 Element 选
 - 部门选择、树选择和 Element 多选封装。
 - 同节点 wrapper + 子 wrapper 的混合数字输入。
 - BaseToolbar 分裂按钮及其动作菜单 Teleport 出口。
+- Element Plus 新旧两种 input-group prepend/append DOM：组合根负责唯一外轮廓，
+  输入主体与附加段统一 26px，纯图标附加段 32px、图标 14px。
+- common-core `jh-drag-row + BaseTable/AG Grid` 高度链：只在真实分屏 AG Grid 中
+  补齐可收缩结构并通知表格内部重布局。
 
 组件结构变化时，测试会先在 fixture/selector 契约处失败，从而把风险阻断在发版前，
 不会等十余个业务项目升级后再发现。
+
+input-group 附加段保留文字、单位、按钮的内容驱动宽度，只有“直接子节点为唯一
+`.el-icon`”时才使用 32px 紧凑宽度；普通 input、普通按钮和非 input-group 不命中。
+分屏重布局的运行机制与接入方式见 `docs/split-grid-resize.md`。

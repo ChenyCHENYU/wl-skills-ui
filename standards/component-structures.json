@@ -215,6 +215,99 @@
         "open"
       ],
       "risk": "主动作和箭头是两个交互区但必须共享一个视觉外轮廓；下拉菜单中的业务按钮需扁平化且不能污染普通菜单。"
+    },
+    {
+      "id": "element-plus.input-group-affixes",
+      "vendor": "element-plus",
+      "family": "form-composite",
+      "source": "Element Plus Input prepend/append slot DOM；common-core jh-input 沿用该结构",
+      "fixture": "scanner/__tests__/component-fixtures/element-input-group-affixes.html",
+      "rootSelector": ".el-input.el-input-group",
+      "ownerSelector": ".el-input.el-input-group",
+      "innerBorderlessSelectors": [
+        ".el-input.el-input-group > .el-input__wrapper"
+      ],
+      "knownRootClasses": [
+        "el-input-group"
+      ],
+      "heightPolicy": "fixed-control-height",
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "error",
+        "disabled"
+      ],
+      "assertions": [
+        {
+          "target": "root",
+          "selector": ".el-input.el-input-group",
+          "matches": true
+        },
+        {
+          "target": "inner",
+          "selector": ".el-input.el-input-group > .el-input__wrapper",
+          "matches": true
+        }
+      ],
+      "risk": "输入主体、prepend/append 和内部图标原本各自携带高度、圆角与描边；必须由组合根统一外轮廓，仅保留内部接缝，避免附加段独立成块。"
+    },
+    {
+      "id": "common-core.drag-row-ag-grid",
+      "vendor": "common-core",
+      "family": "layout-composite",
+      "source": "lowcode-engine/packages/common/common-lowcode/components-core/src/components/drag-row/drag-row.vue + BaseTable renderType=agGrid DOM",
+      "fixture": "scanner/__tests__/component-fixtures/common-core-drag-row-ag-grid.html",
+      "rootSelector": ".drager_row",
+      "ownerSelector": ".drager_row .ag-grid-table",
+      "innerBorderlessSelectors": [],
+      "knownRootClasses": [
+        "drager_row"
+      ],
+      "heightPolicy": "content-driven",
+      "states": [
+        "initial",
+        "dragging",
+        "drag-end",
+        "container-resize"
+      ],
+      "risk": "分屏 pane 使用 overflow:hidden，拖动后若 AG Grid 宿主没有沿 flex 高度链收缩，只会裁掉旧尺寸内容而不会生成内部纵向滚动条。"
+    },
+    {
+      "id": "element-plus.input-group-affixes-legacy",
+      "vendor": "element-plus",
+      "family": "form-composite",
+      "source": "jh-ui 3.1.0 配套 Element Plus 2.2.x Input prepend/append 直挂 DOM",
+      "fixture": "scanner/__tests__/component-fixtures/element-input-group-affixes-legacy.html",
+      "rootSelector": ".el-input.el-input-group",
+      "ownerSelector": ".el-input.el-input-group",
+      "innerBorderlessSelectors": [
+        ".el-input.el-input-group > .el-input__inner"
+      ],
+      "knownRootClasses": [
+        "el-input-group"
+      ],
+      "heightPolicy": "fixed-control-height",
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "error",
+        "disabled"
+      ],
+      "assertions": [
+        {
+          "target": "root",
+          "selector": ".el-input.el-input-group",
+          "matches": true
+        },
+        {
+          "target": "inner",
+          "selector": ".el-input.el-input-group > .el-input__inner",
+          "matches": true
+        }
+      ],
+      "risk": "旧 DOM 没有 el-input__wrapper；若只清理新版 wrapper，直挂 input 会保留第二层边框并与 append 高度错位。"
     }
   ]
 }

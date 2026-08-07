@@ -67,6 +67,9 @@ el-date-picker 默认宽度不会自动撑满 el-form-item，必须显式设置�
   平台默认阴影。
 - 数字输入框必须同时检查社区版“wrapper 子节点”和 jh-ui“wrapper 与
   input-number 同节点”两种 DOM，并确保只存在一层可见边框。
+- 带 prepend/append 的 input-group 必须由组合根绘制唯一外轮廓；输入主体、附加段
+  统一 26px，左右图标统一 14px。纯图标附加段使用 32px，文字/单位/按钮保持内容宽度。
+  不允许业务页分别给 `.el-input__inner` 与 `.el-input-group__append` 写不同高度。
 - 登录页和显式定制页继续使用自身样式，不套用上述高权重规则。
 
 ---

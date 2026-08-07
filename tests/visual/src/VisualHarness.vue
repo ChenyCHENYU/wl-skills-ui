@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { Search } from "@element-plus/icons-vue";
 import { ref } from "vue";
 
 const form = ref({
   name: "烟台华新数智化项目",
   remark: "统一的业务表单聚焦边框",
   quantity: 14.4,
+  station: "STATION-02",
 });
+
+const topPaneHeight = ref(220);
 
 const rows = [
   { id: 1, customer: "江苏武进不锈股份有限公司", grade: "热轧" },
@@ -57,6 +61,16 @@ function rowClassName({ row }: { row: { id: number } }) {
           <ElFormItem label="数量">
             <ElInputNumber v-model="form.quantity" :controls="false" data-testid="input-number" />
           </ElFormItem>
+          <ElFormItem label="作业站">
+            <ElInput v-model="form.station" data-testid="input-group">
+              <template #prefix>
+                <ElIcon><Search /></ElIcon>
+              </template>
+              <template #append>
+                <ElIcon data-testid="input-group-search"><Search /></ElIcon>
+              </template>
+            </ElInput>
+          </ElFormItem>
           <ElFormItem label="价格因素说明" class="wide-field">
             <ElInput
               v-model="form.remark"
@@ -90,6 +104,37 @@ function rowClassName({ row }: { row: { id: number } }) {
       </ElForm>
     </section>
 
+    <section class="visual-section" data-testid="split-section">
+      <h2>上下分屏表格重布局</h2>
+      <button data-testid="resize-split" type="button" @click="topPaneHeight = 120">
+        收缩上表
+      </button>
+      <div class="drager_row visual-drag-row" data-testid="split-root">
+        <div
+          class="drager_top flex flex-col"
+          :style="{ flexBasis: `${topPaneHeight}px` }"
+          data-testid="split-top-pane"
+        >
+          <div class="visual-split-pane-content">
+            <div class="visual-split-toolbar">上表工具栏</div>
+            <div
+              class="base-table ag-theme-quartz ag-grid-table"
+              data-testid="split-grid-host"
+            >
+              <div class="ag-root-wrapper">
+                <div class="ag-body-viewport" data-testid="split-grid-viewport">
+                  <div class="visual-grid-content">AG Grid 长内容</div>
+                </div>
+              </div>
+            </div>
+            <div class="jh-pagination">分页</div>
+          </div>
+        </div>
+        <div class="slider_row"></div>
+        <div class="drager_bottom"><span>下表区域</span></div>
+      </div>
+    </section>
+
     <section class="visual-section" data-testid="table-section">
       <h2>长文本与行状态</h2>
       <ElTable
@@ -113,6 +158,9 @@ function rowClassName({ row }: { row: { id: number } }) {
     <section class="visual-section session-login" data-testid="exempt-section">
       <h2>定制区域豁免</h2>
       <ElButton type="primary">登录页定制按钮</ElButton>
+      <ElInput class="login-custom-input-group" model-value="定制输入">
+        <template #append><ElIcon><Search /></ElIcon></template>
+      </ElInput>
     </section>
   </main>
 </template>

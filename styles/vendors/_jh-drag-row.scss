@@ -81,3 +81,38 @@ html .drager_row > .slider_row {
 html .drager_row {
   min-height: 0;
 }
+
+// 上下分屏只负责裁切布局边界，滚动仍由 AG Grid 内部 viewport 负责。
+// runtime/auto 会仅在分屏 pane 内发现真实 AG Grid 时打上这些结构标记，
+// 从而补齐可收缩高度链；普通内容、普通表格和定制区域不会命中。
+html .drager_row > [data-wl-ui-split-pane] {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+html .drager_row [data-wl-ui-split-grid-chain] {
+  min-height: 0 !important;
+}
+
+html
+  .drager_row
+  [data-wl-ui-split-grid-flex-parent]
+  > [data-wl-ui-split-grid-host] {
+  flex: 1 1 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+}
+
+html .drager_row [data-wl-ui-split-grid-host] {
+  min-height: 0 !important;
+  max-height: 100% !important;
+}
+
+html
+  .drager_row
+  .ag-grid-table[data-wl-ui-split-grid-host]
+  > .ag-root-wrapper {
+  height: 100% !important;
+  min-height: 0 !important;
+}

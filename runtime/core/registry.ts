@@ -8,6 +8,7 @@
  * 内置通用映射（enableStatus / approvalStatus / verifyStatus）在此文件末尾完成注册。
  */
 import type { ColumnLike } from "./types";
+import { normalizeColumnAlignment } from "./alignment";
 import {
   renderEnableStatus,
   renderAuditStatus,
@@ -64,19 +65,21 @@ export function defineColumns<T extends ColumnLike>(columns: T[]): T[] {
     const hasRenderer =
       normalized.defaultNode !== undefined ||
       normalized.defaultSlot !== undefined;
-    if (hasRenderer) return normalized;
+    if (hasRenderer) return normalizeColumnAlignment(normalized);
     if (!preset && isDictColumn(normalized)) {
-      return {
+      return normalizeColumnAlignment({
         ...normalized,
         defaultSlot: ({ row }) =>
           renderDictClassifyTag(
             row?.[fieldName],
             String(normalized.logicValue),
           ),
-      };
+      } as T);
     }
-    if (!preset) return withOverflowTooltip(normalized);
-    return withOverflowTooltip({ ...preset, ...normalized } as T);
+    if (!preset) return normalizeColumnAlignment(withOverflowTooltip(normalized));
+    return normalizeColumnAlignment(
+      withOverflowTooltip({ ...preset, ...normalized } as T),
+    );
   });
 }
 

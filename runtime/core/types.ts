@@ -26,6 +26,11 @@ export interface ColumnLike {
   width?: number | string;
   fixed?: string | boolean;
   type?: string;
+  align?: "left" | "center" | "right";
+  headerAlign?: "left" | "center" | "right";
+  cellStyle?: Record<string, unknown> | ((params: any) => Record<string, unknown>);
+  headerClass?: string | string[] | ((params: any) => string | string[]);
+  children?: ColumnLike[];
   defaultNode?: (ctx: { row: any }) => any;
   defaultSlot?: (ctx: { row: any }) => any;
   [key: string]: any;

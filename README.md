@@ -213,7 +213,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.14` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、复合数字框、跨浏览器字体、AG Grid 原生对齐与定制页边界 |
+| `@agile-team/wl-skills-ui` | `^1.9.15` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、复合数字框、跨浏览器字体、显式列对齐与定制页边界 |
 
 三种识别方式，任选其一：
 
@@ -227,7 +227,15 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.14：
+当前 v1.9.15：
+
+- **显式列对齐跨表格生效**：`defineColumns()` 会把业务明确声明的 `align/headerAlign`
+  桥接为 BaseTable/AG Grid 能稳定消费的 `cellStyle/headerClass`，Element Table 继续读取原属性；
+  无声明时不设置默认对齐，已有业务样式不覆盖，分组列递归处理。
+- **零布局污染边界**：包只修复“显式意图未被平台适配器消费”，不把普通列全局居中，
+  不接管选择列、语义渲染或业务自定义 `cellStyle/headerClass`。
+
+上一版 v1.9.14：
 
 - **Edge/Chrome 字体收敛**：受管 Element、BaseTable 与 AG Grid 统一使用覆盖中英文数字的
   `--wk-font-family-sans`，AG 表头/正文使用整数 13px；不改写 `body/*`，登录页、大屏、
@@ -714,7 +722,8 @@ export const myRules = [
 
 | API                                              | 说明                                               |
 | ------------------------------------------------ | -------------------------------------------------- |
-| `defineColumns(cols)`                            | 列定义，自动应用 `COLUMN_AUTO_MAP`                 |
+| `defineColumns(cols)`                            | 列定义，应用自动映射并桥接显式列对齐               |
+| `normalizeColumnAlignments(cols)`                | 仅桥接显式 `align/headerAlign`，不设置默认对齐      |
 | `renderOps(items)`                               | 操作列图标按钮组（view/edit/del/log/ok/send 预设） |
 | `renderTagNode(v, map)`                          | 状态 Tag 渲染                                      |
 | `renderClassifyTag(v, map)`                      | 分类 Tag 渲染                                      |

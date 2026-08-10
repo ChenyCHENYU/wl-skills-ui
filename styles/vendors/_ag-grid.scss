@@ -94,6 +94,20 @@
   width: 100%;
 }
 
+// 仅响应列定义显式声明的 headerAlign/align；不设置全局默认对齐。
+// runtime/defineColumns 会把该意图桥接为下列类，兼容平台 BaseTable 的 AG Grid 适配层。
+.ag-header-cell.wl-ui-table-header-align--left .ag-header-cell-label {
+  justify-content: flex-start;
+}
+
+.ag-header-cell.wl-ui-table-header-align--center .ag-header-cell-label {
+  justify-content: center;
+}
+
+.ag-header-cell.wl-ui-table-header-align--right .ag-header-cell-label {
+  justify-content: flex-end;
+}
+
 .ag-header-cell-text {
   font-size: 13px;
   font-weight: 600;

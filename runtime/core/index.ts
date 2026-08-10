@@ -3,5 +3,6 @@
  * 聚合 types / renderers / registry 的全量导出
  */
 export * from "./types";
+export * from "./alignment";
 export * from "./renderers";
 export * from "./registry";

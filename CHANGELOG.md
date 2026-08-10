@@ -4,6 +4,21 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.15] - 2026-08-10
+
+### Added
+
+- 新增 `normalizeColumnAlignment(s)` 运行时能力，把业务显式声明的 `align/headerAlign` 桥接为 BaseTable/AG Grid 可消费的 `cellStyle/headerClass`，并递归覆盖分组列。
+- 新增行为与样式契约测试，覆盖无声明不接管、左右/居中对齐、分组列以及业务自定义样式优先级。
+
+### Fixed
+
+- 修复部分平台 AG Grid 适配器忽略列定义 `align/headerAlign`，导致业务明确要求居中或右对齐却仍按默认布局展示的问题。
+
+### Changed
+
+- `defineColumns()` 自动应用显式对齐桥接；未声明对齐的普通列保持原状，已有 `cellStyle/headerClass` 不覆盖，不引入全局居中规则。
+
 ## [1.9.14] - 2026-08-10
 
 ### Added

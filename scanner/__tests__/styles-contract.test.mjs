@@ -176,6 +176,30 @@ describe("上下分屏 AG Grid 高度链契约", () => {
   });
 });
 
+describe("AG Grid 显式列对齐契约", () => {
+  const agGrid = read("styles/vendors/_ag-grid.scss");
+
+  it("只为运行时桥接类提供 left/center/right 表头对齐", () => {
+    for (const [alignment, justify] of [
+      ["left", "flex-start"],
+      ["center", "center"],
+      ["right", "flex-end"],
+    ]) {
+      assert.match(
+        agGrid,
+        new RegExp(
+          `\\.ag-header-cell\\.wl-ui-table-header-align--${alignment} \\.ag-header-cell-label \\{[^}]*justify-content:\\s*${justify}`,
+        ),
+      );
+    }
+    assert.doesNotMatch(
+      agGrid,
+      /^\.ag-header-cell-label\s*\{[^}]*justify-content:\s*center/m,
+      "不得把所有业务表头强制居中",
+    );
+  });
+});
+
 describe("长文本省略与悬停契约", () => {
   const table = read("styles/element/_table.scss");
   const agGrid = read("styles/vendors/_ag-grid.scss");

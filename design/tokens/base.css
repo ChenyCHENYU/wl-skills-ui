@@ -1,5 +1,11 @@
 :root body {
   /* 客户主题契约：防止平台运行时 body 内联主题覆盖。 */
+  /*
+   * Windows 企业端优先使用同时覆盖中文、英文与数字的微软雅黑 UI 字体，
+   * 避免 Edge/Chrome 按字符切换 Helvetica/Segoe UI 与中文 fallback 后出现粗细跳变。
+   * 该 Token 只由受管组件根消费，不直接改写 body 字体，登录页/大屏仍可独立设计。
+   */
+  --wk-font-family-sans: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif !important;
   --el-color-primary: #002a8f !important;
   --el-color-primary-rgb: 0, 42, 143 !important;
   --el-color-primary-light-1: #1a3f9a !important;

@@ -1,5 +1,20 @@
 # 字体排版规范
 
+## 字体族
+
+受管业务组件统一使用：
+
+```css
+var(--wk-font-family-sans)
+/* "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC",
+   "Hiragino Sans GB", Arial, sans-serif */
+```
+
+Windows 优先选择可同时覆盖中文、英文和数字的微软雅黑 UI 字体，避免 Edge 的增强文本
+对比度把逐字符 fallback 的差异放大为同一行粗细、字面高度不一致。该 Token 只映射到
+Element Plus、BaseTable 和 AG Grid 等受管组件根，不直接覆盖 `body` 或 `*`；登录页、大屏、
+代码编辑器、图表、图标字体及显式豁免区继续保留自己的字体设计。
+
 ## 字号
 
 | Token                        | 值     | 用途                |
@@ -27,3 +42,4 @@
 3. 表格表头 `14px / font-weight: 500`
 4. 弹窗标题 `16px / font-weight: 600`
 5. Tag/角标 `12px`
+6. 紧凑 AG Grid 表头/正文统一使用整数 `13px`，避免小字号半像素在浏览器间放大差异

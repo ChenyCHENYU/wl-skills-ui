@@ -85,6 +85,9 @@ $wk-sidebar-width: var(--el-sidebar-width) !default;
 // 选择器特异性负责压过普通样式表，!important 负责压过平台运行时写入 body
 // 的普通内联变量；runtime/theme-lock.ts 再兜底处理后续动态改写。
 :root body {
+  // 仅定义字体 Token，不直接覆盖 body。由 L1/L2 受管组件根按需消费，
+  // 避免登录页、大屏、代码编辑器与图标字体被全局字体规则污染。
+  --wk-font-family-sans: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif !important;
   --el-color-primary: #002a8f !important;
   --el-color-primary-rgb: 0, 42, 143 !important;
   --el-color-primary-light-1: #1a3f9a !important;

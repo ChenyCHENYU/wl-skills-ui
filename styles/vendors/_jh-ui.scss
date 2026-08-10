@@ -197,6 +197,89 @@
     box-shadow: none !important;
   }
 
+  // common-core jh-input-number 是“数字框根节点同时复用 el-input__wrapper”的复合结构：
+  // .com-inputNumber-content.el-input-number.el-input__wrapper > .el-input。
+  // 普通 Element InputNumber 的根/子 wrapper 规则不能套到这里，否则会同时压缩外壳、
+  // 清空组件自己的 textAlign/controls 语义。复合根只统一外轮廓和高度，内部继续由
+  // jh-input-number 自己负责左右对齐、单位附加段与步进按钮。
+  &.com-inputNumber-content.el-input-number.el-input__wrapper {
+    display: inline-flex !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    height: var(--wk-form-control-height, 26px) !important;
+    min-height: var(--wk-form-control-height, 26px) !important;
+    line-height: normal !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: var(--wk-form-control-radius, var(--el-border-radius-base, 6px)) !important;
+    box-sizing: border-box !important;
+    background: var(--el-input-bg-color, var(--el-fill-color-blank, #fff)) !important;
+    box-shadow:
+      0 0 0 1px var(--el-input-border-color, var(--el-border-color, #dcdfe6)) inset !important;
+    transition: box-shadow 0.15s ease !important;
+  }
+
+  &.com-inputNumber-content.el-input-number.el-input__wrapper:not(.is-disabled):hover {
+    box-shadow:
+      0 0 0 1px var(--el-input-hover-border-color, var(--el-border-color-hover, #c0c4cc)) inset !important;
+  }
+
+  &.com-inputNumber-content.el-input-number.el-input__wrapper:not(.is-disabled):focus-within {
+    box-shadow:
+      0 0 0 1.5px var(--el-color-primary, #002a8f) inset !important;
+  }
+
+  &.com-inputNumber-content.el-input-number.el-input__wrapper.is-disabled {
+    background: var(--el-disabled-bg-color, #f5f7fa) !important;
+    box-shadow:
+      0 0 0 1px var(--el-disabled-border-color, #e4e7ed) inset !important;
+  }
+
+  &.com-inputNumber-content.el-input-number.el-input__wrapper > .el-input {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    border: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  &.com-inputNumber-content.el-input-number.el-input__wrapper
+    > .el-input
+    > .el-input__wrapper {
+    height: 100% !important;
+    min-height: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  &.com-inputNumber-content.el-input-number.el-input__wrapper
+    > .el-input
+    .el-input__inner {
+    height: 100% !important;
+    line-height: calc(var(--wk-form-control-height, 26px) - 2px) !important;
+    border: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  // 带单位/后缀时，外层数字框仍是唯一描边所有者；子 input-group 只负责布局和分隔线。
+  &.com-inputNumber-content.el-input-number.el-input__wrapper
+    > .el-input.el-input-group {
+    height: 100% !important;
+    min-height: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
   &.com-picker .el-input > .el-input__inner,
   &.com-reference-picker .el-input > .el-input__inner,
   &.com-reference-picker-input .el-input > .el-input__inner,

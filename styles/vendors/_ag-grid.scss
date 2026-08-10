@@ -6,6 +6,23 @@
 // 维护：只改这一个文件，全项目生效
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+// 字体只落在真实 BaseTable / AG Grid 根上；不修改 body，也不覆盖 renderer 内部
+// 显式声明的图标/代码字体。宿主与 root 同时设变量，兼容不同 AG Grid 版本的继承点。
+#{skin.$managed-scope-selector} {
+  &:where(
+    .base-table,
+    .base-table-wrapper,
+    .base-table-container,
+    .ag-theme-quartz,
+    .ag-theme-quartz-dark,
+    .ag-theme-quartz-auto-dark,
+    .ag-root-wrapper
+  ) {
+    --ag-font-family: var(--wk-font-family-sans) !important;
+    font-family: var(--wk-font-family-sans) !important;
+  }
+}
+
 // ── CSS 变量注入（AG Grid 28+ 支持）──────────────────────────────────────────
 .ag-root-wrapper {
   // 深品牌蓝在大面积行底色中只保留轻提示：hover 4%，selected 7%。
@@ -22,7 +39,7 @@
   --ag-selected-row-background-color: var(--wk-grid-row-selected-bg) !important;
   --ag-range-selection-border-color: rgba(var(--el-color-primary-rgb), 0.4);
   --ag-font-size: 13px;
-  --ag-font-family: inherit;
+  --ag-font-family: var(--wk-font-family-sans);
   --ag-row-height: 26px;
   --ag-header-height: 36px;
   --ag-cell-horizontal-padding: 8px;
@@ -49,7 +66,7 @@
 .ag-header-cell {
   height: 36px !important;
   padding: 0 8px !important;
-  font-size: 12.5px !important;
+  font-size: 13px !important;
   font-weight: 600 !important;
   color: #374151 !important;
   letter-spacing: 0.02em;
@@ -73,13 +90,12 @@
   height: 100%;
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
   padding: 0 !important;
   width: 100%;
 }
 
 .ag-header-cell-text {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   color: #374151;
   white-space: nowrap;
@@ -126,10 +142,16 @@
   font-size: 13px !important;
   color: #374151;
   padding: 0 8px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
   border-right-color: transparent !important;
+}
+
+// 普通单元格保持无竖线的轻量外观；真正获得焦点时恢复 AG Grid 自己的焦点色，
+// 避免上面的透明右边框把选中单元格描边切掉一侧。
+.ag-cell.ag-cell-focus {
+  border-color: var(
+    --ag-range-selection-border-color,
+    rgba(var(--el-color-primary-rgb, 0, 42, 143), 0.4)
+  ) !important;
 }
 
 .ag-cell-value {
@@ -140,9 +162,9 @@
   max-width: 100%;
 }
 
-// 平台把 .ag-cell 与 .ag-cell-value 复用在同一个 flex 节点上；flex 容器的
-// 直接文本不会稳定绘制 text-overflow。仅对没有子元素的普通文本单元格切回
-// block，编辑器、操作列、自定义 renderer、复选框与主动换行列保持原结构。
+// 平台会把 .ag-cell 与 .ag-cell-value 复用在同一个节点上；直接文本需要 block
+// 才能稳定绘制 text-overflow。仅命中没有子元素的普通文本单元格，编辑器、操作列、
+// 自定义 renderer、复选框与主动换行列继续遵循 AG Grid / BaseTable 自身布局。
 #{skin.$managed-scope-selector} {
   &.ag-root-wrapper
     .ag-cell-value:not(.editable-cell):not(.always-editable-cell):not(
@@ -170,6 +192,9 @@
 // 复选框单元格（header 与 body 使用相同规则，确保视觉对齐）
 .ag-cell.ag-checkbox-cell {
   padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 // 多选列表头：精准命中 ag-header-select-all，与 body checkbox 保持相同居中方式
@@ -178,8 +203,8 @@
   justify-content: center !important;
 }
 
-.ag-header-cell.ag-header-cell-sortable:first-child,
-.ag-pinned-left-header .ag-header-cell:first-child {
+.ag-header-cell.ag-header-cell-sortable:first-child:has(.ag-header-select-all),
+.ag-pinned-left-header .ag-header-cell:first-child:has(.ag-checkbox) {
   padding: 0 !important;
   justify-content: center !important;
 }
@@ -360,6 +385,13 @@
 
 // 用 ::before 注入 SVG 动画徽标
 .ag-overlay-loading-center {
+  // AG Grid 默认插入 Loading...；统一文字层级并避免声明落在嵌套规则之后。
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #57606a !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.4 !important;
+
   &::before {
     content: "";
     display: block;
@@ -369,12 +401,6 @@
       center/contain no-repeat;
   }
 
-  // 省略号文字（AG Grid 默认插入"Loading..."，此处做字体优化）
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  color: #57606a !important;
-  letter-spacing: 0.02em !important;
-  line-height: 1.4 !important;
 }
 
 // 三个跳动小点（补充到文字后面，用 ::after 伪元素模拟）

@@ -158,12 +158,13 @@
       "family": "number-composite",
       "source": "lowcode-engine/packages/common/common-lowcode/components/src/schema-component/base-input-group/input-number/com/input-number.vue",
       "fixture": "scanner/__tests__/component-fixtures/common-core-input-number-mixed.html",
-      "rootSelector": ".el-input-number.el-input__wrapper",
-      "ownerSelector": ".el-input-number.el-input__wrapper",
+      "rootSelector": ".com-inputNumber-content.el-input-number.el-input__wrapper",
+      "ownerSelector": ".com-inputNumber-content.el-input-number.el-input__wrapper",
       "innerBorderlessSelectors": [
-        ".el-input-number.el-input__wrapper > .el-input > .el-input__wrapper"
+        ".com-inputNumber-content.el-input-number.el-input__wrapper > .el-input > .el-input__wrapper"
       ],
       "knownRootClasses": [
+        "com-inputNumber-content",
         "el-input-number"
       ],
       "heightPolicy": "fixed-control-height",
@@ -177,16 +178,16 @@
       "assertions": [
         {
           "target": "root",
-          "selector": ".el-input-number.el-input__wrapper",
+          "selector": ".com-inputNumber-content.el-input-number.el-input__wrapper",
           "matches": true
         },
         {
           "target": "inner",
-          "selector": ".el-input-number.el-input__wrapper > .el-input > .el-input__wrapper",
+          "selector": ".com-inputNumber-content.el-input-number.el-input__wrapper > .el-input > .el-input__wrapper",
           "matches": true
         }
       ],
-      "risk": "根节点本身是 wrapper，内部仍含 Element input wrapper；只能由根节点绘制唯一状态边框。"
+      "risk": "jh-input-number 根节点本身是 wrapper，内部仍含 Element input wrapper；只能由根节点绘制唯一状态边框，同时必须保留 textAlign、controls 与单位附加段语义。"
     },
     {
       "id": "common-core.base-toolbar-split-button",

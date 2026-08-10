@@ -12,6 +12,7 @@ function read(relativePath) {
 
 describe("表单样式契约", () => {
   const form = read("styles/element/_form.scss");
+  const jhUi = read("styles/vendors/_jh-ui.scss");
   const baseComponents = read("styles/vendors/_base-components.scss");
   const scope = read("styles/_scope.scss");
 
@@ -68,11 +69,10 @@ describe("表单样式契约", () => {
 
   it("数字输入框覆盖子 wrapper 与同节点 wrapper，且阻止双描边", () => {
     for (const selector of [
-      "&.el-input-number:not(.el-input__wrapper)",
-      "&.el-input-number .el-input__wrapper",
-      "&.el-input-number.el-input__wrapper",
-      "&.el-input-number.el-input__wrapper:not(.is-disabled):focus-within",
-      "&.el-input-number.el-input__wrapper > .el-input > .el-input__wrapper",
+      "&.el-input-number:not(.com-inputNumber-content):not(.el-input__wrapper)",
+      "&.el-input-number:not(.com-inputNumber-content) .el-input__wrapper",
+      "&.el-input-number.el-input__wrapper:not(.com-inputNumber-content)",
+      "&.el-input-number.el-input__wrapper:not(.com-inputNumber-content):not(.is-disabled):focus-within",
     ]) {
       assert.ok(form.includes(selector), `缺少数字框 DOM 分支：${selector}`);
     }
@@ -87,6 +87,25 @@ describe("表单样式契约", () => {
     assert.match(
       baseComponents,
       /\.el-input-number\.el-input__wrapper:not\(\.is-disabled\)[\s\S]*?> \.el-input__wrapper \{[\s\S]*?box-shadow:\s*none !important/,
+    );
+  });
+
+  it("jh-input-number 由复合根统一外轮廓，但保留组件自身高度链、对齐与 controls", () => {
+    assert.match(
+      jhUi,
+      /&\.com-inputNumber-content\.el-input-number\.el-input__wrapper\s*\{[\s\S]*?height:\s*var\(--wk-form-control-height,\s*26px\)\s*!important;[\s\S]*?box-shadow:/,
+    );
+    assert.match(
+      jhUi,
+      /\.com-inputNumber-content\.el-input-number\.el-input__wrapper[\s\S]*?> \.el-input[\s\S]*?> \.el-input__wrapper\s*\{[\s\S]*?height:\s*100%\s*!important;[\s\S]*?box-shadow:\s*none !important/,
+    );
+    assert.doesNotMatch(
+      form,
+      /&\.el-input-number\s+\.el-input-number__(increase|decrease)/,
+    );
+    assert.doesNotMatch(
+      form,
+      /&\.el-input-number\s+\.el-input__inner[\s\S]*?text-align:\s*left\s*!important/,
     );
   });
 
@@ -265,6 +284,49 @@ describe("表格行状态色契约", () => {
     assert.doesNotMatch(
       agGrid,
       /\.ag-row[^{]*\{[^}]*\.el-input__wrapper/,
+    );
+  });
+
+  it("AG Grid 焦点描边完整，并把左右对齐交还列配置", () => {
+    assert.match(
+      agGrid,
+      /\.ag-cell\.ag-cell-focus\s*\{[\s\S]*?border-color:\s*var\([\s\S]*?--ag-range-selection-border-color/,
+    );
+
+    const cellRule = agGrid.match(/\.ag-cell\s*\{([\s\S]*?)\n\}/)?.[1] ?? "";
+    assert.doesNotMatch(cellRule, /display:\s*flex\s*!important/);
+    assert.doesNotMatch(cellRule, /justify-content:\s*center\s*!important/);
+
+    const headerLabelRule =
+      agGrid.match(/\.ag-header-cell-label\s*\{([\s\S]*?)\n\}/)?.[1] ?? "";
+    assert.doesNotMatch(headerLabelRule, /justify-content:\s*center\s*!important/);
+    assert.doesNotMatch(
+      agGrid,
+      /\.ag-header-cell\.ag-header-cell-sortable:first-child,\s*\n\.ag-pinned-left-header/,
+    );
+  });
+});
+
+describe("跨浏览器字体契约", () => {
+  const tokenScss = read("styles/tokens/index.scss");
+  const tokenCss = read("design/tokens/base.css");
+  const typography = read("styles/element/_typography.scss");
+  const agGrid = read("styles/vendors/_ag-grid.scss");
+
+  it("统一中英文数字字体链，但不向 body 或全局后代强刷字体", () => {
+    for (const source of [tokenScss, tokenCss]) {
+      assert.match(
+        source,
+        /--wk-font-family-sans:\s*"Microsoft YaHei UI",\s*"Microsoft YaHei",\s*"PingFang SC"/,
+      );
+    }
+    assert.match(typography, /#{skin\.\$managed-scope-selector}/);
+    assert.match(typography, /--el-font-family:\s*var\(--wk-font-family-sans\)\s*!important/);
+    assert.doesNotMatch(typography, /(^|\n)\s*\*\s*\{/);
+    assert.doesNotMatch(typography, /(^|\n)\s*(html|body)\s*\{/);
+    assert.match(
+      agGrid,
+      /--ag-font-family:\s*var\(--wk-font-family-sans\)\s*!important/,
     );
   });
 });

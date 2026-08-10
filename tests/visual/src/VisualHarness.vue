@@ -61,6 +61,20 @@ function rowClassName({ row }: { row: { id: number } }) {
           <ElFormItem label="数量">
             <ElInputNumber v-model="form.quantity" :controls="false" data-testid="input-number" />
           </ElFormItem>
+          <ElFormItem label="复合数值">
+            <div
+              class="com-inputNumber-content el-input-number el-input__wrapper text-right"
+              data-testid="jh-input-number"
+            >
+              <span class="el-input-number__decrease" data-testid="jh-number-decrease">−</span>
+              <span class="el-input-number__increase" data-testid="jh-number-increase">+</span>
+              <div class="el-input">
+                <div class="el-input__wrapper" data-testid="jh-number-inner-wrapper">
+                  <input class="el-input__inner" type="number" value="13.00" />
+                </div>
+              </div>
+            </div>
+          </ElFormItem>
           <ElFormItem label="作业站">
             <ElInput v-model="form.station" data-testid="input-group">
               <template #prefix>
@@ -153,6 +167,41 @@ function rowClassName({ row }: { row: { id: number } }) {
           </template>
         </ElTableColumn>
       </ElTable>
+      <div
+        class="base-table ag-theme-quartz visual-ag-table"
+        data-testid="ag-grid-contract"
+      >
+        <div class="ag-root-wrapper">
+          <div class="visual-ag-header-row">
+            <div class="ag-header-cell">
+              <div class="ag-header-cell-comp-wrapper">
+                <div class="ag-header-cell-label"><span>左对齐列</span></div>
+              </div>
+            </div>
+            <div class="ag-header-cell ag-right-aligned-header">
+              <div class="ag-header-cell-comp-wrapper">
+                <div class="ag-header-cell-label" data-testid="ag-right-header">
+                  <span>右对齐列</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ag-row ag-row-selected visual-ag-row">
+            <div
+              class="ag-cell ag-cell-value ag-left-aligned-cell ag-cell-focus"
+              data-testid="ag-focus-cell"
+            >
+              <span>混排 GA202603 一道门</span>
+            </div>
+            <div
+              class="ag-cell ag-cell-value ag-right-aligned-cell"
+              data-testid="ag-right-cell"
+            >
+              <span>2026-06-09 09:16:55</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="visual-section session-login" data-testid="exempt-section">

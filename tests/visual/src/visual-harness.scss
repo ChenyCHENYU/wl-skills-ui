@@ -74,6 +74,12 @@ body {
 
 .session-login .el-button {
   border-radius: 18px !important;
+  font-family: Georgia, serif !important;
+}
+
+.session-login {
+  --el-font-family: Georgia, serif;
+  font-family: Georgia, serif;
 }
 
 .session-login .login-custom-input-group {
@@ -135,4 +141,8 @@ body {
   height: 360px;
   padding: 8px;
   background: repeating-linear-gradient(#fff 0 25px, #f5f7fa 25px 26px);
+}
+
+.visual-ag-table {
+  margin-top: 14px;
 }

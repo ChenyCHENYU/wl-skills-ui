@@ -4,6 +4,19 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.14] - 2026-08-10
+
+### Added
+
+- 新增受管业务组件字体 Token 与 Edge/Chrome 双浏览器计算样式门禁，统一 Element Table、BaseTable、AG Grid 的中英文数字字体链，同时保持登录页、大屏、编辑器、图表、图标字体和显式豁免区边界。
+- 复合结构清单按 common-core 真实 DOM 补全 `.com-inputNumber-content` 根类，并新增 jh-input-number 高度、对齐、controls、单描边视觉回归。
+
+### Fixed
+
+- 修复普通 InputNumber 高权重规则误命中 `jh-input-number`，造成复合数字框高度链、`textAlign` 与 controls 语义被压平的问题；复合根统一 26px 与五态外轮廓，内部 wrapper 不重复描边。
+- 修复 AG Grid 普通单元格强制 flex 居中覆盖 BaseTable `align/headerAlign`，以及透明右边框遮掉焦点单元格一侧描边的问题；普通列重新遵循 AG Grid 原生对齐，仅复选框列保持精准居中。
+- AG Grid 紧凑表头字号由半像素改为整数 13px，降低 Windows Edge 小字号抗锯齿差异。
+
 ## [1.9.13] - 2026-08-07
 
 ### Added

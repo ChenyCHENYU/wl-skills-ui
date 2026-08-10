@@ -1,0 +1,86 @@
+// 最小模拟平台/common-core/AG Grid 原始样式，必须在 wl-skills-ui 之前加载。
+// 这样回归测试能发现包是否覆盖了组件本来有效的尺寸、对齐和焦点语义。
+
+.com-inputNumber-content.el-input-number {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+  height: 32px;
+  box-sizing: border-box;
+
+  input {
+    text-align: center !important;
+  }
+
+  &.text-left input {
+    text-align: left !important;
+  }
+
+  &.text-right input {
+    text-align: right !important;
+  }
+
+  .el-input-number__decrease,
+  .el-input-number__increase {
+    position: absolute;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 100%;
+  }
+
+  .el-input-number__decrease {
+    left: 0;
+  }
+
+  .el-input-number__increase {
+    right: 0;
+  }
+}
+
+.visual-ag-header-row,
+.visual-ag-row {
+  display: flex;
+  width: 100%;
+}
+
+.visual-ag-header-row {
+  height: 36px;
+}
+
+.visual-ag-row {
+  height: 26px;
+}
+
+.visual-ag-header-row .ag-header-cell,
+.visual-ag-row .ag-cell {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.visual-ag-row .ag-cell {
+  display: block;
+  line-height: 24px;
+  border: 1px solid transparent;
+}
+
+.visual-ag-row .ag-cell-focus {
+  border-color: var(--ag-range-selection-border-color);
+}
+
+.visual-ag-row .ag-left-aligned-cell {
+  text-align: left;
+}
+
+.visual-ag-row .ag-right-aligned-cell {
+  text-align: right;
+}
+
+.visual-ag-header-row .ag-right-aligned-header .ag-header-cell-label {
+  justify-content: flex-end;
+}

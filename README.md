@@ -213,7 +213,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.13` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、input-group 附加段、分屏 AG Grid 重布局、表格长文本兜底与定制页边界 |
+| `@agile-team/wl-skills-ui` | `^1.9.14` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、复合数字框、跨浏览器字体、AG Grid 原生对齐与定制页边界 |
 
 三种识别方式，任选其一：
 
@@ -227,7 +227,20 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.13：
+当前 v1.9.14：
+
+- **Edge/Chrome 字体收敛**：受管 Element、BaseTable 与 AG Grid 统一使用覆盖中英文数字的
+  `--wk-font-family-sans`，AG 表头/正文使用整数 13px；不改写 `body/*`，登录页、大屏、
+  编辑器、图表、图标字体和显式豁免区不受影响。
+- **jh-input-number 精准解耦**：普通 Element 数字框规则不再误命中
+  `.com-inputNumber-content`；复合根统一 26px 和唯一状态描边，同时保留组件自身
+  `textAlign`、controls、单位及后缀语义。
+- **BaseTable/AG Grid 原生语义恢复**：焦点单元格四边框完整；取消普通单元格和表头的
+  强制居中，`align/headerAlign` 重新以列配置和 AG Grid 原生样式为准，复选框列仍精准居中。
+- **双浏览器门禁**：Windows Edge 维护像素基准，Edge + Google Chrome 同时验证字体、
+  数字框高度、焦点边框及左右对齐计算样式。
+
+上一版 v1.9.13：
 
 - **输入附加段不再割裂**：`el-input-group` 由组合根统一 26px 高度、6px 外圆角和 default/hover/focus/error/disabled 描边；左侧 prefix、右侧 append 图标统一 14px，纯图标附加段 32px，文字/单位/按钮仍按内容宽度。
 - **新旧 DOM 同时覆盖**：兼容 jh-ui 配套旧版 input 直挂结构和新版 `.el-input__wrapper` 结构，内部输入不再重复描边；普通 input、普通按钮、登录页和显式豁免区保持原行为。
@@ -772,7 +785,8 @@ export const myRules = [
 
 ### 维护者防回归
 
-复合控件必须先登记结构契约，再增加精准样式；包发版必须经过 Chromium 基准图对比：
+复合控件必须先登记结构契约，再增加精准样式；包发版必须经过 Edge 基准图与
+Edge/Chrome 双浏览器计算样式验证：
 
 ```bash
 # Windows 默认使用已安装的 Edge Chromium；非 Windows 首次安装一次

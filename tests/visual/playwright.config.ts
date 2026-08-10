@@ -1,8 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const browserChannel =
+const visualBrowserChannel =
   process.env.WL_UI_BROWSER_CHANNEL ||
   (process.platform === "win32" ? "msedge" : undefined);
+const edgeChannel = process.platform === "win32" ? "msedge" : undefined;
+const chromeChannel = process.platform === "win32" ? "chrome" : undefined;
 
 export default defineConfig({
   testDir: "./specs",
@@ -22,9 +24,26 @@ export default defineConfig({
   projects: [
     {
       name: "enterprise-chromium",
+      testIgnore: "**/browser-compat.spec.ts",
       use: {
         ...devices["Desktop Chrome"],
-        ...(browserChannel ? { channel: browserChannel } : {}),
+        ...(visualBrowserChannel ? { channel: visualBrowserChannel } : {}),
+      },
+    },
+    {
+      name: "enterprise-edge-contract",
+      testMatch: "**/browser-compat.spec.ts",
+      use: {
+        ...devices["Desktop Chrome"],
+        ...(edgeChannel ? { channel: edgeChannel } : {}),
+      },
+    },
+    {
+      name: "enterprise-chrome-contract",
+      testMatch: "**/browser-compat.spec.ts",
+      use: {
+        ...devices["Desktop Chrome"],
+        ...(chromeChannel ? { channel: chromeChannel } : {}),
       },
     },
   ],

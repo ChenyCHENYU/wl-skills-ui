@@ -52,12 +52,12 @@ html body {
 
   // 复合多标签输入把外壳复用了 .el-input__wrapper，但它需要随标签换行自然增高；
   // 这里只固定真正的单行 wrapper，复合外壳交给 L2 vendor 适配。
-  &.el-input__wrapper:not(.com-input-multi-tag-wrap),
+  &.el-input__wrapper:not(.com-input-multi-tag-wrap):not(.com-inputNumber-content),
   &.el-select__wrapper,
   &.el-select .el-select__wrapper,
   &.el-date-editor.el-input__wrapper,
   &.el-date-editor .el-input__wrapper,
-  &.el-input-number .el-input__wrapper,
+  &.el-input-number:not(.com-inputNumber-content) .el-input__wrapper,
   &.el-cascader .el-input__wrapper,
   &.el-autocomplete .el-input__wrapper {
     height: var(--wk-form-control-height) !important;
@@ -68,7 +68,7 @@ html body {
   &.el-input__inner,
   &.el-select__selected-item,
   &.el-date-editor .el-input__inner,
-  &.el-input-number .el-input__inner,
+  &.el-input-number:not(.com-inputNumber-content) .el-input__inner,
   &.el-cascader .el-input__inner,
   &.el-autocomplete .el-input__inner {
     height: calc(var(--wk-form-control-height) - 2px) !important;
@@ -203,9 +203,9 @@ html body {
   // A. .el-input-number > .el-input > .el-input__wrapper（社区版）
   // B. .el-input-number.el-input__wrapper > .el-input（jh 同节点 wrapper）
   // 两种结构都只允许 wrapper 层绘制唯一可见边框。
-  &.el-input-number,
-  &.el-input-number:focus,
-  &.el-input-number:focus-within {
+  &.el-input-number:not(.com-inputNumber-content),
+  &.el-input-number:not(.com-inputNumber-content):focus,
+  &.el-input-number:not(.com-inputNumber-content):focus-within {
     width: 100% !important;
     height: var(--wk-form-control-height) !important;
     line-height: var(--wk-form-control-height) !important;
@@ -216,13 +216,13 @@ html body {
     background: transparent !important;
   }
 
-  &.el-input-number:not(.el-input__wrapper),
-  &.el-input-number:not(.el-input__wrapper):focus,
-  &.el-input-number:not(.el-input__wrapper):focus-within {
+  &.el-input-number:not(.com-inputNumber-content):not(.el-input__wrapper),
+  &.el-input-number:not(.com-inputNumber-content):not(.el-input__wrapper):focus,
+  &.el-input-number:not(.com-inputNumber-content):not(.el-input__wrapper):focus-within {
     box-shadow: none !important;
   }
 
-  &.el-input-number .el-input {
+  &.el-input-number:not(.com-inputNumber-content) .el-input {
     width: 100% !important;
     height: 100% !important;
     border: 0 !important;
@@ -231,8 +231,8 @@ html body {
     box-shadow: none !important;
   }
 
-  &.el-input-number .el-input__wrapper,
-  &.el-input-number.el-input__wrapper {
+  &.el-input-number:not(.com-inputNumber-content) .el-input__wrapper,
+  &.el-input-number.el-input__wrapper:not(.com-inputNumber-content) {
     width: 100% !important;
     height: 100% !important;
     min-height: 0 !important;
@@ -245,23 +245,23 @@ html body {
     transition: box-shadow 0.15s ease !important;
   }
 
-  &.el-input-number:not(.is-disabled):hover .el-input__wrapper,
-  &.el-input-number.el-input__wrapper:not(.is-disabled):hover {
+  &.el-input-number:not(.com-inputNumber-content):not(.is-disabled):hover .el-input__wrapper,
+  &.el-input-number.el-input__wrapper:not(.com-inputNumber-content):not(.is-disabled):hover {
     box-shadow:
       0 0 0 1px var(--el-border-color-hover, #c0c4cc) inset !important;
   }
 
-  &.el-input-number:not(.is-disabled) .el-input__wrapper.is-focus,
-  &.el-input-number:not(.is-disabled):focus-within .el-input__wrapper,
-  &.el-input-number.el-input__wrapper:not(.is-disabled).is-focus,
-  &.el-input-number.el-input__wrapper:not(.is-disabled):focus,
-  &.el-input-number.el-input__wrapper:not(.is-disabled):focus-within {
+  &.el-input-number:not(.com-inputNumber-content):not(.is-disabled) .el-input__wrapper.is-focus,
+  &.el-input-number:not(.com-inputNumber-content):not(.is-disabled):focus-within .el-input__wrapper,
+  &.el-input-number.el-input__wrapper:not(.com-inputNumber-content):not(.is-disabled).is-focus,
+  &.el-input-number.el-input__wrapper:not(.com-inputNumber-content):not(.is-disabled):focus,
+  &.el-input-number.el-input__wrapper:not(.com-inputNumber-content):not(.is-disabled):focus-within {
     box-shadow:
       0 0 0 1.5px var(--el-color-primary, #002a8f) inset !important;
   }
 
-  &.el-input-number.is-disabled .el-input__wrapper,
-  &.el-input-number.el-input__wrapper.is-disabled {
+  &.el-input-number:not(.com-inputNumber-content).is-disabled .el-input__wrapper,
+  &.el-input-number.el-input__wrapper:not(.com-inputNumber-content).is-disabled {
     background: var(--el-disabled-bg-color, #f5f7fa) !important;
     box-shadow:
       0 0 0 1px var(--el-disabled-border-color, #e4e7ed) inset !important;
@@ -269,14 +269,16 @@ html body {
 
   // 极少数过渡版本会同时输出“同节点 wrapper + 子 wrapper”；
   // 此时由外层绘制边框，明确清掉内层，防止双描边。
-  &.el-input-number.el-input__wrapper > .el-input > .el-input__wrapper {
+  &.el-input-number.el-input__wrapper:not(.com-inputNumber-content)
+    > .el-input
+    > .el-input__wrapper {
     background: transparent !important;
     box-shadow: none !important;
   }
 
-  &.el-input-number .el-input__inner,
-  &.el-input-number .el-input__inner:focus,
-  &.el-input-number .el-input__inner:focus-visible {
+  &.el-input-number:not(.com-inputNumber-content) .el-input__inner,
+  &.el-input-number:not(.com-inputNumber-content) .el-input__inner:focus,
+  &.el-input-number:not(.com-inputNumber-content) .el-input__inner:focus-visible {
     width: 100% !important;
     height: 100% !important;
     line-height: calc(var(--wk-form-control-height) - 2px) !important;
@@ -289,23 +291,27 @@ html body {
     text-align: left !important;
   }
 
-  &.el-input-number .el-input__wrapper .el-input__inner {
+  &.el-input-number:not(.com-inputNumber-content)
+    .el-input__wrapper
+    .el-input__inner {
     padding: 0 !important;
   }
 
-  &.el-input-number .el-input-number__increase,
-  &.el-input-number .el-input-number__decrease {
+  &.el-input-number:not(.com-inputNumber-content) .el-input-number__increase,
+  &.el-input-number:not(.com-inputNumber-content) .el-input-number__decrease {
     display: none !important;
   }
 
-  &.el-input-number .el-input__inner::-webkit-inner-spin-button,
-  &.el-input-number .el-input__inner::-webkit-outer-spin-button {
+  &.el-input-number:not(.com-inputNumber-content)
+    .el-input__inner::-webkit-inner-spin-button,
+  &.el-input-number:not(.com-inputNumber-content)
+    .el-input__inner::-webkit-outer-spin-button {
     margin: 0 !important;
     appearance: none !important;
     -webkit-appearance: none !important;
   }
 
-  &.el-input-number .el-input__inner[type="number"] {
+  &.el-input-number:not(.com-inputNumber-content) .el-input__inner[type="number"] {
     appearance: textfield !important;
     -moz-appearance: textfield !important;
   }

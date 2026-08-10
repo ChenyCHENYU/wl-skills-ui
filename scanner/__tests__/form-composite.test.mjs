@@ -72,7 +72,7 @@ describe("复合多标签输入样式契约", () => {
   it("外壳自然增高但仍保持统一高度下限、圆角和状态边框", () => {
     assert.match(
       form,
-      /&\.el-input__wrapper:not\(\.com-input-multi-tag-wrap\),[\s\S]*?height:\s*var\(--wk-form-control-height\)\s*!important/,
+      /&\.el-input__wrapper:not\(\.com-input-multi-tag-wrap\):not\(\.com-inputNumber-content\),[\s\S]*?height:\s*var\(--wk-form-control-height\)\s*!important/,
     );
     assert.match(
       jhUi,

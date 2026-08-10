@@ -1,0 +1,26 @@
+// styles/element/_typography.scss — 受管业务组件字体链
+//
+// Edge 在 Windows 上使用增强文本对比度；如果字体栈把英文/数字先分配给
+// Helvetica/Segoe UI，再把中文逐字符 fallback 到微软雅黑，同一行会显得粗细、字面
+// 高度不一致。这里仅在业务组件根统一字体变量与继承起点，不使用全局 * 选择器，
+// 图标字体、编辑器、图表及定制页面仍可使用自己的显式 font-family。
+
+@use "../scope" as skin;
+
+#{skin.$managed-scope-selector} {
+  &:where(
+    .el-form,
+    .el-table,
+    .el-dialog,
+    .el-drawer,
+    .el-message-box,
+    .el-message,
+    .el-notification,
+    .el-popper,
+    .el-button,
+    .el-pagination
+  ) {
+    --el-font-family: var(--wk-font-family-sans) !important;
+    font-family: var(--wk-font-family-sans) !important;
+  }
+}

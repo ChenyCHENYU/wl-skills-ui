@@ -33,6 +33,17 @@ test("品牌主题、表单边框和复合控件结构保持稳定", async ({ pa
   await expect(numberWrapper).not.toHaveCSS("box-shadow", "none");
   await expect(page.getByTestId("input-number")).toHaveCSS("border-top-width", "0px");
 
+  const jhNumber = page.getByTestId("jh-input-number");
+  const jhNumberInner = page.getByTestId("jh-number-inner-wrapper");
+  await expect(jhNumber).toHaveCSS("height", "26px");
+  await expect(jhNumber).toHaveCSS("min-height", "26px");
+  await expect(jhNumber).not.toHaveCSS("box-shadow", "none");
+  await expect(jhNumberInner).toHaveCSS("height", "26px");
+  await expect(jhNumberInner).toHaveCSS("box-shadow", "none");
+  await expect(jhNumber.locator("input")).toHaveCSS("text-align", "right");
+  await expect(page.getByTestId("jh-number-decrease")).toHaveCSS("display", "flex");
+  await expect(page.getByTestId("jh-number-increase")).toHaveCSS("display", "flex");
+
   const inputGroupInput = page.getByTestId("input-group");
   const inputGroup = page.locator(".el-input.el-input-group").filter({
     has: inputGroupInput,
@@ -75,6 +86,10 @@ test("品牌主题、表单边框和复合控件结构保持稳定", async ({ pa
   await expect(page.getByTestId("exempt-section").getByRole("button")).toHaveCSS(
     "border-radius",
     "18px",
+  );
+  await expect(page.getByTestId("exempt-section").getByRole("button")).toHaveCSS(
+    "font-family",
+    "Georgia, serif",
   );
   await expect(page.getByTestId("exempt-section").locator(".login-custom-input-group")).toHaveCSS(
     "height",
@@ -145,6 +160,22 @@ test("长文本真实溢出时省略并按需显示完整内容", async ({ page 
   const tooltip = page.locator("#wl-ui-overflow-tooltip");
   await expect(tooltip).toBeVisible({ timeout: 2_000 });
   await expect(tooltip).toContainText("蓝德鑫泰新材料股份有限公司");
+
+  const grid = page.getByTestId("ag-grid-contract");
+  const focusCell = page.getByTestId("ag-focus-cell");
+  const rightCell = page.getByTestId("ag-right-cell");
+  await expect(grid).toHaveCSS(
+    "font-family",
+    '"Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif',
+  );
+  await expect(focusCell).toHaveCSS("border-right-color", "rgba(0, 42, 143, 0.4)");
+  await expect(focusCell).toHaveCSS("border-left-color", "rgba(0, 42, 143, 0.4)");
+  await expect(rightCell).toHaveCSS("display", "block");
+  await expect(rightCell).toHaveCSS("text-align", "right");
+  await expect(page.getByTestId("ag-right-header")).toHaveCSS(
+    "justify-content",
+    "flex-end",
+  );
 
   await expect(page.getByTestId("table-section")).toHaveScreenshot("table-states.png");
 });

@@ -17,6 +17,11 @@
 - jh-drag-row 收缩后 AG Grid host 跟随变高，纵向滚动只发生在内部 viewport。
 - Element Table 长文本真实溢出、省略号与按需完整提示。
 - 表格选中行柔和状态色、BaseToolbar 分裂按钮与定制区域豁免。
+- common-core `jh-input-number` 与普通表单控件同高，保留 `textAlign` 和 controls，且只有
+  复合根绘制状态边框。
+- AG Grid 焦点单元格四边描边完整，`align/headerAlign` 继续由 BaseTable/AG Grid 列配置决定。
+- 受管 Element Table、BaseTable 与 AG Grid 使用同一中英文数字字体链；计算样式契约分别
+  在 Windows Edge 和 Google Chrome 运行，像素截图仍只维护一套 Edge 基准。
 
 ## 使用
 
@@ -38,7 +43,8 @@ pnpm release:check
 ```
 
 截图基准按 Playwright 的浏览器/平台规则保存，不随 npm 包发布。Windows 默认使用企业
-环境已有的 Edge Chromium，也可通过 `WL_UI_BROWSER_CHANNEL` 显式指定 Playwright 通道。
+环境已有的 Edge Chromium，也可通过 `WL_UI_BROWSER_CHANNEL` 显式指定截图通道；无截图的
+字体、尺寸、焦点与对齐契约会额外启动系统 Edge 和 Google Chrome 各验证一次。
 视觉像素受操作系统、浏览器版本和字体渲染影响，生成与比较必须使用相同环境；当前
 基准为 Windows Edge Chromium。
 升级 Playwright、Chromium 或字体后，应单独提交基准变化并人工审图，不能把更新截图当成

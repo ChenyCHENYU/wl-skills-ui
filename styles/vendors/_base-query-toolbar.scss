@@ -470,6 +470,19 @@ html
   transform: none !important;
 }
 
+// 主色 jh-button 会同时命中全局品牌按钮锁；该锁为保护普通主按钮带有更高特异性。
+// 这里只抬高已知 action-dropdown-menu 直属 primary 按钮的权重，确保它仍按菜单项扁平化。
+html
+  body
+  .el-dropdown-menu.action-dropdown-menu
+  .el-dropdown-menu__item
+  > .el-button.el-button--primary:not(.is-link):not(.is-text):not(.is-plain) {
+  color: inherit !important;
+  border-color: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
 html
   body
   .el-dropdown-menu.action-dropdown-menu

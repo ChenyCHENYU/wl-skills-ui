@@ -13,4 +13,13 @@ html body .el-pagination {
   .el-pager li.is-active {
     border-color: var(--el-color-primary) !important;
   }
+
+  // Element/jh-ui 不同版本可能只给部分页码保留 .number；按 pager 直属 li
+  // 统一字号和字重，避免当前页因粗体看起来明显大于相邻页码。
+  .el-pager > li {
+    font-size: var(--el-pagination-button-font-size, 12px) !important;
+    font-weight: 400 !important;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
 }

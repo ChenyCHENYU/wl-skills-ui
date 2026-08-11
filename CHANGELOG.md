@@ -4,6 +4,13 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.16] - 2026-08-11
+
+### Fixed
+
+- 修复 `action-dropdown-menu` 内直属 primary 按钮被全局品牌按钮锁重新刷成深色背景、同时继承菜单深色文字的问题；仅提升该复合菜单结构的特异性，普通主按钮与普通下拉菜单不受影响。
+- 分页页码改为按 `.el-pager > li` 统一 12px/400 和等宽数字特性，不再依赖不同 Element/jh-ui 版本中不稳定的 `.number` 类，当前页继续仅以品牌色背景区分。
+
 ## [1.9.15] - 2026-08-10
 
 ### Added

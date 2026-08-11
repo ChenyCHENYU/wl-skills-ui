@@ -37,6 +37,19 @@ body {
   gap: 10px;
 }
 
+.visual-contract-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-top: 14px;
+}
+
+.visual-action-dropdown-menu {
+  position: static;
+  width: 132px;
+  margin: 0;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

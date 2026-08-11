@@ -104,6 +104,24 @@ test("品牌主题、表单边框和复合控件结构保持稳定", async ({ pa
   await expect(splitButtons.first()).toHaveCSS("background-color", "rgb(0, 42, 143)");
   await expect(splitButtons.last()).toHaveCSS("background-color", "rgb(0, 42, 143)");
 
+  const actionMenuButton = page
+    .getByTestId("action-dropdown-menu")
+    .locator(":scope > .el-dropdown-menu__item > .el-button");
+  await expect(actionMenuButton).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(actionMenuButton).toHaveCSS("border-top-width", "0px");
+  await expect(actionMenuButton).toHaveCSS("box-shadow", "none");
+  expect(await actionMenuButton.evaluate((element) => getComputedStyle(element).color))
+    .toBe(await page.getByTestId("action-dropdown-menu").locator(".el-dropdown-menu__item").evaluate(
+      (element) => getComputedStyle(element).color,
+    ));
+
+  const pagerItems = page.getByTestId("pagination-contract").locator(".el-pager > li");
+  await expect(pagerItems).toHaveCount(3);
+  expect(await pagerItems.evaluateAll((items) => items.map((item) => getComputedStyle(item).fontSize)))
+    .toEqual(["12px", "12px", "12px"]);
+  expect(await pagerItems.evaluateAll((items) => items.map((item) => getComputedStyle(item).fontWeight)))
+    .toEqual(["400", "400", "400"]);
+
   await expect(page.getByTestId("actions-section")).toHaveScreenshot("action-states.png");
   await expect(page.getByTestId("form-section")).toHaveScreenshot("form-and-composite.png");
 });

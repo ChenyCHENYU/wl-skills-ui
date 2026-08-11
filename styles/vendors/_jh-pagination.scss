@@ -7,9 +7,10 @@
   gap: 2px;
 
   // 页码按钮
-  .el-pager .number {
+  .el-pager > li {
     border-radius: var(--el-border-radius-small) !important;
-    font-size: 12px;
+    font-size: 12px !important;
+    font-weight: 400 !important;
     min-width: 26px;
     height: 26px;
     line-height: 26px;
@@ -25,7 +26,7 @@
       background-color: var(--el-color-primary) !important;
       color: #ffffff !important;
       border-radius: var(--el-border-radius-small) !important;
-      font-weight: 600;
+      font-weight: 400 !important;
     }
   }
 

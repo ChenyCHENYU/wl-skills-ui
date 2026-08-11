@@ -213,7 +213,7 @@ yarn add @agile-team/wl-skills-ui
 |---|---|---|
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版；EP 2.3.0 起引入 `.el-input__wrapper`，与 jh-ui 3.x 不兼容 |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹 + `.has-colon` 冒号注入（wl-skills-ui 已统一屏蔽表单冒号） |
-| `@agile-team/wl-skills-ui` | `^1.9.15` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、复合数字框、跨浏览器字体、显式列对齐与定制页边界 |
+| `@agile-team/wl-skills-ui` | `^1.9.16` | 已对齐上述组合的 DOM 假设、客户主题锁、圆角契约、复合数字框、动作下拉、分页数字、显式列对齐与定制页边界 |
 
 三种识别方式，任选其一：
 
@@ -227,7 +227,13 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.15：
+当前 v1.9.16：
+
+- **动作下拉不再深底深字**：仅对 `action-dropdown-menu` 内直属 primary 按钮补足覆盖权重，菜单动作保持扁平白底/悬停浅品牌色；普通主按钮和普通下拉菜单维持原样。
+- **分页页码数字一致**：所有 `.el-pager > li` 统一 12px、常规字重与等宽数字特性，兼容有无 `.number` 类的 Element/jh-ui DOM，当前页使用品牌色背景而不再靠加粗放大。
+- **真实浏览器门禁**：视觉夹具同时包含上述复合下拉与分页结构，检查透明背景、无额外边框/阴影、页码计算字号和字重，并纳入 Edge/Chrome 全量回归。
+
+上一版 v1.9.15：
 
 - **显式列对齐跨表格生效**：`defineColumns()` 会把业务明确声明的 `align/headerAlign`
   桥接为 BaseTable/AG Grid 能稳定消费的 `cellStyle/headerClass`，Element Table 继续读取原属性；

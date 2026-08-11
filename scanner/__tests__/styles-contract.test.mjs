@@ -386,5 +386,24 @@ describe("BaseToolbar 分裂下拉契约", () => {
       toolbar,
       /\n\.el-dropdown-menu \.el-dropdown-menu__item/,
     );
+    assert.match(
+      toolbar,
+      /> \.el-button\.el-button--primary:not\(\.is-link\):not\(\.is-text\):not\(\.is-plain\)[\s\S]*?background-color:\s*transparent !important;/,
+    );
+  });
+});
+
+describe("分页页码视觉契约", () => {
+  const pagination = read("styles/element/_pagination.scss");
+  const jhPagination = read("styles/vendors/_jh-pagination.scss");
+
+  it("所有直属页码使用同一字号字重，不依赖可选的 number class", () => {
+    for (const source of [pagination, jhPagination]) {
+      assert.match(
+        source,
+        /\.el-pager\s*>\s*li\s*\{[\s\S]*?font-size:[^;]+!important;[\s\S]*?font-weight:\s*400 !important;/,
+      );
+    }
+    assert.doesNotMatch(jhPagination, /\.el-pager \.number/);
   });
 });

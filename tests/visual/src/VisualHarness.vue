@@ -49,6 +49,27 @@ function rowClassName({ row }: { row: { id: number } }) {
           </div>
         </div>
       </div>
+      <div class="visual-contract-row">
+        <ul
+          class="el-dropdown-menu action-dropdown-menu visual-action-dropdown-menu"
+          data-testid="action-dropdown-menu"
+        >
+          <li class="el-dropdown-menu__item">
+            <button class="el-button el-button--primary el-button--small" type="button">
+              ATP释放
+            </button>
+          </li>
+        </ul>
+        <ElPagination
+          class="visual-pagination"
+          data-testid="pagination-contract"
+          size="small"
+          background
+          layout="prev, pager, next"
+          :page-size="10"
+          :total="30"
+        />
+      </div>
     </section>
 
     <section class="visual-section" data-testid="form-section">

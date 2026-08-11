@@ -40,7 +40,7 @@ wrapper 时，应先按上述流程确认，不能直接扩大全局 Element 选
   `.com-inputNumber-content.el-input-number.el-input__wrapper` 复合根：外层统一 26px
   高度与唯一状态边框，内部 wrapper 无重复描边，并保留 `textAlign`、`controls`、单位与
   后缀等组件原生语义。
-- BaseToolbar 分裂按钮及其动作菜单 Teleport 出口。
+- BaseToolbar 分裂按钮及其动作菜单 Teleport 出口；`action-dropdown-menu` 内直属按钮由菜单项负责背景和文字状态，嵌套 primary 按钮不得重新绘制品牌色块。
 - Element Plus 新旧两种 input-group prepend/append DOM：组合根负责唯一外轮廓，
   输入主体与附加段统一 26px，纯图标附加段 32px、图标 14px。
 - common-core `jh-drag-row + BaseTable/AG Grid` 高度链：只在真实分屏 AG Grid 中

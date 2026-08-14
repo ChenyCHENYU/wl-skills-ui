@@ -54,11 +54,11 @@
         background: rgba(var(--el-color-primary-rgb), 0.09);
       }
   }
-  // 编辑 — hover 翠绿
+  // 编辑 — hover 警示黄（wl-ui-ep 定案：查看蓝/编辑黄/删除红三色区分，原绿与成功语义撞色）
   &.jh-op-edit {
     &:hover:not(:disabled) {
-        color: var(--el-color-success);
-        background: rgba(43, 178, 104, 0.09);
+        color: var(--el-color-warning);
+        background: rgba(234, 154, 19, 0.12);
       }
   }
   // 删除/作废 — hover 红

@@ -4,6 +4,23 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.10.0] - 2026-08-15
+
+> 来源：wl-ui-ep（危废/环保子系统）存量改造实战沉淀，全部经过"线上翻车 → 定位 → 修复 → 验证"闭环。
+
+### Added
+
+- 新增 `renderAutoTag(value, dictKey, fieldName?)` / `renderAutoTagByLabel(label, fieldName?)` 文案语义自动判色 Tag：按字典渲染出的文案关键词判色（状态词实心 Tag、分类/形态词镂空 Tag、中性词原样纯文本兜底），零配色表覆盖存量项目上百字典列；规则表 `AUTO_STATUS_RULES` / `AUTO_CLASSIFY_RULES` / `autoTagTypeByLabel` 同步导出可扩展。
+- 新增 `ensureDefaultAlignment` / `normalizeColumnAlignmentsWith(cols, { defaultAlign: "center" })` 默认对齐补齐：无显式 `align/cellStyle/headerClass` 的列补默认居中（含表头 class 桥接，兼容共享 AG 适配层只认 class 的场景），递归分组 children；不传 options 保持原有"仅桥接显式声明"行为，向后兼容。
+- 新增规范文档 `standards/ui/06-legacy-migration-lessons.md`：二级表头、滚动条双轨、默认居中、状态 Tag、操作图标配色、禁用按钮可辨识、搜索区间距、分页位置、联邦门户样式污染规避、字典列审计机制十条实战沉淀。
+- `check:scss` 新增反模式守门：包内出现 `.ag-header-row` 强制 height 直接报错（防二级表头破坏模式回流）。
+
+### Fixed
+
+- AG Grid 二级（分组）表头不渲染：移除 `.ag-header-row { height: 36px !important }` 强制行高，改由 `--ag-header-height` / 新增 `--ag-group-header-height` 变量驱动；并增加 `:has(.ag-header-row-column-group)` 两行兜底（真实存在分组行时强制两行各 36px），兼容共享 AG 适配层不透传 `groupHeaderHeight` 的存量场景。
+- 表格滚动条改为"默认隐藏 → 悬停显示主题色（单档）"双轨实现：Chrome 121+ / Firefox 走标准 `scrollbar-color`，旧 Chromium 走 webkit 伪元素 + CSS 变量继承（`--wk-sb-thumb`），根治"容器:hover 直选伪元素在部分 Chromium 不触发重绘导致悬停不显示"的缺陷；横向条悬停展开 8px 主题色。
+- 操作列编辑图标 hover 由绿改警示黄：与查看蓝/删除红拉开三色区分，绿留给成功/审核语义（业务定案）。
+
 ## [1.9.16] - 2026-08-11
 
 ### Fixed

@@ -216,6 +216,98 @@ export function renderDictClassifyTag(
   );
 }
 
+// ── 文案语义自动判色（wl-ui-ep 存量改造验证） ──────────────────────────────────
+//
+// 解决的问题：存量项目几十个列表页、上百个字典列，逐字段配色表不现实；
+// 按字典渲染出的「文案关键词」判语义色即可覆盖 90% 场景，且零配色表维护。
+//
+// 判定顺序：
+//   1. 状态/流转类关键词 → 浅色实心 Tag（语义色）
+//   2. 分类/级别/形态类关键词 → 镂空 Tag（视觉权重低于状态）
+//   3. 中性文案（单位/职务/周期等）→ 原样纯文本（零视觉变化，安全兜底）
+
+/** 状态类关键词 → 实心 Tag 颜色（顺序即优先级：危险 > 成功 > 警示 > 中性） */
+export const AUTO_STATUS_RULES: Array<[RegExp, string]> = [
+  [/驳回|拒绝|停用|作废|报废|超标|异常|超期|逾期|不合格|失效|无效|惩罚|隐患/, "danger"],
+  [/已完成|已结束|完成|正常|有效|启用|合格|达标|通过|已处置|已确认|已审批|在用|使用中|奖励/, "success"],
+  [/待|进行中|审批中|整改中|处置中|评估中|调查|预警|管控|注意/, "warning"],
+  [/新建|未开始|草稿|暂存|历史|撤回|无|否|未/, "info"],
+];
+
+/** 分类/级别/形态类关键词 → 镂空 Tag 颜色 */
+export const AUTO_CLASSIFY_RULES: Array<[RegExp, string]> = [
+  [/危废|危险|惩罚|事故|气态/, "danger"],
+  [/奖励|安全/, "success"],
+  [/一般|普通|计划外/, "warning"],
+  [/液态|固态|半固态/, "info"],
+];
+
+const CLASSIFY_HINT = /类型|类别|级别|维度|形态|相态|气态|液态|固态/;
+
+function matchRules(
+  label: string,
+  rules: Array<[RegExp, string]>,
+): string | null {
+  for (const [re, type] of rules) {
+    if (re.test(label)) return type;
+  }
+  return null;
+}
+
+/**
+ * 按已解析文案判语义 Tag 类型；中性文案返回 null（调用方保持纯文本）。
+ * 返回 { type, plain }：plain=true 表示分类/级别类（镂空 outline，低视觉权重）。
+ */
+export function autoTagTypeByLabel(
+  label: string,
+  fieldName?: string,
+): { type: string; plain: boolean } | null {
+  const statusType = matchRules(label, AUTO_STATUS_RULES);
+  if (statusType !== null) return { type: statusType, plain: false };
+  const isClassify =
+    CLASSIFY_HINT.test(label) || /type|level|category|class/i.test(fieldName ?? "");
+  if (isClassify) {
+    return { type: matchRules(label, AUTO_CLASSIFY_RULES) ?? "", plain: true };
+  }
+  return null;
+}
+
+/**
+ * 文案语义 Tag（label 版）：已拿到展示文案时直接调用。
+ * 状态类 → 浅色实心 Tag；分类/级别/形态类 → 镂空 Tag；
+ * 中性文案原样返回字符串（defaultSlot 直接可用，零视觉变化兜底）。
+ */
+export function renderAutoTagByLabel(
+  label: string,
+  fieldName?: string,
+): VNode | string {
+  const tag = autoTagTypeByLabel(label, fieldName);
+  if (tag === null) return label;
+  return h(
+    ElTag,
+    { type: tag.type as any, size: "small", effect: tag.plain ? "plain" : "light" },
+    () => label,
+  );
+}
+
+/**
+ * 文案语义 Tag（字典版）：传字典 key，内部经 setDictResolver 解析文案后判色。
+ * 未注入 resolver 时按 value 原文判色（多数字典 value 即文案的存量场景可用）。
+ */
+export function renderAutoTag(
+  value: string | number | null | undefined,
+  dictKey: string,
+  fieldName?: string,
+): VNode | string | null {
+  if (value === null || value === undefined || value === "") return null;
+  let label = String(value);
+  if (dictResolver) {
+    const resolved = dictResolver(dictKey, value);
+    if (resolved) label = resolved;
+  }
+  return renderAutoTagByLabel(label, fieldName ?? dictKey);
+}
+
 /** 蓝色圆角徽标（编号类） */
 export function renderBadge(
   value: string | number | null | undefined,

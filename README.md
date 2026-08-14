@@ -730,9 +730,13 @@ export const myRules = [
 | ------------------------------------------------ | -------------------------------------------------- |
 | `defineColumns(cols)`                            | 列定义，应用自动映射并桥接显式列对齐               |
 | `normalizeColumnAlignments(cols)`                | 仅桥接显式 `align/headerAlign`，不设置默认对齐      |
+| `normalizeColumnAlignmentsWith(cols, opts)`      | 桥接 + 默认对齐补齐（`{ defaultAlign: "center" }`，属性可退出） |
+| `ensureDefaultAlignment(col, align)`             | 单列默认对齐补齐（递归分组 children，尊重显式声明） |
 | `renderOps(items)`                               | 操作列图标按钮组（view/edit/del/log/ok/send 预设） |
 | `renderTagNode(v, map)`                          | 状态 Tag 渲染                                      |
 | `renderClassifyTag(v, map)`                      | 分类 Tag 渲染                                      |
+| `renderAutoTag(v, dictKey, fieldName?)`          | 字典列文案语义自动判色 Tag（状态实心/分类镂空/中性纯文本兜底，存量改造验证） |
+| `renderAutoTagByLabel(label, fieldName?)`        | 同上，已解析文案直调版                             |
 | `renderBadge(v)` / `renderCountBadge(v)`         | 编号 / 计数徽标                                    |
 | `renderRatingLevel(v)`                           | 评级颜色                                           |
 | `registerColumnAutoMap(field, config)`           | 注册新字段自动渲染                                 |

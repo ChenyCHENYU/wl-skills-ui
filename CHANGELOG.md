@@ -4,6 +4,22 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.10.1] - 2026-08-15
+
+### Fixed
+
+- `ensureDefaultAlignment` 分组列语义修正：声明式分组（带 `children`）只递归子列，不再给分组自身补 `align/headerAlign`（分组行无叶子单元格，补齐语义多余）。
+
+### Added
+
+- 新增 `runtime/__tests__`（25 用例）：`ensureDefaultAlignment` / `normalizeColumnAlignmentsWith`（默认居中、属性退出、cellStyle/headerClass 尊重、分组递归、不变突变）与 `autoTagTypeByLabel` / `renderAutoTagByLabel` / `renderAutoTag`（语义分级、危险词优先、镂空分类、中性纯文本兜底、resolver 注入）；`npm test` 统一纳管 runtime 测试。
+- `verify:package` 新增 `dist/tokens.css` ↔ `design/tokens/base.css` 逐字节同步守卫（防陈旧产物发布；该文件被 git 跟踪以保护 `npm pack` 完整性，忽视规则会导致打包缺文件）。
+- 新增 GitHub Actions CI（`ci.yml`）：Ubuntu Node 22/24 + Windows Node 24 矩阵，`pnpm install --frozen-lockfile` + `pnpm verify` + `npm pack --dry-run`，与 wl-skills-kit 的 CI 对齐。
+
+### Changed
+
+- 仓库卫生：删除根目录 3 个历史 tgz 产物与 `.tmp` / `test-results` 空目录；新增 `mcp/README.md` 声明 `server.js` 冻结（2026-05 遗留实验实现，勿基于其扩展）。
+
 ## [1.10.0] - 2026-08-15
 
 > 来源：wl-ui-ep（危废/环保子系统）存量改造实战沉淀，全部经过"线上翻车 → 定位 → 修复 → 验证"闭环。

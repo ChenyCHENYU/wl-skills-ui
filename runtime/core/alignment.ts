@@ -69,7 +69,7 @@ export interface DefaultAlignmentOptions {
  * 为无显式对齐声明的列补齐默认对齐（含表头）。
  *
  * - 列已有 align / cellStyle / headerClass 时一律不动（业务意图优先）；
- * - 递归处理分组列 children；
+ * - 递归处理分组列 children；声明式分组自身无叶子单元格，不补自身 align；
  * - 与 normalizeColumnAlignment 兼容：补齐产物仍可被桥接函数消费。
  */
 export function ensureDefaultAlignment<T extends ColumnLike>(
@@ -79,20 +79,23 @@ export function ensureDefaultAlignment<T extends ColumnLike>(
   const normalizedChildren = Array.isArray(column.children)
     ? column.children.map((child) => ensureDefaultAlignment(child, defaultAlign))
     : column.children;
+  // 分组列：只递归子列，自身不补（align 对分组行无语义）
+  if (Array.isArray(column.children)) {
+    return normalizedChildren === column.children
+      ? column
+      : ({ ...column, children: normalizedChildren } as T);
+  }
   const hasExplicit =
     column.align !== undefined ||
     column.cellStyle !== undefined ||
     column.headerClass !== undefined;
   if (hasExplicit) {
-    return normalizedChildren === column.children
-      ? column
-      : ({ ...column, children: normalizedChildren } as T);
+    return column;
   }
   return {
     ...column,
     align: defaultAlign,
     headerAlign: defaultAlign,
-    children: normalizedChildren,
   } as T;
 }
 

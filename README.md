@@ -227,7 +227,20 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.9.16：
+当前 v1.10.1：
+
+- **存量改造债务清偿**：新增 `runtime/__tests__`（25 个用例覆盖默认对齐与自动判色，`npm test` 统一纳管）；`verify:package` 增加 `dist/tokens.css` 与 `design/tokens/base.css` 逐字节同步守卫；补 GitHub Actions CI（Ubuntu 22/24 + Windows 24 矩阵跑 `pnpm verify`）；清理仓库残留 tgz 与空目录，`mcp/README.md` 声明 server.js 冻结状态。
+- **分组列对齐语义修正**：`ensureDefaultAlignment` 对声明式分组列只递归子列、不补自身 `align`（分组行无叶子单元格）。
+
+上一版 v1.10.0：
+
+- **二级表头渲染根治**：AG Grid 分组表头行高改由 `--ag-header-height` / `--ag-group-header-height` 变量驱动，并带 `:has()` 两行兜底；`check:scss` 拦截 `.ag-header-row` 强制行高反模式。
+- **滚动条双轨主题色**：默认隐藏、悬停显示品牌色（单档）；标准 `scrollbar-color` + webkit 变量继承双轨，规避部分 Chromium 不重绘缺陷。
+- **状态列自动判色**：`renderAutoTag` / `renderAutoTagByLabel` 按字典文案关键词判色（状态实心 / 分类镂空 / 中性纯文本兜底）。
+- **默认居中可退出**：`normalizeColumnAlignmentsWith(cols, { defaultAlign: "center" })`。
+- **操作图标三色定案**：查看蓝 / 编辑黄 / 删除红，默认统一浅主题蓝。
+
+上一版 v1.9.16：
 
 - **动作下拉不再深底深字**：仅对 `action-dropdown-menu` 内直属 primary 按钮补足覆盖权重，菜单动作保持扁平白底/悬停浅品牌色；普通主按钮和普通下拉菜单维持原样。
 - **分页页码数字一致**：所有 `.el-pager > li` 统一 12px、常规字重与等宽数字特性，兼容有无 `.number` 类的 Element/jh-ui DOM，当前页使用品牌色背景而不再靠加粗放大。

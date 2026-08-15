@@ -229,7 +229,20 @@ function verifyManagedScope() {
   }
 }
 
+function verifyTokensSync() {
+  // dist/tokens.css 由 build 的 sync:tokens 从 design/tokens/base.css 生成，
+  // 且被 git 跟踪（保护 npm pack 完整性）——这里强制两者逐字节一致，防止陈旧产物发布
+  const source = readFileSync(join(root, "design/tokens/base.css"));
+  const generated = readFileSync(join(root, "dist/tokens.css"));
+  if (!Buffer.compare(source, generated) === 0) {
+    errors.push(
+      "dist/tokens.css 与 design/tokens/base.css 不一致：先执行 npm run build 再提交/发布",
+    );
+  }
+}
+
 verifyVersions();
+verifyTokensSync();
 verifyExports();
 verifyRules();
 verifyPublishAllowlist();

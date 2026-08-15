@@ -1,6 +1,6 @@
 {
   "name": "@agile-team/wl-skills-ui",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 项目通用化妆/原生双模式（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
   "main": "./es/index.js",
@@ -47,7 +47,7 @@
     "build": "tsup && npm run sync:tokens",
     "prepare": "npm run build",
     "sync:tokens": "node -e \"import('fs').then(fs=>fs.copyFileSync('design/tokens/base.css','dist/tokens.css'))\"",
-    "test": "node --test scanner/__tests__/*.test.mjs",
+    "test": "node --test scanner/__tests__/*.test.mjs runtime/__tests__/*.test.mjs",
     "test:visual": "playwright test --config tests/visual/playwright.config.ts",
     "test:visual:ui": "playwright test --config tests/visual/playwright.config.ts --ui",
     "test:visual:update": "playwright test --config tests/visual/playwright.config.ts --update-snapshots",

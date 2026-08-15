@@ -172,7 +172,7 @@ npx wl-ui audit --target src --refresh-baseline
 git add .wl-baseline.json
 
 # 4. 豁免（如有）
-cp node_modules/@agile-team/wl-skills-ui/.wl-exempt.example.json .wl-exempt.json
+cp node_modules/@agile-team/wl-skills-ui/examples/wl-exempt.example.json .wl-exempt.json
 # 编辑为本项目实际豁免路径
 
 # 5. CI 加 PR gate

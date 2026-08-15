@@ -63,6 +63,26 @@ describe("autoTagTypeByLabel 文案语义判色", () => {
     assert.ok(Array.isArray(AUTO_CLASSIFY_RULES) && AUTO_CLASSIFY_RULES.length >= 4);
     for (const [re] of AUTO_STATUS_RULES) assert.ok(re instanceof RegExp);
   });
+
+  it("单字词锚定：业务文案不被误判（招待费/无票运输/未税 → 纯文本）", () => {
+    assert.equal(autoTagTypeByLabel("招待费", "fee"), null);
+    assert.equal(autoTagTypeByLabel("无票运输", "transport"), null);
+    assert.equal(autoTagTypeByLabel("未税", "price"), null);
+    assert.equal(autoTagTypeByLabel("接待", "reception"), null);
+  });
+
+  it("单字词整词命中：待/无/否/未 独立成词时仍判色", () => {
+    assert.deepEqual(autoTagTypeByLabel("待", "status"), { type: "warning", plain: false });
+    assert.deepEqual(autoTagTypeByLabel("否", "yesNo"), { type: "info", plain: false });
+    assert.deepEqual(autoTagTypeByLabel("无", "yesNo"), { type: "info", plain: false });
+  });
+
+  it("「未X」先行拦截：不被 success 组子串反向误命中", () => {
+    assert.deepEqual(autoTagTypeByLabel("未完成", "status"), { type: "info", plain: false });
+    assert.deepEqual(autoTagTypeByLabel("未通过", "status"), { type: "danger", plain: false });
+    assert.deepEqual(autoTagTypeByLabel("未启用", "status"), { type: "info", plain: false });
+    assert.deepEqual(autoTagTypeByLabel("审核通过", "status"), { type: "success", plain: false });
+  });
 });
 
 describe("renderAutoTagByLabel 渲染", () => {

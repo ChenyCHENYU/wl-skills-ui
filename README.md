@@ -227,7 +227,12 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.10.1：
+当前 v1.10.2：
+
+- **判色纪律收紧**：单字状态词锚定（`待`/`无`/`否`/`未` 仅按词头或整词命中），「招待费」「无票运输」类业务文案不再误判；「未X」先行拦截，`未完成/未通过` 不再被子串反向误命中；不使用后行断言（旧 Safari 兼容）。
+- **工程闭环补强（零运行时开销）**：`test:coverage` 内建覆盖率报告（零依赖）；`publish.yml` Release 触发的自动发布（tag 校验 + verify 门禁）。
+
+上一版 v1.10.1：
 
 - **存量改造债务清偿**：新增 `runtime/__tests__`（25 个用例覆盖默认对齐与自动判色，`npm test` 统一纳管）；`verify:package` 增加 `dist/tokens.css` 与 `design/tokens/base.css` 逐字节同步守卫；补 GitHub Actions CI（Ubuntu 22/24 + Windows 24 矩阵跑 `pnpm verify`）；清理仓库残留 tgz 与空目录，`mcp/README.md` 声明 server.js 冻结状态。
 - **分组列对齐语义修正**：`ensureDefaultAlignment` 对声明式分组列只递归子列、不补自身 `align`（分组行无叶子单元格）。

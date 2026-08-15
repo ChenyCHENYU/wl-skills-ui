@@ -4,6 +4,21 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.10.2] - 2026-08-15
+
+### Fixed
+
+- `AUTO_STATUS_RULES` 匹配纪律收紧（语义正确性，零性能开销）：
+  - 单字词锚定——`^待` / `^(?:无|否|未)$`，业务文案「招待费」「无票运输」「未税」不再被误判为状态 Tag；
+  - 「未X」词表先行拦截（未通过=danger / 未完成·未启用等=info），防止 success 组的 完成/通过/启用/达标 子串反向误命中「未完成/未通过」；
+  - 刻意不使用后行断言（旧 Safari 解析期报错，库代码不可引入）。
+- `docs/governance-long-term.md` 修正 `.wl-exempt.example.json` 陈旧根路径为实际发布路径 `examples/`。
+
+### Added
+
+- `npm run test:coverage`：Node 内建 `--experimental-test-coverage` 覆盖率报告（零新增依赖，仅报告不设门禁）。
+- `publish.yml` 发布工作流（GitHub Release 触发：tag-版本一致性校验 + verify + pack 预检 + npm publish）；视觉回归因快照基线为 win32 平台专属暂不入 Linux 发布路径，跨平台基线补齐后再追加。
+
 ## [1.10.1] - 2026-08-15
 
 ### Fixed

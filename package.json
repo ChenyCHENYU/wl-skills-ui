@@ -1,6 +1,6 @@
 {
   "name": "@agile-team/wl-skills-ui",
-  "version": "1.10.1",
+  "version": "1.10.2",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 项目通用化妆/原生双模式（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
   "main": "./es/index.js",
@@ -64,7 +64,8 @@
     "verify": "npm run lint && npm test && npm run check:scss && npm run docs:check && npm run build && npm run verify:package",
     "pack:dry": "npm pack --dry-run --ignore-scripts",
     "release:check": "npm run verify && npm run test:visual && npm pack --dry-run --ignore-scripts",
-    "prepublishOnly": "npm run release:check"
+    "prepublishOnly": "npm run release:check",
+    "test:coverage": "node --test --experimental-test-coverage scanner/__tests__/*.test.mjs runtime/__tests__/*.test.mjs"
   },
   "files": [
     "dist",

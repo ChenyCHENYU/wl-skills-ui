@@ -99,6 +99,10 @@ describe("表单样式契约", () => {
       jhUi,
       /\.com-inputNumber-content\.el-input-number\.el-input__wrapper[\s\S]*?> \.el-input[\s\S]*?> \.el-input__wrapper\s*\{[\s\S]*?height:\s*100%\s*!important;[\s\S]*?box-shadow:\s*none !important/,
     );
+    assert.match(
+      jhUi,
+      /\.com-inputNumber-content\.el-input-number\.el-input__wrapper[\s\S]*?> \.el-input[\s\S]*?> \.el-input__wrapper\s*\{[\s\S]*?padding-left:\s*11px\s*!important/,
+    );
     assert.doesNotMatch(
       form,
       /&\.el-input-number\s+\.el-input-number__(increase|decrease)/,
@@ -196,6 +200,43 @@ describe("AG Grid 显式列对齐契约", () => {
       agGrid,
       /^\.ag-header-cell-label\s*\{[^}]*justify-content:\s*center/m,
       "不得把所有业务表头强制居中",
+    );
+  });
+
+  it("编辑态退出文本单元格 padding，内容对齐只命中显式 class", () => {
+    assert.match(
+      agGrid,
+      /\.ag-cell\.editable-cell,[\s\S]*?\.ag-cell\.always-editable-cell,[\s\S]*?\.ag-cell\.ag-cell-inline-editing\s*\{[\s\S]*?padding-left:\s*0\s*!important;[\s\S]*?padding-right:\s*0\s*!important/,
+    );
+    for (const alignment of ["left", "center", "right"]) {
+      assert.ok(
+        agGrid.includes(`.wl-ui-table-cell-align--${alignment}`),
+        `缺少单元格对齐桥接：${alignment}`,
+      );
+    }
+    assert.doesNotMatch(
+      agGrid,
+      /^\.ag-cell\s*\{[^}]*text-align:/m,
+      "不得强制所有单元格对齐",
+    );
+  });
+});
+
+describe("MessageBox 状态图标契约", () => {
+  const dialog = read("styles/element/_dialog.scss");
+
+  it("仅修正 container 直属状态图标，不强制普通弹窗位置", () => {
+    assert.match(
+      dialog,
+      /\.el-message-box__container:has\(> \.el-message-box__status\)/,
+    );
+    assert.match(
+      dialog,
+      /> \.el-message-box__status\s*\{[\s\S]*?position:\s*static\s*!important;[\s\S]*?transform:\s*none\s*!important/,
+    );
+    assert.doesNotMatch(
+      dialog,
+      /\.el-message-box \.el-message-box__status\s*\{[^}]*top:\s*\d+px/,
     );
   });
 });
@@ -405,5 +446,56 @@ describe("分页页码视觉契约", () => {
       );
     }
     assert.doesNotMatch(jhPagination, /\.el-pager \.number/);
+  });
+});
+
+describe("AG Grid 完整空状态契约", () => {
+  const agGrid = read("styles/vendors/_ag-grid.scss");
+  const runtime = read("runtime/ag-grid-empty-state.ts");
+
+  it("完整插图与两行文案固定为同一规格，不按高度降级隐藏", () => {
+    assert.match(runtime, /AG_GRID_EMPTY_BODY_MIN_HEIGHT = 160/);
+    assert.match(
+      agGrid,
+      /\.ag-overlay-no-rows-wrapper\[data-wl-ui-empty-overlay\][\s\S]*?min-height:\s*160px !important/,
+    );
+    assert.match(agGrid, /flex:\s*0 0 84px/);
+    assert.match(agGrid, /content:\s*var\(--wk-empty-hint\)/);
+    assert.doesNotMatch(runtime, /compact|minimal|text-only/);
+  });
+
+  it("以实际 body viewport 定位，不猜单层或分组表头高度", () => {
+    assert.match(
+      runtime,
+      /querySelector<HTMLElement>\("\.ag-body-viewport"\)/,
+    );
+    assert.match(runtime, /bodyRect\.top\s*-/);
+    assert.match(
+      agGrid,
+      /top:\s*var\(--wl-ui-empty-overlay-top\) !important/,
+    );
+    assert.doesNotMatch(runtime, /ag-header-height|36\s*\*\s*2/);
+  });
+
+  it("只在空态给上下或左右分屏增加受控滚动，并支持完整清理", () => {
+    for (const boundary of [
+      ".drager_row",
+      ".drag-col-container",
+      ".session-login",
+      ".wl-ui-skin-exempt",
+      "[data-wl-ui-skin='off']",
+    ]) {
+      assert.ok(runtime.includes(boundary), `缺少空态边界：${boundary}`);
+    }
+    assert.match(
+      agGrid,
+      /\[data-wl-ui-empty-scroll="row"\][\s\S]*?overflow-y:\s*auto !important/,
+    );
+    assert.match(
+      agGrid,
+      /\[data-wl-ui-empty-scroll="column"\][\s\S]*?overflow-y:\s*auto !important/,
+    );
+    assert.match(runtime, /uninstallAgGridEmptyStateGuard/);
+    assert.match(runtime, /reconcileOverlayLayouts\(new Map\(\)\)/);
   });
 });

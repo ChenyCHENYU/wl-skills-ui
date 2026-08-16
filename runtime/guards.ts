@@ -1,3 +1,4 @@
+import { installAgGridEmptyStateGuard } from "./ag-grid-empty-state";
 import { installOverflowTooltipGuard } from "./overflow-tooltip";
 import { installSplitGridResizeGuard } from "./split-grid-resize";
 import { installBrandThemeLock } from "./theme-lock";
@@ -11,4 +12,5 @@ export function installUiRuntimeGuards(): void {
   installBrandThemeLock();
   installOverflowTooltipGuard();
   installSplitGridResizeGuard();
+  installAgGridEmptyStateGuard();
 }

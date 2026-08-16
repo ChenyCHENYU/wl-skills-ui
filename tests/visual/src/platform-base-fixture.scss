@@ -47,6 +47,22 @@
   width: 100%;
 }
 
+// Element Plus 2.2.x + jh-ui 的旧 MessageBox 基线：状态图标绝对定位且另有固定 top。
+// wl-skills-ui 必须只在真实 status container 内把它恢复为稳定的行内布局。
+.visual-legacy-message-box .el-message-box__container {
+  position: relative;
+}
+
+.visual-legacy-message-box .el-message-box__status {
+  position: absolute;
+  top: 30px;
+  transform: translateY(-50%);
+}
+
+.visual-legacy-message-box .el-message-box__status + .el-message-box__message {
+  padding-left: 36px;
+}
+
 .visual-ag-header-row {
   height: 36px;
 }
@@ -83,4 +99,53 @@
 
 .visual-ag-header-row .ag-right-aligned-header .ag-header-cell-label {
   justify-content: flex-end;
+}
+
+// 模拟 AG Grid 29/32 共用的空态定位骨架：overlay 覆盖整张 grid，body 从
+// 实际表头之后开始。wl-skills-ui 必须把空态重新约束到 body 数据区。
+.visual-empty-grid,
+.visual-empty-grid .ag-root-wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.visual-empty-grid .ag-header {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 36px;
+}
+
+.visual-empty-grid.has-group-header .ag-header {
+  height: 72px;
+}
+
+.visual-empty-header-row {
+  height: 36px;
+  padding: 0 12px;
+  line-height: 36px;
+}
+
+.visual-empty-grid .ag-body {
+  position: absolute;
+  top: 36px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.visual-empty-grid.has-group-header .ag-body {
+  top: 72px;
+}
+
+.visual-empty-grid .ag-body-viewport {
+  width: 100%;
+  height: 100%;
+}
+
+.visual-empty-grid .ag-overlay {
+  position: absolute;
+  inset: 0;
 }

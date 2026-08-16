@@ -104,9 +104,10 @@ wl-skills-ui/
 │   │   ├── common.ts             # 通用业务预设（enable/audit/verify + 起步包）
 │   │   └── index.ts
 │   ├── auto.ts                   # Skin/老项目包级保护自动入口
-│   ├── guards.ts                 # 主题锁 + 长文本 + 分屏表格尺寸保护聚合
+│   ├── guards.ts                 # 主题锁 + 长文本 + 分屏/空态表格保护聚合
 │   ├── overflow-tooltip.ts       # 普通表格真实溢出 Tooltip 兜底
 │   ├── split-grid-resize.ts      # jh-drag-row 内 AG Grid Resize/高度链守护
+│   ├── ag-grid-empty-state.ts    # AG Grid 完整空态定位与受控撑高
 │   └── index.ts                  # 公共 API 入口
 │
 ├── scanner/                      # 自动化扫描 / 修复
@@ -115,7 +116,7 @@ wl-skills-ui/
 │   │   ├── _shared.mjs           # 公共工具 + inferMeta(layer/vendor)
 │   │   ├── table.mjs             # R001 R002 R003 R014 R039
 │   │   ├── form.mjs              # R006 R007 R008
-│   │   ├── button.mjs            # R004 R005 R015 R038
+│   │   ├── button.mjs            # R004 R005 R015 R038 R041
 │   │   ├── componentStructure.mjs # R040 复合结构登记审查
 │   │   ├── tag.mjs               # R009 R010 R012
 │   │   ├── dialog.mjs            # R011
@@ -227,7 +228,14 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.10.2：
+当前 v1.10.3：
+
+- **复合结构精准修复**：仅在 MessageBox 容器直接含状态图标时统一图标与文字布局；`jh-input-number` 仅给内层文本 wrapper 补 11px 左间距，不改步进按钮、单位后缀和对齐语义。
+- **AG Grid 编辑与对齐闭环**：仅对已标记编辑态的单元格退出普通文本 padding；`align/headerAlign` 桥接为共享适配层可执行的函数配置，表头与内容使用同一对齐轴，并合并保留业务 `cellStyle/cellClass` 返回值。
+- **AG Grid 完整空态闭环**：按真实 `.ag-body-viewport` 定位，数据区统一保留 160px；插图、主文案和辅助说明始终完整同规格。上下/左右多表格空间不足时由最近分屏受控滚动，数据恢复后自动清理全部标记。
+- **按钮尺寸可重现**：新增 R041，只报告未显式声明 `size` 的 `el-button` / `ElButton` / `BaseToolbar`；默认建议 `small`，已设置其他或动态尺寸的业务代码不受影响。
+
+上一版 v1.10.2：
 
 - **判色纪律收紧**：单字状态词锚定（`待`/`无`/`否`/`未` 仅按词头或整词命中），「招待费」「无票运输」类业务文案不再误判；「未X」先行拦截，`未完成/未通过` 不再被子串反向误命中；不使用后行断言（旧 Safari 兼容）。
 - **工程闭环补强（零运行时开销）**：`test:coverage` 内建覆盖率报告（零依赖）；`publish.yml` Release 触发的自动发布（tag 校验 + verify 门禁）。
@@ -276,7 +284,7 @@ yarn add @agile-team/wl-skills-ui
 
 - **输入附加段不再割裂**：`el-input-group` 由组合根统一 26px 高度、6px 外圆角和 default/hover/focus/error/disabled 描边；左侧 prefix、右侧 append 图标统一 14px，纯图标附加段 32px，文字/单位/按钮仍按内容宽度。
 - **新旧 DOM 同时覆盖**：兼容 jh-ui 配套旧版 input 直挂结构和新版 `.el-input__wrapper` 结构，内部输入不再重复描边；普通 input、普通按钮、登录页和显式豁免区保持原行为。
-- **分屏表格真正重布局**：`runtime/auto` 只观察 `jh-drag-row` 内真实 AG Grid pane，补齐可收缩高度链并按帧派发局部重布局事件；AG Grid 自身 ResizeObserver 生成内部滚动条，不给外层加滚动条、不广播全局 resize、不访问 Vue 私有实例。
+- **分屏表格真正重布局**：有数据时，`runtime/auto` 只观察 `jh-drag-row` 内真实 AG Grid pane，补齐可收缩高度链并由 AG Grid 自身生成内部滚动条；只有完整空态确实放不下时，最近分屏根才临时承担一个纵向滚动条，数据恢复后撤销。
 - **回归边界闭环**：结构清单新增 input-group 新旧 DOM 与 drag-row/AG Grid 契约；Node 行为测试覆盖动态挂载、批量 Resize、豁免区，真实浏览器验证附加段计算样式及 220px→120px 收缩后的内部滚动。
 
 上一版 v1.9.12：
@@ -399,7 +407,7 @@ yarn add @agile-team/wl-skills-ui
 - `standards/architecture/01-layer-boundaries.md` 固化 tokens、Element Plus、Project Vendors、layouts、runtime、scanner、skills 的扩展边界，明确 `Base*` / `jh-*` / `C_*` / AG Grid 是当前项目集群必覆盖层
 - `vendors/jh-components` 使用 `<jh-*>` 全量通配治理，当前只维护代表性基线和专项覆盖准入，避免遗漏新增 jh 封装
 - `npm run docs:check` 校验旧命名、旧命令、版本文案和编辑器配置，防止规则文档回退
-- 表格空状态改为对应表格区域内自适应居中，避免嵌套表格靠固定高度猜效果
+- 表格空状态按真实数据区居中；AG Grid 空间不足时受控撑高，完整插图与文案保持一致
 - 查询区/工具栏按钮补齐 token fallback，禁用按钮独立保留清晰禁用态
 - 表单控件圆角统一使用 `--wk-form-control-radius`，覆盖 input/select/date/textarea/upload 等控件家族
 - `wl-ui init/update` 会安装 Skill、触发提示、MCP 配置和 manifest 清单
@@ -456,7 +464,7 @@ npx wl-ui init --mode native
 // 4. src/main.ts
 import { installCommonPreset } from "@agile-team/wl-skills-ui/runtime/common-preset";
 installCommonPreset();
-// 已包含主题锁、普通表格长文本和分屏 AG Grid 尺寸保护，无需重复引入 runtime/auto。
+// 已包含主题锁、普通表格长文本、分屏尺寸和完整空态保护，无需重复引入 runtime/auto。
 ```
 
 ```vue
@@ -785,7 +793,7 @@ export const myRules = [
 
 ## 规范清单
 
-### UI 规则（R001-R040，按 layer 自动分组）
+### UI 规则（R001-R041，按 layer 自动分组）
 
 | Rule | Layer | Vendor    | 说明                                 |
 | ---- | ----- | --------- | ------------------------------------ |
@@ -819,6 +827,7 @@ export const myRules = [
 | R038 | L1    | element   | 创建类主按钮缺 primary 填充主题色    |
 | R039 | L1    | element   | 普通数据列缺省略与悬停完整提示       |
 | R040 | L2    | common-core | 未登记复合控件结构需人工评审       |
+| R041 | L1    | element   | 按钮未显式 size，默认应使用 small   |
 
 ### 维护者防回归
 
@@ -840,7 +849,8 @@ pnpm test:visual:update
 pnpm release:check
 ```
 
-机制与准入细则见 [复合控件结构契约](docs/composite-component-contracts.md) 和
+机制与准入细则见 [复合控件结构契约](docs/composite-component-contracts.md)、
+[AG Grid 完整空状态](docs/ag-grid-empty-state.md) 和
 [浏览器视觉回归](docs/visual-regression.md)。视觉基准依赖字体、浏览器与操作系统渲染，
 必须在相同环境中比较；当前项目基准由 Windows Edge Chromium 生成。
 

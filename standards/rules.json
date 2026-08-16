@@ -123,6 +123,18 @@
       "skills": ["layouts/list-page"]
     },
     {
+      "id": "R041",
+      "category": "button",
+      "severity": "warning",
+      "title": "按钮与 BaseToolbar 必须显式声明 size，默认使用 small",
+      "rationale": "不同项目或部署环境的 ConfigProvider 默认尺寸可能不同；显式 size 可避免同一代码在本地与线上出现按钮高宽漂移。",
+      "appliesTo": ["el-button", "ElButton", "base-toolbar", "BaseToolbar"],
+      "autoFixable": false,
+      "manualReason": "默认应补 size=\"small\"，但已明确设计为 default/large 或动态尺寸的按钮必须保留业务意图。",
+      "scanner": "scanner/rules/button.mjs",
+      "skills": ["layouts/list-page", "element/el-dialog"]
+    },
+    {
       "id": "R006",
       "category": "form",
       "severity": "warning",

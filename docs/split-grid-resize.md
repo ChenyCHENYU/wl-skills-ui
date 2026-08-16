@@ -29,9 +29,14 @@
 5. 同一动画帧内的连续 Resize 会合并，并在 grid host 上派发局部
    `wl-ui:split-grid-resize` 事件，供特殊平台封装按需调用公开 grid API。
 
-本实现不会给 `.drager_top/.drager_bottom` 增加 `overflow:auto`，不会访问 Vue 私有实例，
-不会遍历或猜测 `gridApi`，也不会广播全局 `window.resize`。卸载守护时，本包增加的结构
-标记会一并清理。
+有数据时，本实现不会给 `.drager_top/.drager_bottom` 或 `.drager_row` 增加
+`overflow:auto`。唯一例外是完整空状态：当 160px 数据区在当前上下分屏中放不下时，
+`runtime/ag-grid-empty-state` 会保留两个 pane 的高度基线，并让最近的 `.drager_row`
+临时承担一个纵向滚动条；数据恢复后立即撤销。pane 自身仍不滚动。
+
+两套守护都不会访问 Vue 私有实例，不会遍历或猜测 `gridApi`，也不会广播全局
+`window.resize`。卸载时，本包增加的结构标记会一并清理。完整机制见
+`docs/ag-grid-empty-state.md`。
 
 ## 接入
 
@@ -60,7 +65,8 @@ gridHost.addEventListener("wl-ui:split-grid-resize", () => {
 
 ## 验收
 
-- 拖动前后 `.drager_top/.drager_bottom` 仍为 `overflow:hidden`。
+- 有数据时，拖动前后 `.drager_top/.drager_bottom` 仍为 `overflow:hidden`；完整空态不足
+  160px 时仅 `.drager_row` 临时纵向滚动。
 - `.ag-grid-table` 的实际高度随 pane 收缩，并带
   `data-wl-ui-split-grid-host`。
 - `.ag-body-viewport` 的 `scrollHeight > clientHeight` 时出现内部纵向滚动条。

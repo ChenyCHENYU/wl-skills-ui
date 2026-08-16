@@ -97,6 +97,8 @@ textarea 不强制 26px 高度，只继承统一圆角、字体和状态样式�
 - 数字输入框兼容 `.el-input-number > .el-input__wrapper` 和
   `.el-input-number.el-input__wrapper` 两种 DOM；由 wrapper 层绘制唯一边框，
   内部 input 不得再画第二层边框。
+- `jh-input-number` 的复合根仍是唯一边框所有者；内层 `.el-input__wrapper`
+  只补 11px 左侧文本起始间距，不重置 `textAlign`，不改右侧 controls 或单位后缀。
 - error / disabled 状态继续分别使用危险色和禁用色，不得被 focus 覆盖。
 
 ---

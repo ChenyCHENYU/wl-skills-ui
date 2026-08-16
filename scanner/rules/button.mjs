@@ -1,4 +1,4 @@
-/** scanner/rules/button.mjs — 按钮规则：R004 R005 R015 R038 */
+/** scanner/rules/button.mjs — 按钮规则：R004 R005 R015 R038 R041 */
 import { lineOf, issue, findTags } from "./_shared.mjs";
 
 const CREATE_ACTION_LABEL = /(?:新增|新建|添加|创建)(?:申请|记录|数据|客户|项目|任务|明细|行)?/;
@@ -105,6 +105,34 @@ export const buttonRules = [
               "error",
               "新增/新建/添加/创建类主操作必须是 primary 填充按钮",
               '设置 type="primary" 并移除 plain；行内次级操作应显式使用 link/text',
+            ),
+          );
+        }
+      }
+      return issues;
+    },
+  },
+
+  // R041：按钮尺寸必须显式声明；仅报告，不在运行时强制覆盖业务显式尺寸。
+  {
+    id: "R041",
+    category: "button",
+    severity: "warning",
+    name: "按钮与 BaseToolbar 必须显式声明 size，默认使用 small",
+    check(template, file, lineOffset) {
+      const issues = [];
+      for (const tagName of ["el-button", "ElButton", "base-toolbar", "BaseToolbar"]) {
+        for (const tag of findTags(template, tagName)) {
+          if (/(?:^|\s)(?:size|:size|v-bind:size)\s*=/.test(tag.text)) continue;
+          issues.push(
+            issue(
+              file,
+              lineOf(template, tag.index, lineOffset),
+              "R041",
+              "button",
+              "warning",
+              `${tagName} 未显式声明 size，可能因本地与线上 ConfigProvider 默认值不同而产生尺寸漂移`,
+              '默认补 size="small"；业务明确需要 default/large 或动态尺寸时保留其显式配置',
             ),
           );
         }

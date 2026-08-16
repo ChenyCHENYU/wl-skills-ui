@@ -41,17 +41,17 @@ src/views/[模块]/
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="Search" @click="handleSearch"
+          <el-button type="primary" size="small" icon="Search" @click="handleSearch"
             >搜索</el-button
           >
-          <el-button icon="Refresh" @click="handleReset">重置</el-button>
+          <el-button size="small" icon="Refresh" @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
 
     <!-- 工具栏 -->
     <div class="toolbar">
-      <el-button type="primary" icon="Plus" @click="modal.add()"
+      <el-button type="primary" size="small" icon="Plus" @click="modal.add()"
         >新增</el-button
       >
     </div>

@@ -2,6 +2,12 @@
 
 ## 工具栏按钮（列表页顶部）
 
+所有直接使用的 `el-button` / `ElButton` 以及承载按钮的 `BaseToolbar` 必须显式声明
+`size`。无特殊设计要求时统一
+使用 `size="small"`；业务已明确设置 `default`、`large` 或动态 `:size` 时保持原值，
+化妆层不做运行时强制覆盖。R041 只报告缺失项，避免本地与线上 ConfigProvider 默认值
+不同导致同一代码出现按钮尺寸漂移。
+
 工具栏必须独占一行，放在列表标题上方、表格上方并左对齐；不得与标题/条数统计挤在同一行。标准顺序为“查询区 → 工具栏 → 列表标题 → 表格 → 分页器”。
 
 ### 顺序规则
@@ -41,10 +47,10 @@
 
 ```vue
 <!-- ✅ 工具栏按钮组 -->
-<el-button type="primary" icon="Plus" @click="handleCreate">新增</el-button>
-<el-button type="warning" plain icon="Edit" @click="handleEdit">修改</el-button>
-<el-button type="success" icon="Save" @click="handleSave">保存</el-button>
-<el-button icon="Download" @click="handleExport">导出</el-button>
+<el-button type="primary" size="small" icon="Plus" @click="handleCreate">新增</el-button>
+<el-button type="warning" size="small" plain icon="Edit" @click="handleEdit">修改</el-button>
+<el-button type="success" size="small" icon="Save" @click="handleSave">保存</el-button>
+<el-button size="small" icon="Download" @click="handleExport">导出</el-button>
 ```
 
 ---
@@ -110,8 +116,8 @@ renderOps([
 <!-- ✅ 标准：取消在左，确认在右；footer 右对齐 -->
 <template #footer>
   <div class="dialog-footer">
-    <el-button @click="handleClose">取 消</el-button>
-    <el-button type="primary" @click="handleConfirm">确 认</el-button>
+    <el-button size="small" @click="handleClose">取 消</el-button>
+    <el-button type="primary" size="small" @click="handleConfirm">确 认</el-button>
   </div>
 </template>
 ```

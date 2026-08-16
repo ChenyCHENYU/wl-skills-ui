@@ -252,6 +252,9 @@
     > .el-input__wrapper {
     height: 100% !important;
     min-height: 0 !important;
+    // common-core 原始样式会把左内边距清零；由内部 wrapper 单点补回文本起始间距，
+    // 不改变右侧步进按钮、单位后缀和 textAlign 的组件语义。
+    padding-left: 11px !important;
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;

@@ -187,7 +187,7 @@
           "matches": true
         }
       ],
-      "risk": "jh-input-number 根节点本身是 wrapper，内部仍含 Element input wrapper；只能由根节点绘制唯一状态边框，同时必须保留 textAlign、controls 与单位附加段语义。"
+      "risk": "jh-input-number 根节点本身是 wrapper，内部仍含 Element input wrapper；只能由根节点绘制唯一状态边框，内层 wrapper 仅负责 11px 文本起始间距，同时必须保留 textAlign、controls 与单位附加段语义。"
     },
     {
       "id": "common-core.base-toolbar-split-button",

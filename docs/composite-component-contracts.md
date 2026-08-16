@@ -51,4 +51,5 @@ wrapper 时，应先按上述流程确认，不能直接扩大全局 Element 选
 
 input-group 附加段保留文字、单位、按钮的内容驱动宽度，只有“直接子节点为唯一
 `.el-icon`”时才使用 32px 紧凑宽度；普通 input、普通按钮和非 input-group 不命中。
-分屏重布局的运行机制与接入方式见 `docs/split-grid-resize.md`。
+分屏重布局的运行机制与接入方式见 `docs/split-grid-resize.md`；多表格无数据时的完整
+空态定位、受控撑高与滚动边界见 `docs/ag-grid-empty-state.md`。

@@ -54,6 +54,7 @@ applyTo: "**/*.vue"
 - R001 ~ R003：表格列对齐 + empty-text
 - R005：工具栏按钮缺 icon
 - R038：新增/新建/添加/创建类主按钮缺 primary 填充主题色
+- R041：按钮/BaseToolbar 未显式 `size`；默认使用 `small`，显式其他尺寸不覆盖
 - R039：普通数据列缺少省略号与悬停完整内容提示
 - R006：搜索区输入框缺 `size="small"`
 - R011：分页在 footer 内（严重）
@@ -74,13 +75,13 @@ applyTo: "**/*.vue"
 
     <!-- 工具栏：标题上方、表格上方、左对齐，独占一行 -->
     <div class="list-page__toolbar">
-      <el-button type="primary" icon="Plus" @click="modal.add()"
+      <el-button type="primary" size="small" icon="Plus" @click="modal.add()"
         >新增</el-button
       >
-      <el-button type="warning" plain icon="Edit" @click="modal.edit()"
+      <el-button type="warning" size="small" plain icon="Edit" @click="modal.edit()"
         >修改</el-button
       >
-      <el-button icon="Download" @click="handleExport">导出</el-button>
+      <el-button size="small" icon="Download" @click="handleExport">导出</el-button>
     </div>
 
     <!-- 列表标题：位于按钮组下方，不与按钮同排 -->
@@ -100,7 +101,7 @@ applyTo: "**/*.vue"
 ```
 
 “新增”类按钮必须保持 `type="primary"` 且不得带 `plain`；生成完成后运行
-`wl-ui scan` / `wl-ui fix` 复核 R038。表格列统一由 `defineColumns()` 包裹，
+`wl-ui scan` / `wl-ui fix` 复核 R038，并由 R041 报告缺失的显式按钮尺寸。表格列统一由 `defineColumns()` 包裹，
 普通文本列的 R039 行为由 runtime 自动补齐。
 
 ### SCSS 对应（由 styles/layouts/\_list-page.scss 提供）

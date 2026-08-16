@@ -15,6 +15,8 @@
 - common-core 复合多标签外壳自然增高、内层无双描边。
 - input-group 输入主体、前后附加段、左右图标的统一高度/尺寸/圆角与 focus 描边。
 - jh-drag-row 收缩后 AG Grid host 跟随变高，纵向滚动只发生在内部 viewport。
+- AG Grid 单层/分组表头下的完整空态均以真实数据区居中；上下双空表空间不足时由
+  分屏根统一滚动，插图和两行文案不缩小、不隐藏。
 - Element Table 长文本真实溢出、省略号与按需完整提示。
 - 表格选中行柔和状态色、BaseToolbar 分裂按钮与定制区域豁免。
 - common-core `jh-input-number` 与普通表单控件同高，保留 `textAlign` 和 controls，且只有

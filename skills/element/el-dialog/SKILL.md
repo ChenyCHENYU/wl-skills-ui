@@ -115,8 +115,8 @@ applyTo: "**/*.vue"
     <div class="dialog-footer">
       <el-pagination ... />
       <div class="footer-btns">
-        <el-button @click="visible = false">取消</el-button>
-        <el-button type="primary" @click="handleConfirm">确定</el-button>
+        <el-button size="small" @click="visible = false">取消</el-button>
+        <el-button type="primary" size="small" @click="handleConfirm">确定</el-button>
       </div>
     </div>
   </template>

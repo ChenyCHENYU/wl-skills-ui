@@ -4,6 +4,21 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.10.3] - 2026-08-16
+
+### Added
+
+- 新增 R041 按钮尺寸扫描规则：`el-button` / `ElButton` / `BaseToolbar` 无显式 `size` 时报告 warning，默认建议 `small`；不自动修改，不覆盖显式其他或动态尺寸。
+- 新增 `runtime/ag-grid-empty-state`：测量 AG Grid 真实数据区并为完整空态保留 160px；支持上下/左右分屏受控撑高、动态挂载、Resize 合并、豁免区和卸载清理。
+- 新增完整空态 Node 行为测试与浏览器视觉基准，覆盖单层/分组表头、上下双空表滚动、数据区中心误差和数据恢复清理。
+
+### Fixed
+
+- 精准修正旧新 Element Plus MessageBox 状态图标定位差异，仅命中容器直属状态图标结构。
+- `jh-input-number` 内层文本起始位恢复 11px 间距，不改右侧步进按钮、单位和对齐配置。
+- AG Grid 编辑单元格仅退出普通文本 padding；列 `align/headerAlign` 改为函数式 `cellStyle/cellClass` 桥接，合并业务已有配置并使表头与内容共轴。
+- AG Grid 空态不再相对整张 Grid 居中或依赖 `top:36px/72px` 猜表头；插图、主文案和辅助说明始终完整同规格，低高度多表格不再压盖表头。
+
 ## [1.10.2] - 2026-08-15
 
 ### Fixed

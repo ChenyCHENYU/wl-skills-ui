@@ -70,6 +70,19 @@ function rowClassName({ row }: { row: { id: number } }) {
           :total="30"
         />
       </div>
+      <div
+        class="el-message-box visual-legacy-message-box"
+        data-testid="legacy-message-box"
+      >
+        <div class="el-message-box__content">
+          <div class="el-message-box__container" data-testid="message-box-container">
+            <span class="el-message-box__status el-message-box-icon--warning">!</span>
+            <div class="el-message-box__message" data-testid="message-box-message">
+              <p>确认注销并退出系统吗？</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="visual-section" data-testid="form-section">
@@ -91,7 +104,12 @@ function rowClassName({ row }: { row: { id: number } }) {
               <span class="el-input-number__increase" data-testid="jh-number-increase">+</span>
               <div class="el-input">
                 <div class="el-input__wrapper" data-testid="jh-number-inner-wrapper">
-                  <input class="el-input__inner" type="number" value="13.00" />
+                  <input
+                    class="el-input__inner"
+                    type="number"
+                    value="13.00"
+                    placeholder="请输入工序处理次数"
+                  />
                 </div>
               </div>
             </div>
@@ -170,6 +188,51 @@ function rowClassName({ row }: { row: { id: number } }) {
       </div>
     </section>
 
+    <section class="visual-section" data-testid="empty-grid-section">
+      <h2>多表格完整空状态</h2>
+      <div
+        class="drager_row visual-empty-drag-row"
+        data-testid="empty-split-root"
+      >
+        <div class="drager_top" data-testid="empty-top-pane">
+          <div
+            class="ag-grid-table visual-empty-grid"
+            data-testid="empty-top-grid"
+          >
+            <div class="ag-root-wrapper">
+              <div class="ag-header"><div class="visual-empty-header-row">上表表头</div></div>
+              <div class="ag-body"><div class="ag-body-viewport"></div></div>
+              <div class="ag-overlay">
+                <div class="ag-overlay-no-rows-wrapper" data-testid="empty-top-overlay">
+                  <span class="ag-overlay-no-rows-center">暂无数据</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slider_row"></div>
+        <div class="drager_bottom" data-testid="empty-bottom-pane">
+          <div
+            class="ag-grid-table visual-empty-grid has-group-header"
+            data-testid="empty-bottom-grid"
+          >
+            <div class="ag-root-wrapper">
+              <div class="ag-header">
+                <div class="ag-header-row-column-group visual-empty-header-row">分组表头</div>
+                <div class="visual-empty-header-row">明细表头</div>
+              </div>
+              <div class="ag-body"><div class="ag-body-viewport"></div></div>
+              <div class="ag-overlay">
+                <div class="ag-overlay-no-rows-wrapper" data-testid="empty-bottom-overlay">
+                  <span class="ag-overlay-no-rows-center">暂无数据</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="visual-section" data-testid="table-section">
       <h2>长文本与行状态</h2>
       <ElTable
@@ -194,32 +257,38 @@ function rowClassName({ row }: { row: { id: number } }) {
       >
         <div class="ag-root-wrapper">
           <div class="visual-ag-header-row">
-            <div class="ag-header-cell">
+            <div class="ag-header-cell wl-ui-table-header-align--left">
               <div class="ag-header-cell-comp-wrapper">
-                <div class="ag-header-cell-label"><span>左对齐列</span></div>
+                <div class="ag-header-cell-label"><span data-testid="ag-left-header-text">左对齐列</span></div>
               </div>
             </div>
             <div class="ag-header-cell ag-right-aligned-header">
               <div class="ag-header-cell-comp-wrapper">
                 <div class="ag-header-cell-label" data-testid="ag-right-header">
-                  <span>右对齐列</span>
+                  <span data-testid="ag-right-header-text">右对齐列</span>
                 </div>
               </div>
             </div>
           </div>
           <div class="ag-row ag-row-selected visual-ag-row">
             <div
-              class="ag-cell ag-cell-value ag-left-aligned-cell ag-cell-focus"
+              class="ag-cell ag-cell-value ag-left-aligned-cell wl-ui-table-cell-align--left ag-cell-focus"
               data-testid="ag-focus-cell"
             >
-              <span>混排 GA202603 一道门</span>
+              <span data-testid="ag-left-cell-text">混排 GA202603 一道门</span>
             </div>
             <div
               class="ag-cell ag-cell-value ag-right-aligned-cell"
               data-testid="ag-right-cell"
             >
-              <span>2026-06-09 09:16:55</span>
+              <span data-testid="ag-right-cell-text">2026-06-09 09:16:55</span>
             </div>
+          </div>
+          <div
+            class="ag-cell ag-cell-value editable-cell visual-edit-cell"
+            data-testid="ag-edit-cell"
+          >
+            <div class="el-select"><div class="el-select__wrapper"></div></div>
           </div>
         </div>
       </div>

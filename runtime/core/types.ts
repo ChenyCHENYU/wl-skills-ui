@@ -29,6 +29,7 @@ export interface ColumnLike {
   align?: "left" | "center" | "right";
   headerAlign?: "left" | "center" | "right";
   cellStyle?: Record<string, unknown> | ((params: any) => Record<string, unknown>);
+  cellClass?: string | string[] | ((params: any) => string | string[]);
   headerClass?: string | string[] | ((params: any) => string | string[]);
   children?: ColumnLike[];
   defaultNode?: (ctx: { row: any }) => any;

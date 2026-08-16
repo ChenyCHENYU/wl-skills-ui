@@ -49,7 +49,7 @@ applyTo: "**/*.vue"
     <div class="detail-page__header">
       <el-page-header @back="$router.back()" :content="pageTitle" />
       <div class="detail-page__actions">
-        <el-button icon="Edit" @click="handleEdit">编辑</el-button>
+        <el-button size="small" icon="Edit" @click="handleEdit">编辑</el-button>
       </div>
     </div>
 

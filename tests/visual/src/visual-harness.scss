@@ -50,6 +50,22 @@ body {
   margin: 0;
 }
 
+.visual-legacy-message-box,
+.visual-edit-cell {
+  position: fixed !important;
+  top: 0;
+  left: -10000px;
+}
+
+.visual-legacy-message-box {
+  width: 420px;
+}
+
+.visual-edit-cell {
+  width: 220px;
+  height: 26px;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -154,6 +170,27 @@ body {
   height: 360px;
   padding: 8px;
   background: repeating-linear-gradient(#fff 0 25px, #f5f7fa 25px 26px);
+}
+
+.visual-empty-drag-row {
+  display: flex;
+  flex-direction: column;
+  height: 260px;
+  margin-top: 12px;
+  overflow: hidden;
+  border: 1px solid #e4e7ed;
+}
+
+.visual-empty-drag-row > .drager_top,
+.visual-empty-drag-row > .drager_bottom {
+  display: flex;
+  flex: 0 0 110px;
+  min-height: 0;
+}
+
+.visual-empty-grid {
+  width: 100%;
+  min-height: 0;
 }
 
 .visual-ag-table {

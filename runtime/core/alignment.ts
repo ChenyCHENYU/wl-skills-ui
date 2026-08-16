@@ -8,8 +8,38 @@ const HEADER_ALIGNMENT_CLASS: Record<ColumnAlignment, string> = {
   right: "wl-ui-table-header-align--right",
 };
 
+const CELL_ALIGNMENT_CLASS: Record<ColumnAlignment, string> = {
+  left: "wl-ui-table-cell-align--left",
+  center: "wl-ui-table-cell-align--center",
+  right: "wl-ui-table-cell-align--right",
+};
+
 function isColumnAlignment(value: unknown): value is ColumnAlignment {
   return value === "left" || value === "center" || value === "right";
+}
+
+function mergeCellClass(
+  current: ColumnLike["cellClass"],
+  alignmentClass: string,
+  params: any,
+): string | string[] {
+  const value = typeof current === "function" ? current(params) : current;
+  if (value === undefined || value === null || value === "") {
+    return alignmentClass;
+  }
+  return Array.isArray(value) ? [...value, alignmentClass] : [value, alignmentClass];
+}
+
+function mergeCellStyle(
+  current: ColumnLike["cellStyle"],
+  align: ColumnAlignment,
+  params: any,
+): Record<string, unknown> {
+  const value = typeof current === "function" ? current(params) : current;
+  return {
+    textAlign: align,
+    ...(value ?? {}),
+  };
 }
 
 /**
@@ -29,15 +59,36 @@ export function normalizeColumnAlignment<T extends ColumnLike>(column: T): T {
     ? column.headerAlign
     : align;
   const needsChildren = normalizedChildren !== column.children;
-  const needsCellStyle = Boolean(align) && column.cellStyle === undefined;
+  const needsCellStyle = Boolean(align);
+  // 自定义 cellStyle 可能自带动态对齐：只把 align 作为其默认值，
+  // 不再叠加 !important 对齐 class，避免压过业务返回的 textAlign。
+  const needsCellClass = Boolean(align) && column.cellStyle === undefined;
   const needsHeaderClass = Boolean(headerAlign) && column.headerClass === undefined;
 
-  if (!needsChildren && !needsCellStyle && !needsHeaderClass) return column;
+  if (!needsChildren && !needsCellStyle && !needsCellClass && !needsHeaderClass)
+    return column;
 
   return {
     ...column,
     ...(needsChildren ? { children: normalizedChildren } : {}),
-    ...(needsCellStyle ? { cellStyle: { textAlign: align } } : {}),
+    // common-core 3.x 的 AG 适配层只调用函数型 cellStyle/cellClass；函数形态同时
+    // 也是 AG Grid 原生合法配置，避免对象型样式被兼容层静默丢弃。
+    ...(needsCellStyle
+      ? {
+          cellStyle: (params: any) =>
+            mergeCellStyle(column.cellStyle, align!, params),
+        }
+      : {}),
+    ...(needsCellClass
+      ? {
+          cellClass: (params: any) =>
+            mergeCellClass(
+              column.cellClass,
+              CELL_ALIGNMENT_CLASS[align!],
+              params,
+            ),
+        }
+      : {}),
     ...(needsHeaderClass
       ? { headerClass: HEADER_ALIGNMENT_CLASS[headerAlign!] }
       : {}),

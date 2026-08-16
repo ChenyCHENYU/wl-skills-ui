@@ -21,7 +21,7 @@ describe("ensureDefaultAlignment 默认对齐补齐", () => {
     assert.equal(column.headerAlign, undefined);
   });
 
-  it("已有 cellStyle / headerClass 时不接管", () => {
+  it("已有 cellStyle / headerClass 时不改写默认 align", () => {
     const cellStyle = () => ({ textAlign: "left" });
     const column = ensureDefaultAlignment(
       { name: "warn", label: "预警", cellStyle, headerClass: "biz-h" },
@@ -71,7 +71,8 @@ describe("normalizeColumnAlignmentsWith 统一入口", () => {
       { defaultAlign: "center" },
     );
     assert.equal(column.align, "center");
-    assert.deepEqual(column.cellStyle, { textAlign: "center" });
+    assert.deepEqual(column.cellStyle({}), { textAlign: "center" });
+    assert.equal(column.cellClass({}), "wl-ui-table-cell-align--center");
     assert.equal(column.headerClass, "wl-ui-table-header-align--center");
   });
 
@@ -96,7 +97,8 @@ describe("normalizeColumnAlignmentsWith 统一入口", () => {
       [{ name: "amount", label: "金额", align: "right", headerAlign: "center" }],
       { defaultAlign: "center" },
     );
-    assert.deepEqual(column.cellStyle, { textAlign: "right" });
+    assert.deepEqual(column.cellStyle({}), { textAlign: "right" });
+    assert.equal(column.cellClass({}), "wl-ui-table-cell-align--right");
     assert.equal(column.headerClass, "wl-ui-table-header-align--center");
   });
 });

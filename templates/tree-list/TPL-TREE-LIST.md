@@ -55,10 +55,10 @@
             />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="Search" @click="handleSearch"
+            <el-button type="primary" size="small" icon="Search" @click="handleSearch"
               >搜索</el-button
             >
-            <el-button icon="Refresh" @click="handleReset">重置</el-button>
+            <el-button size="small" icon="Refresh" @click="handleReset">重置</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -67,6 +67,7 @@
       <div class="toolbar">
         <el-button
           type="primary"
+          size="small"
           icon="Plus"
           :disabled="!selectedNodeId"
           @click="modal.add()"

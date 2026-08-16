@@ -1,7 +1,31 @@
 // styles/element/_dialog.scss — el-dialog / el-message-box 覆盖
 
-html body .el-message-box .el-message-box__status {
-  top: 12px !important;
+// Element Plus 2.2.x 将状态图标绝对定位，较新版本改为 flex 子项；jh-ui 还会给旧结构
+// 写入固定 top。只在“container 的直接状态图标”结构内统一为 flex，避免图标被定位到弹窗左上角。
+// 无状态图标的普通 MessageBox、Dialog 以及业务自定义 header 均不受影响。
+html body .el-message-box .el-message-box__container:has(> .el-message-box__status) {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+html body
+  .el-message-box
+  .el-message-box__container
+  > .el-message-box__status {
+  position: static !important;
+  top: auto !important;
+  flex: 0 0 auto !important;
+  transform: none !important;
+}
+
+html body
+  .el-message-box
+  .el-message-box__container
+  > .el-message-box__status
+  + .el-message-box__message {
+  min-width: 0 !important;
+  padding-left: 0 !important;
 }
 
 // jh-ui dialog.scss 标题色为硬编码 #262626，覆盖为 Token

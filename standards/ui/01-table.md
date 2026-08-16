@@ -16,7 +16,11 @@
 <el-table-column label="状态" prop="status" align="center" />
 ```
 
-**例外**：内容为长文本描述（如"备注"、"标准内容"）的列可使用 `align="left"`，但需显式标注，不可省略。
+**例外**：内容为长文本描述（如“备注”、“标准内容”）的列可使用 `align="left"`，但需显式标注，不可省略。
+
+BaseTable / AG Grid 的 `align/headerAlign` 必须同时反映到表头标签和单元格内容：左、中、右分别使用同一条对齐轴。包内 runtime 会将需要桥接的 `cellStyle`，以及未自定义 `cellStyle` 时参与对齐的 `cellClass`，转为共享 AG Grid 适配层可执行的函数。业务动态 `cellStyle` 返回值优先，不会再被强制 class 压过；原有样式和 class 均不会丢失。
+
+表格进入编辑态时，仅 `.editable-cell` / `.always-editable-cell` / `.ag-cell-inline-editing` 退出普通文本单元格的左右 padding，让 editor 使用完整单元格宽度；非编辑列仍保留标准留白。
 
 ---
 

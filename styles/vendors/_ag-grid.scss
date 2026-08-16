@@ -176,6 +176,60 @@
   border-right-color: transparent !important;
 }
 
+// BaseTable 的可编辑列会把 editor 直接铺在单元格内。只对平台已经标记为编辑态的
+// 三类单元格退出普通文本 8px 内边距，避免控件被二次缩进；普通数据列保持原样。
+.ag-cell.editable-cell,
+.ag-cell.always-editable-cell,
+.ag-cell.ag-cell-inline-editing {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+// 显式 align/headerAlign 必须让表头与内容共享同一条对齐轴。runtime 会给兼容层
+// 补 wl-ui class；原生 AG Grid 的 aligned class 同样纳入，未声明对齐的列不接管。
+.ag-cell:is(.wl-ui-table-cell-align--left, .ag-left-aligned-cell) {
+  text-align: left !important;
+}
+
+.ag-cell:is(.wl-ui-table-cell-align--center, .ag-center-aligned-cell) {
+  text-align: center !important;
+}
+
+.ag-cell:is(.wl-ui-table-cell-align--right, .ag-right-aligned-cell) {
+  text-align: right !important;
+}
+
+.ag-cell:is(
+    .wl-ui-table-cell-align--left,
+    .wl-ui-table-cell-align--center,
+    .wl-ui-table-cell-align--right,
+    .ag-left-aligned-cell,
+    .ag-center-aligned-cell,
+    .ag-right-aligned-cell
+  )
+  > :where(.ag-cell-wrapper, .ag-cell-value) {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.ag-cell:is(.wl-ui-table-cell-align--left, .ag-left-aligned-cell)
+  > :where(.ag-cell-wrapper, .ag-cell-value) {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+.ag-cell:is(.wl-ui-table-cell-align--center, .ag-center-aligned-cell)
+  > :where(.ag-cell-wrapper, .ag-cell-value) {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.ag-cell:is(.wl-ui-table-cell-align--right, .ag-right-aligned-cell)
+  > :where(.ag-cell-wrapper, .ag-cell-value) {
+  justify-content: flex-end !important;
+  text-align: right !important;
+}
+
 // 普通单元格保持无竖线的轻量外观；真正获得焦点时恢复 AG Grid 自己的焦点色，
 // 避免上面的透明右边框把选中单元格描边切掉一侧。
 .ag-cell.ag-cell-focus {
@@ -304,6 +358,67 @@
   color: var(--el-text-color-primary, #374151);
   line-height: 20px;
   letter-spacing: 0.02em;
+}
+
+// runtime/auto 只在真实 no-rows overlay 可见时添加以下标记。定位值来自实际
+// .ag-body-viewport，不再按 36px/72px 猜测表头高度；160px 数据区保证插图、
+// 主文案和辅助说明在单表、分组表头及多表格场景中始终使用同一完整规格。
+html body .ag-overlay-no-rows-wrapper[data-wl-ui-empty-overlay] {
+  top: var(--wl-ui-empty-overlay-top) !important;
+  right: 0 !important;
+  bottom: auto !important;
+  left: 0 !important;
+  height: var(--wl-ui-empty-overlay-height) !important;
+  min-height: 160px !important;
+}
+
+html
+  body
+  :where(.ag-grid-table, .ag-root-wrapper)[data-wl-ui-empty-host] {
+  min-height: var(--wl-ui-empty-host-min-height) !important;
+  box-sizing: border-box !important;
+}
+
+// 上下分屏原本必须保持 min-height:0 + overflow:hidden，确保有数据时由 AG Grid
+// 内部 viewport 滚动。仅空状态例外：各 pane 保留进入空态前的高度，空间不足时
+// 最近的分屏根承担一个纵向滚动条，避免完整空态被裁切或压住表头。
+html body .drager_row[data-wl-ui-empty-scroll="row"] {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+html
+  body
+  .drager_row[data-wl-ui-empty-scroll="row"]
+  > [data-wl-ui-empty-pane] {
+  min-height: var(--wl-ui-empty-pane-min-height) !important;
+}
+
+html
+  body
+  .drager_row[data-wl-ui-empty-scroll="row"]
+  .ag-grid-table[data-wl-ui-empty-host][data-wl-ui-split-grid-host] {
+  min-height: var(--wl-ui-empty-host-min-height) !important;
+  max-height: none !important;
+}
+
+// 左右分屏的两个 pane 同高撑开，由分屏根统一滚动；不会让左右两侧出现不同的
+// 空态尺寸，也不会把滚动条塞进空态图标内部。
+html body .drag-col-container[data-wl-ui-empty-scroll="column"] {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+html
+  body
+  .drag-col-container[data-wl-ui-empty-scroll="column"]
+  > [data-wl-ui-empty-pane] {
+  min-height: var(--wl-ui-empty-pane-min-height) !important;
+}
+
+// 弹窗中的独立空表只让弹窗内容区滚动，不突破弹窗可视边界。
+html body .el-dialog__body[data-wl-ui-empty-scroll="dialog"] {
+  overflow-y: auto !important;
 }
 
 // ── 滚动条：默认隐藏，悬停显示主题色（双轨实现） ────────────────────────────

@@ -40,6 +40,7 @@ test("品牌主题、表单边框和复合控件结构保持稳定", async ({ pa
   await expect(jhNumber).not.toHaveCSS("box-shadow", "none");
   await expect(jhNumberInner).toHaveCSS("height", "26px");
   await expect(jhNumberInner).toHaveCSS("box-shadow", "none");
+  await expect(jhNumberInner).toHaveCSS("padding-left", "11px");
   await expect(jhNumber.locator("input")).toHaveCSS("text-align", "right");
   await expect(page.getByTestId("jh-number-decrease")).toHaveCSS("display", "flex");
   await expect(page.getByTestId("jh-number-increase")).toHaveCSS("display", "flex");
@@ -95,6 +96,14 @@ test("品牌主题、表单边框和复合控件结构保持稳定", async ({ pa
     "height",
     "38px",
   );
+
+  const messageBoxContainer = page.getByTestId("message-box-container");
+  const messageBoxStatus = messageBoxContainer.locator(".el-message-box__status");
+  await expect(messageBoxContainer).toHaveCSS("display", "flex");
+  await expect(messageBoxContainer).toHaveCSS("gap", "12px");
+  await expect(messageBoxStatus).toHaveCSS("position", "static");
+  await expect(messageBoxStatus).toHaveCSS("transform", "none");
+  await expect(page.getByTestId("message-box-message")).toHaveCSS("padding-left", "0px");
 
   const splitButtons = page.getByTestId("split-button").locator(":scope > .el-button");
   await expect(splitButtons.first()).toHaveCSS("border-top-left-radius", "6px");
@@ -155,6 +164,71 @@ test("上下分屏收缩后由 AG Grid 内部 viewport 滚动", async ({ page })
   ).toBe(true);
 });
 
+test("多表格空状态始终完整并以真实数据区居中", async ({ page }) => {
+  const split = page.getByTestId("empty-split-root");
+  const topGrid = page.getByTestId("empty-top-grid");
+  const bottomGrid = page.getByTestId("empty-bottom-grid");
+  const topOverlay = page.getByTestId("empty-top-overlay");
+  const bottomOverlay = page.getByTestId("empty-bottom-overlay");
+
+  await expect(split).toHaveAttribute("data-wl-ui-empty-scroll", "row");
+  await expect(topGrid).toHaveAttribute("data-wl-ui-empty-host", "");
+  await expect(bottomGrid).toHaveAttribute("data-wl-ui-empty-host", "");
+  await expect(topOverlay).toHaveCSS("height", "160px");
+  await expect(bottomOverlay).toHaveCSS("height", "160px");
+  await expect(topOverlay).toHaveCSS("top", "36px");
+  await expect(bottomOverlay).toHaveCSS("top", "72px");
+
+  const geometry = await page.evaluate(() => {
+    const measure = (gridTestId: string, overlayTestId: string) => {
+      const grid = document.querySelector<HTMLElement>(
+        `[data-testid="${gridTestId}"]`,
+      )!;
+      const header = grid.querySelector<HTMLElement>(".ag-header")!;
+      const body = grid.querySelector<HTMLElement>(".ag-body-viewport")!;
+      const overlay = document.querySelector<HTMLElement>(
+        `[data-testid="${overlayTestId}"]`,
+      )!;
+      const headerRect = header.getBoundingClientRect();
+      const bodyRect = body.getBoundingClientRect();
+      const overlayRect = overlay.getBoundingClientRect();
+      return {
+        bodyCenter: bodyRect.top + bodyRect.height / 2,
+        bodyHeight: bodyRect.height,
+        headerBottom: headerRect.bottom,
+        overlayCenter: overlayRect.top + overlayRect.height / 2,
+        overlayTop: overlayRect.top,
+      };
+    };
+    const splitRoot = document.querySelector<HTMLElement>(
+      '[data-testid="empty-split-root"]',
+    )!;
+    return {
+      bottom: measure("empty-bottom-grid", "empty-bottom-overlay"),
+      scrolls: splitRoot.scrollHeight > splitRoot.clientHeight,
+      top: measure("empty-top-grid", "empty-top-overlay"),
+    };
+  });
+
+  expect(geometry.scrolls).toBe(true);
+  for (const item of [geometry.top, geometry.bottom]) {
+    expect(item.bodyHeight).toBeGreaterThanOrEqual(160);
+    // AG Grid 的 header bottom border 与 body 起点会共享 1px，不属于内容相交。
+    expect(item.overlayTop + 1).toBeGreaterThanOrEqual(item.headerBottom);
+    expect(Math.abs(item.overlayCenter - item.bodyCenter)).toBeLessThanOrEqual(1);
+  }
+
+  await expect(page.getByTestId("empty-grid-section")).toHaveScreenshot(
+    "ag-grid-empty-state.png",
+  );
+  await split.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect(page.getByTestId("empty-grid-section")).toHaveScreenshot(
+    "ag-grid-empty-state-scrolled.png",
+  );
+});
+
 test("长文本真实溢出时省略并按需显示完整内容", async ({ page }) => {
   const customerCell = page
     .getByTestId("business-table")
@@ -194,6 +268,22 @@ test("长文本真实溢出时省略并按需显示完整内容", async ({ page 
     "justify-content",
     "flex-end",
   );
+  await expect(page.getByTestId("ag-edit-cell")).toHaveCSS("padding-left", "0px");
+  await expect(page.getByTestId("ag-edit-cell")).toHaveCSS("padding-right", "0px");
+  const alignmentEdges = await page.evaluate(() => {
+    const rect = (id: string) =>
+      document.querySelector<HTMLElement>(`[data-testid="${id}"]`)!.getBoundingClientRect();
+    const leftHeader = rect("ag-left-header-text");
+    const leftCell = rect("ag-left-cell-text");
+    const rightHeader = rect("ag-right-header-text");
+    const rightCellText = rect("ag-right-cell-text");
+    return {
+      leftDelta: Math.abs(leftHeader.left - leftCell.left),
+      rightDelta: Math.abs(rightHeader.right - rightCellText.right),
+    };
+  });
+  expect(alignmentEdges.leftDelta).toBeLessThanOrEqual(1);
+  expect(alignmentEdges.rightDelta).toBeLessThanOrEqual(1);
 
   await expect(page.getByTestId("table-section")).toHaveScreenshot("table-states.png");
 });

@@ -5,6 +5,10 @@
 html body {
   --wk-form-control-radius: var(--el-border-radius-base, 6px);
   --wk-form-control-height: 26px;
+  // 所有单行控件共用同一组左右内边距；旧版 jh-ui 直挂 input DOM
+  // 不会继承 Element Plus wrapper 的默认 11px，需要显式补齐。
+  --wk-form-control-padding-inline: 11px;
+  --wk-form-number-controls-width: 24px;
   --wk-form-font-size: 12px !important;
   --wk-form-label-control-gap: 16px;
   --wk-form-label-line-height: 22px;
@@ -62,7 +66,19 @@ html body {
   &.el-autocomplete .el-input__wrapper {
     height: var(--wk-form-control-height) !important;
     min-height: var(--wk-form-control-height) !important;
+    padding: 0 var(--wk-form-control-padding-inline) !important;
     border-radius: var(--wk-form-control-radius) !important;
+  }
+
+  // 选择器、日期和自动完成在不同 Element Plus 版本中可能把 wrapper
+  // 作为根节点或子节点；两种结构都必须保留文本起始间距。
+  &.el-select__wrapper,
+  &.el-select .el-select__wrapper,
+  &.el-date-editor.el-input__wrapper,
+  &.el-date-editor .el-input__wrapper,
+  &.el-cascader .el-input__wrapper,
+  &.el-autocomplete .el-input__wrapper {
+    padding-inline: var(--wk-form-control-padding-inline) !important;
   }
 
   &.el-input__inner,
@@ -73,6 +89,15 @@ html body {
   &.el-autocomplete .el-input__inner {
     height: calc(var(--wk-form-control-height) - 2px) !important;
     line-height: calc(var(--wk-form-control-height) - 2px) !important;
+  }
+
+  // 原生 textarea 是唯一不使用 wrapper 的输入控件，左右间距与单行输入
+  // 对齐；同时覆盖只读、禁用和 placeholder 状态，避免文字贴边。
+  &.el-textarea__inner,
+  &.com-input > .el-textarea > .el-textarea__inner,
+  &.com-textarea > .el-textarea > .el-textarea__inner {
+    padding: 4px var(--wk-form-control-padding-inline) !important;
+    box-sizing: border-box !important;
   }
 
   // ── 带前/后附加段的输入框 ────────────────────────────────────────────────
@@ -98,6 +123,7 @@ html body {
     min-width: 0 !important;
     height: 100% !important;
     min-height: 0 !important;
+    padding: 0 var(--wk-form-control-padding-inline) !important;
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
@@ -110,6 +136,7 @@ html body {
     min-width: 0 !important;
     height: 100% !important;
     min-height: 0 !important;
+    padding: 0 var(--wk-form-control-padding-inline) !important;
     border: 0 !important;
     border-radius: 0 !important;
     outline: none !important;
@@ -236,7 +263,7 @@ html body {
     width: 100% !important;
     height: 100% !important;
     min-height: 0 !important;
-    padding: 0 11px !important;
+    padding: 0 var(--wk-form-control-padding-inline) !important;
     border: 0 !important;
     border-radius: calc(var(--wk-form-control-radius) - 1px) !important;
     box-sizing: border-box !important;
@@ -297,9 +324,58 @@ html body {
     padding: 0 !important;
   }
 
-  &.el-input-number:not(.com-inputNumber-content) .el-input-number__increase,
+  // 数字框步进按钮固定在右侧上下两格，避免平台默认的绝对定位与
+  // 业务高度覆盖互相错开。controls=false 时 Element Plus 不渲染按钮，
+  // 因此该规则不会凭空制造控件。
+  &.el-input-number:not(.com-inputNumber-content) {
+    position: relative !important;
+  }
+
+  &.el-input-number:not(.com-inputNumber-content):has(> .el-input-number__increase)
+    .el-input__wrapper {
+    padding-right: calc(
+      var(--wk-form-control-padding-inline) + var(--wk-form-number-controls-width)
+    ) !important;
+  }
+
+  &.el-input-number:not(.com-inputNumber-content)
+    :where(.el-input-number__increase, .el-input-number__decrease) {
+    position: absolute !important;
+    right: 0 !important;
+    left: auto !important;
+    z-index: 2 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: var(--wk-form-number-controls-width) !important;
+    height: 50% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-left: 1px solid var(--el-border-color, #dcdfe6) !important;
+    box-sizing: border-box !important;
+    color: var(--el-text-color-secondary, #909399) !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    transition: color 0.15s ease, background-color 0.15s ease !important;
+  }
+
+  &.el-input-number:not(.com-inputNumber-content) .el-input-number__increase {
+    top: 0 !important;
+    bottom: auto !important;
+    border-bottom: 1px solid var(--el-border-color, #dcdfe6) !important;
+  }
+
   &.el-input-number:not(.com-inputNumber-content) .el-input-number__decrease {
-    display: none !important;
+    top: auto !important;
+    bottom: 0 !important;
+  }
+
+  &.el-input-number:not(.com-inputNumber-content)
+    :where(.el-input-number__increase, .el-input-number__decrease):hover {
+    color: var(--el-color-primary, #002a8f) !important;
+    background: rgba(var(--el-color-primary-rgb, 0, 42, 143), 0.06) !important;
   }
 
   &.el-input-number:not(.com-inputNumber-content)

@@ -88,11 +88,15 @@
   &.el-select .el-input > .el-input__inner {
     height: var(--wk-form-control-height, 26px) !important;
     line-height: var(--wk-form-control-height, 26px) !important;
+    padding: 0 var(--wk-form-control-padding-inline, 11px) !important;
+    box-sizing: border-box !important;
     border-radius: var(--el-border-radius-base) !important;
     transition: box-shadow 0.15s ease, border-color 0.15s ease;
   }
 
   &.el-textarea > .el-textarea__inner {
+    padding: 4px var(--wk-form-control-padding-inline, 11px) !important;
+    box-sizing: border-box !important;
     border-radius: var(--el-border-radius-base);
     transition: box-shadow 0.15s ease, border-color 0.15s ease;
   }
@@ -124,6 +128,8 @@
   &.com-input > .el-date-editor > .el-input__inner {
     height: var(--wk-form-control-height, 26px) !important;
     line-height: var(--wk-form-control-height, 26px) !important;
+    padding: 0 var(--wk-form-control-padding-inline, 11px) !important;
+    box-sizing: border-box !important;
     border-radius: var(--el-border-radius-base) !important;
   }
 
@@ -200,9 +206,10 @@
   // common-core jh-input-number 是“数字框根节点同时复用 el-input__wrapper”的复合结构：
   // .com-inputNumber-content.el-input-number.el-input__wrapper > .el-input。
   // 普通 Element InputNumber 的根/子 wrapper 规则不能套到这里，否则会同时压缩外壳、
-  // 清空组件自己的 textAlign/controls 语义。复合根只统一外轮廓和高度，内部继续由
-  // jh-input-number 自己负责左右对齐、单位附加段与步进按钮。
+  // 清空组件自己的 textAlign/controls 语义。复合根只统一外轮廓和高度，业务仍负责
+  // textAlign/controls/单位语义，步进按钮几何由本适配层统一治理。
   &.com-inputNumber-content.el-input-number.el-input__wrapper {
+    position: relative !important;
     display: inline-flex !important;
     align-items: stretch !important;
     width: 100% !important;
@@ -254,7 +261,7 @@
     min-height: 0 !important;
     // common-core 原始样式会把左内边距清零；由内部 wrapper 单点补回文本起始间距，
     // 不改变右侧步进按钮、单位后缀和 textAlign 的组件语义。
-    padding-left: 11px !important;
+    padding-left: var(--wk-form-control-padding-inline, 11px) !important;
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
@@ -270,6 +277,58 @@
     outline: none !important;
     background: transparent !important;
     box-shadow: none !important;
+  }
+
+  // jh 复合数字框的步进按钮与普通 Element Plus 数字框共享同一几何：
+  // 固定在右侧上下两格，避免业务高度或单位附加段导致箭头错位。
+  &.com-inputNumber-content.el-input-number.el-input__wrapper:has(
+      > .el-input-number__increase
+    )
+    > .el-input {
+    padding-right: var(--wk-form-number-controls-width, 24px) !important;
+    box-sizing: border-box !important;
+  }
+
+  &.com-inputNumber-content.el-input-number.el-input__wrapper
+    :where(.el-input-number__increase, .el-input-number__decrease) {
+    position: absolute !important;
+    right: 0 !important;
+    left: auto !important;
+    z-index: 2 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: var(--wk-form-number-controls-width, 24px) !important;
+    height: 50% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-left: 1px solid var(--el-border-color, #dcdfe6) !important;
+    box-sizing: border-box !important;
+    color: var(--el-text-color-secondary, #909399) !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    transition: color 0.15s ease, background-color 0.15s ease !important;
+  }
+
+  &.com-inputNumber-content.el-input-number.el-input__wrapper
+    .el-input-number__increase {
+    top: 0 !important;
+    bottom: auto !important;
+    border-bottom: 1px solid var(--el-border-color, #dcdfe6) !important;
+  }
+
+  &.com-inputNumber-content.el-input-number.el-input__wrapper
+    .el-input-number__decrease {
+    top: auto !important;
+    bottom: 0 !important;
+  }
+
+  &.com-inputNumber-content.el-input-number.el-input__wrapper
+    :where(.el-input-number__increase, .el-input-number__decrease):hover {
+    color: var(--el-color-primary, #002a8f) !important;
+    background: rgba(var(--el-color-primary-rgb, 0, 42, 143), 0.06) !important;
   }
 
   // 带单位/后缀时，外层数字框仍是唯一描边所有者；子 input-group 只负责布局和分隔线。
@@ -294,6 +353,8 @@
   &.jh-picker-trigger.el-input > .el-input__inner {
     height: var(--wk-form-control-height, 26px) !important;
     line-height: var(--wk-form-control-height, 26px) !important;
+    padding: 0 var(--wk-form-control-padding-inline, 11px) !important;
+    box-sizing: border-box !important;
     border-radius: var(--el-border-radius-base) !important;
   }
 

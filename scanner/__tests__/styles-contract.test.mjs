@@ -67,6 +67,15 @@ describe("表单样式契约", () => {
     );
   });
 
+  it("所有输入结构保留统一左右间距，placeholder 不贴边", () => {
+    assert.match(form, /--wk-form-control-padding-inline:\s*11px/);
+    assert.match(form, /padding:\s*0 var\(--wk-form-control-padding-inline\) !important/);
+    assert.match(form, /\.el-textarea__inner[\s\S]*?padding:\s*4px var\(--wk-form-control-padding-inline\)/);
+    assert.match(jhUi, /&\.el-input > \.el-input__inner,[\s\S]*?padding:\s*0 var\(--wk-form-control-padding-inline,\s*11px\) !important/);
+    assert.match(jhUi, /&\.com-picker \.el-input > \.el-input__inner,[\s\S]*?padding:\s*0 var\(--wk-form-control-padding-inline,\s*11px\) !important/);
+    assert.match(form, /&\.el-input__inner::placeholder/);
+  });
+
   it("数字输入框覆盖子 wrapper 与同节点 wrapper，且阻止双描边", () => {
     for (const selector of [
       "&.el-input-number:not(.com-inputNumber-content):not(.el-input__wrapper)",
@@ -101,7 +110,7 @@ describe("表单样式契约", () => {
     );
     assert.match(
       jhUi,
-      /\.com-inputNumber-content\.el-input-number\.el-input__wrapper[\s\S]*?> \.el-input[\s\S]*?> \.el-input__wrapper\s*\{[\s\S]*?padding-left:\s*11px\s*!important/,
+      /\.com-inputNumber-content\.el-input-number\.el-input__wrapper[\s\S]*?> \.el-input[\s\S]*?> \.el-input__wrapper\s*\{[\s\S]*?padding-left:\s*var\(--wk-form-control-padding-inline,\s*11px\)\s*!important/,
     );
     assert.doesNotMatch(
       form,
@@ -111,6 +120,18 @@ describe("表单样式契约", () => {
       form,
       /&\.el-input-number\s+\.el-input__inner[\s\S]*?text-align:\s*left\s*!important/,
     );
+    assert.match(jhUi, /&\.com-inputNumber-content\.el-input-number\.el-input__wrapper\s*\{[\s\S]*?position:\s*relative\s*!important/);
+    assert.match(jhUi, /\.com-inputNumber-content\.el-input-number\.el-input__wrapper[\s\S]*?width:\s*var\(--wk-form-number-controls-width,\s*24px\) !important/);
+    assert.match(jhUi, /\.com-inputNumber-content\.el-input-number\.el-input__wrapper[\s\S]*?height:\s*50% !important/);
+    assert.match(jhUi, /\.com-inputNumber-content\.el-input-number\.el-input__wrapper[\s\S]*?right:\s*0 !important/);
+  });
+
+  it("普通数字框步进按钮固定为右侧上下两格，不再隐藏", () => {
+    assert.match(form, /--wk-form-number-controls-width:\s*24px/);
+    assert.match(form, /\.el-input-number__increase[\s\S]*?top:\s*0 !important/);
+    assert.match(form, /\.el-input-number__decrease[\s\S]*?bottom:\s*0 !important/);
+    assert.match(form, /:where\(\.el-input-number__increase, \.el-input-number__decrease\)[\s\S]*?height:\s*50% !important/);
+    assert.doesNotMatch(form, /\.el-input-number__\{\s*display:\s*none/);
   });
 
   it("input-group 由组合根统一附加段高度、圆角、图标和状态描边", () => {

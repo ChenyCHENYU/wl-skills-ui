@@ -4,6 +4,14 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.10.4] - 2026-08-22
+
+### Fixed
+
+- 统一新旧 Element Plus/jh-ui 输入控件的左右内边距，包含 placeholder、textarea、picker 和复合输入结构，避免内容贴边。
+- 统一普通与 jh 复合数字输入框步进按钮的右侧上下布局、尺寸、分隔线和 hover 状态，避免箭头错位。
+- 增加输入间距与数字控件几何回归契约测试。
+
 ## [1.10.3] - 2026-08-16
 
 ### Added

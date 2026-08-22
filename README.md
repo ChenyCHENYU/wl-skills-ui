@@ -228,9 +228,11 @@ yarn add @agile-team/wl-skills-ui
 
 ## 版本亮点
 
-当前 v1.10.3：
+当前 v1.10.4：
 
-- **复合结构精准修复**：仅在 MessageBox 容器直接含状态图标时统一图标与文字布局；`jh-input-number` 仅给内层文本 wrapper 补 11px 左间距，不改步进按钮、单位后缀和对齐语义。
+- **输入控件间距与数字箭头闭环**：统一新旧 Element Plus/jh-ui 输入框、placeholder、textarea、picker 的左右间距；普通与复合数字框的步进箭头统一右侧上下布局和尺寸。
+
+- **复合结构精准修复**：仅在 MessageBox 容器直接含状态图标时统一图标与文字布局；`jh-input-number` 保留单位后缀与对齐语义，内层文本和步进按钮由统一几何契约治理。
 - **AG Grid 编辑与对齐闭环**：仅对已标记编辑态的单元格退出普通文本 padding；`align/headerAlign` 桥接为共享适配层可执行的函数配置，表头与内容使用同一对齐轴，并合并保留业务 `cellStyle/cellClass` 返回值。
 - **AG Grid 完整空态闭环**：按真实 `.ag-body-viewport` 定位，数据区统一保留 160px；插图、主文案和辅助说明始终完整同规格。上下/左右多表格空间不足时由最近分屏受控滚动，数据恢复后自动清理全部标记。
 - **按钮尺寸可重现**：新增 R041，只报告未显式声明 `size` 的 `el-button` / `ElButton` / `BaseToolbar`；默认建议 `small`，已设置其他或动态尺寸的业务代码不受影响。

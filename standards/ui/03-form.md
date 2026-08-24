@@ -11,7 +11,7 @@
 
 ---
 
-## 规则 R006：el-input / el-select 必须加 size="small"
+## 规则 R006：输入、选择、日期与时间控件必须加 size="small"
 
 系统统一使用 small 尺寸，与表格行高匹配：
 
@@ -19,11 +19,13 @@
 <!-- ❌ 错误 -->
 <el-input v-model="form.name" />
 <el-select v-model="form.type"></el-select>
+<el-date-picker v-model="form.date" />
+<el-time-picker v-model="form.time" />
 ```
 
 ---
 
-## 规则 R007：el-date-picker 必须加 style="width:100%"
+## 规则 R007：el-date/time-picker 必须加 style="width:100%"
 
 date-picker 默认宽度固定，在 grid 布局中需撑满列宽：
 
@@ -33,7 +35,30 @@ date-picker 默认宽度固定，在 grid 布局中需撑满列宽：
 
 <!-- ✅ 正确 -->
 <el-date-picker v-model="form.date" type="date" style="width:100%" />
+<el-time-picker v-model="form.time" style="width:100%" />
 ```
+
+---
+
+## 规则 R042：禁止用裸 `.el-date-picker` 选择器设置输入几何
+
+Element Plus 的日期输入根节点是 `.el-date-editor`，Teleport 到 `body` 的日期面板反而
+带有 `.el-date-picker`。下面的写法会同时放大弹层，叠加旧项目的 position/inset 后可能
+直接变成全屏：
+
+```scss
+// ❌ 会误伤日期弹层
+.el-date-picker { width: 100%; }
+
+// ✅ 只设置输入组件
+.query-form .el-date-editor { width: 100%; }
+
+// ✅ 弹层定制必须从真实 popper 限定
+.el-picker__popper .el-date-picker { width: auto; }
+```
+
+包内 `_picker.scss` 已提供最后一道弹层几何保护；如业务确实需要完全自定义弹层，可通过
+`popper-class="wl-ui-picker-geometry-off"` 显式退出。
 
 ---
 
@@ -132,8 +157,8 @@ Element Plus 原生控件、picker 类控件和 jh-\* 封装控件的 label 后�
     </el-select>
   </el-form-item>
   <el-form-item>
-    <el-button type="primary" size="small" @click="handleSearch">搜索</el-button>
-    <el-button size="small" @click="handleReset">重置</el-button>
+    <el-button type="primary" size="small" icon="Search" @click="handleSearch">搜索</el-button>
+    <el-button size="small" icon="Refresh" @click="handleReset">重置</el-button>
   </el-form-item>
 </el-form>
 ```

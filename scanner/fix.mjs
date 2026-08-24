@@ -5,7 +5,9 @@
  * 修复项：
  *   - el-table-column: 缺 align="center"        → 添加
  *   - el-input / el-select: 缺 size="small"     → 添加
- *   - el-date-picker: 缺 style="width:100%"     → 添加
+ *   - el-date/time-picker: 缺 size / width       → 添加或合并
+ *   - el-button / BaseToolbar: 缺 small          → 添加
+ *   - 静态语义按钮: 缺 icon                      → 按文案确定性补齐
  *   - el-table: 缺 empty-text="暂无数据"        → 添加
  *   - 创建类主按钮: 缺 primary / 误用 plain    → 纠正
  *   - el-table 普通数据列: 缺 overflow tooltip → 添加
@@ -28,7 +30,18 @@ function hasTrueBooleanAttr(tagText, attr) {
 const FIXES = {
   "el-input": [{ attr: "size", value: "small" }],
   "el-select": [{ attr: "size", value: "small" }],
-  "el-date-picker": [{ attr: "style", value: "width:100%" }],
+  "el-date-picker": [
+    { attr: "size", value: "small" },
+    { attr: "style", value: "width:100%", mergeStyle: true },
+  ],
+  "el-time-picker": [
+    { attr: "size", value: "small" },
+    { attr: "style", value: "width:100%", mergeStyle: true },
+  ],
+  "el-button": [{ attr: "size", value: "small" }],
+  ElButton: [{ attr: "size", value: "small" }],
+  "base-toolbar": [{ attr: "size", value: "small" }],
+  BaseToolbar: [{ attr: "size", value: "small" }],
   "el-table": [{ attr: "empty-text", value: "暂无数据" }],
   "el-table-column": [{ attr: "align", value: "center", replaceStatic: true }],
   BaseTable: [
@@ -50,6 +63,7 @@ export const FIXED_RULE_IDS = Object.freeze([
   "R021",
   "R038",
   "R039",
+  "R041",
 ]);
 
 function parseTag(content, pos, tagName) {
@@ -77,6 +91,7 @@ function addAttrIfMissing(
   value,
   replaceStatic = false,
   booleanAttr = false,
+  mergeStyle = false,
 ) {
   // 已存在（含动态绑定 :attr=）则跳过
   const escapedAttr = attr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -90,6 +105,20 @@ function addAttrIfMissing(
     `:?${escapedAttr}\\s*=`,
   );
   if (re.test(tagText)) {
+    if (mergeStyle && attr === "style" && !/:style\s*=/.test(tagText)) {
+      const staticStyleRe = /(\sstyle\s*=\s*)(["'])([^"']*)\2/;
+      const match = tagText.match(staticStyleRe);
+      if (!match) return { text: tagText, changed: false };
+      if (/(?:^|;)\s*(?:width|inline-size)\s*:/.test(match[3])) {
+        return { text: tagText, changed: false };
+      }
+      const separator = match[3].trim() === "" || /;\s*$/.test(match[3]) ? "" : ";";
+      const merged = `${match[3]}${separator}${value}`;
+      return {
+        text: tagText.replace(staticStyleRe, `$1$2${merged}$2`),
+        changed: true,
+      };
+    }
     if (!replaceStatic) return { text: tagText, changed: false };
     const staticRe = new RegExp(
       `(\\s${attr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*=\\s*)(["'])[^"']*\\2`,
@@ -149,7 +178,7 @@ function fixTemplateAttrs(content) {
         booleanAttr: true,
       });
     }
-    for (const { attr, value, replaceStatic, booleanAttr } of fixes) {
+    for (const { attr, value, replaceStatic, booleanAttr, mergeStyle } of fixes) {
       const r = addAttrIfMissing(
         text,
         tagName,
@@ -157,6 +186,7 @@ function fixTemplateAttrs(content) {
         value,
         replaceStatic,
         booleanAttr,
+        mergeStyle,
       );
       text = r.text;
       if (r.changed) changes++;
@@ -164,6 +194,50 @@ function fixTemplateAttrs(content) {
     result += text;
     pos = end;
   }
+  return { content: result, changes };
+}
+
+const BUTTON_ICON_BY_LABEL = [
+  [/(新增|新建|添加|创建)/, "Plus"],
+  [/(编辑|修改)/, "Edit"],
+  [/(删除|移除|作废)/, "Delete"],
+  [/(搜索|查询|检索)/, "Search"],
+  [/(重置|刷新|同步|重新加载)/, "Refresh"],
+  [/(导出|下载)/, "Download"],
+  [/(导入|上传)/, "Upload"],
+  [/(查看|详情|预览)/, "View"],
+  [/(保存|确认|确定|提交|通过|审核)/, "Check"],
+  [/(取消|关闭|清空)/, "Close"],
+  [/(返回|上一步)/, "Back"],
+  [/(打印)/, "Printer"],
+  [/(复制)/, "CopyDocument"],
+];
+
+function fixSemanticButtonIcons(content) {
+  let changes = 0;
+  const result = content.replace(
+    /<(el-button|ElButton)\b[\s\S]*?<\/\1>/g,
+    (button, tagName) => {
+      const openEnd = button.indexOf(">");
+      if (openEnd < 0) return button;
+      let opening = button.slice(0, openEnd + 1);
+      if (/:?icon\s*=/.test(opening) || /<el-icon\b/.test(button)) return button;
+      if (hasTrueBooleanAttr(opening, "link") || hasTrueBooleanAttr(opening, "text")) {
+        return button;
+      }
+      const label = button
+        .slice(openEnd + 1, button.lastIndexOf(`</${tagName}>`))
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, "");
+      const icon = BUTTON_ICON_BY_LABEL.find(([pattern]) => pattern.test(label))?.[1];
+      if (!icon) return button;
+      const iconResult = addAttrIfMissing(opening, tagName, "icon", icon);
+      if (!iconResult.changed) return button;
+      opening = iconResult.text;
+      changes++;
+      return opening + button.slice(openEnd + 1);
+    },
+  );
   return { content: result, changes };
 }
 
@@ -272,9 +346,12 @@ export function runFix({
     const r2 = fixPrimaryActionButtons(content);
     content = r2.content;
     changes += r2.changes;
-    const r3 = fixHexColors(content);
+    const r3 = fixSemanticButtonIcons(content);
     content = r3.content;
     changes += r3.changes;
+    const r4 = fixHexColors(content);
+    content = r4.content;
+    changes += r4.changes;
     if (changes > 0 && content !== original) {
       pending.push({ filePath, original, content, changes });
       changedAbsPaths.push(filePath);

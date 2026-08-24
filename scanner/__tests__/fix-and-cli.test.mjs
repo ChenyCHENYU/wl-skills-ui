@@ -53,7 +53,9 @@ describe("fixer 闭环", () => {
     <el-table-column prop="customerName" label="客户名称" />
   </el-table>
   <el-button plain icon="Plus">新增</el-button>
-  <el-input /><el-select /><el-date-picker />
+  <el-button @click="close">取消</el-button>
+  <BaseToolbar :items="toolbars" />
+  <el-input /><el-select /><el-date-picker style="color:red" /><el-time-picker />
   <span style="color:#409eff">示例</span>
 </template>
 <script setup>const chartColor = "#409eff";</script>
@@ -72,9 +74,15 @@ describe("fixer 闭环", () => {
       /el-table-column[^>]*prop="customerName"[^>]*show-overflow-tooltip|el-table-column[^>]*show-overflow-tooltip[^>]*prop="customerName"/,
     );
     assert.match(fixed, /el-button[^>]*type="primary"[^>]*>新增<\/el-button>/);
+    assert.match(fixed, /el-button[^>]*size="small"[^>]*icon="Plus"[^>]*>新增<\/el-button>|el-button[^>]*icon="Plus"[^>]*size="small"[^>]*>新增<\/el-button>/);
+    assert.match(fixed, /el-button[^>]*icon="Close"[^>]*>取消<\/el-button>/);
+    assert.match(fixed, /BaseToolbar[^>]*size="small"/);
     assert.doesNotMatch(fixed, /el-button[^>]*\splain(?:\s|=|>)/);
     assert.match(fixed, /el-input[^>]*size="small"/);
-    assert.match(fixed, /el-date-picker[^>]*style="width:100%"/);
+    assert.match(fixed, /el-date-picker[^>]*size="small"/);
+    assert.match(fixed, /el-date-picker[^>]*style="color:red;width:100%"/);
+    assert.match(fixed, /el-time-picker[^>]*size="small"/);
+    assert.match(fixed, /el-time-picker[^>]*style="width:100%"/);
     assert.doesNotMatch(fixed, /<template>[\s\S]*#409eff[\s\S]*<\/template>/);
     assert.match(fixed, /<script setup>const chartColor = "#409eff";<\/script>/);
     assert.equal(listSnapshots(root).length, 1);

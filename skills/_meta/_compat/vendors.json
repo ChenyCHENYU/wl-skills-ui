@@ -1,6 +1,43 @@
 {
   "description": "L2 Project Vendors 单一事实源。scanner 识别、Skill 推荐、AI 路由、文档优先级均从此读取。",
   "priorityOrder": ["base", "jh", "c", "ag-grid", "custom"],
+  "compatProfiles": [
+    {
+      "id": "jh-ui-element-plus-2.2",
+      "mode": "skin",
+      "peers": {
+        "element-plus": "2.2.6-prod.3",
+        "@jhlc/jh-ui": "3.1.0"
+      },
+      "evidence": [
+        "scanner/__tests__/component-fixtures/element-input-group-affixes-legacy.html",
+        "standards/component-structures.json",
+        "scanner/__tests__/styles-contract.test.mjs"
+      ],
+      "requiredContracts": [
+        ".el-input.el-input-group > .el-input__inner",
+        "element-plus.input-group-affixes-legacy"
+      ]
+    },
+    {
+      "id": "native-element-plus-2.7",
+      "mode": "native",
+      "peers": {
+        "element-plus": "2.7.0"
+      },
+      "evidence": [
+        "scanner/__tests__/component-fixtures/element-input-group-affixes.html",
+        "scanner/__tests__/component-fixtures/element-date-picker-teleport.html",
+        "tests/visual/specs/browser-compat.spec.ts",
+        "standards/component-structures.json"
+      ],
+      "requiredContracts": [
+        ".el-input__wrapper",
+        ".el-picker-panel.el-date-picker",
+        "element-plus.date-picker-teleport"
+      ]
+    }
+  ],
   "vendors": [
     {
       "id": "base",

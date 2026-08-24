@@ -9,7 +9,7 @@ applyTo: "**/*.{ts,vue}"
 
 ## 核心原则
 
-1. 所有列定义用 `defineColumns()` 包裹 — 自动应用已注册字段映射
+1. 所有列定义用 `defineColumns()` 包裹 — 自动应用已注册字段映射，并默认让叶子列与分组表头居中；显式左右对齐优先，特殊页面可传 `{ defaultAlign: null }` 退出
 2. 操作列统一用 `renderOps([...])` — 图标按钮系统，自动分隔线 + stopPropagation
 3. 状态字段用 `renderTagNode()` / `renderClassifyTag()` — 彩色 Tag，见 tag-status/SKILL.md
 

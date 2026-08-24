@@ -12,6 +12,7 @@
  *   八、残留问题与后续建议
  *   附录：豁免配置 & 快照说明
  */
+import { listRules } from "../standards/rules-loader.mjs";
 
 const SEVERITY_LABEL = {
   error: "🔴 高危",
@@ -42,37 +43,15 @@ const CATEGORY_LABEL = {
   feedback: "反馈 (empty/result/alert/badge)",
 };
 
-const RULE_NAME = {
-  R001: 'el-table-column 缺少 align="center"',
-  R002: "el-table 缺少 empty-text",
-  R003: "BaseTable 缺少 empty-text",
-  R004: "操作列使用文字 el-button",
-  R005: "工具栏 el-button 缺少 icon",
-  R006: 'el-input/el-select 缺少 size="small"',
-  R007: "el-date-picker 缺少 width:100%",
-  R008: "el-form labelWidth 偏小",
-  R009: "状态字段纯文本渲染（应使用 renderTagNode/ElTag）",
-  R010: '分类字段 ElTag 未使用 effect="plain"',
-  R011: "pagination 在 #footer 内（位置错误）",
-  R012: "弹窗内 el-table 缺少 empty-text",
-  R013: "columnsDef 旧格式 operations: []",
-  R014: "selection 列缺少 header-align",
-  R015: "弹窗嵌套表格用 el-button link",
-  R016: "<style> 块硬编码 hex 颜色",
-  R017: "<template> 内硬编码 hex 颜色",
-  R018: "<script> 块硬编码 hex 颜色",
-  R021: 'BaseTable 缺少 render-type="agGrid"',
-  R022: "BaseTable 缺少唯一 cid",
-  R038: "创建类主操作缺少 primary 填充主题色",
-  R039: "普通数据列缺少超长省略与悬停完整提示",
-  R031: "详情/统计卡片建议使用统一场景 class",
-  R032: "el-tabs 建议明确页面场景",
-  R033: "el-descriptions 建议使用 bordered 或统一容器",
-  R034: "el-drawer 建议明确 size",
-  R035: "el-upload 建议配置 tip/限制说明",
-  R036: "el-steps 审批/流程建议明确状态来源",
-  R037: "空/异常反馈建议统一操作入口",
-};
+let ruleNameById = null;
+
+/** Markdown 明细才需要规则标题；compact/json 路径不读取规则目录。 */
+function getRuleNameById() {
+  ruleNameById ??= Object.fromEntries(
+    listRules().map((rule) => [rule.id, rule.title]),
+  );
+  return ruleNameById;
+}
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -160,6 +139,15 @@ function buildOverviewSection(issues, fileCount, extras) {
     `| 规范覆盖率（无问题文件占比） | **${coverageRate}%**（${cleanFiles} / ${scannedFiles}） |`,
   );
   lines.push(`| 分类数 | **${Object.keys(summary.byCategory).length}** |`);
+  if (extras.parsing) {
+    const used = Object.entries(extras.parsing.used || {})
+      .filter(([, count]) => count > 0)
+      .map(([parser, count]) => `${parser} ${count}`)
+      .join(" / ");
+    lines.push(
+      `| SFC 解析 | **${extras.parsing.requested}**（${used || "无文件"}） |`,
+    );
+  }
   lines.push("");
   return { lines, summary };
 }
@@ -208,6 +196,7 @@ function buildCategorySection(summary) {
 
 function buildRuleSection(summary) {
   if (Object.keys(summary.byRule).length === 0) return [];
+  const ruleNames = getRuleNameById();
   const lines = ["## 五、按规则统计", ""];
   lines.push("| 规则 | 名称 | 严重度 | 数量 |");
   lines.push("|------|------|--------|------|");
@@ -215,7 +204,7 @@ function buildRuleSection(summary) {
     (a, b) => b[1] - a[1],
   );
   for (const [rule, count] of sortedRules) {
-    const name = RULE_NAME[rule] || "";
+    const name = ruleNames[rule] || "";
     const sev =
       rule.startsWith("R01") && parseInt(rule.slice(1)) <= 15
         ? "🔴/🟡"
@@ -388,6 +377,52 @@ export function generateReport(
   format = "markdown",
   extras = {},
 ) {
+  if (format === "compact" || format === "compact-json") {
+    const summary = buildSummary(issues, fileCount);
+    const issuesByFile = {};
+    for (const item of issues) {
+      (issuesByFile[item.file] ||= []).push([
+        item.line,
+        item.rule,
+        item.severity,
+        item.description,
+        item.suggestion || "",
+      ]);
+    }
+    const coverage = extras.coverage || {};
+    const recommendations = extras.recommendations || {};
+    return JSON.stringify({
+      schema: "wl-ui-scan.compact.v1",
+      summary: {
+        files: summary.fileCount,
+        total: summary.total,
+        error: summary.bySeverity.error,
+        warning: summary.bySeverity.warning,
+        info: summary.bySeverity.info,
+      },
+      coverage: {
+        element: coverage.element || [],
+        vendors: coverage.vendors || [],
+        layouts: coverage.layouts || [],
+        scenarios: coverage.businessScenarios || [],
+      },
+      skills: coverage.recommendedSkills || [],
+      issuesByFile,
+      integration: (extras.integration || [])
+        .filter((item) => !item.ok)
+        .map((item) => [
+          item.id,
+          item.severity,
+          item.description,
+          item.suggestion || "",
+        ]),
+      next: {
+        flows: recommendations.recommendedFlows || [],
+        actions: recommendations.nextActions || [],
+      },
+      parsing: extras.parsing || null,
+    });
+  }
   if (format === "json") {
     return JSON.stringify(
       {
@@ -396,6 +431,7 @@ export function generateReport(
         componentCoverage: extras.coverage || null,
         recommendedSkills: extras.coverage?.recommendedSkills || [],
         recommendations: extras.recommendations || null,
+        parsing: extras.parsing || null,
         issues,
       },
       null,

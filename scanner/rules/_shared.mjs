@@ -3,9 +3,26 @@
  * 所有规则文件均从此处 import 工具函数和 TOKEN_MAP
  */
 
-/** 计算匹配位置的行号 */
+let cachedLineText = null;
+let cachedLineStarts = [0];
+
+/** 计算匹配位置的行号；同一代码块的所有 issue 复用一次换行索引。 */
 export function lineOf(text, matchIndex, lineOffset = 0) {
-  return text.slice(0, matchIndex).split("\n").length + lineOffset;
+  if (text !== cachedLineText) {
+    cachedLineText = text;
+    cachedLineStarts = [0];
+    for (let index = text.indexOf("\n"); index >= 0; index = text.indexOf("\n", index + 1)) {
+      cachedLineStarts.push(index + 1);
+    }
+  }
+  let low = 0;
+  let high = cachedLineStarts.length;
+  while (low < high) {
+    const middle = (low + high) >>> 1;
+    if (cachedLineStarts[middle] <= matchIndex) low = middle + 1;
+    else high = middle;
+  }
+  return low + lineOffset;
 }
 
 /** 构造 issue 对象（自动推断 layer/vendor，规则可通过 meta 覆盖） */
@@ -79,8 +96,20 @@ export function inferMeta(category) {
   return { layer: "L1", vendor: "element" };
 }
 
-/** 查找完整 HTML/Vue 标签（处理多行、引号嵌套） */
+let cachedTagTemplate = null;
+let cachedTagsByName = new Map();
+
+/**
+ * 查找完整 HTML/Vue 标签（处理多行、引号嵌套）。规则按文件串行执行，
+ * 因此只缓存最近一个 template：避免 40+ 规则重复扫描，又不长期持有项目源码。
+ */
 export function findTags(template, tagName) {
+  if (template !== cachedTagTemplate) {
+    cachedTagTemplate = template;
+    cachedTagsByName = new Map();
+  }
+  const cached = cachedTagsByName.get(tagName);
+  if (cached) return cached;
   const results = [];
   const pattern = new RegExp(`<${tagName}(?=[\\s/>])`, "g");
   let m;
@@ -107,6 +136,7 @@ export function findTags(template, tagName) {
     }
     results.push({ text: template.slice(start, i), index: start });
   }
+  cachedTagsByName.set(tagName, results);
   return results;
 }
 

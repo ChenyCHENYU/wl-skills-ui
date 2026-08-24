@@ -95,6 +95,28 @@ for (const [ruleId, { pass, fail }] of grouped) {
   });
 }
 
+describe("R042 选择器分支边界", () => {
+  const rule = rules.find((item) => item.id === "R042");
+
+  it("安全 popper 分支不能掩盖并列的危险输入分支", () => {
+    const issues = rule.checkStyle(
+      `.el-picker__popper .el-date-picker,\n.form .el-date-picker { width: 100dvw; }`,
+      "mixed.vue",
+      0,
+    );
+    assert.equal(issues.length, 1);
+  });
+
+  it("所有 date-picker 分支都限定在 popper 内时不报告", () => {
+    const issues = rule.checkStyle(
+      `.el-picker__popper .el-date-picker,\n.el-picker__popper.is-light .el-date-picker { width: auto; }`,
+      "safe.vue",
+      0,
+    );
+    assert.equal(issues.length, 0);
+  });
+});
+
 // ── drift 模块测试 ──────────────────────────────────────────────────────────
 const { drift } = await import("../drift.mjs");
 

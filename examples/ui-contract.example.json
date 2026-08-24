@@ -1,0 +1,58 @@
+{
+  "schema": "wl-ui-contract.v1",
+  "id": "produce.query-table.native",
+  "visibility": "project-private",
+  "domain": "produce",
+  "scenario": "query-table",
+  "mode": "native",
+  "source": {
+    "file": "list.vue",
+    "hash": "5e5ff929fd932d2a399c62511c4f776ada64bd4359ed601a4426fd3882850f8b",
+    "parser": "sfc"
+  },
+  "layout": {
+    "kind": "list-page",
+    "regions": ["list-page", "pagination", "query", "table", "toolbar"]
+  },
+  "components": [
+    {
+      "family": "table",
+      "implementation": "BaseTable",
+      "count": 1,
+      "capabilities": ["operations", "pagination", "selection"]
+    },
+    {
+      "family": "query",
+      "implementation": "BaseQuery",
+      "count": 1,
+      "capabilities": ["selection-input"]
+    },
+    {
+      "family": "toolbar",
+      "implementation": "BaseToolbar",
+      "count": 1,
+      "capabilities": []
+    },
+    {
+      "family": "pagination",
+      "implementation": "Pagination",
+      "count": 1,
+      "capabilities": []
+    }
+  ],
+  "actions": [
+    {
+      "semantic": "create",
+      "location": "toolbar",
+      "size": "small",
+      "icon": true
+    }
+  ],
+  "rules": {
+    "required": ["R001", "R002", "R005", "R006", "R041"],
+    "observed": []
+  },
+  "tokens": ["--el-color-primary", "--wk-form-control-height"],
+  "constraints": ["default-table-axis-center", "small-icon-actions"],
+  "fingerprint": "c13ca7b0e43360c1fccf9d1ddb4d74fdfb8fdd873dd16333060b26b90b7c967a"
+}

@@ -11,15 +11,19 @@ applyTo: "**"
 
 | 规则      | 修复内容                                          |
 | --------- | ------------------------------------------------- |
-| R006      | el-input / el-select 补充 `size="small"`          |
-| R007      | el-date-picker 补充 `style="width:100%"`          |
+| R006      | input/select/date/time 补充 `size="small"`        |
+| R007      | date/time picker 合并 `style="width:100%"`        |
+| R041      | el-button / BaseToolbar 缺失尺寸时补 `small`       |
+| R005*     | 常见静态动作文案确定性补语义 icon                  |
 | R002/R003 | el-table / BaseTable 补充 `empty-text="暂无数据"` |
 | R001      | el-table-column 补充 `align="center"`             |
 | R014      | selection 列补充 `header-align="center"`          |
 | R021      | BaseTable 修正为 `render-type="agGrid"`           |
 | R016/R017 | style/template 块 hex 颜色替换为 CSS Token        |
 
-权威清单来自 `standards/rules.json#autoFixable`，发布检查会与 `scanner/fix.mjs` 的实际实现逐项比对，禁止文档声明与代码能力漂移。
+完整可自动修复清单来自 `standards/rules.json#autoFixable`，发布检查会与
+`scanner/fix.mjs` 的实际实现逐项比对。R005* 是保守的机会式修复：只处理已知静态
+动作文案，因此规则本身仍标记为不可完整自动修复，动态或未知文案会继续报告。
 
 ## 命令
 
@@ -46,7 +50,9 @@ npx wl-ui scan --target src --outFile /tmp/after-fix.md
 
 | 规则      | 原因                                           |
 | --------- | ---------------------------------------------- |
-| R004/R005/R013 | 操作列和图标语义需人工确认                 |
+| R004/R013 | 操作列结构需人工确认                               |
+| R005      | 动态或未知动作文案的图标语义需人工确认             |
+| R042      | 裸 date-picker 选择器需区分输入与弹层意图          |
 | R008      | labelWidth 需人工判断布局需求                  |
 | R009/R010 | 状态字段语义需人工识别                         |
 | R015      | 弹窗内操作按钮结构改造                         |

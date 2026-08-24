@@ -1,0 +1,42 @@
+// Element Plus Date/Time Picker 弹层几何隔离
+//
+// Element Plus 的输入组件使用 .el-date-editor，但 Teleport 到 body 的日期面板
+// 同时带有 .el-date-picker。业务项目若用 `.el-date-picker { width: 100% }`
+// 撑满表单控件，就会误伤弹层，严重时叠加 position/inset 规则形成全屏面板。
+// 这里只重置真实 picker popper 的面板几何，不触碰 Popper 写入外层的定位样式。
+
+html body .el-picker__popper:not(.wl-ui-picker-geometry-off) {
+  width: fit-content !important;
+  max-width: calc(100vw - 16px) !important;
+  height: auto !important;
+  max-height: calc(100vh - 16px) !important;
+}
+
+html
+  body
+  .el-picker__popper:not(.wl-ui-picker-geometry-off)
+  > :where(
+    .el-picker-panel,
+    .el-date-picker,
+    .el-date-range-picker,
+    .el-month-range-picker,
+    .el-time-panel,
+    .el-time-range-picker
+  ) {
+  position: relative !important;
+  inset: auto !important;
+  width: auto !important;
+  max-width: calc(100vw - 16px) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: calc(100vh - 16px) !important;
+}
+
+// 面板内部在窄屏下允许横向滚动，而不是把 popper 撑出视口或改造成全屏。
+html
+  body
+  .el-picker__popper:not(.wl-ui-picker-geometry-off)
+  > :where(.el-date-range-picker, .el-month-range-picker, .el-time-range-picker) {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}

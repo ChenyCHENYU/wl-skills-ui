@@ -21,6 +21,33 @@ html body .el-table {
     --el-table-tr-bg-color: var(--el-fill-color-lighter, #fafafa);
   }
 
+  // Element Plus 会把 align 落到 th/td 的 is-left/is-center/is-right，
+  // 但 sortable header、selection、Tag/按钮等内容又可能把 .cell 改成 flex，
+  // 只设置 text-align 无法保证视觉中心。显式 is-center 时同时统一文本轴和
+  // flex 轴；显式 left/right 继续完全交给业务列配置。
+  th.el-table__cell.is-center > .cell {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  td.el-table__cell.is-center > .cell {
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  td.el-table__cell.is-center > .cell:has(> *) {
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  :where(th, td).el-table__cell.is-center
+    > .cell
+    > :where(.el-checkbox, .el-radio, .el-tag, .el-button, .jh-cell-tag):only-child {
+    margin-inline: auto !important;
+  }
+
   // 仅命中 show-overflow-tooltip 生成的单元格，不压制 Tag/操作列等自定义内容。
   .el-table__body .cell.el-tooltip {
     min-width: 0;

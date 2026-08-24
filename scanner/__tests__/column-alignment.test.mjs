@@ -37,7 +37,25 @@ describe("显式列对齐跨表格兼容", () => {
       color: "var(--el-color-danger)",
     });
     assert.equal(column.cellClass, cellClass);
-    assert.equal(column.headerClass, "business-header");
+    assert.deepEqual(column.headerClass, [
+      "business-header",
+      "wl-ui-table-header-align--center",
+    ]);
+  });
+
+  it("函数型 headerClass 与居中 class 合并，且重复规范化保持幂等", () => {
+    const headerClass = ({ column }) => [`business-${column}`];
+    const once = normalizeColumnAlignment({
+      name: "name",
+      align: "center",
+      headerClass,
+    });
+    const twice = normalizeColumnAlignment(once);
+    assert.equal(twice, once);
+    assert.deepEqual(once.headerClass({ column: "name" }), [
+      "business-name",
+      "wl-ui-table-header-align--center",
+    ]);
   });
 
   it("把对象型 cellStyle 桥接为函数，保留业务 cellClass 与对齐优先级", () => {

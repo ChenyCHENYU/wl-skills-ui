@@ -1,6 +1,6 @@
 {
   "name": "@agile-team/wl-skills-ui",
-  "version": "1.10.4",
+  "version": "1.11.0",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 项目通用化妆/原生双模式（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
   "main": "./es/index.js",
@@ -41,7 +41,8 @@
   },
   "bin": {
     "wl-ui": "bin/wl-ui.js",
-    "wl-scan": "scanner/index.mjs"
+    "wl-scan": "scanner/index.mjs",
+    "wl-ui-mcp": "mcp/server.js"
   },
   "scripts": {
     "build": "tsup && npm run sync:tokens",
@@ -49,9 +50,11 @@
     "sync:tokens": "node -e \"import('fs').then(fs=>fs.copyFileSync('design/tokens/base.css','dist/tokens.css'))\"",
     "test": "node --test scanner/__tests__/*.test.mjs runtime/__tests__/*.test.mjs",
     "test:visual": "playwright test --config tests/visual/playwright.config.ts",
+    "test:visual:contracts": "playwright test --config tests/visual/playwright.config.ts tests/visual/specs/browser-compat.spec.ts",
     "test:visual:ui": "playwright test --config tests/visual/playwright.config.ts --ui",
     "test:visual:update": "playwright test --config tests/visual/playwright.config.ts --update-snapshots",
     "check:scss": "node scripts/check-scss.mjs",
+    "check:compat": "node scripts/check-compat-matrix.mjs",
     "docs:check": "node scripts/check-docs.mjs",
     "scan": "node scanner/index.mjs scan",
     "check": "node scanner/index.mjs check",
@@ -61,11 +64,12 @@
     "cz": "git-cz",
     "lint": "eslint . --max-warnings 0",
     "verify:package": "node scripts/verify-package.mjs",
-    "verify": "npm run lint && npm test && npm run check:scss && npm run docs:check && npm run build && npm run verify:package",
+    "verify": "npm run lint && npm test && npm run check:scss && npm run check:compat && npm run docs:check && npm run build && npm run verify:package",
     "pack:dry": "npm pack --dry-run --ignore-scripts",
-    "release:check": "npm run verify && npm run test:visual && npm pack --dry-run --ignore-scripts",
+    "release:check": "npm run verify && npm run test:visual:contracts && npm run pack:dry",
     "prepublishOnly": "npm run release:check",
-    "test:coverage": "node --test --experimental-test-coverage scanner/__tests__/*.test.mjs runtime/__tests__/*.test.mjs"
+    "test:coverage": "node --test --experimental-test-coverage scanner/__tests__/*.test.mjs runtime/__tests__/*.test.mjs",
+    "benchmark:runtime": "node scripts/benchmark-observer-hub.mjs"
   },
   "files": [
     "dist",

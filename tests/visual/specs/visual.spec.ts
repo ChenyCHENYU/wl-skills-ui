@@ -262,7 +262,8 @@ test("长文本真实溢出时省略并按需显示完整内容", async ({ page 
   );
   await expect(focusCell).toHaveCSS("border-right-color", "rgba(0, 42, 143, 0.4)");
   await expect(focusCell).toHaveCSS("border-left-color", "rgba(0, 42, 143, 0.4)");
-  await expect(rightCell).toHaveCSS("display", "block");
+  await expect(rightCell).toHaveCSS("display", "flex");
+  await expect(rightCell).toHaveCSS("align-items", "center");
   await expect(rightCell).toHaveCSS("text-align", "right");
   await expect(page.getByTestId("ag-right-header")).toHaveCSS(
     "justify-content",

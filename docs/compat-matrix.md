@@ -11,7 +11,7 @@
 | `element-plus` | **`2.2.6-prod.3`** | 集团 jh- 定制版，搭配 `@jhlc/jh-ui` 使用，DOM 仍为 `.el-input > .el-input__inner` 直挂结构（**EP 2.3.0 起才引入 `.el-input__wrapper`**） |
 | `@jhlc/jh-ui` | **`3.1.0`** | SCSS 皮肤包，`.com-text` label 包裹、`.has-colon ::after` 冒号注入、`.el-form-item--default { margin-bottom: 24px }` 等强约束 |
 | `@jhlc/common-core` | `3.1.0` 或 `3.1.0-prod.x` | 基础 util/types，`@jhlc/jh-ui` 间接依赖 |
-| `@agile-team/wl-skills-ui` | `^1.9.16` | 已对齐 jh-ui 3.1.0 + EP 2.2.6-prod.3 的 DOM 假设、客户主题锁、6px 基础圆角、紧凑表单、复合数字框、动作下拉、分页数字、显式列对齐与定制页边界 |
+| `@agile-team/wl-skills-ui` | `^1.11.0` | 同时维护 jh-ui + EP 2.2 旧 DOM 与原生 EP 2.7+ wrapper/Teleport 契约；含 Picker 几何隔离、全轴表格对齐和共享运行时观察器 |
 
 ## 项目集群当前实测
 
@@ -33,9 +33,19 @@
 | 错误态 | `.el-form-item.is-error .el-input__inner` | `.el-form-item.is-error .el-input__wrapper` |
 | 表单 label | jh-ui 注入 `<span class="com-text">` 包裹文本 | EP 默认直接渲染文本节点 |
 
+## 自动验证的兼容 Profile
+
+| Profile | 模式 | 证据门禁 |
+|---|---|---|
+| `jh-ui-element-plus-2.2` | Skin | legacy input-group fixture、`component-structures.json`、SCSS 契约测试 |
+| `native-element-plus-2.7` | Native | wrapper/input-group fixture、DatePicker Teleport fixture、Chrome/Edge 计算样式契约 |
+
+结构化声明位于 `skills/_meta/_compat/vendors.json#compatProfiles`。`npm run check:compat` 会阻止 peer、fixture、required contract 与实际证据漂移。
+
 ## 适配建议
 
-- 集团内项目：**统一锚定 `element-plus@2.2.6-prod.3` + `@jhlc/jh-ui@3.1.0`**，与 wl-skills-ui v1.9.16 三方对齐。
+- 集团内 jh 项目：**统一锚定 `element-plus@2.2.6-prod.3` + `@jhlc/jh-ui@3.1.0`**，与 wl-skills-ui v1.11.0 三方对齐。
+- 新的原生 Element Plus 项目使用社区 wrapper DOM；Date/Time Picker 必须保留 `_picker.scss` 与 R042，禁止裸 `.el-date-picker` 几何规则污染 Teleport 面板。
 - Skin 项目除全局样式外，在 `main.ts` 引入一次 `@agile-team/wl-skills-ui/runtime/auto`；Native 项目的 `installCommonPreset()` 已包含相同包级保护，不要重复安装。
 - 升级 `element-plus` 到 2.3+ 前，必须同步升级 `@jhlc/jh-ui` 到对应支持版本，否则 `.com-text` / `.el-input__inner` DOM 与 EP `__wrapper` 体系不兼容。
 - 新项目接入：见 README 「快速接入」章节，默认会按本表声明 peerDependency 范围。

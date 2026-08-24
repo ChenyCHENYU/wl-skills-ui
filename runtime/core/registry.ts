@@ -8,7 +8,10 @@
  * 内置通用映射（enableStatus / approvalStatus / verifyStatus）在此文件末尾完成注册。
  */
 import type { ColumnLike } from "./types";
-import { normalizeColumnAlignment } from "./alignment";
+import {
+  normalizeColumnAlignmentsWith,
+  type DefaultAlignmentOptions,
+} from "./alignment";
 import {
   renderEnableStatus,
   renderAuditStatus,
@@ -52,12 +55,29 @@ export function clearColumnAutoMap(name?: string): void {
  * 规则：对每一列，若其 name 命中注册表且该列未显式指定 defaultNode/defaultSlot，
  * 则自动合并注册表中的配置（列自身配置优先级更高）。
  */
-export function defineColumns<T extends ColumnLike>(columns: T[]): T[] {
+export type DefineColumnsOptions = DefaultAlignmentOptions;
+
+/**
+ * 统一列定义入口。
+ * 默认把表头和内容补为 center；显式 left/right、动态 cellStyle.textAlign
+ * 和 headerAlign 仍优先。传入 `{ defaultAlign: null }` 可完全退出默认补齐。
+ */
+export function defineColumns<T extends ColumnLike>(
+  columns: T[],
+  options: DefineColumnsOptions = {},
+): T[] {
+  const alignmentOptions: DefaultAlignmentOptions = {
+    defaultAlign:
+      options.defaultAlign === undefined ? "center" : options.defaultAlign,
+  };
+  const finalize = (column: T): T =>
+    normalizeColumnAlignmentsWith([column], alignmentOptions)[0];
+
   return columns.map((col) => {
     const normalized = Array.isArray(col.children)
       ? ({
           ...col,
-          children: defineColumns(col.children as T[]),
+          children: defineColumns(col.children as T[], alignmentOptions),
         } as T)
       : col;
     const fieldName = normalized.name ?? normalized.label ?? "";
@@ -65,9 +85,9 @@ export function defineColumns<T extends ColumnLike>(columns: T[]): T[] {
     const hasRenderer =
       normalized.defaultNode !== undefined ||
       normalized.defaultSlot !== undefined;
-    if (hasRenderer) return normalizeColumnAlignment(normalized);
+    if (hasRenderer) return finalize(normalized);
     if (!preset && isDictColumn(normalized)) {
-      return normalizeColumnAlignment({
+      return finalize({
         ...normalized,
         defaultSlot: ({ row }) =>
           renderDictClassifyTag(
@@ -76,10 +96,8 @@ export function defineColumns<T extends ColumnLike>(columns: T[]): T[] {
           ),
       } as T);
     }
-    if (!preset) return normalizeColumnAlignment(withOverflowTooltip(normalized));
-    return normalizeColumnAlignment(
-      withOverflowTooltip({ ...preset, ...normalized } as T),
-    );
+    if (!preset) return finalize(withOverflowTooltip(normalized));
+    return finalize(withOverflowTooltip({ ...preset, ...normalized } as T));
   });
 }
 

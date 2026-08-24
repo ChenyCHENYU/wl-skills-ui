@@ -1,3 +1,8 @@
+import {
+  subscribeDocumentMutations,
+  subscribeElementResize,
+} from "./observer-hub.ts";
+
 const SPLIT_ROOT_SELECTOR = ".drager_row";
 const SPLIT_PANE_SELECTOR = ".drager_top, .drager_bottom";
 const GRID_SELECTOR = ".ag-grid-table, .ag-root-wrapper";
@@ -13,9 +18,9 @@ export interface SplitGridResizeDetail {
 }
 
 let installed = false;
-let resizeObserver: ResizeObserver | null = null;
-let mutationObserver: MutationObserver | null = null;
 let observedPanes = new WeakSet<Element>();
+let resizeUnsubscribers = new Map<Element, () => void>();
+let unsubscribeMutations: (() => void) | undefined;
 const pendingPanes = new Set<HTMLElement>();
 let addedMarkers = new Map<HTMLElement, Set<string>>();
 let frameId: number | null = null;
@@ -125,7 +130,16 @@ function registerSplitRoot(root: HTMLElement): void {
     if (pane.parentElement !== root) continue;
     if (!observedPanes.has(pane)) {
       observedPanes.add(pane);
-      resizeObserver?.observe(pane);
+      resizeUnsubscribers.set(
+        pane,
+        subscribeElementResize(pane, (entries) => {
+          for (const entry of entries) {
+            if (entry.target instanceof window.HTMLElement) {
+              schedulePane(entry.target);
+            }
+          }
+        }),
+      );
     }
     schedulePane(pane);
   }
@@ -167,22 +181,15 @@ export function installSplitGridResizeGuard(): void {
   }
   installed = true;
 
-  if (typeof window.ResizeObserver !== "undefined") {
-    resizeObserver = new window.ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.target instanceof window.HTMLElement) schedulePane(entry.target);
-      }
-    });
-  }
-
-  if (document.body && typeof window.MutationObserver !== "undefined") {
-    mutationObserver = new window.MutationObserver((records) => {
+  unsubscribeMutations = subscribeDocumentMutations(
+    document,
+    (records) => {
       for (const record of records) {
         for (const node of Array.from(record.addedNodes)) scanNode(node);
       }
-    });
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
-  }
+    },
+    { childList: true, subtree: true },
+  );
 
   document.addEventListener("mouseup", handleDragEnd, true);
   document.addEventListener("touchend", handleDragEnd, true);
@@ -196,10 +203,10 @@ export function installSplitGridResizeGuard(): void {
 export function uninstallSplitGridResizeGuard(): void {
   if (!installed) return;
   installed = false;
-  resizeObserver?.disconnect();
-  mutationObserver?.disconnect();
-  resizeObserver = null;
-  mutationObserver = null;
+  unsubscribeMutations?.();
+  unsubscribeMutations = undefined;
+  for (const unsubscribe of resizeUnsubscribers.values()) unsubscribe();
+  resizeUnsubscribers = new Map<Element, () => void>();
   observedPanes = new WeakSet<Element>();
   pendingPanes.clear();
   for (const [element, names] of addedMarkers) {

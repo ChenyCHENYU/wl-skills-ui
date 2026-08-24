@@ -20,6 +20,9 @@ npx wl-ui check --project .
 
 # JSON 格式输出（方便程序处理）
 npx wl-ui scan --target src --output json
+
+# 低 token / PR 增量（MCP 默认使用 compact）
+npx wl-ui scan --target src --changed --base origin/main --output compact
 ```
 
 ## 参数说明
@@ -28,7 +31,9 @@ npx wl-ui scan --target src --output json
 | ----------------- | ------------------------ | ---------------------------------------------- |
 | `--target`        | `./src`                  | Vue 文件扫描根目录                             |
 | `--project`       | `.`                      | 项目根目录（用于接入完整性检查）               |
-| `--output`        | `markdown`               | 输出格式：`markdown` \| `json`                 |
+| `--output`        | `markdown`               | 输出格式：`markdown` \| `json` \| `compact`    |
+| `--changed`       | `false`                  | 仅扫描 Git 变更 Vue 文件，解析失败时回退全量    |
+| `--base`          | `HEAD`                   | 增量基线，例如 `origin/main`                    |
 | `--exclude`       | `node_modules,dist,.git` | 排除目录（逗号分隔）                           |
 | `--outFile`       | `""`                     | 写入文件路径，为空则输出到 stdout              |
 | `--fail-on-error` | `false`                  | 存在 error 级别问题时以非零退出码退出（CI 用） |
@@ -42,6 +47,10 @@ npx wl-ui scan --target src --output json
 ```
 
 ## 报告格式说明
+
+`compact` 使用 `wl-ui-scan.compact.v1`：问题按文件分组，每项为
+`[line, rule, severity, description, suggestion]`，适合 MCP/AI；`json` 保留完整字段，
+`markdown` 面向人工评审。
 
 ```
 一、接入完整性仪表盘

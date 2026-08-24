@@ -9,6 +9,7 @@
  *   wl-scan scan --target <path> --skip R031-R037
  *   wl-scan scan --target <path> --outFile report.md
  *   wl-scan scan --target <path> --output json
+ *   wl-scan scan --target <path> --changed [--base origin/main]
  *   wl-scan check --project <path>        # 接入完整性检查
  *   wl-scan fix --target <path>           # 自动修复 A 类问题
  *   wl-scan fix --target <path> --dry-run
@@ -40,6 +41,8 @@ import {
   cleanSnapshots,
 } from "./snapshot.mjs";
 import { loadExemptConfig } from "./exempt.mjs";
+import { collectChangedVueFiles } from "./changed.mjs";
+import { parseVueSfc, SFC_PARSER_MODES } from "./sfc-parser.mjs";
 
 const args = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
@@ -84,26 +87,19 @@ const { values } = parseArgs({
     current: { type: "string", default: "" },
     only: { type: "string", default: "" },
     skip: { type: "string", default: "" },
+    changed: { type: "boolean", default: false },
+    base: { type: "string", default: "HEAD" },
+    parser: { type: "string", default: "auto" },
   },
   strict: false,
 });
 
 // ── 公共：扫描逻辑 ──────────────────────────────────────────────────────
-function extractBlock(content, tag) {
-  const re = new RegExp(`(<${tag}[^>]*>)([\\s\\S]*?)(</${tag}>)`);
-  const match = content.match(re);
-  if (!match) return null;
-  const lineOffset = content
-    .slice(0, content.indexOf(match[0]))
-    .split("\n").length;
-  return { text: match[2], lineOffset };
-}
-function extractTemplate(content) {
-  const m = content.match(/(<template[^>]*>)([\s\S]*?)(<\/template>)/);
-  if (!m) return { text: content, lineOffset: 0 };
-  const lineOffset =
-    content.slice(0, content.indexOf(m[0])).split("\n").length - 1;
-  return { text: m[0], lineOffset };
+if (!SFC_PARSER_MODES.includes(values.parser)) {
+  console.error(
+    `[wl-scan] --parser 仅支持 ${SFC_PARSER_MODES.join(" / ")}，当前为 ${values.parser}`,
+  );
+  process.exit(1);
 }
 
 function* walkVue(dir, excludeDirs) {
@@ -137,19 +133,37 @@ function checkScriptOps(content, relPath) {
   return issues;
 }
 
-function runScan(targetDir, excludeDirs, exemptConfig) {
+function runScan(
+  targetDir,
+  excludeDirs,
+  exemptConfig,
+  fileFilter = null,
+  scanOptions = {},
+) {
   const allIssues = [];
   const exemptedIssues = [];
   let fileCount = 0;
   let exemptFileCount = 0;
   const exempt = exemptConfig || { isExempt: () => false };
   const coverage = createCoverageCollector();
+  const parserCounts = { fast: 0, sfc: 0 };
+  const parserWarnings = new Set();
+  const parserMode = scanOptions.parser || values.parser;
+  const projectRoot = scanOptions.projectRoot || process.cwd();
 
   for (const filePath of walkVue(targetDir, excludeDirs)) {
+    if (fileFilter && !fileFilter.has(resolve(filePath))) continue;
     fileCount++;
     const content = readFileSync(filePath, "utf8");
-    const { text: template, lineOffset } = extractTemplate(content);
     const relPath = relative(targetDir, filePath).replace(/\\/g, "/");
+    const parsed = parseVueSfc(content, {
+      filename: relPath,
+      mode: parserMode,
+      projectRoot,
+    });
+    parserCounts[parsed.parser] += 1;
+    for (const warning of parsed.warnings) parserWarnings.add(warning);
+    const { text: template, lineOffset } = parsed.template;
     coverage.addFile(relPath, template, content);
 
     // 整文件豁免
@@ -166,8 +180,7 @@ function runScan(targetDir, excludeDirs, exemptConfig) {
       }
     }
 
-    const styleBlock = extractBlock(content, "style");
-    if (styleBlock) {
+    for (const styleBlock of parsed.styles) {
       for (const rule of rules) {
         if (typeof rule.checkStyle === "function") {
           fileIssues.push(
@@ -177,8 +190,7 @@ function runScan(targetDir, excludeDirs, exemptConfig) {
       }
     }
 
-    const scriptBlock = extractBlock(content, "script");
-    if (scriptBlock) {
+    for (const scriptBlock of parsed.scripts) {
       for (const rule of rules) {
         if (typeof rule.checkScript === "function") {
           fileIssues.push(
@@ -209,6 +221,11 @@ function runScan(targetDir, excludeDirs, exemptConfig) {
     fileCount,
     exemptFileCount,
     coverage: coverage.result(),
+    parsing: {
+      requested: parserMode,
+      used: parserCounts,
+      warnings: [...parserWarnings],
+    },
   };
 }
 
@@ -262,6 +279,21 @@ function applyFilters(issues) {
 
 // ── 子命令分发 ──────────────────────────────────────────────────────────
 const excludeDirs = values.exclude.split(",").map((s) => s.trim());
+
+function changedFileFilter(projectRoot, targetDir) {
+  if (!values.changed) return null;
+  const result = collectChangedVueFiles({
+    projectRoot,
+    targetDir,
+    base: values.base,
+  });
+  if (result.fallback) {
+    console.error(`[wl-scan] 增量范围解析失败，已安全回退全量扫描：${result.reason}`);
+    return null;
+  }
+  console.error(`[wl-scan] 增量模式：扫描 ${result.files.size} 个变更 Vue 文件`);
+  return result.files;
+}
 
 if (subcommand === "init") {
   console.log(`# wl-skills-ui 接入指引
@@ -476,6 +508,8 @@ if (subcommand === "fix") {
     targetDir,
     excludeDirs,
     loadExemptConfig(projectRoot, values.exempt || undefined),
+    null,
+    { parser: values.parser, projectRoot },
   );
   const remaining = applyFilters(verification.allIssues);
   const remainingErrors = remaining.filter((issue) => issue.severity === "error");
@@ -494,8 +528,20 @@ if (subcommand === "all") {
     projectRoot,
     values.exempt || undefined,
   );
-  const { allIssues, exemptedIssues, fileCount, exemptFileCount, coverage } =
-    runScan(targetDir, excludeDirs, exemptConfig);
+  const {
+    allIssues,
+    exemptedIssues,
+    fileCount,
+    exemptFileCount,
+    coverage,
+    parsing,
+  } = runScan(
+      targetDir,
+      excludeDirs,
+      exemptConfig,
+      changedFileFilter(projectRoot, targetDir),
+      { parser: values.parser, projectRoot },
+    );
   const filtered = applyFilters(allIssues);
   const recommendations = recommendFlows({ issues: filtered, coverage });
   const report = generateReport(filtered, fileCount, values.output, {
@@ -504,6 +550,7 @@ if (subcommand === "all") {
     exemptedIssueCount: exemptedIssues.length,
     exemptPaths: exemptConfig.exemptPaths,
     coverage,
+    parsing,
     recommendations,
   });
   if (values.outFile) {
@@ -526,8 +573,20 @@ if (subcommand === "all") {
     projectRoot,
     values.exempt || undefined,
   );
-  const { allIssues, exemptedIssues, fileCount, exemptFileCount, coverage } =
-    runScan(targetDir, excludeDirs, exemptConfig);
+  const {
+    allIssues,
+    exemptedIssues,
+    fileCount,
+    exemptFileCount,
+    coverage,
+    parsing,
+  } = runScan(
+      targetDir,
+      excludeDirs,
+      exemptConfig,
+      changedFileFilter(projectRoot, targetDir),
+      { parser: values.parser, projectRoot },
+    );
   const filtered = applyFilters(allIssues);
   const recommendations = recommendFlows({ issues: filtered, coverage });
   const report = generateReport(filtered, fileCount, values.output, {
@@ -535,6 +594,7 @@ if (subcommand === "all") {
     exemptedIssueCount: exemptedIssues.length,
     exemptPaths: exemptConfig.exemptPaths,
     coverage,
+    parsing,
     recommendations,
   });
   if (values.outFile) {

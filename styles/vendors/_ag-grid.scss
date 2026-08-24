@@ -113,16 +113,34 @@
 
 // 仅响应列定义显式声明的 headerAlign/align；不设置全局默认对齐。
 // runtime/defineColumns 会把该意图桥接为下列类，兼容平台 BaseTable 的 AG Grid 适配层。
-.ag-header-cell.wl-ui-table-header-align--left .ag-header-cell-label {
+.ag-header-cell.wl-ui-table-header-align--left .ag-header-cell-label,
+.ag-header-group-cell.wl-ui-table-header-align--left
+  .ag-header-group-cell-label {
   justify-content: flex-start;
 }
 
-.ag-header-cell.wl-ui-table-header-align--center .ag-header-cell-label {
+.ag-header-cell.wl-ui-table-header-align--center .ag-header-cell-label,
+.ag-header-group-cell.wl-ui-table-header-align--center
+  .ag-header-group-cell-label {
   justify-content: center;
 }
 
-.ag-header-cell.wl-ui-table-header-align--right .ag-header-cell-label {
+.ag-header-cell.wl-ui-table-header-align--right .ag-header-cell-label,
+.ag-header-group-cell.wl-ui-table-header-align--right
+  .ag-header-group-cell-label {
   justify-content: flex-end;
+}
+
+.ag-header-group-cell:is(
+    .wl-ui-table-header-align--left,
+    .wl-ui-table-header-align--center,
+    .wl-ui-table-header-align--right
+  )
+  .ag-header-group-cell-label {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
 }
 
 .ag-header-cell-text {
@@ -188,14 +206,17 @@
 // 显式 align/headerAlign 必须让表头与内容共享同一条对齐轴。runtime 会给兼容层
 // 补 wl-ui class；原生 AG Grid 的 aligned class 同样纳入，未声明对齐的列不接管。
 .ag-cell:is(.wl-ui-table-cell-align--left, .ag-left-aligned-cell) {
+  justify-content: flex-start !important;
   text-align: left !important;
 }
 
 .ag-cell:is(.wl-ui-table-cell-align--center, .ag-center-aligned-cell) {
+  justify-content: center !important;
   text-align: center !important;
 }
 
 .ag-cell:is(.wl-ui-table-cell-align--right, .ag-right-aligned-cell) {
+  justify-content: flex-end !important;
   text-align: right !important;
 }
 
@@ -207,27 +228,41 @@
     .ag-center-aligned-cell,
     .ag-right-aligned-cell
   )
-  > :where(.ag-cell-wrapper, .ag-cell-value) {
+  :where(.ag-cell-wrapper, .ag-cell-value) {
+  display: flex !important;
+  align-items: center !important;
   width: 100% !important;
   min-width: 0 !important;
 }
 
 .ag-cell:is(.wl-ui-table-cell-align--left, .ag-left-aligned-cell)
-  > :where(.ag-cell-wrapper, .ag-cell-value) {
+  :where(.ag-cell-wrapper, .ag-cell-value) {
   justify-content: flex-start !important;
   text-align: left !important;
 }
 
 .ag-cell:is(.wl-ui-table-cell-align--center, .ag-center-aligned-cell)
-  > :where(.ag-cell-wrapper, .ag-cell-value) {
+  :where(.ag-cell-wrapper, .ag-cell-value) {
   justify-content: center !important;
   text-align: center !important;
 }
 
 .ag-cell:is(.wl-ui-table-cell-align--right, .ag-right-aligned-cell)
-  > :where(.ag-cell-wrapper, .ag-cell-value) {
+  :where(.ag-cell-wrapper, .ag-cell-value) {
   justify-content: flex-end !important;
   text-align: right !important;
+}
+
+.ag-cell:is(
+    .wl-ui-table-cell-align--left,
+    .wl-ui-table-cell-align--center,
+    .wl-ui-table-cell-align--right,
+    .ag-left-aligned-cell,
+    .ag-center-aligned-cell,
+    .ag-right-aligned-cell
+  ) {
+  display: flex !important;
+  align-items: center !important;
 }
 
 // 普通单元格保持无竖线的轻量外观；真正获得焦点时恢复 AG Grid 自己的焦点色，

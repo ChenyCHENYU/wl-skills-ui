@@ -46,6 +46,9 @@ npx wl-ui all --project [项目根目录] --outFile /tmp/scan-result.md
 # 单独风格扫描
 npx wl-ui scan --target [项目src目录] --outFile /tmp/scan-result.md
 
+# PR/AI 低 token 增量扫描
+npx wl-ui scan --target [项目src目录] --changed --base origin/main --output compact --parser auto
+
 # 单独接入完整性检查
 npx wl-ui check --project [项目根目录]
 ```
@@ -55,7 +58,7 @@ npx wl-ui check --project [项目根目录]
 读取扫描输出，提取：
 - 接入完整性 I001~I004 通过情况
 - 总 issue 数量
-- 按规则分类统计（R001~R018）
+- 按规则分类统计（权威全集见 `standards/rules.json`）
 - 每个 issue 的文件路径 + 行号 + 规则 + 建议
 
 ### Phase 2 — 汇报
@@ -97,7 +100,20 @@ npx wl-ui check --project [项目根目录]
 
 ---
 
-## 三、规则定义（R001—R022）
+### 领域页面 UI Contract（无需 AI 重读整页源码）
+
+```bash
+# 只预览脱敏 JSON
+npx wl-ui contract extract --path [成熟页面.vue] --domain [领域] --scenario [场景]
+
+# 校验与匹配项目私有模板库
+npx wl-ui contract validate --input [contract.json]
+npx wl-ui contract match --input [contract.json] --library .wl-ui/contracts
+```
+
+Contract 禁止保存源码、真实接口、业务字段值和按钮原始文案。写文件必须显式传 `--output-file` 与 `--confirm`。
+
+## 三、关键规则说明（权威全集为 standards/rules.json 的 R001—R042）
 
 ### Category A：表格（el-table / AG Grid）
 
@@ -188,9 +204,9 @@ npx wl-ui check --project [项目根目录]
 **标签→type 映射**：查看→`view`，编辑/修改→`edit`，删除/移除→`del`，审核/审批→`ok`，提交→`send`，流程记录→`log`
 **参考**：`reference/ag-cell-renders.ts` - `renderOps` 函数
 
-#### R005 — 工具栏按钮缺少 icon【中危】
-**检测**：toolbarDef / 顶部 el-button 没有 `icon` 属性
-**标准**：工具栏按钮必须带 icon + 文字
+#### R005 — 普通动作按钮缺少语义 icon【中危】
+**检测**：普通 `el-button` / `ElButton` 没有 `icon` 属性或 `el-icon` 子节点；`link` / `text` 与 `renderOps` 排除
+**标准**：普通动作按钮必须带与动作一致的 icon + 文字。fixer 只对常见静态文案确定性补图标，动态或未知文案保留给人工确认
 ```diff
 - <el-button type="primary" @click="handleAdd">新增</el-button>
 + <el-button type="primary" icon="Plus" @click="handleAdd">新增</el-button>
@@ -198,23 +214,27 @@ npx wl-ui check --project [项目根目录]
 
 ---
 
-### Category C：表单控件（el-input / el-select / el-date-picker）
+### Category C：表单控件（el-input / el-select / el-date-picker / el-time-picker）
 
-#### R006 — el-input / el-select 未统一 size【中危】
-**检测**：`<el-input` 或 `<el-select` 没有 `size="small"` 属性
+#### R006 — 输入与日期/时间控件未统一 size【中危】
+**检测**：`<el-input`、`<el-select`、`<el-date-picker` 或 `<el-time-picker` 没有显式 `size` 属性
 **标准**：全局统一 `size="small"`
 ```diff
 - <el-input v-model="form.name" placeholder="请输入">
 + <el-input size="small" v-model="form.name" placeholder="请输入">
 ```
 
-#### R007 — el-date-picker 宽度未撑满【中危】
-**检测**：`<el-date-picker` 没有 `style` 包含 `width:100%`
-**标准**：在 el-form-item 内必须 `style="width:100%"`
+#### R007 — el-date/time-picker 宽度未撑满【中危】
+**检测**：`<el-date-picker` / `<el-time-picker` 没有静态 `width:100%`（动态 `:style` 保留业务判断）
+**标准**：在 el-form-item 内必须通过组件 `style="width:100%"` 撑满；禁止用裸 `.el-date-picker` 选择器设置宽度，该类同时属于 Teleport 弹层（R042）
 ```diff
 - <el-date-picker v-model="form.date" type="date">
-+ <el-date-picker style="width:100%" v-model="form.date" type="date">
++ <el-date-picker size="small" style="width:100%" v-model="form.date" type="date">
 ```
+
+#### R042 — 裸 `.el-date-picker` 几何样式污染弹层【高危】
+**检测**：样式块中裸 `.el-date-picker` 设置 `width/height:100%`、`position:fixed` 或 `inset:0`
+**标准**：输入根宽度使用组件 `style="width:100%"` 或 `.el-date-editor`；弹层样式必须从 `.el-picker__popper` 开始限定。包内保护层会恢复面板几何，但仍应删除源头污染。
 
 #### R008 — el-form labelWidth 不统一【低危】
 **检测**：`labelWidth` 小于 150px

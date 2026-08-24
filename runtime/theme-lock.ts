@@ -6,6 +6,8 @@
  * 功能色和圆角以 inline !important 写回，并监听后续改写，确保包值最终生效。
  */
 
+import { subscribeDocumentMutations } from "./observer-hub.ts";
+
 export const BRAND_THEME_TOKENS = Object.freeze({
   "--el-color-primary": "#002a8f",
   "--el-color-primary-rgb": "0, 42, 143",
@@ -89,7 +91,8 @@ export const BRAND_THEME_TOKENS = Object.freeze({
   "--el-border-radius-circle": "100%",
 } as const);
 
-let observer: MutationObserver | undefined;
+let installedDocument: Document | undefined;
+let unsubscribeMutations: (() => void) | undefined;
 let waitingForBody = false;
 
 function enforceOn(target: HTMLElement | null): void {
@@ -105,32 +108,30 @@ function enforceOn(target: HTMLElement | null): void {
   }
 }
 
-function bindObserver(): void {
-  if (typeof document === "undefined") return;
+function bindObserver(doc: Document): void {
+  enforceOn(doc.documentElement);
+  enforceOn(doc.body);
 
-  enforceOn(document.documentElement);
-  enforceOn(document.body);
-
-  if (typeof MutationObserver === "undefined") return;
-  observer ??= new MutationObserver((mutations) => {
+  if (unsubscribeMutations) return;
+  unsubscribeMutations = subscribeDocumentMutations(doc, (mutations) => {
     const bodyChanged = mutations.some((mutation) => mutation.type === "childList");
-    enforceOn(document.documentElement);
-    enforceOn(document.body);
-    if (bodyChanged) bindObserver();
-  });
-
-  observer.disconnect();
-  observer.observe(document.documentElement, {
+    enforceOn(doc.documentElement);
+    enforceOn(doc.body);
+    if (bodyChanged) {
+      enforceOn(doc.documentElement);
+      enforceOn(doc.body);
+    }
+  }, {
     attributes: true,
     attributeFilter: ["style"],
     childList: true,
+    subtree: true,
   });
-  if (document.body) {
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ["style"],
-    });
-  }
+}
+
+function handleBodyReady(): void {
+  waitingForBody = false;
+  if (installedDocument) bindObserver(installedDocument);
 }
 
 /**
@@ -138,18 +139,27 @@ function bindObserver(): void {
  */
 export function installBrandThemeLock(): void {
   if (typeof document === "undefined") return;
-  bindObserver();
+  if (installedDocument && installedDocument !== document) {
+    uninstallBrandThemeLock();
+  }
+  installedDocument = document;
+  bindObserver(document);
 
   if (!document.body && !waitingForBody) {
     waitingForBody = true;
-    document.addEventListener(
-      "DOMContentLoaded",
-      () => {
-        waitingForBody = false;
-        bindObserver();
-      },
-      { once: true },
-    );
+    document.addEventListener("DOMContentLoaded", handleBodyReady, {
+      once: true,
+    });
   }
 }
 
+/** 停止主题变量回写。已写入的 token 保留，避免卸载瞬间产生视觉闪烁。 */
+export function uninstallBrandThemeLock(): void {
+  unsubscribeMutations?.();
+  unsubscribeMutations = undefined;
+  if (installedDocument) {
+    installedDocument.removeEventListener("DOMContentLoaded", handleBodyReady);
+  }
+  installedDocument = undefined;
+  waitingForBody = false;
+}

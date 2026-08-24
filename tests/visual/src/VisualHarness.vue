@@ -10,6 +10,7 @@ const form = ref({
 });
 
 const topPaneHeight = ref(220);
+const selectedDate = ref<Date | null>(null);
 
 const rows = [
   { id: 1, customer: "江苏武进不锈股份有限公司", grade: "热轧" },
@@ -155,6 +156,18 @@ function rowClassName({ row }: { row: { id: number } }) {
           </ElFormItem>
         </div>
       </ElForm>
+    </section>
+
+    <section class="visual-section" data-testid="picker-section">
+      <h2>原生日期弹层隔离</h2>
+      <ElDatePicker
+        v-model="selectedDate"
+        data-testid="native-date-picker"
+        size="small"
+        type="date"
+        placeholder="请选择日期"
+        style="width: 100%"
+      />
     </section>
 
     <section class="visual-section" data-testid="split-section">

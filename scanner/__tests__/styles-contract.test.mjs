@@ -161,6 +161,25 @@ describe("表单样式契约", () => {
   });
 });
 
+describe("Element Date/Time Picker 弹层隔离", () => {
+  const picker = read("styles/element/_picker.scss");
+  const elementIndex = read("styles/element/index.scss");
+
+  it("只重置真实 picker popper 内面板，不破坏 Popper 外层定位", () => {
+    assert.match(elementIndex, /@forward '\.\/picker'/);
+    assert.match(picker, /\.el-picker__popper:not\(\.wl-ui-picker-geometry-off\)/);
+    assert.match(picker, /> :where\([\s\S]*?\.el-date-picker,[\s\S]*?\.el-time-panel/);
+    assert.match(picker, /position:\s*relative\s*!important/);
+    assert.match(picker, /inset:\s*auto\s*!important/);
+    assert.match(picker, /width:\s*auto\s*!important/);
+    const rootBlock = picker.match(
+      /html body \.el-picker__popper:not\(\.wl-ui-picker-geometry-off\)\s*\{([^}]*)\}/,
+    )?.[1];
+    assert.ok(rootBlock, "缺少 picker popper 根规则");
+    assert.doesNotMatch(rootBlock, /position\s*:/, "不得覆盖 Popper 外层定位");
+  });
+});
+
 describe("上下分屏 AG Grid 高度链契约", () => {
   const dragRow = read("styles/vendors/_jh-drag-row.scss");
   const resizeRuntime = read("runtime/split-grid-resize.ts");
@@ -182,7 +201,11 @@ describe("上下分屏 AG Grid 高度链契约", () => {
   });
 
   it("ResizeObserver 按帧合并并通知 AG Grid 自己重布局", () => {
-    assert.match(resizeRuntime, /new window\.ResizeObserver/);
+    assert.match(resizeRuntime, /subscribeElementResize/);
+    assert.match(
+      read("runtime/observer-hub.ts"),
+      /ResizeObserver/,
+    );
     assert.match(resizeRuntime, /window\.requestAnimationFrame\(flushPendingPanes\)/);
     assert.match(resizeRuntime, /host\.dispatchEvent\(/);
     assert.doesNotMatch(
@@ -201,20 +224,24 @@ describe("上下分屏 AG Grid 高度链契约", () => {
   });
 });
 
-describe("AG Grid 显式列对齐契约", () => {
+describe("AG Grid 列对齐契约", () => {
   const agGrid = read("styles/vendors/_ag-grid.scss");
 
-  it("只为运行时桥接类提供 left/center/right 表头对齐", () => {
+  it("为叶子表头和分组表头提供 left/center/right 同轴对齐", () => {
     for (const [alignment, justify] of [
       ["left", "flex-start"],
       ["center", "center"],
       ["right", "flex-end"],
     ]) {
+      assert.ok(
+        agGrid.includes(`.ag-header-cell.wl-ui-table-header-align--${alignment}`),
+      );
+      assert.ok(
+        agGrid.includes(`.ag-header-group-cell.wl-ui-table-header-align--${alignment}`),
+      );
       assert.match(
         agGrid,
-        new RegExp(
-          `\\.ag-header-cell\\.wl-ui-table-header-align--${alignment} \\.ag-header-cell-label \\{[^}]*justify-content:\\s*${justify}`,
-        ),
+        new RegExp(`header-align--${alignment}[\\s\\S]*?justify-content:\\s*${justify}`),
       );
     }
     assert.doesNotMatch(
@@ -240,6 +267,36 @@ describe("AG Grid 显式列对齐契约", () => {
       /^\.ag-cell\s*\{[^}]*text-align:/m,
       "不得强制所有单元格对齐",
     );
+  });
+
+  it("对齐轴贯穿嵌套 ag-cell-wrapper / ag-cell-value", () => {
+    for (const [alignment, justify] of [
+      ["left", "flex-start"],
+      ["center", "center"],
+      ["right", "flex-end"],
+    ]) {
+      assert.match(
+        agGrid,
+        new RegExp(
+          `wl-ui-table-cell-align--${alignment}[\\s\\S]*?justify-content:\\s*${justify}\\s*!important`,
+        ),
+      );
+    }
+    assert.match(
+      agGrid,
+      /\.ag-cell:is\([\s\S]*?:where\(\.ag-cell-wrapper, \.ag-cell-value\)\s*\{[\s\S]*?display:\s*flex\s*!important;[\s\S]*?align-items:\s*center\s*!important/,
+    );
+  });
+});
+
+describe("Element Table 居中契约", () => {
+  const table = read("styles/element/_table.scss");
+
+  it("显式 is-center 同时统一文本、flex 与单一语义组件的中心轴", () => {
+    assert.match(table, /th\.el-table__cell\.is-center > \.cell/);
+    assert.match(table, /td\.el-table__cell\.is-center > \.cell:has\(> \*\)/);
+    assert.match(table, /justify-content:\s*center\s*!important/);
+    assert.match(table, /margin-inline:\s*auto\s*!important/);
   });
 });
 

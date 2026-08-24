@@ -21,7 +21,7 @@ describe("ensureDefaultAlignment 默认对齐补齐", () => {
     assert.equal(column.headerAlign, undefined);
   });
 
-  it("已有 cellStyle / headerClass 时不改写默认 align", () => {
+  it("已有 cellStyle / headerClass 时仍补默认轴，业务动态 textAlign 可在桥接时覆盖", () => {
     const cellStyle = () => ({ textAlign: "left" });
     const column = ensureDefaultAlignment(
       { name: "warn", label: "预警", cellStyle, headerClass: "biz-h" },
@@ -29,7 +29,8 @@ describe("ensureDefaultAlignment 默认对齐补齐", () => {
     );
     assert.equal(column.cellStyle, cellStyle);
     assert.equal(column.headerClass, "biz-h");
-    assert.equal(column.align, undefined);
+    assert.equal(column.align, "center");
+    assert.equal(column.headerAlign, "center");
   });
 
   it("递归补齐分组列 children", () => {
@@ -53,8 +54,9 @@ describe("ensureDefaultAlignment 默认对齐补齐", () => {
     assert.equal(column.children[1].align, "left");
     // 深层分组同样补齐
     assert.equal(column.children[2].children[0].align, "center");
-    // 分组自身不强行加 align（无叶子语义）
+    // 分组自身不强行加 body align，但分组表头继续默认居中
     assert.equal(column.align, undefined);
+    assert.equal(column.headerAlign, "center");
   });
 
   it("原列对象不被突变", () => {

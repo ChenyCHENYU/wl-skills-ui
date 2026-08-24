@@ -5,8 +5,12 @@
 所有直接使用的 `el-button` / `ElButton` 以及承载按钮的 `BaseToolbar` 必须显式声明
 `size`。无特殊设计要求时统一
 使用 `size="small"`；业务已明确设置 `default`、`large` 或动态 `:size` 时保持原值，
-化妆层不做运行时强制覆盖。R041 只报告缺失项，避免本地与线上 ConfigProvider 默认值
-不同导致同一代码出现按钮尺寸漂移。
+化妆层不做运行时强制覆盖。R041 会报告缺失项，`wl-ui fix` 只为未声明尺寸的按钮
+补 `small`，不会覆盖显式其他或动态尺寸，避免本地与线上 ConfigProvider 默认值不同。
+
+R005 覆盖所有普通动作按钮，不再只检查彩色按钮。静态常见文案由 fixer 按确定性映射
+补图标（如新增→Plus、搜索→Search、取消→Close、确认→Check）；动态或未知业务文案
+只报告、不猜测，避免为了自动化牺牲语义准确率。`link` / `text` 和 `renderOps` 不重复检查。
 
 工具栏必须独占一行，放在列表标题上方、表格上方并左对齐；不得与标题/条数统计挤在同一行。标准顺序为“查询区 → 工具栏 → 列表标题 → 表格 → 分页器”。
 
@@ -116,8 +120,8 @@ renderOps([
 <!-- ✅ 标准：取消在左，确认在右；footer 右对齐 -->
 <template #footer>
   <div class="dialog-footer">
-    <el-button size="small" @click="handleClose">取 消</el-button>
-    <el-button type="primary" size="small" @click="handleConfirm">确 认</el-button>
+    <el-button size="small" icon="Close" @click="handleClose">取 消</el-button>
+    <el-button type="primary" size="small" icon="Check" @click="handleConfirm">确 认</el-button>
   </div>
 </template>
 ```

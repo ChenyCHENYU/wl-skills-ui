@@ -10,6 +10,11 @@
  * 数据恢复或卸载后，本模块添加的属性和 CSS 变量会全部清理。
  */
 
+import {
+  subscribeDocumentMutations,
+  subscribeElementResize,
+} from "./observer-hub.ts";
+
 const GRID_ROOT_SELECTOR = ".ag-root-wrapper";
 const GRID_HOST_SELECTOR = ".ag-grid-table";
 const EMPTY_OVERLAY_SELECTOR = ".ag-overlay-no-rows-wrapper";
@@ -52,9 +57,9 @@ interface OverlayLayout {
 }
 
 let installedDocument: Document | undefined;
-let mutationObserver: MutationObserver | undefined;
-let resizeObserver: ResizeObserver | undefined;
 let observedElements = new WeakSet<Element>();
+let resizeUnsubscribers = new Map<Element, () => void>();
+let unsubscribeMutations: (() => void) | undefined;
 let animationFrame: number | undefined;
 
 const trackedRoots = new Set<HTMLElement>();
@@ -133,7 +138,10 @@ function resolveOverlayContainer(
 function observe(element: Element): void {
   if (observedElements.has(element)) return;
   observedElements.add(element);
-  resizeObserver?.observe(element);
+  resizeUnsubscribers.set(
+    element,
+    subscribeElementResize(element, () => scheduleRefresh()),
+  );
 }
 
 function registerRoot(root: HTMLElement): void {
@@ -517,18 +525,16 @@ export function installAgGridEmptyStateGuard(): void {
   if (installedDocument) uninstallAgGridEmptyStateGuard();
   installedDocument = document;
 
-  if (typeof ResizeObserver !== "undefined") {
-    resizeObserver = new ResizeObserver(() => scheduleRefresh());
-  }
-  if (typeof MutationObserver !== "undefined") {
-    mutationObserver = new MutationObserver(handleMutations);
-    mutationObserver.observe(document.documentElement, {
+  unsubscribeMutations = subscribeDocumentMutations(
+    document,
+    handleMutations,
+    {
       attributeFilter: ["aria-hidden", "class", "hidden"],
       attributes: true,
       childList: true,
       subtree: true,
-    });
-  }
+    },
+  );
 
   scanDocument(document);
   scheduleRefresh();
@@ -539,10 +545,10 @@ export function uninstallAgGridEmptyStateGuard(): void {
   const view = installedDocument?.defaultView;
   if (animationFrame !== undefined) view?.cancelAnimationFrame(animationFrame);
   animationFrame = undefined;
-  mutationObserver?.disconnect();
-  resizeObserver?.disconnect();
-  mutationObserver = undefined;
-  resizeObserver = undefined;
+  unsubscribeMutations?.();
+  unsubscribeMutations = undefined;
+  for (const unsubscribe of resizeUnsubscribers.values()) unsubscribe();
+  resizeUnsubscribers = new Map<Element, () => void>();
 
   reconcileOverlayLayouts(new Map());
   reconcileMinHeights(

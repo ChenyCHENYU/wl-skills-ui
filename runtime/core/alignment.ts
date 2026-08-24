@@ -14,6 +14,8 @@ const CELL_ALIGNMENT_CLASS: Record<ColumnAlignment, string> = {
   right: "wl-ui-table-cell-align--right",
 };
 
+const NORMALIZED_COLUMNS = new WeakSet<object>();
+
 function isColumnAlignment(value: unknown): value is ColumnAlignment {
   return value === "left" || value === "center" || value === "right";
 }
@@ -27,7 +29,23 @@ function mergeCellClass(
   if (value === undefined || value === null || value === "") {
     return alignmentClass;
   }
+  if (
+    (typeof value === "string" && value.split(/\s+/).includes(alignmentClass)) ||
+    (Array.isArray(value) && value.includes(alignmentClass))
+  ) {
+    return value;
+  }
   return Array.isArray(value) ? [...value, alignmentClass] : [value, alignmentClass];
+}
+
+function mergeHeaderClass(
+  current: ColumnLike["headerClass"],
+  alignmentClass: string,
+): ColumnLike["headerClass"] {
+  if (typeof current === "function") {
+    return (params: any) => mergeCellClass(current, alignmentClass, params);
+  }
+  return mergeCellClass(current, alignmentClass, undefined);
 }
 
 function mergeCellStyle(
@@ -51,6 +69,7 @@ function mergeCellStyle(
  * - Element Table 仍直接消费原有 align/headerAlign。
  */
 export function normalizeColumnAlignment<T extends ColumnLike>(column: T): T {
+  if (NORMALIZED_COLUMNS.has(column)) return column;
   const normalizedChildren = Array.isArray(column.children)
     ? normalizeColumnAlignments(column.children)
     : column.children;
@@ -63,12 +82,14 @@ export function normalizeColumnAlignment<T extends ColumnLike>(column: T): T {
   // 自定义 cellStyle 可能自带动态对齐：只把 align 作为其默认值，
   // 不再叠加 !important 对齐 class，避免压过业务返回的 textAlign。
   const needsCellClass = Boolean(align) && column.cellStyle === undefined;
-  const needsHeaderClass = Boolean(headerAlign) && column.headerClass === undefined;
+  // headerClass 经常承载业务色/边框类；不能因为它存在就放弃对齐桥接，
+  // 应与对齐 class 合并。这样分组表头和自定义表头也不会丢失居中轴。
+  const needsHeaderClass = Boolean(headerAlign);
 
   if (!needsChildren && !needsCellStyle && !needsCellClass && !needsHeaderClass)
     return column;
 
-  return {
+  const result = {
     ...column,
     ...(needsChildren ? { children: normalizedChildren } : {}),
     // common-core 3.x 的 AG 适配层只调用函数型 cellStyle/cellClass；函数形态同时
@@ -90,14 +111,27 @@ export function normalizeColumnAlignment<T extends ColumnLike>(column: T): T {
         }
       : {}),
     ...(needsHeaderClass
-      ? { headerClass: HEADER_ALIGNMENT_CLASS[headerAlign!] }
+      ? {
+          headerClass: mergeHeaderClass(
+            column.headerClass,
+            HEADER_ALIGNMENT_CLASS[headerAlign!],
+          ),
+        }
       : {}),
   } as T;
+  NORMALIZED_COLUMNS.add(result);
+  return result;
 }
 
 /** 批量规范化列定义；只桥接显式对齐意图，不设置全局默认对齐。 */
 export function normalizeColumnAlignments<T extends ColumnLike>(columns: T[]): T[] {
-  return columns.map((column) => normalizeColumnAlignment(column));
+  let changed = false;
+  const normalized = columns.map((column) => {
+    const next = normalizeColumnAlignment(column);
+    if (next !== column) changed = true;
+    return next;
+  });
+  return changed ? normalized : columns;
 }
 
 // ── 默认对齐补齐（wl-ui-ep 存量改造验证） ────────────────────────────────────
@@ -119,8 +153,8 @@ export interface DefaultAlignmentOptions {
 /**
  * 为无显式对齐声明的列补齐默认对齐（含表头）。
  *
- * - 列已有 align / cellStyle / headerClass 时一律不动（业务意图优先）；
- * - 递归处理分组列 children；声明式分组自身无叶子单元格，不补自身 align；
+ * - 显式 align 始终优先；cellStyle 的 textAlign 仍可动态覆盖默认值；
+ * - 递归处理分组列 children；分组自身只补 headerAlign，不补叶子 align；
  * - 与 normalizeColumnAlignment 兼容：补齐产物仍可被桥接函数消费。
  */
 export function ensureDefaultAlignment<T extends ColumnLike>(
@@ -130,23 +164,25 @@ export function ensureDefaultAlignment<T extends ColumnLike>(
   const normalizedChildren = Array.isArray(column.children)
     ? column.children.map((child) => ensureDefaultAlignment(child, defaultAlign))
     : column.children;
-  // 分组列：只递归子列，自身不补（align 对分组行无语义）
+  const childrenChanged =
+    Array.isArray(column.children) &&
+    normalizedChildren?.some((child, index) => child !== column.children?.[index]);
+  // 分组列没有 body 单元格，但分组表头仍需共享默认对齐轴。
   if (Array.isArray(column.children)) {
-    return normalizedChildren === column.children
+    const needsHeaderAlign = column.headerAlign === undefined;
+    return !childrenChanged && !needsHeaderAlign
       ? column
-      : ({ ...column, children: normalizedChildren } as T);
+      : ({
+          ...column,
+          ...(childrenChanged ? { children: normalizedChildren } : {}),
+          ...(needsHeaderAlign ? { headerAlign: defaultAlign } : {}),
+        } as T);
   }
-  const hasExplicit =
-    column.align !== undefined ||
-    column.cellStyle !== undefined ||
-    column.headerClass !== undefined;
-  if (hasExplicit) {
-    return column;
-  }
+  if (column.align !== undefined) return column;
   return {
     ...column,
     align: defaultAlign,
-    headerAlign: defaultAlign,
+    ...(column.headerAlign === undefined ? { headerAlign: defaultAlign } : {}),
   } as T;
 }
 

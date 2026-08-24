@@ -36,6 +36,12 @@ function verifyExports() {
   if (!pkg.sideEffects?.includes("./es/auto.js")) {
     errors.push("sideEffects 必须保留 ./es/auto.js，避免包级保护被 tree-shaking");
   }
+  for (const [name, target] of Object.entries(pkg.bin || {})) {
+    requireFile(target, `bin ${name}`);
+  }
+  if (pkg.bin?.["wl-ui-mcp"] !== "mcp/server.js") {
+    errors.push("wl-ui-mcp 必须指向维护中的 mcp/server.js");
+  }
 }
 
 function verifyRules() {
@@ -150,7 +156,8 @@ function verifyCustomerTheme() {
   for (const required of [
     "BRAND_THEME_TOKENS",
     'style.setProperty(name, value, "important")',
-    "new MutationObserver",
+    "subscribeDocumentMutations",
+    "uninstallBrandThemeLock",
     '"--el-border-radius-base": "6px"',
   ]) {
     if (!themeLock.includes(required)) {
@@ -249,7 +256,18 @@ verifyPublishAllowlist();
 verifyViteDefineCompatibility();
 verifyCustomerTheme();
 verifyManagedScope();
-for (const relPath of ["es/index.js", "es/index.d.ts", "bin/wl-ui.js", "scanner/index.mjs"] ) {
+for (const relPath of [
+  "es/index.js",
+  "es/index.d.ts",
+  "bin/wl-ui.js",
+  "scanner/index.mjs",
+  "scanner/changed.mjs",
+  "scanner/sfc-parser.mjs",
+  "scanner/ui-contract.mjs",
+  "scanner/contract-cli.mjs",
+  "standards/ui-contract.schema.json",
+  "mcp/server.js",
+]) {
   requireFile(relPath);
 }
 
@@ -286,13 +304,37 @@ const overflowColumns = runtime.defineColumns([
   },
 ]);
 if (
+  overflowColumns[0].align !== "center" ||
+  overflowColumns[0].headerAlign !== "center" ||
+  overflowColumns[0].cellStyle?.({}).textAlign !== "center" ||
   overflowColumns[0].showOverflowTooltip !== true ||
   overflowColumns[1].showOverflowTooltip !== undefined ||
   overflowColumns[2].showOverflowTooltip !== undefined ||
   overflowColumns[3].showOverflowTooltip !== false ||
   overflowColumns[4].children?.[0]?.showOverflowTooltip !== true
 ) {
-  errors.push("runtime defineColumns 未正确补齐普通文本列 overflow tooltip");
+  errors.push("runtime defineColumns 未正确补齐默认居中或普通文本列 overflow tooltip");
+}
+
+const customAlignmentColumns = runtime.defineColumns([
+  {
+    label: "分组",
+    headerClass: "business-group",
+    children: [
+      { name: "amount", align: "right" },
+      { name: "remark", cellStyle: { color: "red", textAlign: "left" } },
+    ],
+  },
+]);
+if (
+  customAlignmentColumns[0].headerAlign !== "center" ||
+  !customAlignmentColumns[0].headerClass?.includes?.(
+    "wl-ui-table-header-align--center",
+  ) ||
+  customAlignmentColumns[0].children?.[0]?.cellStyle?.({}).textAlign !== "right" ||
+  customAlignmentColumns[0].children?.[1]?.cellStyle?.({}).textAlign !== "left"
+) {
+  errors.push("runtime defineColumns 未保持分组表头、自定义 class 与显式左右对齐优先级");
 }
 
 class FakeStyle {

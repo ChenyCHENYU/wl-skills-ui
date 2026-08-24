@@ -52,9 +52,9 @@ applyTo: "**/*.vue"
 ### 内容层问题（复用 scanner 规则）
 
 - R001 ~ R003：表格列对齐 + empty-text
-- R005：工具栏按钮缺 icon
+- R005：普通动作按钮缺语义 icon；静态常见文案可确定性修复，动态/未知文案人工确认
 - R038：新增/新建/添加/创建类主按钮缺 primary 填充主题色
-- R041：按钮/BaseToolbar 未显式 `size`；默认使用 `small`，显式其他尺寸不覆盖
+- R041：按钮/BaseToolbar 未显式 `size`；fixer 默认补 `small`，显式其他尺寸不覆盖
 - R039：普通数据列缺少省略号与悬停完整内容提示
 - R006：搜索区输入框缺 `size="small"`
 - R011：分页在 footer 内（严重）
@@ -101,7 +101,7 @@ applyTo: "**/*.vue"
 ```
 
 “新增”类按钮必须保持 `type="primary"` 且不得带 `plain`；生成完成后运行
-`wl-ui scan` / `wl-ui fix` 复核 R038，并由 R041 报告缺失的显式按钮尺寸。表格列统一由 `defineColumns()` 包裹，
+`wl-ui scan` / `wl-ui fix` 复核 R005/R038/R041，确定性补齐常见动作图标和缺失的 `small`。表格列统一由 `defineColumns()` 包裹，
 普通文本列的 R039 行为由 runtime 自动补齐。
 
 ### SCSS 对应（由 styles/layouts/\_list-page.scss 提供）

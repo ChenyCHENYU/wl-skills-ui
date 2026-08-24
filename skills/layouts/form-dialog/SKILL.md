@@ -87,11 +87,12 @@ applyTo: "**/*.vue"
     </el-form>
 
     <template #footer>
-      <el-button size="small" @click="visible = false">取消</el-button>
+      <el-button size="small" icon="Close" @click="visible = false">取消</el-button>
       <el-button
         v-if="optr !== 'view'"
         type="primary"
         size="small"
+        icon="Check"
         :loading="saving"
         @click="handleSubmit"
       >确定</el-button>

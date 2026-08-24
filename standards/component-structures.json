@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "复合/组合控件结构契约单一事实源。登记边框所有者、高度策略、内部无描边层和 Teleport 出口，防止普通 Element 选择器误识别。",
   "heightPolicies": [
     "fixed-control-height",
@@ -252,6 +252,44 @@
         }
       ],
       "risk": "输入主体、prepend/append 和内部图标原本各自携带高度、圆角与描边；必须由组合根统一外轮廓，仅保留内部接缝，避免附加段独立成块。"
+    },
+    {
+      "id": "element-plus.date-picker-teleport",
+      "vendor": "element-plus",
+      "family": "picker-composite",
+      "source": "Element Plus DatePicker 输入触发器与 Teleport 到 body 的 picker panel DOM",
+      "fixture": "scanner/__tests__/component-fixtures/element-date-picker-teleport.html",
+      "rootSelector": ".el-date-editor.el-input",
+      "ownerSelector": ".el-picker__popper > .el-picker-panel.el-date-picker",
+      "innerBorderlessSelectors": [],
+      "portalSelectors": [
+        ".el-picker__popper"
+      ],
+      "knownRootClasses": [
+        "el-date-editor",
+        "el-picker__popper"
+      ],
+      "heightPolicy": "fixed-control-height",
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "disabled",
+        "open"
+      ],
+      "assertions": [
+        {
+          "target": "root",
+          "selector": ".el-date-editor.el-input:not(.el-date-picker)",
+          "matches": true
+        },
+        {
+          "target": "owner",
+          "selector": ".el-picker__popper > .el-picker-panel.el-date-picker",
+          "matches": true
+        }
+      ],
+      "risk": "输入触发器使用 el-date-editor，而 Teleport 面板使用 el-date-picker；裸 .el-date-picker 宽高或 fixed/inset 几何规则会命中弹层并将其放大到全屏。"
     },
     {
       "id": "common-core.drag-row-ag-grid",

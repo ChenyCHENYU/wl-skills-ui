@@ -5,7 +5,8 @@ const CREATE_ACTION_LABEL = /(?:新增|新建|添加|创建)(?:申请|记录|数
 
 function buttonContent(template, tag) {
   const start = tag.index + tag.text.length;
-  const end = template.indexOf("</el-button>", start);
+  const tagName = tag.text.match(/^<([A-Za-z][\w-]*)/)?.[1] || "el-button";
+  const end = template.indexOf(`</${tagName}>`, start);
   return end < 0 ? "" : template.slice(start, end);
 }
 
@@ -43,20 +44,25 @@ export const buttonRules = [
     },
   },
 
-  // R005: 工具栏按钮缺少 icon
+  // R005: 普通动作按钮缺少 icon
   {
     id: "R005",
     category: "button",
     severity: "warning",
-    name: "工具栏按钮缺少 icon",
+    name: "普通动作按钮缺少 icon",
     check(template, file, lineOffset) {
       const issues = [];
-      for (const tag of findTags(template, "el-button")) {
-        if (!/type=["'](primary|success|warning|danger)["']/.test(tag.text))
-          continue;
-        if (/\blink\b/.test(tag.text)) continue;
-        if (/jh-op-btn/.test(tag.text)) continue;
-        if (!/:?icon=/.test(tag.text))
+      for (const tagName of ["el-button", "ElButton"]) {
+        for (const tag of findTags(template, tagName)) {
+          if (/jh-op-btn/.test(tag.text)) continue;
+          if (
+            hasTrueBooleanAttr(tag.text, "link") ||
+            hasTrueBooleanAttr(tag.text, "text")
+          ) {
+            continue;
+          }
+          const content = buttonContent(template, tag);
+          if (/:?icon\s*=/.test(tag.text) || /<el-icon\b/.test(content)) continue;
           issues.push(
             issue(
               file,
@@ -64,10 +70,11 @@ export const buttonRules = [
               "R005",
               "button",
               "warning",
-              "工具栏 el-button 缺少 icon 属性",
-              '添加 icon="Plus / Edit / Search / Refresh" 等语义图标',
+              `${tagName} 缺少语义 icon`,
+              '按动作补 icon="Plus / Edit / Search / Refresh / Check / Close" 等语义图标',
             ),
           );
+        }
       }
       return issues;
     },
@@ -113,7 +120,7 @@ export const buttonRules = [
     },
   },
 
-  // R041：按钮尺寸必须显式声明；仅报告，不在运行时强制覆盖业务显式尺寸。
+  // R041：按钮尺寸必须显式声明；fixer 只补缺失的 small，不覆盖业务显式尺寸。
   {
     id: "R041",
     category: "button",

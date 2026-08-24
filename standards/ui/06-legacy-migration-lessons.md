@@ -56,10 +56,10 @@ ag-grid 内部按变量计算分组行高与各行 `top` 定位，强制 height 
 
 **约定**：列定义不写 `align` 时默认表头+内容居中；显式声明 `align: "left"` 等以列为准。
 
-**固化**：`runtime` 的 `normalizeColumnAlignmentsWith(cols, { defaultAlign: "center" })`：
-无显式 align/cellStyle/headerClass 的列补齐默认居中（含表头 class 桥接，兼容共享
-AG 适配层只认 class 的场景），递归分组 children；存量项目保持
-`normalizeColumnAlignments(cols)` 不传 options 即不补齐，向后兼容。
+**固化**：业务统一入口 `defineColumns(cols)` 默认补齐居中，并将叶子列、分组表头、
+嵌套 renderer 和已有 `headerClass/cellStyle` 合并到同一对齐轴；显式 left/right 与动态
+`textAlign` 优先。特殊页面用 `defineColumns(cols, { defaultAlign: null })` 退出。
+底层 `normalizeColumnAlignments(cols)` 仍只桥接显式声明，保持独立 API 向后兼容。
 
 ---
 

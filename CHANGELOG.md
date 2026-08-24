@@ -4,6 +4,27 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+## [1.11.0] - 2026-08-24
+
+### Added
+
+- 新增 Element Plus 日期/时间弹层几何隔离、结构契约与 R042 规则，阻断裸 `.el-date-picker` 宽高/定位样式误伤 Teleport 面板造成的全屏问题。
+- scanner 新增 `--changed --base` Git 增量范围和 `compact` 分组 JSON；Git 路径使用 NUL 协议兼容中文/空格文件名；MCP 扫描默认使用 compact，并新增 `wl-ui-mcp` 可执行入口。
+- scanner 新增 `--parser auto|fast|sfc`：自动优先使用目标项目本地 `@vue/compiler-sfc`，零依赖 fast 模式也支持嵌套 template 与多个 style/script 块，报告会显示实际解析器与降级原因。
+- 新增 `wl-ui contract extract/validate/match` 与三个同名能力 MCP Tool，将成熟 Vue 页面提取为按领域/场景分类的脱敏 `wl-ui-contract.v1`；契约不保存源码、真实接口、业务字段值和按钮原始文案。
+- 新增共享 Observer Hub 和按需 guard 安装选项；每个 Document/Window 最多各一个 MutationObserver/ResizeObserver，支持完整卸载与运行时统计。
+- 新增 Element Plus 2.2+jh-ui 与原生 Element Plus 2.7 DOM 契约证据矩阵，`check:compat` 防止支持声明与 fixture/浏览器契约漂移。
+
+### Changed
+
+- `defineColumns()` 默认让叶子列和分组表头居中，完整合并 `cellStyle/headerClass`，保持显式左右对齐和动态 `textAlign` 优先；`defaultAlign:null` 可退出。
+- Element Table 与 AG Grid 对齐样式覆盖 flex、分组表头及嵌套 renderer，避免属性存在但视觉轴仍偏移。
+- R005 扩展到普通动作按钮，R041 纳入 fixer；常见静态按钮文案确定性补语义图标，缺失尺寸默认补 `small`。
+- scanner 最近模板标签和行号索引改为单文件复用，减少多规则重复解析且不长期持有项目源码。
+- README 以“能力、效果、单能力用法、组合工作流、安全边界”重新组织；历史细节迁移到 `docs/version-history.md`。
+
 ## [1.10.4] - 2026-08-22
 
 ### Fixed

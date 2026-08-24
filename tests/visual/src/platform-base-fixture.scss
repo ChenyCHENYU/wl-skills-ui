@@ -79,6 +79,15 @@
   box-sizing: border-box;
 }
 
+// 模拟存量业务误把输入宽度写到弹层同名 class 的高危样式。包必须只在真实
+// picker popper 内恢复面板几何，不能覆盖 Popper 外层的 top/left/transform。
+.el-date-picker {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100vh !important;
+}
+
 .visual-ag-row .ag-cell {
   display: block;
   line-height: 24px;

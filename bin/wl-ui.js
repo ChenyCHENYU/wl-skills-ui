@@ -63,6 +63,7 @@ const SUBCOMMANDS = new Set([
   "snapshot",
   "drift",
   "exempt",
+  "contract",
 ]);
 let subcommand = "help";
 
@@ -97,6 +98,18 @@ if (SCANNER_CMDS.has(subcommand)) {
     });
   } catch (e) {
     process.exit(e.status ?? 1);
+  }
+  process.exit(0);
+}
+
+if (subcommand === "contract") {
+  const contractBin = join(PKG_ROOT, "scanner", "contract-cli.mjs");
+  try {
+    execFileSync(process.execPath, [contractBin, ...rawArgs], {
+      stdio: "inherit",
+    });
+  } catch (error) {
+    process.exit(error.status ?? 1);
   }
   process.exit(0);
 }
@@ -1092,6 +1105,11 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
   wl-ui drift --baseline <基线.json> --current <当前.json> [--fail-on-error]
   wl-ui exempt init --project . --target src        生成豁免候选，需人工确认
 
+  wl-ui contract extract --path <page.vue> --domain <domain> [--scenario <name>]
+  wl-ui contract validate --input <ui-contract.json>
+  wl-ui contract match --input <ui-contract.json> --library <directory>
+                提取、校验和匹配不含源码/接口/业务文案的 UI 语义契约
+
   wl-ui add-preset <name> [--project .] [--output src/wl-ui/presets] [--dry-run]
                            在消费项目内脚手架业务预设文件
   wl-ui add-vendor <tag> [--family <id>] [--dry-run]
@@ -1104,6 +1122,7 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
                   scan: skin(只看L0/L1/L2) | native(全量)
   --layer         scan 过滤：L0/L1/L2/L3/L4（逗号分隔）
   --vendor        scan 过滤：element/base-table/jh-components/...（逗号分隔）
+  --parser        scan/contract: auto(默认) | fast | sfc
   --exempt        豁免配置文件路径（默认 .wl-exempt.json）
   --dry-run       预览模式，不实际写入文件
   --no-snapshot   fix 时跳过快照创建

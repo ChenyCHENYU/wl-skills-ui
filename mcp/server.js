@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
-import { dirname, resolve, join } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,9 +43,21 @@ const TOOLS = [
         vendor: { type: "string", description: "vendor 过滤，逗号分隔" },
         output: {
           type: "string",
-          description: "markdown 或 json，默认 markdown",
+          description: "compact、json 或 markdown；默认 compact，适合低 token 调用",
         },
         exempt: { type: "string", description: "豁免配置文件路径" },
+        changedOnly: {
+          type: "boolean",
+          description: "仅扫描 Git 变更 Vue 文件；失败时安全回退全量",
+        },
+        base: {
+          type: "string",
+          description: "增量对比基线，例如 origin/main；默认 HEAD",
+        },
+        parser: {
+          type: "string",
+          description: "auto（默认）、fast 或 sfc；auto 优先项目本地 compiler-sfc",
+        },
       },
       required: [],
     },
@@ -155,13 +167,57 @@ const TOOLS = [
   {
     name: "wl_ui_recommend_flow",
     description:
-      "根据 wl_ui_scan --output json 的扫描结果推荐后续 flow、tool 和 wl-skills-kit 桥接动作。",
+      "根据 wl_ui_scan 的 compact（默认）或 json 扫描结果推荐后续 flow、tool 和 wl-skills-kit 桥接动作。",
     inputSchema: {
       type: "object",
       properties: {
         scanJson: { type: "string", description: "扫描 JSON 字符串" },
       },
       required: ["scanJson"],
+    },
+  },
+  {
+    name: "wl_ui_contract_extract",
+    description:
+      "从单个 Vue 页面提取脱敏 ui-contract JSON；不返回源码、真实接口、业务字段或按钮原始文案。",
+    inputSchema: {
+      type: "object",
+      properties: {
+        path: { type: "string", description: "目标项目内的 Vue 文件路径" },
+        domain: { type: "string", description: "领域标识，例如 produce" },
+        scenario: { type: "string", description: "可选场景，例如 query-table" },
+        mode: { type: "string", description: "native（默认）或 skin" },
+        parser: { type: "string", description: "auto（默认）、fast 或 sfc" },
+        project: { type: "string", description: "项目根目录" },
+      },
+      required: ["path", "domain"],
+    },
+  },
+  {
+    name: "wl_ui_contract_validate",
+    description:
+      "校验 ui-contract schema、fingerprint 和脱敏边界，只读且不写文件。",
+    inputSchema: {
+      type: "object",
+      properties: {
+        contractJson: { type: "string", description: "ui-contract JSON 字符串" },
+      },
+      required: ["contractJson"],
+    },
+  },
+  {
+    name: "wl_ui_contract_match",
+    description:
+      "按领域、场景、模式、布局和组件族匹配本地 ui-contract 库，只返回摘要与相似度。",
+    inputSchema: {
+      type: "object",
+      properties: {
+        contractJson: { type: "string", description: "查询 ui-contract JSON 字符串" },
+        library: { type: "string", description: "项目内契约库目录" },
+        limit: { type: "number", description: "最大返回数，默认 5" },
+        project: { type: "string", description: "项目根目录" },
+      },
+      required: ["contractJson", "library"],
     },
   },
 ];
@@ -180,6 +236,15 @@ function sendError(id, code, message) {
 
 function projectRoot(args = {}) {
   return resolve(args.project || process.env.WL_PROJECT_ROOT || process.cwd());
+}
+
+function projectPath(root, input, label) {
+  const absolute = resolve(root, input);
+  const rel = relative(root, absolute);
+  if (rel.startsWith("..") || isAbsolute(rel)) {
+    throw new Error(`${label} 必须位于项目根目录内`);
+  }
+  return absolute;
 }
 
 async function detectSkin(args = {}) {
@@ -248,8 +313,11 @@ function runScanner(command, args = {}) {
     if (args.mode) cliArgs.push("--mode", String(args.mode));
     if (args.layer) cliArgs.push("--layer", String(args.layer));
     if (args.vendor) cliArgs.push("--vendor", String(args.vendor));
-    if (args.output) cliArgs.push("--output", String(args.output));
+    cliArgs.push("--output", String(args.output || "compact"));
     if (args.exempt) cliArgs.push("--exempt", String(args.exempt));
+    if (args.changedOnly) cliArgs.push("--changed");
+    if (args.base) cliArgs.push("--base", String(args.base));
+    if (args.parser) cliArgs.push("--parser", String(args.parser));
     if (command === "fix") cliArgs.push("--dry-run");
   }
   return new Promise((resolvePromise) => {
@@ -374,34 +442,66 @@ function buildKitBridge(needed) {
   };
 }
 
+function issuesFromScan(parsed) {
+  if (Array.isArray(parsed.issues)) return parsed.issues;
+  return Object.entries(parsed.issuesByFile || {}).flatMap(([file, items]) =>
+    items.map(([line, rule, severity, description, suggestion]) => ({
+      file,
+      line,
+      rule,
+      severity,
+      description,
+      suggestion,
+    })),
+  );
+}
+
+function coverageFromScan(parsed) {
+  if (parsed.componentCoverage) return parsed.componentCoverage;
+  if (!parsed.coverage) return {};
+  return {
+    ...parsed.coverage,
+    businessScenarios: parsed.coverage.scenarios || [],
+    recommendedSkills: parsed.skills || [],
+  };
+}
+
+function addIssueRecommendations(issues, recommendedFlows, nextActions) {
+  if (issues.length === 0) {
+    recommendedFlows.add("full-audit");
+    nextActions.add("当前扫描未发现规则问题，建议保留周期性 full-audit");
+    return;
+  }
+  recommendedFlows.add("legacy-skin-align");
+  nextActions.add(
+    "先用 skin/native 样式层完成视觉统一，再判断是否需要代码级修复",
+  );
+  nextActions.add("修复前调用 wl_ui_fix_dry_run 并向用户展示摘要");
+}
+
+function addCategoryRecommendations(categories, recommendedFlows, nextActions) {
+  if (!categories.has("color") && !categories.has("token")) return;
+  recommendedFlows.add("progressive-migrate");
+  nextActions.add(
+    "硬编码色值应迁移为 wl-skills-ui tokens 或 Element Plus 变量",
+  );
+}
+
 function recommendFromScan(args = {}) {
   const parsed = JSON.parse(String(args.scanJson || "{}"));
-  const issues = parsed.issues || [];
-  const coverage = parsed.componentCoverage || {};
+  const issues = issuesFromScan(parsed);
+  const coverage = coverageFromScan(parsed);
   const rules = new Set(issues.map((issue) => issue.rule));
   const categories = new Set(issues.map((issue) => issue.category));
   const recommendedFlows = new Set(
-    parsed.recommendations?.recommendedFlows || [],
+    parsed.recommendations?.recommendedFlows || parsed.next?.flows || [],
   );
-  const nextActions = new Set(parsed.recommendations?.nextActions || []);
+  const nextActions = new Set(
+    parsed.recommendations?.nextActions || parsed.next?.actions || [],
+  );
 
-  if (issues.length > 0) {
-    recommendedFlows.add("legacy-skin-align");
-    nextActions.add(
-      "先用 skin/native 样式层完成视觉统一，再判断是否需要代码级修复",
-    );
-    nextActions.add("修复前调用 wl_ui_fix_dry_run 并向用户展示摘要");
-  } else {
-    recommendedFlows.add("full-audit");
-    nextActions.add("当前扫描未发现规则问题，建议保留周期性 full-audit");
-  }
-
-  if (categories.has("color") || categories.has("token")) {
-    recommendedFlows.add("progressive-migrate");
-    nextActions.add(
-      "硬编码色值应迁移为 wl-skills-ui tokens 或 Element Plus 变量",
-    );
-  }
+  addIssueRecommendations(issues, recommendedFlows, nextActions);
+  addCategoryRecommendations(categories, recommendedFlows, nextActions);
 
   const shouldUseKit = hasKitBridgeNeed(rules, coverage);
   return {
@@ -416,6 +516,67 @@ function recommendFromScan(args = {}) {
     kitBridge: buildKitBridge(shouldUseKit),
     nextActions: [...nextActions].sort(),
   };
+}
+
+async function dispatchContractTool(id, name, args) {
+  if (!name.startsWith("wl_ui_contract_")) return false;
+  const contractTools = await import("../scanner/ui-contract.mjs");
+  if (name === "wl_ui_contract_extract") {
+    const root = projectRoot(args);
+    const contract = contractTools.extractUiContractFromFile(
+      projectPath(root, args.path, "path"),
+      {
+        domain: args.domain,
+        mode: args.mode || "native",
+        parser: args.parser || "auto",
+        projectRoot: root,
+        scenario: args.scenario || undefined,
+      },
+    );
+    sendResult(id, {
+      content: [{ type: "text", text: JSON.stringify(contract, null, 2) }],
+    });
+    return true;
+  }
+  if (name === "wl_ui_contract_validate") {
+    const validation = contractTools.validateUiContract(args.contractJson);
+    sendResult(id, {
+      content: [
+        { type: "text", text: JSON.stringify(validation, null, 2) },
+      ],
+      isError: !validation.ok,
+    });
+    return true;
+  }
+  if (name === "wl_ui_contract_match") {
+    const query = JSON.parse(args.contractJson);
+    const validation = contractTools.validateUiContract(query);
+    if (!validation.ok) {
+      sendResult(id, {
+        content: [
+          { type: "text", text: JSON.stringify(validation, null, 2) },
+        ],
+        isError: true,
+      });
+      return true;
+    }
+    const candidates = contractTools.loadUiContractLibrary(
+      projectPath(projectRoot(args), args.library, "library"),
+    );
+    const result = {
+      schema: "wl-ui-contract-match.v1",
+      query: query.id,
+      candidates: candidates.length,
+      matches: contractTools.matchUiContracts(query, candidates, {
+        limit: args.limit || 5,
+      }),
+    };
+    sendResult(id, {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    });
+    return true;
+  }
+  return false;
 }
 
 async function dispatchTool(id, name, args) {
@@ -550,6 +711,7 @@ async function dispatchTool(id, name, args) {
       });
       return;
     }
+    if (await dispatchContractTool(id, name, args)) return;
     sendError(id, -32601, `未知工具: ${name}`);
   } catch (e) {
     sendResult(id, {

@@ -47,8 +47,8 @@
   <!-- ✅ footer：只放操作按钮，不放分页 -->
   <template #footer>
     <div class="dialog-footer">
-      <el-button @click="handleClose">取 消</el-button>
-      <el-button type="primary" @click="handleConfirm">确 认</el-button>
+      <el-button size="small" icon="Close" @click="handleClose">取 消</el-button>
+      <el-button type="primary" size="small" icon="Check" @click="handleConfirm">确 认</el-button>
     </div>
   </template>
 </el-dialog>

@@ -310,17 +310,49 @@
 }
 
 // 复选框单元格（header 与 body 使用相同规则，确保视觉对齐）
-.ag-cell.ag-checkbox-cell {
+//
+// 2026-08-26 复盘修订（源自 wl-ui-produce 炼钢模块选择列错轴实测）：
+// 平台定制版 AG Grid 的行 cell 不携带 ag-checkbox-cell 结构类，行复选框实际
+// 挂在 cell 内部；按结构类写的规则在该版本永不命中。补充按真实存在的
+// .ag-selection-checkbox 反选兜底（仅真实选择列 cell 含该节点，文本 cell 安全），
+// 并清掉主题默认 widget-spacing margin（约 6px）造成的行侧偏轴。
+.ag-cell.ag-checkbox-cell,
+.ag-cell:has(.ag-selection-checkbox) {
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 
+.ag-cell.ag-checkbox-cell .ag-cell-wrapper,
+.ag-cell.ag-checkbox-cell .ag-selection-checkbox,
+.ag-cell:has(.ag-selection-checkbox) .ag-cell-wrapper,
+.ag-cell:has(.ag-selection-checkbox) .ag-selection-checkbox {
+  width: auto !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+
 // 多选列表头：精准命中 ag-header-select-all，与 body checkbox 保持相同居中方式
 .ag-header-cell:has(.ag-header-select-all) {
   padding: 0 !important;
   justify-content: center !important;
+}
+
+// 平台定制版全选框经 insertAdjacentElement 挂为表头 cell 直接子节点，
+// comp-wrapper 默认 flex:1 会把它顶到左缘。
+// 安全约束：普通表头也会保留 display:none 的隐藏 select-all 节点，因此
+// 【禁止】对 select-all 强制 display、也【禁止】压缩 comp-wrapper 宽度，
+// 否则隐藏框显形、表头文字被挤没（2026-08-26 事故教训）。改用绝对定位
+// 居中：不参与 flex 布局分配，隐藏节点保持不可见，文本表头零影响。
+// .ag-header-cell 自身为 absolute 定位，天然充当包含块。
+.ag-header-cell:has(> .ag-header-select-all) .ag-header-select-all {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  z-index: 1;
 }
 
 .ag-header-cell.ag-header-cell-sortable:first-child:has(.ag-header-select-all),

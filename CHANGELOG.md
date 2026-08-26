@@ -1,4 +1,4 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to **@agile-team/wl-skills-ui** will be documented in this file.
 
@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ## [1.11.0] - 2026-08-24
+
+### Fixed
+
+- AG Grid 选择列表头/行复选框横向错轴：平台定制版行 cell 不携带 `ag-checkbox-cell` 结构类，补充 `:has(.ag-selection-checkbox)` 反选兜底并清默认 widget 间距；全选框为表头 cell 直接子节点时改绝对定位居中，不强制 display、不压缩 comp-wrapper，普通表头隐藏的 select-all 节点保持不可见（produce 事故复盘，新增 5 项几何回归测试 ag-grid-selection-alignment）。
 
 ### Added
 

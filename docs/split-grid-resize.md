@@ -31,7 +31,8 @@
 
 有数据时，本实现不会给 `.drager_top/.drager_bottom` 或 `.drager_row` 增加
 `overflow:auto`。唯一例外是完整空状态：当 160px 数据区在当前上下分屏中放不下时，
-`runtime/ag-grid-empty-state` 会保留两个 pane 的高度基线，并让最近的 `.drager_row`
+`runtime/ag-grid-empty-state` 只给持有空态表格的 pane 设置内容需求地板（不按初始
+高度快照钉死全部 pane，手柄始终保留行程），并让最近的 `.drager_row`
 临时承担一个纵向滚动条；数据恢复后立即撤销。pane 自身仍不滚动。
 
 两套守护都不会访问 Vue 私有实例，不会遍历或猜测 `gridApi`，也不会广播全局

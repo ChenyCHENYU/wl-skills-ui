@@ -1,6 +1,6 @@
 # @agile-team/wl-skills-ui
 
-**企业级 UI 一致性与 AI 精确治理工具包 v1.11.0** — 面向 Vue 3 + Element Plus 的设计令牌、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
+**企业级 UI 一致性与 AI 精确治理工具包 v1.11.1** — 面向 Vue 3 + Element Plus 的设计令牌、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
 
 它把“视觉统一、问题识别、机械修复、项目适配和样例沉淀”拆成可验证、可组合的工程能力。脚本、规则和 MCP 先完成确定性工作，AI 只处理业务语义与人工决策，从而减少重复读源码、上下文 token 和误修改。
 
@@ -449,7 +449,7 @@ npx wl-ui doctor --project . --print-overrides
 
 ## 版本与进一步阅读
 
-当前 v1.11.0：新增精确 SFC 解析、低 token 增量扫描、共享 Observer Hub、领域 ui-contract、13 个 MCP Tool、日期弹层全屏防护、表格全轴居中与 small 图标按钮确定性治理。
+当前 v1.11.1：修复空态守护按初始快照钉死上下分栏全部 pane 导致手柄失去拖动行程的问题，空态表格仍保留内容需求地板。v1.11.0 新增精确 SFC 解析、低 token 增量扫描、共享 Observer Hub、领域 ui-contract、13 个 MCP Tool、日期弹层全屏防护、表格全轴居中与 small 图标按钮确定性治理。
 
 - [版本摘要](docs/version-history.md)
 - [完整 Changelog](CHANGELOG.md)

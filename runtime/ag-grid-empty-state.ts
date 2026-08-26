@@ -392,7 +392,6 @@ function collectRowSplitLayouts(
   for (const [splitRoot, grids] of rowGroups) {
     activeSplitRoots.add(splitRoot);
     scrollContainers.set(splitRoot, "row");
-    const baselines = ensurePaneBaselines(splitRoot, ROW_PANE_SELECTOR);
     const paneGroups = new Map<HTMLElement, ActiveEmptyGrid[]>();
     for (const grid of grids) {
       const pane = grid.root.closest<HTMLElement>(ROW_PANE_SELECTOR);
@@ -401,14 +400,18 @@ function collectRowSplitLayouts(
       paneGrids.push(grid);
       paneGroups.set(pane, paneGrids);
     }
-    for (const [pane, baseline] of baselines) {
-      const paneGrids = paneGroups.get(pane);
-      paneMinHeights.set(
-        pane,
-        paneGrids
-          ? Math.max(baseline, desiredPaneHeight(pane, paneGrids))
-          : baseline,
-      );
+    // 只给真正持有空态 Grid 的 pane 设置地板，且地板值来自当前内容需求
+    // （pane 内非 Grid 内容的实测高度 + 空态最小数据区高度），而不是初始
+    // 高度快照。
+    //
+    // 2026-08-26 修复：旧逻辑对分栏内【所有】pane 按首次观测高度做快照并
+    // 以 min-height 钉死。两个 pane 的地板相加必然约等于容器高度，拖动手
+    // 柄因此失去全部行程——上下分栏只要有任意一侧表格为空，手柄就拖不动，
+    // 直到空态消失才解钉。未持有空态 Grid 的 pane 完全不参与钉死；持有
+    // 空态 Grid 的 pane 仍保留内容地板，配合分屏根滚动保证空态提示不被
+    // 挤没（本模块头部声明的职责 2/3 不变）。
+    for (const [pane, paneGrids] of paneGroups) {
+      paneMinHeights.set(pane, desiredPaneHeight(pane, paneGrids));
     }
   }
 }

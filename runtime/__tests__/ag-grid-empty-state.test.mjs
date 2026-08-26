@@ -107,7 +107,7 @@ describe("AG Grid 空状态布局守护", () => {
     );
   });
 
-  it("上下分屏保持两个 pane 的基线并只让分屏根承担滚动", () => {
+  it("上下分屏只给持有空态 Grid 的 pane 设置内容地板", () => {
     const split = window.document.createElement("div");
     split.className = "drager_row";
     const topPane = window.document.createElement("div");
@@ -132,10 +132,53 @@ describe("AG Grid 空状态布局守护", () => {
       topPane.style.getPropertyValue("--wl-ui-empty-pane-min-height"),
       "196px",
     );
+    // 未持有空态 Grid 的 pane 不得钉死：旧逻辑按初始高度快照给它设置
+    // min-height，导致分栏手柄失去行程。
+    assert.ok(!bottomPane.hasAttribute("data-wl-ui-empty-pane"));
     assert.equal(
       bottomPane.style.getPropertyValue("--wl-ui-empty-pane-min-height"),
-      "100px",
+      "",
     );
+  });
+
+  it("上下分栏存在空表格时手柄必须保留拖动行程", () => {
+    // 复刻 wl-ui-produce 计划下达页实测场景：上 pane 为有数据的表格
+    // （无空态 overlay，不属于守护管辖），下 pane 为未加载明细的空表格。
+    const split = window.document.createElement("div");
+    split.className = "drager_row";
+    const topPane = window.document.createElement("div");
+    topPane.className = "drager_top";
+    const slider = window.document.createElement("div");
+    slider.className = "slider_row";
+    const bottomPane = window.document.createElement("div");
+    bottomPane.className = "drager_bottom";
+    const dataHost = window.document.createElement("div");
+    dataHost.className = "ag-grid-table";
+    dataHost.innerHTML = '<div class="ag-root-wrapper"></div>';
+    topPane.append(dataHost);
+    const empty = emptyGrid({ bodyHeight: 288, top: 400 });
+    bottomPane.append(empty.host);
+    split.append(topPane, slider, bottomPane);
+    window.document.body.append(split);
+    rect(split, { height: 724 });
+    rect(topPane, { height: 380 });
+    rect(slider, { height: 20, top: 380 });
+    rect(bottomPane, { height: 324, top: 400 });
+
+    installAgGridEmptyStateGuard();
+    refreshAgGridEmptyStateLayout();
+
+    assert.equal(split.getAttribute("data-wl-ui-empty-scroll"), "row");
+    // 有数据的上 pane 完全不被钉死。
+    assert.ok(!topPane.hasAttribute("data-wl-ui-empty-pane"));
+    // 空表格 pane 的地板是内容需求（196px），不是初始快照（324px）。
+    assert.ok(bottomPane.hasAttribute("data-wl-ui-empty-pane"));
+    assert.equal(
+      bottomPane.style.getPropertyValue("--wl-ui-empty-pane-min-height"),
+      "196px",
+    );
+    // 地板之和 + 手柄必须小于容器高度，手柄才有行程。
+    assert.ok(0 + 20 + 196 < 724);
   });
 
   it("左右分屏使用同一最小高度，避免两侧视觉尺寸不一致", () => {

@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-08-26
+
+### Fixed
+
+- AG Grid 空态守护导致上下分栏（`jh-drag-row`）手柄失去拖动行程：旧逻辑对分栏内所有 pane 按首次观测高度做快照并以 `min-height` 钉死，两侧地板相加约等于容器高度，分栏内任意一侧表格为空时手柄即拖不动，直到空态消失才解钉（wl-ui-produce 计划下达页实测复盘）。现只给持有空态表格的 pane 设置内容需求地板（pane 内非表格内容实测高度 + 160px 空态最小数据区），未持有空态表格的 pane 不钉死；空态提示保护、分屏根滚动、左右分栏同高语义与清理逻辑均不变。左右分栏（`drag-col`）路径零改动。
+
 ## [1.11.0] - 2026-08-24
 
 ### Fixed

@@ -139,13 +139,18 @@ test("形态B（标准嵌套布局）select-all保持可见且未越出cell", as
 });
 
 test("行复选框在cell内水平居中（无结构类 + 有结构类两种DOM）", async ({ page }) => {
-  for (const testId of ["row-custom", "row-structural"]) {
-    const cell = await boxOf(page, testId);
-    const checkbox = await boxOf(page, testId, ".ag-selection-checkbox");
-    expect(checkbox.visible).toBe(true);
+  const boxes = await Promise.all(
+    (["row-custom", "row-structural"] as const).map(async (testId) => ({
+      cell: await boxOf(page, testId),
+      checkbox: await boxOf(page, testId, ".ag-selection-checkbox"),
+      testId,
+    })),
+  );
+  for (const { testId, cell, checkbox } of boxes) {
+    expect(checkbox.visible, `${testId} checkbox visible`).toBe(true);
     const cellCenter = cell.left + cell.width / 2;
     const checkboxCenter = checkbox.left + checkbox.width / 2;
-    expect(Math.abs(checkboxCenter - cellCenter)).toBeLessThanOrEqual(1);
+    expect(Math.abs(checkboxCenter - cellCenter), `${testId} centered`).toBeLessThanOrEqual(1);
   }
 });
 

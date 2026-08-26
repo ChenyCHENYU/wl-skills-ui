@@ -310,79 +310,29 @@
 }
 
 // 复选框单元格（header 与 body 使用相同规则，确保视觉对齐）
-//
-// 2026-08-26 实测修正（源自 wl-ui-produce 炼钢模块选择列错轴实测复盘）：
-// 1) 平台 ag-grid 子应用的行 cell 不携带 ag-checkbox-cell 结构类，行复选框
-//    实际是 .ag-selection-checkbox 挂在 cell 直接子级；按结构类写的规则在该
-//    版本永不命中，必须双选择器兜底。
-// 2) 全选框经 eResize.insertAdjacentElement("afterend") 挂到表头 cell 上，
-//    是 comp-wrapper 的兄弟节点而非子节点；comp-wrapper 只含空 label，默认
-//    flex:1 吃满剩余宽度会把全选框顶到左缘。表头侧需让 select-all 撑满
-//    cell 内部居中、comp-wrapper 收缩为 0 宽，与行侧
-//    cell > wrapper > checkbox 的撑满居中结构同构，两侧几何链一致。
-.ag-cell.ag-checkbox-cell,
-.ag-cell:has(> .ag-selection-checkbox) {
+.ag-cell.ag-checkbox-cell {
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 
-// 行复选框收缩自然宽度并清 margin（主题默认 --ag-cell-widget-spacing 6px
-// 会把行复选框推离中轴）。
-.ag-cell.ag-checkbox-cell .ag-cell-wrapper,
-.ag-cell.ag-checkbox-cell .ag-selection-checkbox,
-.ag-cell:has(> .ag-selection-checkbox) .ag-cell-wrapper,
-.ag-cell:has(> .ag-selection-checkbox) .ag-selection-checkbox {
-  width: auto !important;
-  flex: 0 0 auto !important;
-  margin: 0 !important;
-}
-
-// 多选列表头分两种 DOM 形态，必须区分处理：
-// 形态 A（平台定制版）：select-all 是 cell 直接子节点（insertAdjacentElement
-//   挂在 comp-wrapper 外）→ select-all 撑满 cell 内部居中，comp-wrapper /
-//   label 链收缩 0 宽移出布局分配，否则默认 flex:1 把 select-all 顶到左缘。
-// 形态 B（标准 AG Grid）：select-all 在 comp-wrapper 内部 → wrapper 居中且
-//   不拉伸（见下方独立规则），不可压 0，否则会藏掉全选框。
-.ag-header-cell:has(> .ag-header-select-all) {
+// 多选列表头：精准命中 ag-header-select-all，与 body checkbox 保持相同居中方式
+.ag-header-cell:has(.ag-header-select-all) {
   padding: 0 !important;
-  justify-content: flex-start !important;
-}
-
-.ag-header-cell:has(> .ag-header-select-all) .ag-header-select-all {
-  width: 100% !important;
-  flex: 1 1 auto !important;
-  display: flex !important;
-  align-items: center !important;
   justify-content: center !important;
-  margin: 0 !important;
 }
 
-.ag-header-cell:has(> .ag-header-select-all) .ag-header-cell-comp-wrapper,
-.ag-header-cell:has(> .ag-header-select-all) .ag-cell-label-container,
-.ag-header-cell:has(> .ag-header-select-all) .ag-header-cell-label {
-  width: 0 !important;
-  min-width: 0 !important;
-  flex: 0 0 0px !important;
-  overflow: hidden !important;
-}
-
-// 形态 B：select-all 位于 comp-wrapper 内部的标准布局，wrapper 居中不占满。
-// 父 cell 属于形态 A 时已被上方规则压 0，这里用 :not(:has(> select-all))
-// 显式排除，避免 width:100% 反向覆盖形态 A 的收缩。
-.ag-header-cell:not(:has(> .ag-header-select-all))
-  .ag-header-cell-comp-wrapper:has(.ag-header-select-all, .ag-checkbox) {
-  justify-content: center !important;
-  flex: none !important;
-  width: 100% !important;
-}
-
-// pinned 首列与排序表头兜底（保持旧行为；形态 B 下 wrapper 内排布不受影响）。
 .ag-header-cell.ag-header-cell-sortable:first-child:has(.ag-header-select-all),
 .ag-pinned-left-header .ag-header-cell:first-child:has(.ag-checkbox) {
   padding: 0 !important;
-  justify-content: flex-start !important;
+  justify-content: center !important;
+}
+
+.ag-header-cell .ag-header-cell-comp-wrapper:has(.ag-checkbox) {
+  justify-content: center !important;
+  flex: none !important;
+  width: 100% !important;
 }
 
 // 固定列分割线

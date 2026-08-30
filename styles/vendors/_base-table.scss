@@ -1,3 +1,5 @@
+$include-ag-grid-base-table: true !default;
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // styles/vendors/_base-table.scss — BaseTable / <base-table> 系列封装组件覆盖
 // 适用：所有以 Base 前缀的表格类封装（BaseTable / BaseDataTable / BaseList...）
@@ -39,10 +41,7 @@
 // ── v-loading 遮罩层质感优化 ──────────────────────────────────────────────────
 // 目的：去除 BaseTable / AG Grid 切换数据时的灰色蒙层，替换为轻量毛玻璃 + 微透明效果
 // 体验：数据切换几乎无感，加载状态通过 spinner 动画暗示，不阻断阅读上下文
-.app-page-container,
-.base-table-wrapper,
-.base-table-container,
-.ag-root-wrapper {
+@mixin loading-mask-surface {
 
   >.el-loading-mask,
   .el-loading-mask {
@@ -64,6 +63,18 @@
       color: var(--el-color-primary);
       margin-top: 4px;
     }
+  }
+}
+
+.app-page-container,
+.base-table-wrapper,
+.base-table-container {
+  @include loading-mask-surface;
+}
+
+@if $include-ag-grid-base-table {
+  .ag-root-wrapper {
+    @include loading-mask-surface;
   }
 }
 

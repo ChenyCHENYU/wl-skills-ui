@@ -14,7 +14,7 @@ applyTo: "**"
 | R006      | input/select/date/time 补充 `size="small"`        |
 | R007      | date/time picker 合并 `style="width:100%"`        |
 | R041      | el-button / BaseToolbar 缺失尺寸时补 `small`       |
-| R005*     | 常见静态动作文案确定性补语义 icon                  |
+| R043      | 常见静态动作文案确定性补语义 icon                  |
 | R002/R003 | el-table / BaseTable 补充 `empty-text="暂无数据"` |
 | R001      | el-table-column 补充 `align="center"`             |
 | R014      | selection 列补充 `header-align="center"`          |
@@ -22,17 +22,17 @@ applyTo: "**"
 | R016/R017 | style/template 块 hex 颜色替换为 CSS Token        |
 
 完整可自动修复清单来自 `standards/rules.json#autoFixable`，发布检查会与
-`scanner/fix.mjs` 的实际实现逐项比对。R005* 是保守的机会式修复：只处理已知静态
-动作文案，因此规则本身仍标记为不可完整自动修复，动态或未知文案会继续报告。
+`scanner/fix.mjs` 的实际实现逐项比对。R043 只处理已知静态动作；R005 负责动态或
+未知文案并保持人工判断，fixer 不再执行未声明的机会式修改。
 
 ## 命令
 
 ```bash
 # 先预览（推荐！）
-npx wl-ui fix --target src --dry-run
+npx wl-ui fix --target src --profile native-element --only R001,R006,R043 --dry-run --output json
 
 # 确认后执行
-npx wl-ui fix --target src
+npx wl-ui fix --target src --profile native-element --only R001,R006,R043 --plan-hash <hash>
 
 # 只修复特定目录
 npx wl-ui fix --target src/views/check
@@ -61,4 +61,7 @@ npx wl-ui scan --target src --outFile /tmp/after-fix.md
 
 ## 幂等性保证
 
-修复脚本可重复运行，已符合标准的文件不会被修改。正式写入前自动创建项目内快照；快照创建失败时零写入，写入中断会恢复本轮已改文件。可用 `wl-ui snapshot rollback` 回退。
+修复脚本可重复运行，`profile/only/skip` 同时限制预览与写入。dry-run 返回的
+`planHash` 会绑定文件前后 hash、规则集合和 Profile；应用前不一致则零写入。正式
+写入前自动创建项目内快照；快照创建失败时零写入，写入中断会恢复本轮已改文件。
+可用 `wl-ui snapshot rollback` 回退。R021 只会出现在 `legacy-jh-ag` 计划中。

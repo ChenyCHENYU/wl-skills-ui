@@ -29,11 +29,10 @@ import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve, relative } from "node:path";
 import { parseArgs } from "node:util";
 import { getRules } from "./rules/index.mjs";
-const rules = getRules();
 import { generateReport } from "./report.mjs";
 import { checkIntegration } from "./integration.mjs";
 import { runFix } from "./fix.mjs";
-import { createCoverageCollector, recommendFlows } from "./coverage.mjs";
+import { recommendFlows } from "./coverage.mjs";
 import {
   listSnapshots,
   rollbackSnapshot,
@@ -42,7 +41,9 @@ import {
 } from "./snapshot.mjs";
 import { loadExemptConfig } from "./exempt.mjs";
 import { collectChangedVueFiles } from "./changed.mjs";
-import { parseVueSfc, SFC_PARSER_MODES } from "./sfc-parser.mjs";
+import { SFC_PARSER_MODES } from "./sfc-parser.mjs";
+import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
+import { scanFiles } from "./engine.mjs";
 
 const args = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
@@ -78,9 +79,11 @@ const { values } = parseArgs({
     layer: { type: "string", default: "" },
     vendor: { type: "string", default: "" },
     mode: { type: "string", default: "" },
+    profile: { type: "string", default: "" },
     id: { type: "string", default: "" },
     keep: { type: "string", default: "5" },
     "no-snapshot": { type: "boolean", default: false },
+    "plan-hash": { type: "string", default: "" },
     "refresh-baseline": { type: "boolean", default: false },
     exempt: { type: "string", default: "" },
     baseline: { type: "string", default: "" },
@@ -88,8 +91,11 @@ const { values } = parseArgs({
     only: { type: "string", default: "" },
     skip: { type: "string", default: "" },
     changed: { type: "boolean", default: false },
+    "changed-fallback": { type: "string", default: "error" },
     base: { type: "string", default: "HEAD" },
     parser: { type: "string", default: "auto" },
+    limit: { type: "string", default: "100" },
+    cursor: { type: "string", default: "0" },
   },
   strict: false,
 });
@@ -102,35 +108,28 @@ if (!SFC_PARSER_MODES.includes(values.parser)) {
   process.exit(1);
 }
 
-function* walkVue(dir, excludeDirs) {
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.isDirectory()) {
-      if (excludeDirs.some((ex) => entry.name === ex)) continue;
-      yield* walkVue(join(dir, entry.name), excludeDirs);
-    } else if (entry.name.endsWith(".vue")) {
-      yield join(dir, entry.name);
-    }
-  }
-}
-
-function checkScriptOps(content, relPath) {
-  const issues = [];
-  const lines = content.split("\n");
-  lines.forEach((line, idx) => {
-    if (/^\s*operations:\s*\[/.test(line) && !line.trim().startsWith("//")) {
-      issues.push({
-        file: relPath,
-        line: idx + 1,
-        rule: "R013",
-        category: "button",
-        severity: "error",
-        description: "columnsDef 使用旧格式 operations: [...] 文字按钮",
-        suggestion:
-          "改为 defaultSlot: ({ row }) => renderOps([...]) 图标按钮系统",
-      });
-    }
+let profileResolution;
+try {
+  profileResolution = resolveProjectProfile({
+    projectRoot: values.project,
+    profile: values.profile || undefined,
+    mode: values.mode || undefined,
   });
-  return issues;
+} catch (error) {
+  console.error(`[wl-scan] ${error.message}`);
+  process.exit(1);
+}
+if (!["error", "full"].includes(values["changed-fallback"])) {
+  console.error(
+    `[wl-scan] --changed-fallback 仅支持 error / full，当前为 ${values["changed-fallback"]}`,
+  );
+  process.exit(1);
+}
+const activeProfile = profileResolution.profile;
+const rules = getRules({ profile: activeProfile.id });
+
+function resolveTarget(projectRoot, target) {
+  return resolve(projectRoot, target || "src");
 }
 
 function runScan(
@@ -140,93 +139,16 @@ function runScan(
   fileFilter = null,
   scanOptions = {},
 ) {
-  const allIssues = [];
-  const exemptedIssues = [];
-  let fileCount = 0;
-  let exemptFileCount = 0;
-  const exempt = exemptConfig || { isExempt: () => false };
-  const coverage = createCoverageCollector();
-  const parserCounts = { fast: 0, sfc: 0 };
-  const parserWarnings = new Set();
-  const parserMode = scanOptions.parser || values.parser;
-  const projectRoot = scanOptions.projectRoot || process.cwd();
-
-  for (const filePath of walkVue(targetDir, excludeDirs)) {
-    if (fileFilter && !fileFilter.has(resolve(filePath))) continue;
-    fileCount++;
-    const content = readFileSync(filePath, "utf8");
-    const relPath = relative(targetDir, filePath).replace(/\\/g, "/");
-    const parsed = parseVueSfc(content, {
-      filename: relPath,
-      mode: parserMode,
-      projectRoot,
-    });
-    parserCounts[parsed.parser] += 1;
-    for (const warning of parsed.warnings) parserWarnings.add(warning);
-    const { text: template, lineOffset } = parsed.template;
-    coverage.addFile(relPath, template, content);
-
-    // 整文件豁免
-    if (exempt.isExempt(relPath)) {
-      exemptFileCount++;
-      continue;
-    }
-
-    const fileIssues = [];
-
-    for (const rule of rules) {
-      if (typeof rule.check === "function") {
-        fileIssues.push(...rule.check(template, relPath, lineOffset));
-      }
-    }
-
-    for (const styleBlock of parsed.styles) {
-      for (const rule of rules) {
-        if (typeof rule.checkStyle === "function") {
-          fileIssues.push(
-            ...rule.checkStyle(styleBlock.text, relPath, styleBlock.lineOffset),
-          );
-        }
-      }
-    }
-
-    for (const scriptBlock of parsed.scripts) {
-      for (const rule of rules) {
-        if (typeof rule.checkScript === "function") {
-          fileIssues.push(
-            ...rule.checkScript(
-              scriptBlock.text,
-              relPath,
-              scriptBlock.lineOffset,
-            ),
-          );
-        }
-      }
-    }
-
-    fileIssues.push(...checkScriptOps(content, relPath));
-
-    // 规则级豁免过滤
-    for (const issue of fileIssues) {
-      if (exempt.isExempt(relPath, issue.rule)) {
-        exemptedIssues.push({ ...issue, exempted: true });
-      } else {
-        allIssues.push(issue);
-      }
-    }
-  }
-  return {
-    allIssues,
-    exemptedIssues,
-    fileCount,
-    exemptFileCount,
-    coverage: coverage.result(),
-    parsing: {
-      requested: parserMode,
-      used: parserCounts,
-      warnings: [...parserWarnings],
-    },
-  };
+  return scanFiles({
+    targetDir,
+    excludeDirs,
+    exemptConfig,
+    fileFilter,
+    parser: scanOptions.parser || values.parser,
+    projectRoot: scanOptions.projectRoot || process.cwd(),
+    rules,
+    profile: activeProfile,
+  });
 }
 
 // ── 公共：规则范围展开（R031-R037 → R031,R032,...,R037）────────────────────
@@ -279,18 +201,38 @@ function applyFilters(issues) {
 
 // ── 子命令分发 ──────────────────────────────────────────────────────────
 const excludeDirs = values.exclude.split(",").map((s) => s.trim());
+let latestChangedInfo = null;
 
 function changedFileFilter(projectRoot, targetDir) {
-  if (!values.changed) return null;
+  if (!values.changed) {
+    latestChangedInfo = { requested: false, fallback: false };
+    return null;
+  }
   const result = collectChangedVueFiles({
     projectRoot,
     targetDir,
     base: values.base,
   });
   if (result.fallback) {
+    latestChangedInfo = {
+      requested: true,
+      fallback: true,
+      reason: result.reason,
+    };
+    if (values["changed-fallback"] === "error") {
+      console.error(`[wl-scan] 增量范围解析失败：${result.reason}`);
+      console.error("如确需全量扫描，请显式传入 --changed-fallback full");
+      process.exit(1);
+    }
     console.error(`[wl-scan] 增量范围解析失败，已安全回退全量扫描：${result.reason}`);
     return null;
   }
+  latestChangedInfo = {
+    requested: true,
+    fallback: false,
+    files: result.files.size,
+    base: values.base,
+  };
   console.error(`[wl-scan] 增量模式：扫描 ${result.files.size} 个变更 Vue 文件`);
   return result.files;
 }
@@ -305,29 +247,36 @@ if (subcommand === "init") {
    <link rel="stylesheet" href="/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css" />
 
 3. 在全局 SCSS 入口（如 src/assets/style/main.scss）追加：
-   @use '@agile-team/wl-skills-ui/styles' as *;
-   // 化妆模式：@use '@agile-team/wl-skills-ui/styles/presets/skin' as *;
+   @use '@agile-team/wl-skills-ui/${activeProfile.stylePreset}' as *;
 
-4. 在 src/main.ts 中安装包级保护：
-   // Skin / 老项目：
-   import '@agile-team/wl-skills-ui/runtime/auto';
-   // Native 项目改为调用 installCommonPreset()，其已包含相同保护。
+4. 在 src/main.ts 中安装 Profile 对应的包级保护：
+   import '@agile-team/wl-skills-ui/${activeProfile.runtimePreset}';
 
 5. 业务列定义改用 defineColumns：
    import { defineColumns, renderOps } from '@agile-team/wl-skills-ui/runtime';
 
 6. 验证：
    npx wl-ui check --project .
-   npx wl-ui scan --target src
+   npx wl-ui scan --target src --profile ${activeProfile.id} --output summary
 `);
   process.exit(0);
 }
 
 if (subcommand === "check") {
   const projectRoot = resolve(values.project);
-  const checks = checkIntegration(projectRoot);
+  const checks = checkIntegration(projectRoot, activeProfile);
   if (values.output === "json") {
-    console.log(JSON.stringify({ projectRoot, checks }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          projectRoot,
+          profile: { id: activeProfile.id, source: profileResolution.source },
+          checks,
+        },
+        null,
+        2,
+      ),
+    );
   } else {
     console.log(`# wl-skills-ui 接入完整性检查\n`);
     console.log(`项目根目录：${projectRoot}\n`);
@@ -346,7 +295,7 @@ if (subcommand === "exempt") {
   if (sub === "init") {
     const { existsSync } = await import("node:fs");
     const projectRoot = resolve(values.project);
-    const targetDir = resolve(values.target);
+    const targetDir = resolveTarget(projectRoot, values.target);
     const outPath = join(projectRoot, ".wl-exempt.json");
     if (existsSync(outPath)) {
       console.log(`⚠️  ${outPath} 已存在，跳过生成。如需重新生成请先删除。`);
@@ -375,7 +324,7 @@ if (subcommand === "exempt") {
         for (const entry of readdirSync(dir, { withFileTypes: true })) {
           if (!entry.isDirectory()) continue;
           if (["node_modules", "dist", ".git"].includes(entry.name)) continue;
-          const rel = relative(targetDir, join(dir, entry.name)).replace(
+          const rel = relative(projectRoot, join(dir, entry.name)).replace(
             /\\/g,
             "/",
           );
@@ -476,34 +425,48 @@ if (subcommand === "snapshot") {
 }
 
 if (subcommand === "fix") {
-  const targetDir = resolve(values.target);
   const projectRoot = resolve(values.project);
-  const result = runFix({
-    target: targetDir,
-    exclude: excludeDirs,
-    dryRun: values["dry-run"],
-    projectRoot,
-    noSnapshot: values["no-snapshot"],
-  });
-  const mode = values["dry-run"] ? "[DRY-RUN] " : "";
-  console.log(
-    `${mode}扫描 ${result.totalFiles} 个文件，修改 ${result.changedFiles.length} 个文件，共 ${result.totalChanges} 处改动：`,
-  );
-  for (const { file, changes } of result.changedFiles.sort((a, b) =>
-    a.file.localeCompare(b.file),
-  )) {
-    console.log(`  ${file}: ${changes} 处`);
+  const targetDir = resolveTarget(projectRoot, values.target);
+  let result;
+  try {
+    result = runFix({
+      target: targetDir,
+      exclude: excludeDirs,
+      dryRun: values["dry-run"],
+      projectRoot,
+      noSnapshot: values["no-snapshot"],
+      profile: activeProfile.id,
+      only: values.only ? expandRuleRange(values.only) : undefined,
+      skip: values.skip ? expandRuleRange(values.skip) : undefined,
+      expectedPlanHash: values["plan-hash"] || undefined,
+    });
+  } catch (error) {
+    console.error(`[wl-scan] ${error.message}`);
+    process.exit(1);
   }
-  if (result.snapshotId) {
-    console.log(`\n📸 已创建快照: ${result.snapshotId}`);
+  if (values.output !== "json") {
+    const mode = values["dry-run"] ? "[DRY-RUN] " : "";
     console.log(
-      `   回退命令: npx wl-scan snapshot rollback --id ${result.snapshotId}`,
+      `${mode}扫描 ${result.totalFiles} 个文件，修改 ${result.changedFiles.length} 个文件，共 ${result.totalChanges} 处改动：`,
     );
+    for (const { file, changes } of result.changedFiles.sort((a, b) =>
+      a.file.localeCompare(b.file),
+    )) {
+      console.log(`  ${file}: ${changes} 处`);
+    }
+    if (result.snapshotId) {
+      console.log(`\n📸 已创建快照: ${result.snapshotId}`);
+      console.log(
+        `   回退命令: npx wl-scan snapshot rollback --id ${result.snapshotId}`,
+      );
+    }
+    if (values["dry-run"])
+      console.log(
+        `\n[DRY-RUN 模式] 未实际写入文件。去掉 --dry-run 后重新运行即可应用。`,
+      );
+    console.log(`\n修复计划哈希: ${result.planHash}`);
+    console.log(`Profile: ${result.profile}`);
   }
-  if (values["dry-run"])
-    console.log(
-      `\n[DRY-RUN 模式] 未实际写入文件。去掉 --dry-run 后重新运行即可应用。`,
-    );
   const verification = runScan(
     targetDir,
     excludeDirs,
@@ -513,17 +476,30 @@ if (subcommand === "fix") {
   );
   const remaining = applyFilters(verification.allIssues);
   const remainingErrors = remaining.filter((issue) => issue.severity === "error");
-  console.log(`\n复检：剩余 ${remaining.length} 项，其中 error ${remainingErrors.length} 项。`);
+  if (values.output === "json") {
+    console.log(
+      JSON.stringify(
+        {
+          ...result,
+          verification: {
+            remaining: remaining.length,
+            errors: remainingErrors.length,
+          },
+        },
+        null,
+        2,
+      ),
+    );
+  } else {
+    console.log(`\n复检：剩余 ${remaining.length} 项，其中 error ${remainingErrors.length} 项。`);
+  }
   process.exit(values["fail-on-error"] && remainingErrors.length > 0 ? 1 : 0);
 }
 
 if (subcommand === "all") {
   const projectRoot = resolve(values.project);
-  const targetDir =
-    values.target === "./src"
-      ? join(projectRoot, "src")
-      : resolve(values.target);
-  const integration = checkIntegration(projectRoot);
+  const targetDir = resolveTarget(projectRoot, values.target);
+  const integration = checkIntegration(projectRoot, activeProfile);
   const exemptConfig = loadExemptConfig(
     projectRoot,
     values.exempt || undefined,
@@ -543,7 +519,11 @@ if (subcommand === "all") {
       { parser: values.parser, projectRoot },
     );
   const filtered = applyFilters(allIssues);
-  const recommendations = recommendFlows({ issues: filtered, coverage });
+  const recommendations = recommendFlows({
+    issues: filtered,
+    coverage,
+    profile: activeProfile,
+  });
   const report = generateReport(filtered, fileCount, values.output, {
     integration,
     exemptFileCount,
@@ -552,6 +532,10 @@ if (subcommand === "all") {
     coverage,
     parsing,
     recommendations,
+    profile: { id: activeProfile.id, source: profileResolution.source },
+    changed: latestChangedInfo,
+    limit: values.limit,
+    cursor: values.cursor,
   });
   if (values.outFile) {
     writeFileSync(values.outFile, report, "utf8");
@@ -560,15 +544,15 @@ if (subcommand === "all") {
     console.log(report);
   }
   const hasError =
-    allIssues.some((i) => i.severity === "error") ||
+    filtered.some((i) => i.severity === "error") ||
     integration.some((c) => !c.ok && c.severity === "error");
   process.exit(values["fail-on-error"] && hasError ? 1 : 0);
 }
 
 // 默认：scan（兼容旧用法）
 {
-  const targetDir = resolve(values.target);
   const projectRoot = resolve(values.project);
+  const targetDir = resolveTarget(projectRoot, values.target);
   const exemptConfig = loadExemptConfig(
     projectRoot,
     values.exempt || undefined,
@@ -588,7 +572,11 @@ if (subcommand === "all") {
       { parser: values.parser, projectRoot },
     );
   const filtered = applyFilters(allIssues);
-  const recommendations = recommendFlows({ issues: filtered, coverage });
+  const recommendations = recommendFlows({
+    issues: filtered,
+    coverage,
+    profile: activeProfile,
+  });
   const report = generateReport(filtered, fileCount, values.output, {
     exemptFileCount,
     exemptedIssueCount: exemptedIssues.length,
@@ -596,6 +584,10 @@ if (subcommand === "all") {
     coverage,
     parsing,
     recommendations,
+    profile: { id: activeProfile.id, source: profileResolution.source },
+    changed: latestChangedInfo,
+    limit: values.limit,
+    cursor: values.cursor,
   });
   if (values.outFile) {
     writeFileSync(values.outFile, report, "utf8");

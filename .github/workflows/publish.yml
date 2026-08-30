@@ -20,15 +20,22 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
-      - run: pnpm install --frozen-lockfile
-      # 注意：这里跑 verify（lint+test+scss+docs+build+verify:package），不跑 test:visual——
-      # 视觉快照基线目前是 enterprise-chromium-win32 平台专属，Linux 必挂；
-      # 视觉回归在发布前于 Windows 本地执行（pnpm test:visual）。跨平台基线在
-      # 仓库 issue 里跟踪，补齐后本工作流再追加 playwright 步骤。
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Verify release tag matches package version
         run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
       - run: pnpm verify
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:visual:contracts
       - run: npm pack --dry-run --ignore-scripts
-      - run: npm publish --access public
+      # 门禁已执行；避免 npm publish 再次运行 prepublishOnly。本地应急发布后重跑也保持幂等。
+      - name: Publish package when version is absent
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version >/dev/null 2>&1; then
+            echo "$PACKAGE_NAME@$PACKAGE_VERSION already exists; skipping publish."
+          else
+            npm publish --access public --provenance --ignore-scripts
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

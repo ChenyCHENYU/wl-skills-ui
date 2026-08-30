@@ -1,5 +1,7 @@
 @use "../scope" as skin;
 
+$include-ag-grid-base-components: true !default;
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 通用组件样式 — wl-ui-safe 统一设计规范
 // 包含：操作按钮组、状态标签、徽标、兼容旧按钮
@@ -190,6 +192,7 @@
 
 // ── 状态标签 — 精致小标签（GitHub/Linear label 风格）────────────────────────
 // 实色填充 + 轻柔圆角 + 克制字号
+@if $include-ag-grid-base-components {
 .ag-cell .el-tag {
   display: inline-flex !important;
   align-items: center !important;
@@ -229,6 +232,7 @@
     background: var(--el-color-primary) !important;
     color: #fff !important;
   }
+}
 }
 
 // ── 数值型徽标（考核基数/评分等）────────────────────────────────────────────
@@ -320,7 +324,9 @@
     }
 }
 
-// ── 兼容旧 el-button 操作列（其他页面渐进迁移）──────────────────────────────.ag-cell .el-button + .el-button { margin-left: 4px; }
+// ── 兼容旧 AG Grid el-button 操作列（其他页面渐进迁移）────────────────────────
+@if $include-ag-grid-base-components {
+.ag-cell .el-button + .el-button { margin-left: 4px; }
 
 .ag-cell .el-button.el-button--link,
 .ag-cell .el-button.el-button--text {
@@ -351,6 +357,7 @@
   .jh-op-link:not(:disabled) {
     background-color: rgba(255, 255, 255, 0.65);
   }
+}
 }
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // FullScreenDialog — 全屏/关闭按钮尺寸对齐 + 弹窗底部按钮风格

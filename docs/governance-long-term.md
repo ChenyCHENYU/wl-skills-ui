@@ -165,7 +165,7 @@ export default defineConfig({
 pnpm add -D @agile-team/wl-skills-ui
 
 # 2. 编辑器规则 + MCP + 启动期插件
-npx wl-ui init --project . --mode skin
+npx wl-ui init --project . --profile legacy-jh-element
 
 # 3. 基线
 npx wl-ui audit --target src --refresh-baseline
@@ -193,7 +193,8 @@ npx wl-ui audit --refresh-baseline      # 基线收敛
 2. **CSS Token 不破坏**：`design/tokens/base.css` 的变量名为长期契约，重命名走 deprecate → alias → remove 三段式
 3. **vendor 适配可选**：业务项目偏离推荐组合时插件**只警告不阻塞**，由项目方决策升级节奏
 4. **每个 minor 版本附带 compat-matrix 更新**：`docs/compat-matrix.md` 是版本与 vendor 的双向契约
-5. **`docs:check` 守护文档/规则/scanner 一致性**：包级 CI 不通过则不发版
+5. **`docs:check` 守护文档/规则/scanner/fixer/Profile/Skill 引用一致性**：包级 CI 不通过则不发版
+6. **单文件编辑器不夺取文件所有权**：只维护标记区块，`clean` 保留项目自有指令和其他 MCP 配置
 
 ---
 

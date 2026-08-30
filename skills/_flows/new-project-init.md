@@ -19,7 +19,7 @@ applyTo: "**/*.{vue,ts,scss,html}"
 
 ### Phase 0 — 安装/更新 Skill 与 MCP 配置
 ```bash
-npx wl-ui init --project . --mode native
+npx wl-ui init --project . --profile native-element
 npx wl-ui doctor --project .
 ```
 
@@ -47,8 +47,7 @@ pnpm add @agile-team/wl-skills-ui
 ### Phase 4 — 接入 runtime
 `src/main.ts`：
 ```ts
-import { installCommonPreset } from '@agile-team/wl-skills-ui/runtime/common-preset';
-installCommonPreset();
+import '@agile-team/wl-skills-ui/runtime/profiles/native-element';
 ```
 
 ### Phase 5 — 使用模板生成第一个页面

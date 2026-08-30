@@ -67,7 +67,7 @@ BaseTable / AG Grid 使用 `defineColumns()` 后由 runtime 自动为普通文�
 显式声明 `showOverflowTooltip: false`。
 
 Skin/历史项目还必须在启动入口引入一次
-`@agile-team/wl-skills-ui/runtime/auto`。它为未经过 `defineColumns()` 的动态
+对应的 `@agile-team/wl-skills-ui/runtime/profiles/*` 入口。它为未经过 `defineColumns()` 的动态
 Picker/BaseTable/AG Grid 普通文本提供真实溢出兜底；未溢出、已有 Tooltip、Tag、
 操作列、编辑列、自定义 renderer 与皮肤豁免区域均不接管。局部可使用
 `data-wl-ui-overflow="off"` 退出。

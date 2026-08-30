@@ -27,7 +27,7 @@ AG Grid 的 no-rows overlay 在不同版本中可能覆盖整张 Grid。直接�
 
 ## 包内机制
 
-`runtime/ag-grid-empty-state.ts` 随 `runtime/auto` 或 `installCommonPreset()` 安装：
+`runtime/ag-grid-empty-state.ts` 只随 `legacy-jh-ag` Profile（以及旧 `runtime/auto` 兼容入口）安装：
 
 1. 只识别当前可见的 `.ag-overlay-no-rows-wrapper`。
 2. 优先读取 `.ag-body-viewport` 的真实矩形，兼容 AG Grid 29/32；缺少 viewport 时才回退
@@ -60,10 +60,10 @@ Skin 项目：
 ```
 
 ```ts
-import "@agile-team/wl-skills-ui/runtime/auto";
+import "@agile-team/wl-skills-ui/runtime/profiles/legacy-jh-ag";
 ```
 
-Native 项目调用一次 `installCommonPreset()`，无需重复引入 `runtime/auto`。
+`native-element` 与 `legacy-jh-element` 不安装该 guard；不要在非 AG 项目为“保险”额外引入 `runtime/auto`。
 
 常规场景不需要业务代码。特殊宿主主动变更尺寸后如需立即同步，可调用：
 

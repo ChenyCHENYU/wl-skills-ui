@@ -16,13 +16,17 @@ import { installCommonPreset } from "@agile-team/wl-skills-ui/runtime/common-pre
 installCommonPreset();
 ```
 
-Skin/老项目在保留 `skin` 样式入口的同时，在启动文件引入一次自动入口：
+老项目应按真实表格 adapter 引入一次显式 Profile：
 
 ```ts
-import "@agile-team/wl-skills-ui/runtime/auto";
+// Base/jh + Element Table
+import "@agile-team/wl-skills-ui/runtime/profiles/legacy-jh-element";
+
+// 只有项目确实使用 AG Grid 时改为：
+// import "@agile-team/wl-skills-ui/runtime/profiles/legacy-jh-ag";
 ```
 
-不要同时重复调用 `installCommonPreset()` 和引入 `runtime/auto`。内部安装函数具备幂等保护，但项目应保留单一、清晰的启动入口。
+不要同时重复调用 `installCommonPreset()` 和引入 Profile。内部安装函数具备幂等保护，但项目应保留单一、清晰的启动入口。`runtime/auto` 仅供尚未迁移的 full legacy 项目兼容，不应作为新接入默认值。
 
 ## 工作机制
 

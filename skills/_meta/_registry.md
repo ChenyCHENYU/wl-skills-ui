@@ -1,4 +1,4 @@
-# Skills Registry — wl-skills-ui v1.9
+# Skills Registry — wl-skills-ui
 
 > 全部可被 AI 编辑器加载的 skill 索引（**仅列实际存在的 SKILL.md**）。R-rule 元数据见 `standards/rules.json`。
 

@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: pnpm
-      # prepare 钩子会执行 tsup 构建；verify 内部还会再构建并做 verify-package 一致性校验
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm verify
       - run: npm pack --dry-run --ignore-scripts
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 24

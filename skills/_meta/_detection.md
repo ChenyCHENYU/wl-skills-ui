@@ -10,27 +10,27 @@
 | `<el-form>` `<el-form-item>`                                                                       | element/el-form                                        |
 | `<el-dialog>`                                                                                      | element/el-dialog                                      |
 | `<el-tag>`                                                                                         | element/el-tag                                         |
-| `<el-button>`                                                                                      | element/el-table（操作列） / element/el-button（独立） |
+| `<el-button>`                                                                                      | element/el-table（操作列） / layouts/list-page（普通动作） |
 | `<el-input>` `<el-select>` `<el-date-picker>`                                                      | element/el-form                                        |
 | `<el-pagination>`                                                                                  | element/el-dialog（位置约束）                          |
-| `<el-tree>`                                                                                        | element/el-tree                                        |
+| `<el-tree>`                                                                                        | element/component-family                               |
 | `<el-message-box>` `ElMessageBox.*`                                                                | element/el-dialog                                      |
-| `<el-card>`                                                                                        | element/el-card                                        |
-| `<el-tabs>` `<el-tab-pane>`                                                                        | element/el-tabs                                        |
-| `<el-descriptions>` `<el-descriptions-item>`                                                       | element/el-descriptions                                |
-| `<el-drawer>`                                                                                      | element/el-drawer                                      |
-| `<el-upload>`                                                                                      | element/el-upload                                      |
-| `<el-steps>` `<el-step>`                                                                           | element/el-steps                                       |
-| `<el-popover>` `<el-tooltip>` `<el-dropdown>`                                                      | element/el-overlay                                     |
-| `<el-menu>` `<el-menu-item>` `<el-sub-menu>` `<el-breadcrumb>`                                     | element/el-navigation                                  |
-| `<el-empty>` `<el-result>` `<el-alert>` `<el-badge>` `<el-avatar>` `<el-timeline>` `<el-collapse>` | element/el-feedback                                    |
+| `<el-card>`                                                                                        | element/component-family                               |
+| `<el-tabs>` `<el-tab-pane>`                                                                        | element/component-family                               |
+| `<el-descriptions>` `<el-descriptions-item>`                                                       | element/component-family                               |
+| `<el-drawer>`                                                                                      | element/component-family                               |
+| `<el-upload>`                                                                                      | element/component-family                               |
+| `<el-steps>` `<el-step>`                                                                           | element/component-family                               |
+| `<el-popover>` `<el-tooltip>` `<el-dropdown>`                                                      | element/component-family                               |
+| `<el-menu>` `<el-menu-item>` `<el-sub-menu>` `<el-breadcrumb>`                                     | element/component-family                               |
+| `<el-empty>` `<el-result>` `<el-alert>` `<el-badge>` `<el-avatar>` `<el-timeline>` `<el-collapse>` | element/component-family                               |
 
 ## L2 — Vendor 封装
 
 | 前缀 / 标签                                                            | 优先级 | Skill                                      |
 | ---------------------------------------------------------------------- | ------ | ------------------------------------------ |
 | `<BaseTable>` `<base-table>` `<BaseDataTable>`                         | #1     | vendors/base-table                         |
-| `<BaseQuery>` `<BaseToolbar>` `<base-*>` 其它                          | #1     | vendors/base-components（暂随 base-table） |
+| `<BaseQuery>` `<BaseToolbar>` `<base-*>` 其它                          | #1     | vendors/base-table |
 | `<jh-*>` 全量通配；代表性基线含 `jh-table` / `jh-form` / `jh-tree` / `jh-pagination` / `jh-drag-col` | #2     | vendors/jh-components                      |
 | `<C_*>` `<c-*>`                                                        | #3     | vendors/c-components                       |
 | `src/components/PascalCase.vue` 无前缀                                 | #4     | vendors/custom-wrappers                    |

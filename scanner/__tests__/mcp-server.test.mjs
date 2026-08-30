@@ -23,10 +23,13 @@ describe("stdio MCP", () => {
     assert.equal(response.result.tools.length, 13);
     const scan = response.result.tools.find((tool) => tool.name === "wl_ui_scan");
     assert.ok(scan);
-    assert.match(scan.inputSchema.properties.output.description, /默认 compact/);
+    assert.match(scan.inputSchema.properties.output.description, /默认 summary/);
     assert.ok(scan.inputSchema.properties.changedOnly);
     assert.ok(scan.inputSchema.properties.base);
     assert.ok(scan.inputSchema.properties.parser);
+    assert.ok(scan.inputSchema.properties.profile);
+    assert.ok(scan.inputSchema.properties.limit);
+    assert.ok(scan.inputSchema.properties.changedFallback);
     assert.ok(
       response.result.tools.some(
         (tool) => tool.name === "wl_ui_contract_extract",
@@ -63,6 +66,66 @@ describe("stdio MCP", () => {
     assert.equal(payload.kitBridge.needed, true);
     assert.deepEqual(payload.recommendedSkills, ["element/el-table"]);
     assert.ok(payload.nextActions.includes("先 dry-run"));
+  });
+
+  it("scan 默认直接返回 summary 并报告 profile", () => {
+    const response = callMcp({
+      jsonrpc: "2.0",
+      id: 11,
+      method: "tools/call",
+      params: {
+        name: "wl_ui_scan",
+        arguments: {
+          project: root,
+          target: "scanner/__tests__/fixtures",
+          profile: "native-element",
+        },
+      },
+    });
+    assert.equal(response.result.isError, false);
+    const result = JSON.parse(response.result.content[0].text);
+    assert.equal(result.schema, "wl-ui-scan.summary.v1");
+    assert.equal(result.profile.id, "native-element");
+    assert.ok(!result.skills.includes("vendors/ag-grid"));
+  });
+
+  it("scan 拒绝越过 MCP 项目边界", () => {
+    const response = callMcp({
+      jsonrpc: "2.0",
+      id: 12,
+      method: "tools/call",
+      params: {
+        name: "wl_ui_scan",
+        arguments: { target: "..", profile: "native-element" },
+      },
+    });
+    assert.equal(response.result.isError, true);
+    assert.match(response.result.content[0].text, /target 必须位于项目根目录内/);
+  });
+
+  it("recommend-flow 可消费 compact-v2 去重目录", () => {
+    const response = callMcp({
+      jsonrpc: "2.0",
+      id: 22,
+      method: "tools/call",
+      params: {
+        name: "wl_ui_recommend_flow",
+        arguments: {
+          scanJson: JSON.stringify({
+            schema: "wl-ui-scan.compact.v2",
+            summary: { total: 1 },
+            ruleCatalog: { R021: ["error", "use agGrid", "base"] },
+            issuesByFile: { "A.vue": [[2, "R021", "missing adapter"]] },
+            skills: ["vendors/ag-grid"],
+            next: ["preview"],
+          }),
+        },
+      },
+    });
+    const result = JSON.parse(response.result.content[0].text);
+    assert.equal(result.kitBridge.needed, true);
+    assert.deepEqual(result.recommendedSkills, ["vendors/ag-grid"]);
+    assert.ok(result.nextActions.includes("preview"));
   });
 
   it("ui-contract MCP 提取结果不泄漏源码与业务文案，并可直接校验", () => {

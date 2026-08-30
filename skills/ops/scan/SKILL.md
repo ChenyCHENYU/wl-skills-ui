@@ -21,8 +21,9 @@ npx wl-ui check --project .
 # JSON 格式输出（方便程序处理）
 npx wl-ui scan --target src --output json
 
-# 低 token / PR 增量（MCP 默认使用 compact）
-npx wl-ui scan --target src --changed --base origin/main --output compact
+# 低 token / PR 增量（MCP 默认使用 summary）
+npx wl-ui scan --target src --changed --base origin/main --output summary
+npx wl-ui scan --target src --changed --base origin/main --output compact-v2 --limit 50
 ```
 
 ## 参数说明
@@ -31,8 +32,11 @@ npx wl-ui scan --target src --changed --base origin/main --output compact
 | ----------------- | ------------------------ | ---------------------------------------------- |
 | `--target`        | `./src`                  | Vue 文件扫描根目录                             |
 | `--project`       | `.`                      | 项目根目录（用于接入完整性检查）               |
-| `--output`        | `markdown`               | 输出格式：`markdown` \| `json` \| `compact`    |
-| `--changed`       | `false`                  | 仅扫描 Git 变更 Vue 文件，解析失败时回退全量    |
+| `--output`        | `markdown`               | `summary` \| `compact-v2` \| `compact` \| `json` \| `markdown` |
+| `--changed`       | `false`                  | 仅扫描 Git 变更 Vue 文件，解析失败默认终止       |
+| `--changed-fallback` | `error`               | 只有显式设为 `full` 才允许扩大到全量             |
+| `--profile`       | 自动检测                 | `native-element` / `legacy-jh-element` / `legacy-jh-ag` |
+| `--limit/cursor`  | `100/0`                  | `compact-v2` 的有界分页                          |
 | `--base`          | `HEAD`                   | 增量基线，例如 `origin/main`                    |
 | `--exclude`       | `node_modules,dist,.git` | 排除目录（逗号分隔）                           |
 | `--outFile`       | `""`                     | 写入文件路径，为空则输出到 stdout              |
@@ -48,9 +52,9 @@ npx wl-ui scan --target src --changed --base origin/main --output compact
 
 ## 报告格式说明
 
-`compact` 使用 `wl-ui-scan.compact.v1`：问题按文件分组，每项为
-`[line, rule, severity, description, suggestion]`，适合 MCP/AI；`json` 保留完整字段，
-`markdown` 面向人工评审。
+`summary` 只返回计数、规则分布和下一步；`compact-v2` 将公共规则字段放入一次性的
+`ruleCatalog`，问题项为 `[line, rule, description]` 并支持分页；`compact` v1 保留兼容，
+`json` 保留完整字段，`markdown` 面向人工评审。
 
 ```
 一、接入完整性仪表盘

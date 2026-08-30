@@ -76,6 +76,9 @@
     {
       "id": "R003",
       "category": "table",
+      "layer": "L2",
+      "vendor": "base",
+      "profiles": ["legacy-jh-element", "legacy-jh-ag"],
       "severity": "warning",
       "title": "BaseTable 必须 empty-text=\"暂无数据\"",
       "rationale": "Base* 封装表格与原生 el-table 共用同一空状态文案。",
@@ -108,6 +111,18 @@
       "appliesTo": ["el-button:not([link]):not([text])", "ElButton:not([link]):not([text])"],
       "autoFixable": false,
       "manualReason": "需根据按钮业务语义选择 Plus/Edit/Search/Refresh/Download/Upload 等图标",
+      "scanner": "scanner/rules/button.mjs",
+      "skills": ["layouts/list-page"]
+    },
+    {
+      "id": "R043",
+      "category": "button",
+      "severity": "warning",
+      "title": "静态常见动作按钮必须使用确定性语义 icon",
+      "rationale": "新增、编辑、搜索、重置等静态文案存在唯一图标映射，可由脚本精确补齐；动态或未知文案继续由 R005 人工判断。",
+      "appliesTo": ["el-button[static-known-label]", "ElButton[static-known-label]"],
+      "autoFixable": true,
+      "fixConfidence": "exact-static-label",
       "scanner": "scanner/rules/button.mjs",
       "skills": ["layouts/list-page"]
     },
@@ -233,12 +248,12 @@
       "id": "R013",
       "category": "layout",
       "severity": "review",
-      "title": "Upload 嵌入 operations[] 必须抽离到 toolbarDef",
-      "rationale": "renderOps 数组里直接放 <el-upload> 会导致按钮与上传组件耦合渲染，应改为 toolbar 级。",
-      "appliesTo": ["renderOps[].component=el-upload"],
+      "title": "columnsDef 旧 operations[] 操作配置必须迁移到 renderOps",
+      "rationale": "旧 operations 数组只能表达文字按钮，难以统一图标、权限、显隐与 Tooltip；应迁移为 defaultSlot + renderOps。",
+      "appliesTo": ["columnsDef.operations", "defineColumns.operations"],
       "autoFixable": false,
-      "manualReason": "需识别上传业务、把上传抽到 toolbarDef 并保留 row 上下文",
-      "scanner": null,
+      "manualReason": "需保留每项权限、show 条件、业务回调与 row 上下文，必须逐项迁移确认",
+      "scanner": "scanner/rules/button.mjs",
       "skills": ["ops/migrate", "runtime/migration"]
     },
     {
@@ -331,6 +346,9 @@
     {
       "id": "R021",
       "category": "base",
+      "layer": "L2",
+      "vendor": "base",
+      "profiles": ["legacy-jh-ag"],
       "severity": "error",
       "title": "BaseTable 必须 render-type=\"agGrid\"",
       "rationale": "项目集群规定 BaseTable 仅 AG Grid 渲染模式，禁止 elTable 模式。",
@@ -342,6 +360,9 @@
     {
       "id": "R022",
       "category": "base",
+      "layer": "L2",
+      "vendor": "base",
+      "profiles": ["legacy-jh-element", "legacy-jh-ag"],
       "severity": "error",
       "title": "BaseTable 必须配置全局唯一 cid",
       "rationale": "cid 用于列宽/排序持久化与 wl-skills-kit 桥接。",
@@ -490,7 +511,7 @@
       "autoFixable": false,
       "manualReason": "需按组件语义选择 base/small/round 等圆角 token",
       "scanner": "scanner/rules/semantic.mjs",
-      "skills": ["tokens/index"]
+      "skills": ["runtime/design-tokens"]
     },
     {
       "id": "R040",

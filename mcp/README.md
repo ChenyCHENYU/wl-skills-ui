@@ -22,7 +22,7 @@ wl-ui-mcp
 | Tool | 作用 |
 | --- | --- |
 | `wl_ui_check` | 接入完整性检查 |
-| `wl_ui_scan` | UI 规则扫描，默认 compact，支持 changed-only 与 auto/fast/sfc parser |
+| `wl_ui_scan` | UI 规则扫描，默认 summary，支持 profile、changed-only、分页与 auto/fast/sfc parser |
 | `wl_ui_fix_dry_run` | 只预览确定性修复 |
 | `wl_ui_skill_prompt` | 输出 Skill 触发提示 |
 | `wl_ui_route_intent` | 自然语言意图路由 |
@@ -35,7 +35,7 @@ wl-ui-mcp
 | `wl_ui_contract_validate` | 校验 schema、fingerprint 与脱敏边界 |
 | `wl_ui_contract_match` | 匹配项目内领域契约库，只返回摘要与分数 |
 
-`wl_ui_scan` 默认返回 `wl-ui-scan.compact.v1`：问题按文件分组，公共字段只出现一次。需要完整上下文时传 `output: "json"`，面向人工阅读时传 `output: "markdown"`。
+`wl_ui_scan` 默认返回不含逐条问题的 `wl-ui-scan.summary.v1`，适合先判断是否需要继续。需要修复明细时传 `output: "compact-v2"`，它会去重规则目录并通过 `limit` / `cursor` 稳定分页；只有调试时才使用 `output: "json"`，人工审阅使用 `output: "markdown"`。`changedOnly: true` 无法解析 Git 范围时默认失败关闭，如明确接受全量扫描才设置 `changedFallback: "full"`。
 
 MCP 只编排确定性 scanner、dry-run、规则事实源和契约工具，不让模型重新阅读全项目后猜测 UI 问题。三个 contract 工具均只读，path/library 必须位于项目根目录内；契约不会返回源码、真实接口、业务字段值或按钮原始文案。
 

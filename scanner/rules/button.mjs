@@ -2,6 +2,21 @@
 import { lineOf, issue, findTags } from "./_shared.mjs";
 
 const CREATE_ACTION_LABEL = /(?:新增|新建|添加|创建)(?:申请|记录|数据|客户|项目|任务|明细|行)?/;
+export const STATIC_BUTTON_ICON_BY_LABEL = [
+  [/(新增|新建|添加|创建)/, "Plus"],
+  [/(编辑|修改)/, "Edit"],
+  [/(删除|移除|作废)/, "Delete"],
+  [/(搜索|查询|检索)/, "Search"],
+  [/(重置|刷新|同步|重新加载)/, "Refresh"],
+  [/(导出|下载)/, "Download"],
+  [/(导入|上传)/, "Upload"],
+  [/(查看|详情|预览)/, "View"],
+  [/(保存|确认|确定|提交|通过|审核)/, "Check"],
+  [/(取消|关闭|清空)/, "Close"],
+  [/(返回|上一步)/, "Back"],
+  [/(打印)/, "Printer"],
+  [/(复制)/, "CopyDocument"],
+];
 
 function buttonContent(template, tag) {
   const start = tag.index + tag.text.length;
@@ -63,6 +78,10 @@ export const buttonRules = [
           }
           const content = buttonContent(template, tag);
           if (/:?icon\s*=/.test(tag.text) || /<el-icon\b/.test(content)) continue;
+          const staticLabel = content.replace(/<[^>]+>/g, "").replace(/\s+/g, "");
+          if (STATIC_BUTTON_ICON_BY_LABEL.some(([pattern]) => pattern.test(staticLabel))) {
+            continue;
+          }
           issues.push(
             issue(
               file,
@@ -72,6 +91,48 @@ export const buttonRules = [
               "warning",
               `${tagName} 缺少语义 icon`,
               '按动作补 icon="Plus / Edit / Search / Refresh / Check / Close" 等语义图标',
+            ),
+          );
+        }
+      }
+      return issues;
+    },
+  },
+
+  // R043: 静态常见动作按钮可按确定性文案表补 icon
+  {
+    id: "R043",
+    category: "button",
+    severity: "warning",
+    name: "静态常见动作按钮缺少可确定映射的语义 icon",
+    check(template, file, lineOffset) {
+      const issues = [];
+      for (const tagName of ["el-button", "ElButton"]) {
+        for (const tag of findTags(template, tagName)) {
+          if (/jh-op-btn/.test(tag.text)) continue;
+          if (
+            hasTrueBooleanAttr(tag.text, "link") ||
+            hasTrueBooleanAttr(tag.text, "text") ||
+            /:?icon\s*=/.test(tag.text)
+          ) {
+            continue;
+          }
+          const content = buttonContent(template, tag);
+          if (/<el-icon\b/.test(content)) continue;
+          const label = content.replace(/<[^>]+>/g, "").replace(/\s+/g, "");
+          const icon = STATIC_BUTTON_ICON_BY_LABEL.find(([pattern]) =>
+            pattern.test(label),
+          )?.[1];
+          if (!icon) continue;
+          issues.push(
+            issue(
+              file,
+              lineOf(template, tag.index, lineOffset),
+              "R043",
+              "button",
+              "warning",
+              `${tagName} 静态动作“${label}”缺少语义 icon`,
+              `按确定性映射补 icon="${icon}"`,
             ),
           );
         }
@@ -180,6 +241,35 @@ export const buttonRules = [
           ),
         );
       }
+      return issues;
+    },
+  },
+
+  // R013: columnsDef 旧 operations:[] 文字按钮配置
+  {
+    id: "R013",
+    category: "button",
+    severity: "error",
+    name: "columnsDef 使用旧 operations:[] 文字按钮",
+    checkScript(script, file, lineOffset) {
+      const issues = [];
+      const lines = script.split("\n");
+      lines.forEach((line, index) => {
+        if (!/^\s*operations:\s*\[/.test(line) || line.trim().startsWith("//")) {
+          return;
+        }
+        issues.push(
+          issue(
+            file,
+            lineOffset + index + 1,
+            "R013",
+            "button",
+            "error",
+            "columnsDef 使用旧格式 operations: [...] 文字按钮",
+            "改为 defaultSlot: ({ row }) => renderOps([...]) 图标按钮系统",
+          ),
+        );
+      });
       return issues;
     },
   },

@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-08-30
+
+### Added
+
+- 新增 `native-element`、`legacy-jh-element`、`legacy-jh-ag` 三个能力 Profile，统一声明 adapter、扫描规则、SCSS preset 与 runtime guard；提供 `.wl-ui-profile.json`、`wl-ui profiles` 和自动依赖识别。
+- 新增 `wl-ui-scan.summary.v1` 与可分页的 `compact.v2` 低 token 协议；规则公共字段集中在 `ruleCatalog`，CLI/MCP 支持 `limit/cursor/nextCursor`。
+- 新增 R043 静态已知按钮文案到语义 icon 的确定性规则，并加入 pass/fail fixture、fixer 与一致性门禁。
+- Fixer 新增 `profile/only/skip` 范围约束、逐规则改动统计和 SHA-256 `planHash`；支持预览后以 `--plan-hash` 拒绝漂移计划。
+- 新增共享 `scanner/engine.mjs`，CLI 与 MCP 使用同一扫描实现；MCP 不再为每次 scan/check/fix preview 创建 Node 子进程。
+
+### Changed
+
+- `standards/rules.json` 成为 category、severity、layer、vendor、Profile 和 fixability 的运行期事实源；39 条元数据与 39 个实现一一对应，14 条可修规则与 fixer 集合一致。
+- AG Grid 改为显式可选 adapter：R021、AG 样式、分屏/空态 observers 只在 `legacy-jh-ag` 启用。两个非 AG Profile 的编译产物由门禁保证零 `.ag-*` 选择器。
+- `installCommonPreset()` 默认使用 `native-element`；旧 `runtime/auto` 与 `styles/skin` 保留 full legacy 兼容。
+- MCP scan 默认从 `compact` 改为更小的 `summary`；changed-only 范围失败默认终止，显式 `--changed-fallback full` 才允许全量。
+- 单文件编辑器安装改为托管 Skill 路由块，不再拼接全量 Skill；update/clean 保留项目自有 `AGENTS.md`、`CLAUDE.md`、`.clinerules` 内容和其他 MCP server。
+- CI 增加 scanner/scripts lint、TypeScript 检查、覆盖率阈值、全部 Profile SCSS 编译、非 AG 隔离、规则/Skill 引用、生成 token 同步、包内容和浏览器契约门禁，并移除安装阶段重复 build。
+
+### Fixed
+
+- 修复 `verify-package` 的 `Buffer.compare` 条件恒不成立，`dist/tokens.css` 漂移现在会阻止发布。
+- 修复 fixer 忽略 `--only/--skip/mode` 并无条件把 BaseTable 切到 AG Grid 的问题。
+- 修复 R013 脱离规则注册表、规则实现字段与元数据不一致、coverage/MCP 推荐不存在的 Skill 路径，以及 JSON fix 输出混入文本复检日志。
+- 修复单文件安装覆盖用户规则、clean 删除整份用户文件、`.mcp.json` 清理误删其他 server 的风险。
+- 修复扫描路径以 target 而非项目根为基准，导致单文件报告文件名为空、标准 `src/**` 豁免无法命中的问题。
+- MCP target/exempt/project 现在受 `WL_PROJECT_ROOT` 边界约束；无效 changed fallback 与无法解析的用户 `.mcp.json` 均失败关闭，不再静默扩大扫描或覆盖配置。
+
 ## [1.11.1] - 2026-08-26
 
 ### Fixed

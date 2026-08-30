@@ -26,7 +26,7 @@ npx wl-ui check --project [项目根目录]
 读取扫描输出，提取：
 
 - 接入完整性 I001~I004 通过情况
-- 总 issue 数、按规则分类统计（R001~R018）
+- 总 issue 数、按规则分类统计（权威全集由 `standards/rules.json` 提供）
 - 每个 issue：文件路径 + 行号 + 规则 + 建议
 
 ### Phase 2 — 汇报

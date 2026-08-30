@@ -4,7 +4,7 @@
  *  R026: 模板中使用原生 HTML 元素（<table>/<input>/<select>/<button>/<textarea>），
  *        应替换为 Element Plus 组件以纳入统一风格体系
  */
-import { lineOf, issue, findTags } from "./_shared.mjs";
+import { lineOf, issue } from "./_shared.mjs";
 
 export const semanticRules = [
   // R025: options:[] 退化检测

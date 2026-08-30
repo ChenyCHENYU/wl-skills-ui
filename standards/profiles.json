@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "description": "UI capability profiles compose vendor adapters, scanner rules, style presets, and runtime guards.",
+  "profiles": [
+    {
+      "id": "native-element",
+      "mode": "native",
+      "description": "Native Element Plus project without legacy vendor or AG Grid coupling.",
+      "adapters": ["element-plus"],
+      "stylePreset": "styles/presets/native-element",
+      "runtimePreset": "runtime/profiles/native-element"
+    },
+    {
+      "id": "legacy-jh-element",
+      "mode": "skin",
+      "description": "Legacy Base/jh/C wrapper project that uses Element-based tables and no AG Grid adapter.",
+      "adapters": ["element-plus", "base", "jh", "c", "custom"],
+      "stylePreset": "styles/presets/legacy-jh-element",
+      "runtimePreset": "runtime/profiles/legacy-jh-element"
+    },
+    {
+      "id": "legacy-jh-ag",
+      "mode": "skin",
+      "description": "Legacy Base/jh/C wrapper project that intentionally uses the AG Grid adapter.",
+      "adapters": ["element-plus", "base", "jh", "c", "ag-grid", "custom"],
+      "stylePreset": "styles/presets/legacy-jh-ag",
+      "runtimePreset": "runtime/profiles/legacy-jh-ag"
+    }
+  ]
+}

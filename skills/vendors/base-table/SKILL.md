@@ -28,7 +28,7 @@ applyTo: "**/*.vue"
 - ❌ 用 `<el-button type="primary">` 当操作按钮（应用 `is-text` 文字按钮，沿用 R004）
 - ❌ 列头未居中（同 R001）
 - ❌ 缺 `empty-text="暂无数据"`（同 R003）
-- ❌ 项目未安装 `runtime/auto` 包级保护，导致动态 Picker/历史列绕过 `defineColumns()` 后没有超长省略与完整提示（同 R039）
+- ❌ 项目未安装对应 `runtime/profiles/*` 包级保护，导致动态 Picker/历史列绕过 `defineColumns()` 后没有超长省略与完整提示（同 R039）
 - ❌ 在 `<BaseTable>` 外层包裹自定义 padding 容器，破坏整体节奏
 
 ## Repair（修复）
@@ -36,7 +36,7 @@ applyTo: "**/*.vue"
 ### A 类（自动修）
 - 缺失 `empty-text` → 补 `empty-text="暂无数据"`
 - 普通文本列统一经 `defineColumns()` 自动补 `showOverflowTooltip: true`
-- Skin/历史项目启动入口统一引入 `@agile-team/wl-skills-ui/runtime/auto`，为未经过 `defineColumns()` 的普通文本列提供真实溢出兜底
+- 历史项目启动入口按表格实现引入 `runtime/profiles/legacy-jh-element` 或 `runtime/profiles/legacy-jh-ag`，为未经过 `defineColumns()` 的普通文本列提供真实溢出兜底
 - 操作列按钮 `type="primary"` → 改为 `link` + `is-text`
 - 内联 hex → CSS 变量
 
@@ -55,7 +55,7 @@ applyTo: "**/*.vue"
 ## 全局样式来源
 
 `styles/vendors/_base-table.scss` — 已注入容器圆角、表头颜色、操作按钮间距；
-`runtime.defineColumns()` 优先接入平台原生 overflow tooltip；`runtime/auto` 为动态
+`runtime.defineColumns()` 优先接入平台原生 overflow tooltip；Profile runtime 为动态
 Picker 和历史普通文本列提供包级兜底。运行时只在 `scrollWidth > clientWidth` 时工作，
 并排除 Tag、操作列、编辑器、自定义 renderer、主动换行列和皮肤豁免区域。项目侧
 不要重复写样式或再注册第二套全局 Tooltip。

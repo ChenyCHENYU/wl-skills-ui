@@ -29,6 +29,11 @@ import { parseArgs } from "node:util";
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { getRule, listRules } from "../standards/rules-loader.mjs";
+import {
+  listProfiles,
+  resolveProjectProfile,
+} from "../standards/profiles-loader.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,6 +41,8 @@ const PKG_ROOT = resolve(__dirname, "..");
 const require = createRequire(import.meta.url);
 const PKG = require("../package.json");
 const MANIFEST_NAME = ".wl-skills-ui-manifest.json";
+const MANAGED_BLOCK_START = "<!-- wl-skills-ui:begin -->";
+const MANAGED_BLOCK_END = "<!-- wl-skills-ui:end -->";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 常量
@@ -64,6 +71,8 @@ const SUBCOMMANDS = new Set([
   "drift",
   "exempt",
   "contract",
+  "rules",
+  "profiles",
 ]);
 let subcommand = "help";
 
@@ -114,6 +123,38 @@ if (subcommand === "contract") {
   process.exit(0);
 }
 
+if (subcommand === "rules") {
+  const action = rawArgs[0] || "list";
+  if (action === "describe") {
+    const rule = getRule(String(rawArgs[1] || "").toUpperCase());
+    if (!rule) {
+      console.error(`[wl-ui rules] 未找到规则：${rawArgs[1] || "(empty)"}`);
+      process.exit(1);
+    }
+    console.log(JSON.stringify(rule, null, 2));
+  } else {
+    console.log(
+      JSON.stringify(
+        listRules().map(({ id, category, severity, title, autoFixable }) => ({
+          id,
+          category,
+          severity,
+          title,
+          autoFixable,
+        })),
+        null,
+        2,
+      ),
+    );
+  }
+  process.exit(0);
+}
+
+if (subcommand === "profiles") {
+  console.log(JSON.stringify(listProfiles(), null, 2));
+  process.exit(0);
+}
+
 // ── help ──────────────────────────────────────────────────────────────────────
 if (
   subcommand === "help" ||
@@ -135,7 +176,8 @@ if (subcommand === "init" || subcommand === "update") {
     options: {
       project: { type: "string", default: "." },
       editor: { type: "string", default: "" },
-      mode: { type: "string", default: "native" }, // native | skin
+      mode: { type: "string", default: "" }, // compatibility alias
+      profile: { type: "string", default: "" },
       "dry-run": { type: "boolean", default: false },
       "skills-only": { type: "boolean", default: false },
       force: { type: "boolean", default: false },
@@ -146,7 +188,13 @@ if (subcommand === "init" || subcommand === "update") {
   const projectRoot = resolve(values.project);
   const dryRun = values["dry-run"];
   const skillsOnly = values["skills-only"];
-  const mode = values.mode === "skin" ? "skin" : "native";
+  const profileResolution = resolveProjectProfile({
+    projectRoot,
+    profile: values.profile || undefined,
+    mode: values.mode || undefined,
+  });
+  const profile = profileResolution.profile;
+  const mode = profile.mode;
 
   const manifest = readManifest(projectRoot);
   if (
@@ -165,6 +213,9 @@ if (subcommand === "init" || subcommand === "update") {
   console.log(
     `[wl-ui ${subcommand}] 模式：${mode === "skin" ? "化妆 (skin)" : "原生 (native)"}`,
   );
+  console.log(
+    `[wl-ui ${subcommand}] Profile：${profile.id} (${profileResolution.source})`,
+  );
   if (dryRun)
     console.log(`[wl-ui ${subcommand}] DRY-RUN 模式：不实际写入文件\n`);
 
@@ -181,34 +232,68 @@ if (subcommand === "init" || subcommand === "update") {
   const installedFiles = [];
   for (const editor of editors) {
     installedFiles.push(
-      ...installSkills({ projectRoot, editor, mode, dryRun }),
+      ...installSkills({ projectRoot, editor, mode, profile, dryRun }),
     );
   }
   installedFiles.push(...installSupportFiles({ projectRoot, dryRun }));
+  installedFiles.push(
+    ...installProfileConfig({
+      projectRoot,
+      profile,
+      source: profileResolution.source,
+      owned: Boolean(manifest?.files?.[".wl-ui-profile.json"]),
+      dryRun,
+    }),
+  );
 
   // 3. 安装接入配置（非 --skills-only 时）
   if (!skillsOnly) {
-    installStyleSetup({ projectRoot, mode, dryRun });
+    installStyleSetup({ projectRoot, mode, profile, dryRun });
   }
 
   if (!dryRun) {
+    const managedSingleFiles = editors
+      .map((editor) => EDITOR_TARGETS[editor]?.singleFile)
+      .filter(Boolean);
     writeManifest(projectRoot, {
       version: PKG.version,
       editor: editors.join(","),
       editors,
       mode,
+      profile: profile.id,
       installedAt: new Date().toISOString(),
       files: Object.fromEntries(
         installedFiles.map((f) => [f, fileHash(join(projectRoot, f))]),
       ),
+      managedBlocks: Object.fromEntries(
+        managedSingleFiles.map((file) => [
+          file,
+          contentHash(extractManagedBlock(readFileSync(join(projectRoot, file), "utf8"))),
+        ]),
+      ),
+      managedJson: installedFiles.includes(".mcp.json")
+        ? {
+            ".mcp.json": contentHash(
+              JSON.stringify(
+                JSON.parse(readFileSync(join(projectRoot, ".mcp.json"), "utf8"))
+                  .mcpServers?.["wl-skills-ui"] || null,
+              ),
+            ),
+          }
+        : {},
     });
   }
 
   console.log(`\n✅ wl-ui ${subcommand} 完成！\n`);
-  printInstallSummary({ projectRoot, mode, editor: editors.join(", ") });
+  printInstallSummary({
+    projectRoot,
+    mode,
+    profile: profile.id,
+    editor: editors.join(", "),
+  });
   console.log("下一步：");
   if (mode === "skin") {
-    console.log("  npx wl-ui scan --target src --mode skin   # 仅化妆层审计");
+    console.log(`  npx wl-ui scan --target src --profile ${profile.id} --output summary`);
   } else {
     console.log("  npx wl-ui check --project . # 验证接入完整性");
     console.log("  npx wl-ui all   --project . # 完整扫描报告");
@@ -481,7 +566,7 @@ function transformForEditor(content, editor) {
 }
 
 /** 安装 skills 到目标项目（按 mode 过滤）*/
-function installSkills({ projectRoot, editor, mode = "native", dryRun }) {
+function installSkills({ projectRoot, editor, mode = "native", profile, dryRun }) {
   const target = EDITOR_TARGETS[editor] || EDITOR_TARGETS["github-copilot"];
   const targetDir = join(projectRoot, target.dir);
   const skillsDir = join(PKG_ROOT, "skills");
@@ -497,14 +582,36 @@ function installSkills({ projectRoot, editor, mode = "native", dryRun }) {
     );
     console.log("  [skin mode] 已过滤掉 runtime/ 和 layouts/ 类 skill");
   }
+  const vendorAdapter = {
+    "vendors/ag-grid": "ag-grid",
+    "vendors/base-table": "base",
+    "vendors/jh-components": "jh",
+    "vendors/c-components": "c",
+    "vendors/custom-wrappers": "custom",
+    "vendors/unknown-wrapper": "custom",
+  };
+  const adapters = new Set(profile?.adapters || []);
+  skills = skills.filter((skill) => {
+    const adapter = vendorAdapter[skill.path];
+    return !adapter || adapters.has(adapter);
+  });
 
   let count = 0;
   const installedFiles = [];
   if (target.singleFile) {
     const outPath = join(projectRoot, target.singleFile);
-    const transformed = skills
-      .map((skill) => transformForEditor(skill.content, editor))
-      .join("\n\n---\n\n");
+    const managedBlock = buildSingleFileRouter(skills, profile);
+    const existing = existsSync(outPath) ? readFileSync(outPath, "utf8") : "";
+    const legacyHeader = target.headerFile
+      ? readFileSync(join(skillsDir, "_meta", "_compat", target.headerFile), "utf8").trim()
+      : "";
+    const legacyGenerated =
+      legacyHeader &&
+      existing.trimStart().startsWith(legacyHeader) &&
+      !existing.includes(MANAGED_BLOCK_START);
+    const transformed = legacyGenerated
+      ? `${managedBlock}\n`
+      : upsertManagedBlock(existing, managedBlock);
 
     if (dryRun) {
       console.log(`  [dry-run] 写入 ${relative(projectRoot, outPath)}`);
@@ -537,16 +644,101 @@ function installSkills({ projectRoot, editor, mode = "native", dryRun }) {
   return installedFiles;
 }
 
+function buildSingleFileRouter(skills, profile) {
+  const lines = [
+    MANAGED_BLOCK_START,
+    "# wl-skills-ui managed router",
+    "",
+    "> Managed by `npx wl-ui update`. Keep project-specific instructions outside this block.",
+    `> Active profile: \`${profile?.id || "native-element"}\`.`,
+    "",
+    "Use the package router first, then open only the relevant Skill:",
+    "",
+    "- `node_modules/@agile-team/wl-skills-ui/SKILL.md`",
+    "",
+    "Available Skills:",
+    "",
+  ];
+  for (const skill of skills.sort((a, b) => a.path.localeCompare(b.path))) {
+    const description = parseSkillFrontmatter(skill.content).description
+      .replace(/\s+/g, " ")
+      .slice(0, 120);
+    lines.push(
+      `- \`${skill.path}\`: ${description || "Open when this capability matches the task."} ` +
+        `([source](node_modules/@agile-team/wl-skills-ui/skills/${skill.path}/SKILL.md))`,
+    );
+  }
+  lines.push(MANAGED_BLOCK_END);
+  return lines.join("\n");
+}
+
+function extractManagedBlock(content) {
+  const start = content.indexOf(MANAGED_BLOCK_START);
+  const end = content.indexOf(MANAGED_BLOCK_END, start);
+  if (start < 0 || end < 0) return "";
+  return content.slice(start, end + MANAGED_BLOCK_END.length);
+}
+
+function upsertManagedBlock(existing, block) {
+  const current = extractManagedBlock(existing);
+  if (current) return `${existing.replace(current, block).trimEnd()}\n`;
+  const prefix = existing.trimEnd();
+  return `${prefix ? `${prefix}\n\n` : ""}${block}\n`;
+}
+
+function removeManagedBlock(content) {
+  const block = extractManagedBlock(content);
+  if (!block) return content;
+  const remaining = content.replace(block, "").trim();
+  return remaining ? `${remaining}\n` : "";
+}
+
+function installProfileConfig({ projectRoot, profile, source, owned, dryRun }) {
+  const rel = ".wl-ui-profile.json";
+  const outPath = join(projectRoot, rel);
+  if (existsSync(outPath)) {
+    let config;
+    try {
+      config = JSON.parse(readFileSync(outPath, "utf8"));
+      if (!config || typeof config !== "object" || Array.isArray(config)) {
+        throw new TypeError("root must be an object");
+      }
+    } catch {
+      console.warn(`  ⚠ 跳过 ${rel}：现有文件不是有效 JSON，未覆盖用户内容`);
+      return [];
+    }
+    if (config.profile !== profile.id && ["argument", "mode"].includes(source)) {
+      const updated = `${JSON.stringify({ ...config, schema: 1, profile: profile.id }, null, 2)}\n`;
+      if (dryRun) console.log(`  [dry-run] 更新 ${rel} → ${profile.id}`);
+      else {
+        writeFileSync(outPath, updated, "utf8");
+        console.log(`  ✔ 更新 ${rel} → ${profile.id}`);
+      }
+    }
+    return owned ? [rel] : [];
+  }
+  if (dryRun) {
+    console.log(`  [dry-run] 写入 ${rel}`);
+  } else {
+    writeFileSync(
+      outPath,
+      `${JSON.stringify({ schema: 1, profile: profile.id }, null, 2)}\n`,
+      "utf8",
+    );
+    console.log(`  ✔ 写入 ${rel}`);
+  }
+  return [rel];
+}
+
 /** 接入配置引导（tokens.css + styles import）按 mode 推荐不同 presets */
-function installStyleSetup({ projectRoot, mode = "native", dryRun }) {
+function installStyleSetup({ projectRoot, mode = "native", profile, dryRun }) {
   console.log("[wl-ui init] 检查样式接入配置...\n");
 
   const tokensHref =
     "/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css";
-  const stylesEntry =
-    mode === "skin"
-      ? "@agile-team/wl-skills-ui/styles/presets/skin"
-      : "@agile-team/wl-skills-ui/styles";
+  const stylesEntry = `@agile-team/wl-skills-ui/${
+    profile?.stylePreset || "styles/presets/native-element"
+  }`;
 
   // 检查 index.html
   const htmlFiles = [
@@ -582,12 +774,11 @@ ${
   mode === "native"
     ? `
   ⚠️  请手动在 src/main.ts 添加：
-     import { installCommonPreset } from '@agile-team/wl-skills-ui/runtime/common-preset';
-     installCommonPreset();
+     import '@agile-team/wl-skills-ui/${profile?.runtimePreset || "runtime/profiles/native-element"}';
 `
     : `
   ⚠️  请手动在 src/main.ts 添加包级保护（不接管页面布局 / 业务列定义）：
-     import '@agile-team/wl-skills-ui/runtime/auto';
+     import '@agile-team/wl-skills-ui/${profile?.runtimePreset || "runtime/profiles/legacy-jh-element"}';
 `
 }`);
 }
@@ -800,6 +991,7 @@ export const ${safe.replace(/-/g, "_")}Rules = [
 }
 
 function installSupportFiles({ projectRoot, dryRun }) {
+  const mcpConfig = mergeMcpConfig(projectRoot);
   const files = [
     {
       rel: ".github/wl-skills-ui/TRIGGER_PROMPTS.md",
@@ -809,10 +1001,7 @@ function installSupportFiles({ projectRoot, dryRun }) {
       rel: ".github/wl-skills-ui/README.md",
       content: installReadme(),
     },
-    {
-      rel: ".mcp.json",
-      content: mergeMcpConfig(projectRoot),
-    },
+    ...(mcpConfig ? [{ rel: ".mcp.json", content: mcpConfig }] : []),
   ];
   const installed = [];
   for (const f of files) {
@@ -834,7 +1023,7 @@ function triggerPrompts() {
 
 ## 核心原则
 
-- wl-skills-ui 优先保证样式绝对管控，覆盖纯 Element Plus、老项目封装、Base*/jh*/C_* 以及 wl-skills-kit 最佳写法
+- wl-skills-ui 按 Profile 组合 Element、Base/jh/C/custom 与可选 AG adapter；不要因 BaseTable 存在而推断 AG Grid
 - 不管是否使用 wl-skills-kit，wl-skills-ui 都要先保证视觉统一，再按需引导规范化重构
 
 ## 组合流程
@@ -846,9 +1035,9 @@ function triggerPrompts() {
 
 ## 智能触发
 
-- 用户说"样式乱 / 不统一 / 老项目化妆"：先调用 wl_ui_route_intent，再调用 wl_ui_scan --mode skin
+- 用户说"样式乱 / 不统一 / 老项目化妆"：先调用 wl_ui_route_intent，再用项目 Profile 调用 wl_ui_scan --output summary
 - 用户说"卡片 / Tab / 详情 / 树 / 抽屉 / 上传 / 步骤条 / 更多操作"：触发对应 Element Plus 组件族 skill
-- 扫描 JSON 返回后：调用 wl_ui_recommend_flow 判断 recommendedFlows、nextActions 和 kitBridge
+- summary 返回后先判断 recommendedSkills/next；只有需要逐条明细时再请求 compact-v2 分页
 
 ## 单点触发
 
@@ -866,8 +1055,8 @@ function triggerPrompts() {
 ## 执行约束
 
 - 扫描只读，修复前必须等待用户确认
-- skin 模式只处理 L0/L1/L2，不改业务布局和 runtime
-- fix 前建议先 dry-run 或通过 MCP 调用 wl_ui_fix_dry_run
+- legacy Profile 只处理 L0/L1/L2，不改业务布局；AG 能力只在 legacy-jh-ag 开启
+- fix 前必须 dry-run；CLI 应使用同一 profile/only/skip 与 planHash 应用
 - 涉及 BaseTable render-type/cid、renderOps 或页面结构规范时，视觉统一后再桥接 wl-skills-kit validate-page / doctor-ui
 `;
 }
@@ -877,7 +1066,10 @@ function installReadme() {
 
 - 触发提示：.github/wl-skills-ui/TRIGGER_PROMPTS.md
 - MCP Server：wl-skills-ui
+- Profile：见 .wl-ui-profile.json
 - 更新命令：npx wl-ui update
+
+AI 默认先调用 scan summary，只按 recommendedSkills 打开局部 Skill。
 
 wl-skills-kit 可选安装，两者分工独立、不强耦合。
 `;
@@ -889,9 +1081,19 @@ function mergeMcpConfig(projectRoot) {
   if (existsSync(mcpPath)) {
     try {
       config = JSON.parse(readFileSync(mcpPath, "utf8"));
-      if (!config.mcpServers) config.mcpServers = {};
+      if (!config || typeof config !== "object" || Array.isArray(config)) {
+        throw new TypeError("root must be an object");
+      }
+      if (
+        config.mcpServers != null &&
+        (typeof config.mcpServers !== "object" || Array.isArray(config.mcpServers))
+      ) {
+        throw new TypeError("mcpServers must be an object");
+      }
+      config.mcpServers ||= {};
     } catch {
-      config = { mcpServers: {} };
+      console.warn("  ⚠ 跳过 .mcp.json：现有文件不是有效的 MCP JSON 对象，未覆盖用户内容");
+      return null;
     }
   }
   config.mcpServers["wl-skills-ui"] = {
@@ -924,6 +1126,10 @@ function fileHash(filePath) {
   return createHash("sha256").update(readFileSync(filePath)).digest("hex");
 }
 
+function contentHash(content) {
+  return createHash("sha256").update(content).digest("hex");
+}
+
 function runDiff(projectRoot) {
   const manifest = readManifest(projectRoot);
   if (!manifest) {
@@ -938,7 +1144,23 @@ function runDiff(projectRoot) {
   for (const [rel, hash] of Object.entries(manifest.files || {})) {
     const full = join(projectRoot, rel);
     if (!existsSync(full)) missing.push(rel);
-    else if (fileHash(full) !== hash) changed.push(rel);
+    else if (manifest.managedBlocks?.[rel]) {
+      const current = extractManagedBlock(readFileSync(full, "utf8"));
+      if (contentHash(current) !== manifest.managedBlocks[rel]) changed.push(rel);
+      else same.push(rel);
+    } else if (manifest.managedJson?.[rel] && rel === ".mcp.json") {
+      let current = null;
+      try {
+        current = JSON.parse(readFileSync(full, "utf8")).mcpServers?.[
+          "wl-skills-ui"
+        ];
+      } catch {
+        current = null;
+      }
+      if (contentHash(JSON.stringify(current || null)) !== manifest.managedJson[rel]) {
+        changed.push(rel);
+      } else same.push(rel);
+    } else if (fileHash(full) !== hash) changed.push(rel);
     else same.push(rel);
   }
   console.log(`\n[wl-ui diff] manifest: v${manifest.version}`);
@@ -959,7 +1181,31 @@ function runClean(projectRoot, dryRun) {
   for (const rel of files) {
     const full = join(projectRoot, rel);
     if (!existsSync(full)) continue;
-    if (dryRun) console.log(`  删除 ${rel}`);
+    if (manifest.managedBlocks?.[rel]) {
+      if (dryRun) {
+        console.log(`  移除托管区块 ${rel}`);
+      } else {
+        const remaining = removeManagedBlock(readFileSync(full, "utf8"));
+        if (remaining.trim()) writeFileSync(full, remaining, "utf8");
+        else rmSync(full, { force: true });
+      }
+    } else if (rel === ".mcp.json") {
+      if (dryRun) {
+        console.log(`  移除 MCP 配置项 ${rel}`);
+      } else {
+        try {
+          const config = JSON.parse(readFileSync(full, "utf8"));
+          delete config.mcpServers?.["wl-skills-ui"];
+          if (config.mcpServers && Object.keys(config.mcpServers).length === 0) {
+            delete config.mcpServers;
+          }
+          if (Object.keys(config).length === 0) rmSync(full, { force: true });
+          else writeFileSync(full, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+        } catch {
+          console.warn(`  跳过无法解析的 ${rel}`);
+        }
+      }
+    } else if (dryRun) console.log(`  删除 ${rel}`);
     else rmSync(full, { force: true });
   }
   if (!dryRun && existsSync(join(projectRoot, MANIFEST_NAME)))
@@ -1041,12 +1287,13 @@ function hasGitStandards(projectRoot, pkg) {
   );
 }
 
-function printInstallSummary({ projectRoot, mode, editor }) {
+function printInstallSummary({ projectRoot, mode, profile, editor }) {
   console.log("已安装能力：");
   console.log(`  - 编辑器规则：${editor}`);
   console.log(
     `  - UI Skill：${mode === "skin" ? "skin 模式" : "native 全量模式"}`,
   );
+  console.log(`  - UI Profile：${profile}`);
   console.log("  - MCP：wl-skills-ui");
   console.log("  - 触发提示：.github/wl-skills-ui/TRIGGER_PROMPTS.md");
   if (existsSync(join(projectRoot, ".wl-skills-manifest.json"))) {
@@ -1074,7 +1321,7 @@ function printHelp() {
 wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
 
 用法：
-  wl-ui init   [--project <path>] [--editor <editor>] [--mode native|skin]
+  wl-ui init   [--project <path>] [--editor <editor>] [--profile <id>]
                 [--dry-run] [--skills-only]
                 把 skills/ 写入目标项目的 AI 编辑器规则目录
   wl-ui update [--project <path>] [--editor <editor|all>] [--force] [--dry-run]
@@ -1090,12 +1337,14 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
                 打印 AI 触发提示词
 
   wl-ui scan   --target <src> [--layer L0,L1,L2] [--vendor base-table,jh]
-                              [--mode skin|native] [--outFile report.md]
+                              [--profile <id>] [--output summary|compact-v2|json|markdown]
+                              [--changed --changed-fallback error|full]
                               [--exempt <config.json>]
   wl-ui audit  --target <src> [--output json] [--refresh-baseline]
                 scan 的只读审计别名；可显式刷新项目问题基线
   wl-ui check  --project <项目根目录>
-  wl-ui fix    --target <src目录> [--dry-run] [--no-snapshot]
+  wl-ui fix    --target <src目录> [--profile <id>] [--only R001,R043]
+               [--dry-run] [--plan-hash <hash>] [--no-snapshot]
   wl-ui all    --project <项目根目录> [--outFile report.md]
 
   wl-ui snapshot list     [--project .]           列出所有快照
@@ -1110,6 +1359,9 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
   wl-ui contract match --input <ui-contract.json> --library <directory>
                 提取、校验和匹配不含源码/接口/业务文案的 UI 语义契约
 
+  wl-ui rules list | wl-ui rules describe <R-id>  查询规则事实源
+  wl-ui profiles                                   列出能力组合
+
   wl-ui add-preset <name> [--project .] [--output src/wl-ui/presets] [--dry-run]
                            在消费项目内脚手架业务预设文件
   wl-ui add-vendor <tag> [--family <id>] [--dry-run]
@@ -1118,8 +1370,8 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
 参数：
   --project       项目根目录（默认 .）
   --editor        指定编辑器：github-copilot | cursor | windsurf | kiro | trae | claude-code | cline | agents-generic | qoder | all
-  --mode          init: native(默认,完整接入) | skin(化妆,老项目)
-                  scan: skin(只看L0/L1/L2) | native(全量)
+  --profile       native-element | legacy-jh-element | legacy-jh-ag
+  --mode          兼容别名；新接入请使用 --profile
   --layer         scan 过滤：L0/L1/L2/L3/L4（逗号分隔）
   --vendor        scan 过滤：element/base-table/jh-components/...（逗号分隔）
   --parser        scan/contract: auto(默认) | fast | sfc
@@ -1135,10 +1387,11 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
   npx wl-ui update --editor all --force
   npx wl-ui doctor
   npx wl-ui prompts
-  npx wl-ui init --mode skin --project /path/to/legacy-project
-  npx wl-ui scan --target src --mode skin --outFile report.md
+  npx wl-ui init --profile legacy-jh-element --project /path/to/legacy-project
+  npx wl-ui scan --target src --profile legacy-jh-element --output summary
+  npx wl-ui scan --target src --output compact-v2 --limit 50
   npx wl-ui scan --target src --layer L0,L1
-  npx wl-ui fix --target src                     # 自动创建快照 + 修复
+  npx wl-ui fix --target src --dry-run --output json
   npx wl-ui snapshot rollback                     # 一键回退最近修复
   npx wl-ui add-preset my-biz
 

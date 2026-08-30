@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
-import { dirname, isAbsolute, join, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { isAbsolute, join, relative, resolve } from "node:path";
+import { scanProject, expandRuleRange } from "../scanner/engine.mjs";
+import { generateReport } from "../scanner/report.mjs";
+import { checkIntegration } from "../scanner/integration.mjs";
+import { runFix } from "../scanner/fix.mjs";
+import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const PKG_ROOT = resolve(__dirname, "..");
 const require = createRequire(import.meta.url);
 const PKG = require("../package.json");
 
@@ -21,6 +21,11 @@ const TOOLS = [
         project: {
           type: "string",
           description: "项目根目录，默认 WL_PROJECT_ROOT 或当前目录",
+        },
+        profile: {
+          type: "string",
+          enum: ["native-element", "legacy-jh-element", "legacy-jh-ag"],
+          description: "显式 UI Profile；默认读取配置或按依赖检测",
         },
       },
       required: [],
@@ -38,17 +43,27 @@ const TOOLS = [
           type: "string",
           description: "项目根目录，默认 WL_PROJECT_ROOT 或当前目录",
         },
-        mode: { type: "string", description: "skin 或 native" },
+        mode: {
+          type: "string",
+          enum: ["skin", "native"],
+          description: "skin 或 native",
+        },
+        profile: {
+          type: "string",
+          enum: ["native-element", "legacy-jh-element", "legacy-jh-ag"],
+          description: "native-element、legacy-jh-element 或 legacy-jh-ag",
+        },
         layer: { type: "string", description: "L0,L1,L2,L3,L4 逗号分隔" },
         vendor: { type: "string", description: "vendor 过滤，逗号分隔" },
         output: {
           type: "string",
-          description: "compact、json 或 markdown；默认 compact，适合低 token 调用",
+          enum: ["summary", "compact-v2", "compact", "json", "markdown"],
+          description: "summary、compact-v2、compact、json 或 markdown；默认 summary",
         },
         exempt: { type: "string", description: "豁免配置文件路径" },
         changedOnly: {
           type: "boolean",
-          description: "仅扫描 Git 变更 Vue 文件；失败时安全回退全量",
+          description: "仅扫描 Git 变更 Vue 文件；默认解析失败即报错，避免意外全量输出",
         },
         base: {
           type: "string",
@@ -56,8 +71,18 @@ const TOOLS = [
         },
         parser: {
           type: "string",
+          enum: ["auto", "fast", "sfc"],
           description: "auto（默认）、fast 或 sfc；auto 优先项目本地 compiler-sfc",
         },
+        changedFallback: {
+          type: "string",
+          enum: ["error", "full"],
+          description: "error（默认）或 full",
+        },
+        only: { type: "string", description: "仅扫描指定规则，支持 R031-R037" },
+        skip: { type: "string", description: "跳过指定规则" },
+        limit: { type: "number", description: "compact-v2 每页条数，默认 100" },
+        cursor: { type: "string", description: "compact-v2 分页游标" },
       },
       required: [],
     },
@@ -73,6 +98,13 @@ const TOOLS = [
           type: "string",
           description: "项目根目录，默认 WL_PROJECT_ROOT 或当前目录",
         },
+        profile: {
+          type: "string",
+          enum: ["native-element", "legacy-jh-element", "legacy-jh-ag"],
+          description: "显式 UI Profile；默认按项目依赖检测",
+        },
+        only: { type: "string", description: "仅预览指定可修复规则" },
+        skip: { type: "string", description: "跳过指定可修复规则" },
       },
       required: [],
     },
@@ -186,8 +218,16 @@ const TOOLS = [
         path: { type: "string", description: "目标项目内的 Vue 文件路径" },
         domain: { type: "string", description: "领域标识，例如 produce" },
         scenario: { type: "string", description: "可选场景，例如 query-table" },
-        mode: { type: "string", description: "native（默认）或 skin" },
-        parser: { type: "string", description: "auto（默认）、fast 或 sfc" },
+        mode: {
+          type: "string",
+          enum: ["native", "skin"],
+          description: "native（默认）或 skin",
+        },
+        parser: {
+          type: "string",
+          enum: ["auto", "fast", "sfc"],
+          description: "auto（默认）、fast 或 sfc",
+        },
         project: { type: "string", description: "项目根目录" },
       },
       required: ["path", "domain"],
@@ -235,7 +275,13 @@ function sendError(id, code, message) {
 }
 
 function projectRoot(args = {}) {
-  return resolve(args.project || process.env.WL_PROJECT_ROOT || process.cwd());
+  const boundary = resolve(process.env.WL_PROJECT_ROOT || process.cwd());
+  const requested = resolve(boundary, args.project || ".");
+  const rel = relative(boundary, requested);
+  if (rel.startsWith("..") || isAbsolute(rel)) {
+    throw new Error("project 必须位于 MCP 配置的 WL_PROJECT_ROOT 内");
+  }
+  return requested;
 }
 
 function projectPath(root, input, label) {
@@ -303,38 +349,82 @@ async function detectSkin(args = {}) {
 
 function runScanner(command, args = {}) {
   const root = projectRoot(args);
-  const scanner = join(PKG_ROOT, "scanner", "index.mjs");
-  const cliArgs = [scanner, command];
   if (command === "check") {
-    cliArgs.push("--project", root);
-  } else {
-    cliArgs.push("--project", root);
-    cliArgs.push("--target", resolve(root, args.target || "src"));
-    if (args.mode) cliArgs.push("--mode", String(args.mode));
-    if (args.layer) cliArgs.push("--layer", String(args.layer));
-    if (args.vendor) cliArgs.push("--vendor", String(args.vendor));
-    cliArgs.push("--output", String(args.output || "compact"));
-    if (args.exempt) cliArgs.push("--exempt", String(args.exempt));
-    if (args.changedOnly) cliArgs.push("--changed");
-    if (args.base) cliArgs.push("--base", String(args.base));
-    if (args.parser) cliArgs.push("--parser", String(args.parser));
-    if (command === "fix") cliArgs.push("--dry-run");
-  }
-  return new Promise((resolvePromise) => {
-    const child = spawn(process.execPath, cliArgs, { cwd: root, shell: false });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.on("data", (chunk) => (stdout += chunk));
-    child.stderr.on("data", (chunk) => (stderr += chunk));
-    child.on("close", (code) => {
-      const text = [stdout.trim(), stderr.trim()].filter(Boolean).join("\n");
-      resolvePromise({ code, text: text || "(无输出)" });
+    const resolution = resolveProjectProfile({
+      projectRoot: root,
+      profile: args.profile,
+      mode: args.mode,
     });
+    const checks = checkIntegration(root, resolution.profile);
+    return {
+      code: 0,
+      text: JSON.stringify({
+        schema: "wl-ui-check.v1",
+        project: root,
+        profile: { id: resolution.profile.id, source: resolution.source },
+        checks,
+      }),
+    };
+  }
+  if (command === "fix") {
+    const resolution = resolveProjectProfile({
+      projectRoot: root,
+      profile: args.profile,
+      mode: args.mode,
+    });
+    const result = runFix({
+      target: projectPath(root, args.target || "src", "target"),
+      projectRoot: root,
+      dryRun: true,
+      profile: resolution.profile.id,
+      only: args.only ? expandRuleRange(args.only) : undefined,
+      skip: args.skip ? expandRuleRange(args.skip) : undefined,
+    });
+    return { code: 0, text: JSON.stringify(result) };
+  }
+  const result = scanProject({
+    projectRoot: root,
+    target: projectPath(root, args.target || "src", "target"),
+    mode: args.mode,
+    profile: args.profile,
+    layer: args.layer,
+    vendor: args.vendor,
+    exempt: args.exempt ? projectPath(root, args.exempt, "exempt") : undefined,
+    changedOnly: args.changedOnly,
+    changedFallback: args.changedFallback || "error",
+    base: args.base,
+    parser: args.parser || "auto",
+    only: args.only,
+    skip: args.skip,
   });
+  const text = generateReport(
+    result.issues,
+    result.fileCount,
+    String(args.output || "summary"),
+    {
+      exemptFileCount: result.exemptFileCount,
+      exemptedIssueCount: result.exemptedIssues.length,
+      coverage: result.coverage,
+      parsing: result.parsing,
+      recommendations: result.recommendations,
+      profile: { id: result.profile.id, source: result.profileSource },
+      changed: result.changed,
+      limit: args.limit,
+      cursor: args.cursor,
+    },
+  );
+  return { code: 0, text };
 }
 
 function skillPrompt() {
-  return "# wl-skills-ui Skill 触发提示\n\n核心原则：wl-skills-ui 优先保证样式绝对管控，覆盖纯 Element Plus、老项目封装、Base*/jh*/C_* 以及 wl-skills-kit 最佳写法。\n\n推荐触发语：\n\n- 新项目：用 wl-ui 的 new-project-init 流程接入统一 UI 风格\n- 老项目：用 wl-ui 的 legacy-skin-align 流程做老项目化妆对齐\n- 只审计：用 wl-ui 的 full-audit 流程扫描当前项目，不修改代码\n- 渐进迁移：用 wl-ui 的 progressive-migrate 流程从 skin 迁移到 runtime\n- 表格/弹窗/卡片/Tab/详情/树/抽屉/上传/步骤条/更多操作样式不统一：先调用 wl_ui_route_intent，再调用 wl_ui_scan\n- 单点修复：用 wl-ui 的 vendors/base-table、element/el-table 或 element 组件族 skill 检查当前文件\n\n执行约束：\n\n- 扫描只读，修复前必须先给用户摘要并等待确认\n- 老项目 skin 模式只处理 L0/L1/L2，不改业务布局和 runtime\n- 若扫描结果涉及页面结构、BaseTable render-type/cid 或 renderOps，视觉统一后再建议 wl-skills-kit validate-page / doctor-ui。";
+  return `# wl-skills-ui 路由
+
+1. 调用 wl_ui_scan，默认 summary；需要明细时用 compact-v2 + limit/cursor。
+2. 使用返回的 profile 与 recommendedSkills，只打开命中的局部 Skill。
+3. 单条规则用 wl_ui_describe_rule 查询事实源。
+4. 修复先调用 wl_ui_fix_dry_run；CLI 应使用同一 profile/only/skip 与 planHash 应用。
+
+Profile：native-element（无 legacy/AG）、legacy-jh-element（legacy 无 AG）、legacy-jh-ag（显式 AG）。不要因 BaseTable 存在而推断或迁移 AG Grid。changed-only 失败默认终止，不静默扩大上下文。动态按钮、权限、状态字典、业务颜色、未知复合控件和表格技术迁移保留给 AI/人工确认。`;
 }
 
 function routeIntent(args = {}) {
@@ -353,27 +443,27 @@ function routeIntent(args = {}) {
       "element/el-form",
     ],
     [/弹窗|dialog|modal/, "el-dialog", "element/el-dialog"],
-    [/卡片|card/, "el-card", "element/el-card"],
-    [/tab|标签页|页签/, "el-tabs", "element/el-tabs"],
-    [/详情|描述|descriptions/, "el-descriptions", "element/el-descriptions"],
-    [/树|tree/, "el-tree", "element/el-tree"],
-    [/抽屉|drawer/, "el-drawer", "element/el-drawer"],
-    [/上传|附件|upload/, "el-upload", "element/el-upload"],
-    [/步骤|流程|审批|steps/, "el-steps", "element/el-steps"],
+    [/卡片|card/, "el-card", "element/component-family"],
+    [/tab|标签页|页签/, "el-tabs", "element/component-family"],
+    [/详情|描述|descriptions/, "el-descriptions", "element/component-family"],
+    [/树|tree/, "el-tree", "element/component-family"],
+    [/抽屉|drawer/, "el-drawer", "element/component-family"],
+    [/上传|附件|upload/, "el-upload", "element/component-family"],
+    [/步骤|流程|审批|steps/, "el-steps", "element/component-family"],
     [
       /下拉|更多|popover|tooltip|dropdown|提示/,
       "el-overlay",
-      "element/el-overlay",
+      "element/component-family",
     ],
     [
       /菜单|面包屑|导航|menu|breadcrumb/,
       "el-navigation",
-      "element/el-navigation",
+      "element/component-family",
     ],
     [
       /空状态|异常|警告|角标|empty|result|alert|badge/,
       "el-feedback",
-      "element/el-feedback",
+      "element/component-family",
     ],
   ];
 
@@ -409,11 +499,11 @@ function routeIntent(args = {}) {
     recommendedTools: [...new Set(recommendedTools)],
     shouldUseKit,
     nextActions: [
-      "先执行 wl_ui_scan 做只读扫描，确认 componentCoverage 与 issues",
-      "如需修复，先执行 wl_ui_fix_dry_run 预览，不直接写入",
+      "先执行 wl_ui_scan（默认 summary）确认 profile、规则分布与 recommendedSkills",
+      "如需明细，用 compact-v2 + limit/cursor；如需修复，先执行 wl_ui_fix_dry_run",
       shouldUseKit
         ? "若要规范化页面结构，再桥接 wl-skills-kit validate-page / doctor-ui"
-        : "优先由 wl-skills-ui skin/native 样式层完成视觉统一",
+        : "优先由 wl-skills-ui 当前 Profile 完成视觉统一",
     ],
   };
 }
@@ -444,15 +534,17 @@ function buildKitBridge(needed) {
 
 function issuesFromScan(parsed) {
   if (Array.isArray(parsed.issues)) return parsed.issues;
+  const compactV2 = parsed.schema === "wl-ui-scan.compact.v2";
   return Object.entries(parsed.issuesByFile || {}).flatMap(([file, items]) =>
-    items.map(([line, rule, severity, description, suggestion]) => ({
-      file,
-      line,
-      rule,
-      severity,
-      description,
-      suggestion,
-    })),
+    items.map((item) => {
+      if (compactV2) {
+        const [line, rule, description] = item;
+        const [severity, suggestion, category] = parsed.ruleCatalog?.[rule] || [];
+        return { file, line, rule, severity, description, suggestion, category };
+      }
+      const [line, rule, severity, description, suggestion] = item;
+      return { file, line, rule, severity, description, suggestion };
+    }),
   );
 }
 
@@ -466,8 +558,8 @@ function coverageFromScan(parsed) {
   };
 }
 
-function addIssueRecommendations(issues, recommendedFlows, nextActions) {
-  if (issues.length === 0) {
+function addIssueRecommendations(issues, total, recommendedFlows, nextActions) {
+  if (total === 0) {
     recommendedFlows.add("full-audit");
     nextActions.add("当前扫描未发现规则问题，建议保留周期性 full-audit");
     return;
@@ -491,26 +583,39 @@ function recommendFromScan(args = {}) {
   const parsed = JSON.parse(String(args.scanJson || "{}"));
   const issues = issuesFromScan(parsed);
   const coverage = coverageFromScan(parsed);
-  const rules = new Set(issues.map((issue) => issue.rule));
-  const categories = new Set(issues.map((issue) => issue.category));
+  const rules = new Set([
+    ...issues.map((issue) => issue.rule),
+    ...Object.keys(parsed.summary?.byRule || {}),
+  ]);
+  const categories = new Set([
+    ...issues.map((issue) => issue.category),
+    ...Object.keys(parsed.summary?.byCategory || {}),
+  ]);
   const recommendedFlows = new Set(
     parsed.recommendations?.recommendedFlows || parsed.next?.flows || [],
   );
   const nextActions = new Set(
-    parsed.recommendations?.nextActions || parsed.next?.actions || [],
+    parsed.recommendations?.nextActions ||
+      parsed.next?.actions ||
+      (Array.isArray(parsed.next) ? parsed.next : []),
   );
 
-  addIssueRecommendations(issues, recommendedFlows, nextActions);
+  addIssueRecommendations(
+    issues,
+    Number(parsed.summary?.total ?? issues.length),
+    recommendedFlows,
+    nextActions,
+  );
   addCategoryRecommendations(categories, recommendedFlows, nextActions);
 
   const shouldUseKit = hasKitBridgeNeed(rules, coverage);
   return {
     recommendedFlows: [...recommendedFlows].sort(),
     recommendedSkills:
-      parsed.recommendedSkills || coverage.recommendedSkills || [],
+      parsed.recommendedSkills || parsed.skills || coverage.recommendedSkills || [],
     componentCoverage: coverage,
     recommendedTools:
-      issues.length > 0
+      Number(parsed.summary?.total ?? issues.length) > 0
         ? ["wl_ui_scan", "wl_ui_fix_dry_run"]
         : ["wl_ui_scan"],
     kitBridge: buildKitBridge(shouldUseKit),

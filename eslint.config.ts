@@ -14,7 +14,7 @@ export default defineConfigWithVueTs(
   //MARK: 基础配置组
   {
     name: "app/files-to-lint",
-    files: ["**/*.{js,ts,mts,tsx,vue}"],
+    files: ["**/*.{js,mjs,ts,mts,tsx,vue}"],
   },
 
   {
@@ -25,7 +25,7 @@ export default defineConfigWithVueTs(
       "**/coverage/**",
       "**/es/**",
       "reference/**",
-      "scanner/**",
+      "scanner/**/__tests__/fixtures/**",
     ],
   },
 
@@ -45,7 +45,7 @@ export default defineConfigWithVueTs(
 
   //! 变量使用规则
   {
-    files: ["**/*.js"],
+    files: ["**/*.{js,mjs}"],
     rules: {
       "no-unused-vars": "error",
       "@typescript-eslint/no-unused-vars": "off",
@@ -58,7 +58,6 @@ export default defineConfigWithVueTs(
       "@typescript-eslint/no-unused-vars": "error",
     },
   },
-
   // 自定义规则组
   {
     rules: {
@@ -153,8 +152,29 @@ export default defineConfigWithVueTs(
       "**/*.d.ts",
       "**/auto-imports.d.ts",
       "src/views/**/components/*.vue",
-      "scripts/**/*",
       "node_modules/**/*",
     ],
+  },
+  {
+    name: "app/tooling-overrides-final",
+    files: [
+      "bin/**/*.{js,mjs}",
+      "mcp/**/*.{js,mjs}",
+      "scanner/**/*.{js,mjs}",
+      "scripts/**/*.{js,mjs}",
+      "standards/**/*.{js,mjs}",
+    ],
+    rules: {
+      complexity: "off",
+      "max-depth": "off",
+      "max-params": "off",
+      "prefer-destructuring": "off",
+      "prefer-const": "off",
+    },
+  },
+  {
+    name: "app/test-control-flow-final",
+    files: ["**/__tests__/**/*.{js,mjs,ts}"],
+    rules: { "no-await-in-loop": "off" },
   },
 );

@@ -9,22 +9,19 @@
  *   I004 — element-plus 是否在 dependencies 中（peer 兼容）
  *   I005 — @jhlc/jh-ui ↔ element-plus 版本配对是否符合推荐组合（vendors.json 单一事实源）
  */
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from "node:url";
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   listCompatVendors,
   evaluateVendor,
 } from "../skills/_meta/_compat/loader.mjs";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 /**
  * @param {string} projectRoot — 项目根目录（包含 index.html / src / package.json）
+ * @param {{id:string,stylePreset:string,runtimePreset:string}} [profile]
  * @returns {Array<{id, severity, ok, description, suggestion}>}
  */
-export function checkIntegration(projectRoot) {
+export function checkIntegration(projectRoot, profile) {
   const checks = [];
 
   // ── I001: index.html 加载 tokens.css ─────────────────────────────────
@@ -74,20 +71,24 @@ export function checkIntegration(projectRoot) {
     }
   }
   if (styleHit) {
-    const referenced =
-      /@agile-team\/wl-skills-ui(\/styles)?/.test(styleHit.content) ||
-      /wl-skills-ui(\/dist)?/.test(styleHit.content) ||
-      /shared\/index/.test(styleHit.content);
+    const expectedStyle = profile
+      ? `@agile-team/wl-skills-ui/${profile.stylePreset}`
+      : "@agile-team/wl-skills-ui/styles";
+    const referenced = profile
+      ? styleHit.content.includes(expectedStyle)
+      : /@agile-team\/wl-skills-ui(\/styles)?/.test(styleHit.content) ||
+        /wl-skills-ui(\/dist)?/.test(styleHit.content) ||
+        /shared\/index/.test(styleHit.content);
     checks.push({
       id: "I002",
       severity: referenced ? "info" : "warning",
       ok: referenced,
       description: referenced
-        ? `全局样式入口 ${styleHit.rel} 已引入 @agile-team/wl-skills-ui`
-        : `全局样式入口 ${styleHit.rel} 未引入 @agile-team/wl-skills-ui/styles`,
+        ? `全局样式入口 ${styleHit.rel} 已引入 ${expectedStyle}`
+        : `全局样式入口 ${styleHit.rel} 未引入 ${expectedStyle}`,
       suggestion: referenced
         ? ""
-        : `在 ${styleHit.rel} 末尾添加：@use '@agile-team/wl-skills-ui/styles' as *;`,
+        : `在 ${styleHit.rel} 添加：@use '${expectedStyle}' as *;`,
     });
   } else {
     checks.push({
@@ -95,8 +96,7 @@ export function checkIntegration(projectRoot) {
       severity: "warning",
       ok: false,
       description: "未找到全局 SCSS 入口（main.scss / index.scss）",
-      suggestion:
-        "在 src/assets/style/main.scss 中 @use '@agile-team/wl-skills-ui/styles' as *;",
+      suggestion: `在 src/assets/style/main.scss 中 @use '@agile-team/wl-skills-ui/${profile?.stylePreset || "styles"}' as *;`,
     });
   }
 
@@ -107,28 +107,35 @@ export function checkIntegration(projectRoot) {
     (existsSync(join(utilDir, "ag-cell-renders.ts")) ||
       existsSync(join(utilDir, "define-columns.ts")));
   let runtimeReferenced = false;
+  const expectedRuntime = profile
+    ? `@agile-team/wl-skills-ui/${profile.runtimePreset}`
+    : "@agile-team/wl-skills-ui/runtime";
   // 也检查 main.ts 是否 import runtime
   for (const entry of ["src/main.ts", "src/main.js", "src/main-core.ts"]) {
     const p = join(projectRoot, entry);
     if (
       existsSync(p) &&
-      /@agile-team\/wl-skills-ui\/runtime/.test(readFileSync(p, "utf8"))
+      readFileSync(p, "utf8").includes(expectedRuntime)
     ) {
       runtimeReferenced = true;
       break;
     }
   }
-  const runtimeOk = utilHit || runtimeReferenced;
+  const runtimeOk = profile ? runtimeReferenced : utilHit || runtimeReferenced;
   checks.push({
     id: "I003",
     severity: runtimeOk ? "info" : "warning",
     ok: runtimeOk,
     description: runtimeOk
-      ? "runtime 已可用（util/ag-cell-renders.ts 存在或已 import 包）"
-      : "未发现 runtime 引入（无 src/util/ag-cell-renders.ts，main.ts 也未 import runtime）",
+      ? profile
+        ? `runtime 已引入 ${expectedRuntime}`
+        : "runtime 已可用（util/ag-cell-renders.ts 存在或已 import 包）"
+      : profile
+        ? `未发现 Profile runtime：${expectedRuntime}`
+        : "未发现 runtime 引入（无 src/util/ag-cell-renders.ts，main.ts 也未 import runtime）",
     suggestion: runtimeOk
       ? ""
-      : 'Skin 项目在 main.ts 中 import "@agile-team/wl-skills-ui/runtime/auto"；Native 项目调用 installCommonPreset()（已包含包级保护）。',
+      : `在 main.ts 中 import "${expectedRuntime}"。`,
   });
 
   // ── I004: element-plus 已安装 ────────────────────────────────────────

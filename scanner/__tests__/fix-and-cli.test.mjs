@@ -1,6 +1,7 @@
 import { afterEach, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -63,10 +64,16 @@ describe("fixer 闭环", () => {
 `;
     writeFileSync(file, original, "utf8");
 
-    const result = runFix({ target: join(root, "src"), projectRoot: root });
+    const result = runFix({
+      target: join(root, "src"),
+      projectRoot: root,
+      profile: "legacy-jh-ag",
+    });
     const fixed = readFileSync(file, "utf8");
     assert.equal(result.changedFiles.length, 1);
     assert.ok(result.snapshotId);
+    assert.equal(result.profile, "legacy-jh-ag");
+    assert.ok(result.planHash);
     assert.match(fixed, /BaseTable[^>]*render-type="agGrid"[^>]*empty-text="暂无数据"|BaseTable[^>]*empty-text="暂无数据"[^>]*render-type="agGrid"/);
     assert.match(fixed, /el-table-column[^>]*align="center"[^>]*header-align="center"|el-table-column[^>]*header-align="center"[^>]*align="center"/);
     assert.match(
@@ -89,6 +96,67 @@ describe("fixer 闭环", () => {
 
     rollbackSnapshot(root, result.snapshotId);
     assert.equal(readFileSync(file, "utf8"), original);
+  });
+
+  it("native profile 不会把 BaseTable 强制迁移到 AG Grid", () => {
+    const root = tempProject();
+    const file = join(root, "src", "Native.vue");
+    writeFileSync(
+      file,
+      '<template><BaseTable cid="native" render-type="elTable" /></template>\n',
+      "utf8",
+    );
+    const result = runFix({
+      target: join(root, "src"),
+      projectRoot: root,
+      profile: "native-element",
+      dryRun: true,
+    });
+    assert.equal(result.changedFiles.length, 0);
+    assert.ok(!result.enabledRules.includes("R021"));
+    assert.match(readFileSync(file, "utf8"), /render-type="elTable"/);
+  });
+
+  it("only/skip 与计划哈希约束真实写入范围", () => {
+    const root = tempProject();
+    const file = join(root, "src", "Scoped.vue");
+    writeFileSync(
+      file,
+      "<template><el-input /><el-button>取消</el-button></template>\n",
+      "utf8",
+    );
+    const preview = runFix({
+      target: join(root, "src"),
+      projectRoot: root,
+      dryRun: true,
+      only: new Set(["R006"]),
+    });
+    assert.deepEqual(preview.enabledRules, ["R006"]);
+    assert.deepEqual(preview.changesByRule, { R006: 1 });
+    const applied = runFix({
+      target: join(root, "src"),
+      projectRoot: root,
+      only: new Set(["R006"]),
+      expectedPlanHash: preview.planHash,
+      noSnapshot: true,
+    });
+    assert.equal(applied.planHash, preview.planHash);
+    assert.match(readFileSync(file, "utf8"), /el-input size="small"/);
+    assert.doesNotMatch(readFileSync(file, "utf8"), /icon="Close"/);
+
+    writeFileSync(file, '<template><el-select /></template>\n', "utf8");
+    assert.throws(
+      () =>
+        runFix({
+          target: join(root, "src"),
+          projectRoot: root,
+          only: new Set(["R006"]),
+          expectedPlanHash: preview.planHash,
+          noSnapshot: true,
+        }),
+      /修复计划已变化/,
+    );
+    assert.equal(readFileSync(file, "utf8"), '<template><el-select /></template>\n');
   });
 
   it("快照目标越界时失败关闭，不写入目标文件", () => {
@@ -157,5 +225,91 @@ describe("统一 CLI", () => {
     const presetSource = readFileSync(join(root, "src", "wl-ui", "presets", "my-biz.ts"), "utf8");
     assert.match(presetSource, /installMyBizPreset/);
     assert.match(presetSource, /from '@agile-team\/wl-skills-ui\/runtime'/);
+  });
+
+  it("单文件编辑器只维护路由区块并在 clean 时保留用户内容", () => {
+    const root = tempProject();
+    writeFileSync(join(root, "package.json"), '{"name":"router-test"}\n', "utf8");
+    writeFileSync(join(root, "AGENTS.md"), "# Project rules\n\nKeep me.\n", "utf8");
+    writeFileSync(
+      join(root, ".mcp.json"),
+      '{"mcpServers":{"existing":{"command":"existing"}}}\n',
+      "utf8",
+    );
+
+    const init = runCli(
+      [
+        "init",
+        "--project",
+        root,
+        "--editor",
+        "agents-generic",
+        "--profile",
+        "native-element",
+        "--skills-only",
+      ],
+      root,
+    );
+    assert.equal(init.status, 0, init.stderr);
+    const installed = readFileSync(join(root, "AGENTS.md"), "utf8");
+    assert.match(installed, /# Project rules/);
+    assert.match(installed, /wl-skills-ui:begin/);
+    assert.match(installed, /node_modules\/@agile-team\/wl-skills-ui\/SKILL\.md/);
+    assert.ok(installed.length < 12_000, `router too large: ${installed.length}`);
+
+    const update = runCli(
+      ["update", "--project", root, "--editor", "agents-generic", "--force"],
+      root,
+    );
+    assert.equal(update.status, 0, update.stderr);
+    const updated = readFileSync(join(root, "AGENTS.md"), "utf8");
+    assert.equal((updated.match(/wl-skills-ui:begin/g) || []).length, 1);
+
+    const clean = runCli(["clean", "--project", root], root);
+    assert.equal(clean.status, 0, clean.stderr);
+    assert.equal(readFileSync(join(root, "AGENTS.md"), "utf8"), "# Project rules\n\nKeep me.\n");
+    assert.equal(existsSync(join(root, ".wl-ui-profile.json")), false);
+    const mcp = JSON.parse(readFileSync(join(root, ".mcp.json"), "utf8"));
+    assert.deepEqual(mcp, { mcpServers: { existing: { command: "existing" } } });
+  });
+
+  it("init 不会覆盖无法解析的用户 MCP 配置", () => {
+    const root = tempProject();
+    const invalidMcp = "{ keep: user-owned }\n";
+    writeFileSync(join(root, "package.json"), '{"name":"invalid-mcp-test"}\n', "utf8");
+    writeFileSync(join(root, ".mcp.json"), invalidMcp, "utf8");
+    writeFileSync(
+      join(root, ".wl-ui-profile.json"),
+      '{"schema":1,"profile":"native-element","owner":"user"}\n',
+      "utf8",
+    );
+
+    const init = runCli(
+      [
+        "init",
+        "--project",
+        root,
+        "--editor",
+        "agents-generic",
+        "--profile",
+        "native-element",
+        "--skills-only",
+      ],
+      root,
+    );
+    assert.equal(init.status, 0, init.stderr);
+    assert.match(init.stderr, /跳过 \.mcp\.json/);
+    assert.equal(readFileSync(join(root, ".mcp.json"), "utf8"), invalidMcp);
+
+    const manifest = JSON.parse(
+      readFileSync(join(root, ".wl-skills-ui-manifest.json"), "utf8"),
+    );
+    assert.equal(manifest.files[".mcp.json"], undefined);
+    assert.equal(manifest.managedJson[".mcp.json"], undefined);
+
+    const clean = runCli(["clean", "--project", root], root);
+    assert.equal(clean.status, 0, clean.stderr);
+    assert.equal(readFileSync(join(root, ".mcp.json"), "utf8"), invalidMcp);
+    assert.match(readFileSync(join(root, ".wl-ui-profile.json"), "utf8"), /"owner":"user"/);
   });
 });

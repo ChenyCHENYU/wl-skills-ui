@@ -49,7 +49,7 @@ applyTo: "**/*.vue"
 
 - ❌ 自行给 `.jh-tree` 写颜色覆盖（应用全局 `vendors/_jh-tree.scss`）
 - ❌ jh-drag-col 内自定义 padding 破坏拖拽条对齐
-- ❌ jh-drag-row 上下分栏缺可收缩高度链，拖动后仅靠 pane 的 `overflow:hidden` 裁切 AG Grid；必须接入 `runtime/auto`，由 ResizeObserver 通知表格内部重布局，禁止给外层随意加滚动条
+- ❌ jh-drag-row 上下分栏缺可收缩高度链，拖动后仅靠 pane 的 `overflow:hidden` 裁切 AG Grid；AG 项目必须接入 `runtime/profiles/legacy-jh-ag`，由 ResizeObserver 通知表格内部重布局，禁止给外层随意加滚动条
 - ❌ 页面自行重画 `.slider_row`；手柄必须统一使用 `_jh-drag-row.scss` 的细分隔线 + 三点胶囊
 - ❌ jh-pagination 未对齐到右侧（同 R011）
 - ❌ jh-form 内不用 `size="small"` 控件（同 R006）
@@ -66,7 +66,7 @@ applyTo: "**/*.vue"
 ### B 类
 
 - 直接全局覆盖 `.jh-*` → 改为引入 `wl-skills-ui/styles` 由 vendors 层处理
-- `jh-drag-row + AG Grid` → Skin 项目除样式外在启动入口引入一次 `@agile-team/wl-skills-ui/runtime/auto`；Native 项目使用 `installCommonPreset()`，详见 `docs/split-grid-resize.md`
+- `jh-drag-row + AG Grid` → 启动入口引入一次 `@agile-team/wl-skills-ui/runtime/profiles/legacy-jh-ag`，详见 `docs/split-grid-resize.md`
 - 新的复杂 `<jh-*>` 组件 → 先判断是否只是 Element Plus 薄封装；若不是，应新增 `styles/vendors/_jh-xxx.scss` 和对应 Skill/检测规则
 
 ## 全局样式来源

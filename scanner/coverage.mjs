@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -29,7 +29,7 @@ const VENDOR_REGISTRY = (() => {
 
 const VENDOR_PATTERNS = VENDOR_REGISTRY;
 
-const ELEMENT_SKILL_MAP = {
+export const ELEMENT_SKILL_MAP = Object.freeze({
   "el-table": "element/el-table",
   "el-table-column": "element/el-table",
   "el-form": "element/el-form",
@@ -37,36 +37,36 @@ const ELEMENT_SKILL_MAP = {
   "el-input": "element/el-form",
   "el-select": "element/el-form",
   "el-date-picker": "element/el-form",
-  "el-button": "element/el-button",
+  "el-button": "layouts/list-page",
   "el-dialog": "element/el-dialog",
   "el-message-box": "element/el-dialog",
   "el-tag": "element/el-tag",
-  "el-pagination": "element/el-pagination",
-  "el-card": "element/el-card",
-  "el-tabs": "element/el-tabs",
-  "el-tab-pane": "element/el-tabs",
-  "el-descriptions": "element/el-descriptions",
-  "el-descriptions-item": "element/el-descriptions",
-  "el-tree": "element/el-tree",
-  "el-drawer": "element/el-drawer",
-  "el-upload": "element/el-upload",
-  "el-steps": "element/el-steps",
-  "el-step": "element/el-steps",
-  "el-popover": "element/el-overlay",
-  "el-tooltip": "element/el-overlay",
-  "el-dropdown": "element/el-overlay",
-  "el-menu": "element/el-navigation",
-  "el-menu-item": "element/el-navigation",
-  "el-sub-menu": "element/el-navigation",
-  "el-breadcrumb": "element/el-navigation",
-  "el-empty": "element/el-feedback",
-  "el-result": "element/el-feedback",
-  "el-alert": "element/el-feedback",
-  "el-badge": "element/el-feedback",
-  "el-avatar": "element/el-feedback",
-  "el-timeline": "element/el-feedback",
-  "el-collapse": "element/el-feedback",
-};
+  "el-pagination": "element/el-dialog",
+  "el-card": "element/component-family",
+  "el-tabs": "element/component-family",
+  "el-tab-pane": "element/component-family",
+  "el-descriptions": "element/component-family",
+  "el-descriptions-item": "element/component-family",
+  "el-tree": "element/component-family",
+  "el-drawer": "element/component-family",
+  "el-upload": "element/component-family",
+  "el-steps": "element/component-family",
+  "el-step": "element/component-family",
+  "el-popover": "element/component-family",
+  "el-tooltip": "element/component-family",
+  "el-dropdown": "element/component-family",
+  "el-menu": "element/component-family",
+  "el-menu-item": "element/component-family",
+  "el-sub-menu": "element/component-family",
+  "el-breadcrumb": "element/component-family",
+  "el-empty": "element/component-family",
+  "el-result": "element/component-family",
+  "el-alert": "element/component-family",
+  "el-badge": "element/component-family",
+  "el-avatar": "element/component-family",
+  "el-timeline": "element/component-family",
+  "el-collapse": "element/component-family",
+});
 
 // VENDOR_PATTERNS 现由 vendors.json 单一事实源驱动（见文件顶部 VENDOR_REGISTRY）
 
@@ -236,7 +236,35 @@ export function createCoverageCollector() {
   return { addFile, result };
 }
 
-export function recommendFlows({ issues = [], coverage = {} } = {}) {
+export function filterCoverageForProfile(coverage, profile) {
+  if (!profile) return coverage;
+  const adapters = new Set(profile.adapters || []);
+  const disallowedVendorSkills = new Set(
+    VENDOR_REGISTRY.filter((vendor) => !adapters.has(vendor.id)).map(
+      (vendor) => vendor.skill,
+    ),
+  );
+  const filterSkills = (skills = []) =>
+    skills.filter((skill) => !disallowedVendorSkills.has(skill));
+  const files = Object.fromEntries(
+    Object.entries(coverage.files || {}).map(([file, item]) => [
+      file,
+      { ...item, recommendedSkills: filterSkills(item.recommendedSkills) },
+    ]),
+  );
+  return {
+    ...coverage,
+    recommendedSkills: filterSkills(coverage.recommendedSkills),
+    unsupportedVendors: VENDOR_REGISTRY.filter(
+      (vendor) =>
+        !adapters.has(vendor.id) &&
+        (coverage.vendors || []).includes(vendor.label),
+    ).map((vendor) => vendor.label),
+    files,
+  };
+}
+
+export function recommendFlows({ issues = [], coverage = {}, profile } = {}) {
   const categories = new Set(issues.map((i) => i.category));
   const rules = new Set(issues.map((i) => i.rule));
   const flows = [];
@@ -248,14 +276,20 @@ export function recommendFlows({ issues = [], coverage = {} } = {}) {
       "保持 wl-skills-ui 样式入口，定期运行 wl_ui_scan 做只读审计",
     );
   } else {
-    flows.push("legacy-skin-align");
-    nextActions.push("先运行 wl_ui_scan --mode skin 确认 L0/L1/L2 样式偏差");
+    flows.push(profile?.mode === "skin" ? "legacy-skin-align" : "full-audit");
+    nextActions.push(
+      `先运行 wl_ui_scan --profile ${profile?.id || "native-element"} --output summary 确认问题范围`,
+    );
     nextActions.push(
       "修复前运行 wl_ui_fix_dry_run 预览改动，不直接写入业务文件",
     );
   }
 
-  if (categories.has("color") || categories.has("token")) {
+  if (
+    categories.has("color") ||
+    categories.has("token") ||
+    categories.has("style")
+  ) {
     flows.push("progressive-migrate");
     nextActions.push(
       "将硬编码颜色迁移到 runtime/design-tokens 或 Element Plus token",

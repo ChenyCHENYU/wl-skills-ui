@@ -10,6 +10,17 @@ import {
   installUiRuntimeGuards,
   uninstallUiRuntimeGuards,
 } from "../guards.ts";
+import { UI_RUNTIME_PROFILES } from "../profiles.ts";
+
+describe("runtime profiles", () => {
+  it("只有 legacy-jh-ag 开启 AG Grid observers", () => {
+    assert.equal(UI_RUNTIME_PROFILES["native-element"].splitGridResize, false);
+    assert.equal(UI_RUNTIME_PROFILES["native-element"].agGridEmptyState, false);
+    assert.equal(UI_RUNTIME_PROFILES["legacy-jh-element"].splitGridResize, false);
+    assert.equal(UI_RUNTIME_PROFILES["legacy-jh-ag"].splitGridResize, true);
+    assert.equal(UI_RUNTIME_PROFILES["legacy-jh-ag"].agGridEmptyState, true);
+  });
+});
 
 class TestMutationObserver {
   static instances = [];

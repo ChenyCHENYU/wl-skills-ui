@@ -1,6 +1,10 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { getRules } from "../scanner/rules/index.mjs";
+import { FIXED_RULE_IDS } from "../scanner/fix.mjs";
+import { ELEMENT_SKILL_MAP } from "../scanner/coverage.mjs";
+import { listProfiles } from "../standards/profiles-loader.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -203,6 +207,41 @@ if (!existsSync(rulesJsonPath)) {
     errors.push("standards/rules.json: 存在重复 R-id");
   }
 
+  const implementations = getRules();
+  const implementationIds = new Set(implementations.map((rule) => rule.id));
+  for (const rule of rulesData.rules) {
+    if (!implementationIds.has(rule.id)) {
+      errors.push(`standards/rules.json: ${rule.id} 缺少 scanner 实现`);
+    }
+    for (const skill of rule.skills || []) {
+      if (!existsSync(join(root, "skills", skill, "SKILL.md"))) {
+        errors.push(`standards/rules.json: ${rule.id} 引用了不存在的 Skill ${skill}`);
+      }
+    }
+  }
+  for (const rule of implementations) {
+    if (!rulesById.has(rule.id)) {
+      errors.push(`scanner rule ${rule.id} 未在 standards/rules.json 注册`);
+    }
+  }
+
+  const metadataFixers = rulesData.rules
+    .filter((rule) => rule.autoFixable)
+    .map((rule) => rule.id)
+    .sort();
+  const implementedFixers = [...FIXED_RULE_IDS].sort();
+  if (JSON.stringify(metadataFixers) !== JSON.stringify(implementedFixers)) {
+    errors.push(
+      `fixer 与 autoFixable 元数据不一致：metadata=${metadataFixers.join(",")} implementation=${implementedFixers.join(",")}`,
+    );
+  }
+
+  for (const skill of new Set(Object.values(ELEMENT_SKILL_MAP))) {
+    if (!existsSync(join(root, "skills", skill, "SKILL.md"))) {
+      errors.push(`scanner/coverage.mjs 引用了不存在的 Skill ${skill}`);
+    }
+  }
+
   // (2) 校验 scanner/rules/*.mjs 中所有 id: "Rxxx" 都在 rules.json 中存在且 scanner 字段一致
   const scannerRulesDir = join(root, "scanner", "rules");
   for (const f of readdirSync(scannerRulesDir)) {
@@ -274,6 +313,42 @@ if (!existsSync(rulesJsonPath)) {
       }
     }
   }
+}
+
+const rootSkill = readFileSync(join(root, "SKILL.md"), "utf8");
+if (!/^---[\s\S]*?\bname:\s*wl-skills-ui\b[\s\S]*?\bdescription:/m.test(rootSkill)) {
+  errors.push("SKILL.md: 缺少可判别的 name/description frontmatter");
+}
+const frontmatter = rootSkill.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] || "";
+const allowedSkillKeys = new Set([
+  "name",
+  "description",
+  "license",
+  "allowed-tools",
+  "metadata",
+]);
+for (const match of frontmatter.matchAll(/^([a-zA-Z][\w-]*):/gm)) {
+  if (!allowedSkillKeys.has(match[1])) {
+    errors.push(`SKILL.md: 不支持的 frontmatter 字段 ${match[1]}`);
+  }
+}
+if (rootSkill.length > 12_000) {
+  errors.push(`SKILL.md: 根路由过长（${rootSkill.length} chars），应使用渐进式披露`);
+}
+
+const profileIds = new Set();
+for (const profile of listProfiles()) {
+  if (profileIds.has(profile.id)) errors.push(`profiles.json: 重复 profile ${profile.id}`);
+  profileIds.add(profile.id);
+  const stylePath = join(root, `${profile.stylePreset}.scss`);
+  const runtimePath = join(
+    root,
+    "runtime",
+    "profile-entries",
+    `${profile.id}.ts`,
+  );
+  if (!existsSync(stylePath)) errors.push(`profiles.json: 样式入口不存在 ${profile.stylePreset}`);
+  if (!existsSync(runtimePath)) errors.push(`profiles.json: runtime 入口不存在 ${profile.runtimePreset}`);
 }
 
 if (errors.length > 0) {

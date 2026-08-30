@@ -36,6 +36,9 @@ function verifyExports() {
   if (!pkg.sideEffects?.includes("./es/auto.js")) {
     errors.push("sideEffects 必须保留 ./es/auto.js，避免包级保护被 tree-shaking");
   }
+  if (!pkg.sideEffects?.includes("./es/profiles/*.js")) {
+    errors.push("sideEffects 必须保留 ./es/profiles/*.js，避免 Profile 安装入口被 tree-shaking");
+  }
   for (const [name, target] of Object.entries(pkg.bin || {})) {
     requireFile(target, `bin ${name}`);
   }
@@ -241,7 +244,7 @@ function verifyTokensSync() {
   // 且被 git 跟踪（保护 npm pack 完整性）——这里强制两者逐字节一致，防止陈旧产物发布
   const source = readFileSync(join(root, "design/tokens/base.css"));
   const generated = readFileSync(join(root, "dist/tokens.css"));
-  if (!Buffer.compare(source, generated) === 0) {
+  if (Buffer.compare(source, generated) !== 0) {
     errors.push(
       "dist/tokens.css 与 design/tokens/base.css 不一致：先执行 npm run build 再提交/发布",
     );
@@ -261,11 +264,14 @@ for (const relPath of [
   "es/index.d.ts",
   "bin/wl-ui.js",
   "scanner/index.mjs",
+  "scanner/engine.mjs",
   "scanner/changed.mjs",
   "scanner/sfc-parser.mjs",
   "scanner/ui-contract.mjs",
   "scanner/contract-cli.mjs",
   "standards/ui-contract.schema.json",
+  "standards/profiles.json",
+  "standards/profiles-loader.mjs",
   "mcp/server.js",
 ]) {
   requireFile(relPath);

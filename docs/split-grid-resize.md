@@ -18,7 +18,7 @@
 
 ## 实现机制
 
-1. `runtime/auto` 安装 `ResizeObserver`，只观察已识别分屏的两个直接 pane。
+1. `runtime/profiles/legacy-jh-ag` 安装 `ResizeObserver`，只观察已识别分屏的两个直接 pane。
 2. 动态路由晚挂载的新分屏通过仅监听 `childList` 的 `MutationObserver` 注册；不监听
    全站 style/class 变化，也不扫描每一帧。
 3. 发现 AG Grid 后，为 pane、必要祖先和 grid host 增加包内结构标记；SCSS 只对这些
@@ -48,11 +48,10 @@ Skin 项目必须同时接入样式与一次运行时保护：
 ```
 
 ```ts
-import "@agile-team/wl-skills-ui/runtime/auto";
+import "@agile-team/wl-skills-ui/runtime/profiles/legacy-jh-ag";
 ```
 
-Native 项目调用 `installCommonPreset()` 即可，它已经包含相同守护，不要重复引入
-`runtime/auto`。
+只有 AG Profile 包含该守护。Native/legacy-element Profile 会显式关闭它，避免无关 DOM 扫描。
 
 平台封装若确实还需要主动调用 `api.doLayout()`，可选监听局部事件：
 

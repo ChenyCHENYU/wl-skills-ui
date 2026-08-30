@@ -196,7 +196,10 @@ function stable(value) {
 }
 
 function fingerprintPayload(contract) {
-  const { fingerprint, id, source, ...semantic } = contract;
+  const semantic = { ...contract };
+  delete semantic.fingerprint;
+  delete semantic.id;
+  delete semantic.source;
   return semantic;
 }
 

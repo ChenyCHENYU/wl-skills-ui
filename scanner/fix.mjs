@@ -15,8 +15,11 @@
  */
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
+import { createHash } from "node:crypto";
 import { createSnapshot } from "./snapshot.mjs";
 import { TOKEN_MAP } from "./rules/_shared.mjs";
+import { STATIC_BUTTON_ICON_BY_LABEL } from "./rules/button.mjs";
+import { getRules } from "./rules/index.mjs";
 
 const CREATE_ACTION_LABEL =
   /(?:新增|新建|添加|创建)(?:申请|记录|数据|客户|项目|任务|明细|行)?/;
@@ -28,25 +31,32 @@ function hasTrueBooleanAttr(tagText, attr) {
 }
 
 const FIXES = {
-  "el-input": [{ attr: "size", value: "small" }],
-  "el-select": [{ attr: "size", value: "small" }],
+  "el-input": [{ rule: "R006", attr: "size", value: "small" }],
+  "el-select": [{ rule: "R006", attr: "size", value: "small" }],
   "el-date-picker": [
-    { attr: "size", value: "small" },
-    { attr: "style", value: "width:100%", mergeStyle: true },
+    { rule: "R006", attr: "size", value: "small" },
+    { rule: "R007", attr: "style", value: "width:100%", mergeStyle: true },
   ],
   "el-time-picker": [
-    { attr: "size", value: "small" },
-    { attr: "style", value: "width:100%", mergeStyle: true },
+    { rule: "R006", attr: "size", value: "small" },
+    { rule: "R007", attr: "style", value: "width:100%", mergeStyle: true },
   ],
-  "el-button": [{ attr: "size", value: "small" }],
-  ElButton: [{ attr: "size", value: "small" }],
-  "base-toolbar": [{ attr: "size", value: "small" }],
-  BaseToolbar: [{ attr: "size", value: "small" }],
-  "el-table": [{ attr: "empty-text", value: "暂无数据" }],
-  "el-table-column": [{ attr: "align", value: "center", replaceStatic: true }],
+  "el-button": [{ rule: "R041", attr: "size", value: "small" }],
+  ElButton: [{ rule: "R041", attr: "size", value: "small" }],
+  "base-toolbar": [{ rule: "R041", attr: "size", value: "small" }],
+  BaseToolbar: [{ rule: "R041", attr: "size", value: "small" }],
+  "el-table": [{ rule: "R002", attr: "empty-text", value: "暂无数据" }],
+  "el-table-column": [
+    { rule: "R001", attr: "align", value: "center", replaceStatic: true },
+  ],
   BaseTable: [
-    { attr: "empty-text", value: "暂无数据" },
-    { attr: "render-type", value: "agGrid", replaceStatic: true },
+    { rule: "R003", attr: "empty-text", value: "暂无数据" },
+    {
+      rule: "R021",
+      attr: "render-type",
+      value: "agGrid",
+      replaceStatic: true,
+    },
   ],
 };
 
@@ -54,6 +64,7 @@ export const FIXED_RULE_IDS = Object.freeze([
   "R001",
   "R002",
   "R003",
+  "R043",
   "R006",
   "R007",
   "R012",
@@ -65,6 +76,10 @@ export const FIXED_RULE_IDS = Object.freeze([
   "R039",
   "R041",
 ]);
+
+function incrementRule(changesByRule, rule, amount = 1) {
+  changesByRule[rule] = (changesByRule[rule] || 0) + amount;
+}
 
 function parseTag(content, pos, tagName) {
   let i = pos + tagName.length + 1;
@@ -140,7 +155,7 @@ function addAttrIfMissing(
   return { text: newTag, changed: true };
 }
 
-function fixTemplateAttrs(content) {
+function fixTemplateAttrs(content, enabledRules) {
   const tagPattern = new RegExp(
     `<(${Object.keys(FIXES)
       .sort((a, b) => b.length - a.length)
@@ -150,7 +165,7 @@ function fixTemplateAttrs(content) {
   );
   let result = "";
   let pos = 0;
-  let changes = 0;
+  const changesByRule = {};
   let m;
   // 按位置遍历，配合 parseTag 处理嵌套引号
   while (true) {
@@ -163,22 +178,34 @@ function fixTemplateAttrs(content) {
     result += content.slice(pos, m.index);
     const tagName = m[1];
     let { text, end } = parseTag(content, m.index, tagName);
-    const fixes = [...FIXES[tagName]];
+    const fixes = FIXES[tagName].filter(({ rule }) => enabledRules.has(rule));
     if (tagName === "el-table-column" && text.includes('type="selection"')) {
-      fixes.push({ attr: "header-align", value: "center" });
+      if (enabledRules.has("R014")) {
+        fixes.push({ rule: "R014", attr: "header-align", value: "center" });
+      }
     }
     if (
       tagName === "el-table-column" &&
       /(?:^|\s):?prop\s*=/.test(text) &&
       !/(?:^|\s)type\s*=\s*["'](?:selection|index|expand)["']/.test(text)
     ) {
-      fixes.push({
-        attr: "show-overflow-tooltip",
-        value: "",
-        booleanAttr: true,
-      });
+      if (enabledRules.has("R039")) {
+        fixes.push({
+          rule: "R039",
+          attr: "show-overflow-tooltip",
+          value: "",
+          booleanAttr: true,
+        });
+      }
     }
-    for (const { attr, value, replaceStatic, booleanAttr, mergeStyle } of fixes) {
+    for (const {
+      rule,
+      attr,
+      value,
+      replaceStatic,
+      booleanAttr,
+      mergeStyle,
+    } of fixes) {
       const r = addAttrIfMissing(
         text,
         tagName,
@@ -189,29 +216,32 @@ function fixTemplateAttrs(content) {
         mergeStyle,
       );
       text = r.text;
-      if (r.changed) changes++;
+      if (r.changed) incrementRule(changesByRule, rule);
     }
     result += text;
     pos = end;
   }
-  return { content: result, changes };
+  return { content: result, changesByRule };
 }
 
-const BUTTON_ICON_BY_LABEL = [
-  [/(新增|新建|添加|创建)/, "Plus"],
-  [/(编辑|修改)/, "Edit"],
-  [/(删除|移除|作废)/, "Delete"],
-  [/(搜索|查询|检索)/, "Search"],
-  [/(重置|刷新|同步|重新加载)/, "Refresh"],
-  [/(导出|下载)/, "Download"],
-  [/(导入|上传)/, "Upload"],
-  [/(查看|详情|预览)/, "View"],
-  [/(保存|确认|确定|提交|通过|审核)/, "Check"],
-  [/(取消|关闭|清空)/, "Close"],
-  [/(返回|上一步)/, "Back"],
-  [/(打印)/, "Printer"],
-  [/(复制)/, "CopyDocument"],
-];
+function fixDialogTableEmpty(content) {
+  let changes = 0;
+  const result = content.replace(
+    /<(el-dialog|ElDialog)\b[\s\S]*?<\/\1>/g,
+    (dialog) =>
+      dialog.replace(/<el-table(?=\s|>|\/>)[^>]*>/g, (tagText) => {
+        const fixed = addAttrIfMissing(
+          tagText,
+          "el-table",
+          "empty-text",
+          "暂无数据",
+        );
+        if (fixed.changed) changes++;
+        return fixed.text;
+      }),
+  );
+  return { content: result, changes };
+}
 
 function fixSemanticButtonIcons(content) {
   let changes = 0;
@@ -229,7 +259,9 @@ function fixSemanticButtonIcons(content) {
         .slice(openEnd + 1, button.lastIndexOf(`</${tagName}>`))
         .replace(/<[^>]+>/g, "")
         .replace(/\s+/g, "");
-      const icon = BUTTON_ICON_BY_LABEL.find(([pattern]) => pattern.test(label))?.[1];
+      const icon = STATIC_BUTTON_ICON_BY_LABEL.find(([pattern]) =>
+        pattern.test(label),
+      )?.[1];
       if (!icon) return button;
       const iconResult = addAttrIfMissing(opening, tagName, "icon", icon);
       if (!iconResult.changed) return button;
@@ -279,30 +311,35 @@ function fixPrimaryActionButtons(content) {
   return { content: result, changes };
 }
 
-function fixHexColors(content) {
-  let changes = 0;
+function fixHexColors(content, enabledRules) {
+  const changesByRule = {};
   let result = content;
 
-  function replaceMappedHex(body) {
+  function replaceMappedHex(body, rule) {
     return body.replace(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g, (match) => {
       const replacement = TOKEN_MAP[match.toLowerCase()];
       if (!replacement) return match;
-      changes++;
+      incrementRule(changesByRule, rule);
       return replacement;
     });
   }
 
   // Style 块内
-  result = result.replace(/<style[^>]*>([\s\S]*?)<\/style>/g, (full, body) => {
-    return full.replace(body, replaceMappedHex(body));
-  });
+  if (enabledRules.has("R016")) {
+    result = result.replace(/<style[^>]*>([\s\S]*?)<\/style>/g, (full, body) => {
+      return full.replace(body, replaceMappedHex(body, "R016"));
+    });
+  }
 
   // Template 中 scanner 可识别的映射色全部替换；script 颜色需业务色板语义，不自动改。
-  result = result.replace(/<template[^>]*>([\s\S]*?)<\/template>/g, (full, body) =>
-    full.replace(body, replaceMappedHex(body)),
-  );
+  if (enabledRules.has("R017")) {
+    result = result.replace(
+      /<template[^>]*>([\s\S]*?)<\/template>/g,
+      (full, body) => full.replace(body, replaceMappedHex(body, "R017")),
+    );
+  }
 
-  return { content: result, changes };
+  return { content: result, changesByRule };
 }
 
 function* walkVue(dir, excludes) {
@@ -327,9 +364,28 @@ export function runFix({
   dryRun = false,
   projectRoot,
   noSnapshot = false,
+  profile = "native-element",
+  only,
+  skip,
+  expectedPlanHash,
 }) {
+  const enabledRules = new Set(FIXED_RULE_IDS);
+  const profileRules = new Set(getRules({ profile }).map(({ id }) => id));
+  for (const rule of [...enabledRules]) {
+    if (!profileRules.has(rule)) enabledRules.delete(rule);
+  }
+  if (only) {
+    for (const rule of [...enabledRules]) {
+      if (!only.has(rule)) enabledRules.delete(rule);
+    }
+  }
+  if (skip) {
+    for (const rule of skip) enabledRules.delete(rule);
+  }
+
   const changedFiles = [];
   const changedAbsPaths = [];
+  const changesByRule = {};
   let totalChanges = 0;
   let totalFiles = 0;
 
@@ -340,28 +396,67 @@ export function runFix({
     const original = readFileSync(filePath, "utf8");
     let content = original;
     let changes = 0;
-    const r1 = fixTemplateAttrs(content);
-    content = r1.content;
-    changes += r1.changes;
-    const r2 = fixPrimaryActionButtons(content);
-    content = r2.content;
-    changes += r2.changes;
-    const r3 = fixSemanticButtonIcons(content);
-    content = r3.content;
-    changes += r3.changes;
-    const r4 = fixHexColors(content);
-    content = r4.content;
-    changes += r4.changes;
+    const fileRules = {};
+    const collect = (result, fallbackRule) => {
+      content = result.content;
+      if (fallbackRule && result.changes) {
+        incrementRule(fileRules, fallbackRule, result.changes);
+        changes += result.changes;
+      }
+      for (const [rule, count] of Object.entries(result.changesByRule || {})) {
+        incrementRule(fileRules, rule, count);
+        changes += count;
+      }
+    };
+
+    const r1 = fixTemplateAttrs(content, enabledRules);
+    collect(r1);
+
+    if (enabledRules.has("R012")) {
+      collect(fixDialogTableEmpty(content), "R012");
+    }
+
+    if (enabledRules.has("R038")) {
+      collect(fixPrimaryActionButtons(content), "R038");
+    }
+
+    if (enabledRules.has("R043")) {
+      collect(fixSemanticButtonIcons(content), "R043");
+    }
+
+    const r4 = fixHexColors(content, enabledRules);
+    collect(r4);
     if (changes > 0 && content !== original) {
-      pending.push({ filePath, original, content, changes });
+      pending.push({ filePath, original, content, changes, rules: fileRules });
       changedAbsPaths.push(filePath);
     }
+  }
+
+  pending.sort((a, b) => a.filePath.localeCompare(b.filePath));
+  const root = projectRoot || resolve(target, "..");
+  const planHash = createHash("sha256")
+    .update(
+      JSON.stringify({
+        profile,
+        enabledRules: [...enabledRules].sort(),
+        files: pending.map(({ filePath, original, content }) => ({
+          file: relative(root, filePath).replace(/\\/g, "/"),
+          before: createHash("sha256").update(original).digest("hex"),
+          after: createHash("sha256").update(content).digest("hex"),
+        })),
+      }),
+    )
+    .digest("hex");
+
+  if (expectedPlanHash && expectedPlanHash !== planHash) {
+    throw new Error(
+      `修复计划已变化：期望 ${expectedPlanHash}，当前 ${planHash}。请重新执行 --dry-run。`,
+    );
   }
 
   // 创建快照（fix 前保存原始内容）。失败即停止，避免不可回退写入。
   let snapshotId = null;
   if (!dryRun && !noSnapshot && changedAbsPaths.length > 0) {
-    const root = projectRoot || resolve(target, "..");
     const snap = createSnapshot({
       projectRoot: root,
       targetDir: target,
@@ -374,7 +469,7 @@ export function runFix({
   // 第二遍：写入文件
   const written = [];
   try {
-    for (const { filePath, original, content, changes } of pending) {
+    for (const { filePath, original, content, changes, rules } of pending) {
       if (!dryRun) {
         writeFileSync(filePath, content, "utf8");
         written.push({ filePath, original });
@@ -382,8 +477,12 @@ export function runFix({
       changedFiles.push({
         file: relative(target, filePath).replace(/\\/g, "/"),
         changes,
+        rules,
       });
       totalChanges += changes;
+      for (const [rule, count] of Object.entries(rules)) {
+        incrementRule(changesByRule, rule, count);
+      }
     }
   } catch (error) {
     for (const { filePath, original } of written.reverse()) {
@@ -392,5 +491,14 @@ export function runFix({
     throw new Error(`自动修复写入失败，已回滚本轮改动：${error.message}`, { cause: error });
   }
 
-  return { totalFiles, changedFiles, totalChanges, snapshotId };
+  return {
+    totalFiles,
+    changedFiles,
+    totalChanges,
+    changesByRule,
+    enabledRules: [...enabledRules].sort(),
+    profile,
+    planHash,
+    snapshotId,
+  };
 }

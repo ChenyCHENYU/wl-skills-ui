@@ -1,3 +1,5 @@
+$include-ag-grid-drag-row: true !default;
+
 // jh-drag-row 上下分栏拖拽手柄
 // 统一为“细分隔线 + 三点胶囊”，既保留足够的拖拽热区，也避免视觉喧宾夺主。
 html .drager_row > .slider_row {
@@ -94,6 +96,7 @@ html .drager_row [data-wl-ui-split-grid-chain] {
   min-height: 0 !important;
 }
 
+@if $include-ag-grid-drag-row {
 html
   .drager_row
   [data-wl-ui-split-grid-flex-parent]
@@ -115,4 +118,5 @@ html
   > .ag-root-wrapper {
   height: 100% !important;
   min-height: 0 !important;
+}
 }

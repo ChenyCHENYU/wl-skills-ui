@@ -127,6 +127,16 @@ function buildOverviewSection(issues, fileCount, extras) {
   lines.push("| 维度 | 数量 |");
   lines.push("|------|------|");
   lines.push(`| 扫描 .vue 文件总数 | **${fileCount}** |`);
+  if (extras.profile) {
+    lines.push(
+      `| UI Profile | **${extras.profile.id}**（${extras.profile.source || "explicit"}） |`,
+    );
+  }
+  if (extras.changed?.requested) {
+    lines.push(
+      `| 增量范围 | **${extras.changed.fallback ? "full fallback" : `${extras.changed.files} changed files`}** |`,
+    );
+  }
   lines.push(
     `| 实际检查文件数 | **${scannedFiles}**（豁免 ${extras.exemptFileCount || 0}） |`,
   );
@@ -377,8 +387,85 @@ export function generateReport(
   format = "markdown",
   extras = {},
 ) {
+  const summary = buildSummary(issues, fileCount);
+  if (format === "summary") {
+    const coverage = extras.coverage || {};
+    const recommendations = extras.recommendations || {};
+    return JSON.stringify({
+      schema: "wl-ui-scan.summary.v1",
+      profile: extras.profile || null,
+      summary: {
+        files: summary.fileCount,
+        total: summary.total,
+        bySeverity: summary.bySeverity,
+        byCategory: summary.byCategory,
+        byRule: summary.byRule,
+      },
+      skills: coverage.recommendedSkills || [],
+      next: {
+        flows: recommendations.recommendedFlows || [],
+        actions: recommendations.nextActions || [],
+      },
+      changed: extras.changed || null,
+      parsing: extras.parsing || null,
+    });
+  }
+
+  if (format === "compact-v2") {
+    const requestedLimit = Number.parseInt(extras.limit, 10);
+    const requestedCursor = Number.parseInt(extras.cursor, 10);
+    const limit = Number.isFinite(requestedLimit)
+      ? Math.min(Math.max(requestedLimit, 1), 500)
+      : 100;
+    const cursor = Number.isFinite(requestedCursor)
+      ? Math.min(Math.max(requestedCursor, 0), issues.length)
+      : 0;
+    const pageIssues = issues.slice(cursor, cursor + limit);
+    const nextCursor = cursor + pageIssues.length;
+    const ruleCatalog = {};
+    const issuesByFile = {};
+    for (const item of pageIssues) {
+      ruleCatalog[item.rule] ||= [
+        item.severity,
+        item.suggestion || "",
+        item.category || "",
+      ];
+      (issuesByFile[item.file] ||= []).push([
+        item.line,
+        item.rule,
+        item.description,
+      ]);
+    }
+    const coverage = extras.coverage || {};
+    const recommendations = extras.recommendations || {};
+    return JSON.stringify({
+      schema: "wl-ui-scan.compact.v2",
+      profile: extras.profile || null,
+      summary: {
+        files: summary.fileCount,
+        total: summary.total,
+        error: summary.bySeverity.error,
+        warning: summary.bySeverity.warning,
+        info: summary.bySeverity.info,
+        suggestion: summary.bySeverity.suggestion || 0,
+        review: summary.bySeverity.review || 0,
+      },
+      page: {
+        cursor,
+        limit,
+        returned: pageIssues.length,
+        nextCursor: nextCursor < issues.length ? String(nextCursor) : null,
+      },
+      ruleCatalog,
+      issuesByFile,
+      skills: coverage.recommendedSkills || [],
+      next: recommendations.nextActions || [],
+      changed: extras.changed || null,
+      parsing: extras.parsing || null,
+    });
+  }
+
   if (format === "compact" || format === "compact-json") {
-    const summary = buildSummary(issues, fileCount);
     const issuesByFile = {};
     for (const item of issues) {
       (issuesByFile[item.file] ||= []).push([
@@ -393,12 +480,15 @@ export function generateReport(
     const recommendations = extras.recommendations || {};
     return JSON.stringify({
       schema: "wl-ui-scan.compact.v1",
+      profile: extras.profile || null,
       summary: {
         files: summary.fileCount,
         total: summary.total,
         error: summary.bySeverity.error,
         warning: summary.bySeverity.warning,
         info: summary.bySeverity.info,
+        suggestion: summary.bySeverity.suggestion || 0,
+        review: summary.bySeverity.review || 0,
       },
       coverage: {
         element: coverage.element || [],
@@ -427,6 +517,7 @@ export function generateReport(
     return JSON.stringify(
       {
         summary: buildSummary(issues, fileCount),
+        profile: extras.profile || null,
         integration: extras.integration || null,
         componentCoverage: extras.coverage || null,
         recommendedSkills: extras.coverage?.recommendedSkills || [],

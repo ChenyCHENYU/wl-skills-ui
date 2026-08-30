@@ -1,0 +1,13 @@
+// Legacy vendor composition without AG Grid. Order remains fallback -> specific.
+@forward './_portal';
+@forward './_overflow-tooltip';
+@forward './_custom-wrappers';
+@forward './_c-components';
+@forward './_jh-ui';
+@forward './_jh-tree';
+@forward './_jh-pagination';
+@forward './_jh-drag-col';
+@forward './_jh-drag-row' with ($include-ag-grid-drag-row: false);
+@forward './_base-query-toolbar';
+@forward './_base-components' with ($include-ag-grid-base-components: false);
+@forward './_base-table' with ($include-ag-grid-base-table: false);

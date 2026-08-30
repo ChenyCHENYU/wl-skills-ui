@@ -3,6 +3,7 @@ node_modules/
 es/
 test-results/
 playwright-report/
+.eslintcache
 bash.exe.stackdump
 
 # npm pack 产物不入库

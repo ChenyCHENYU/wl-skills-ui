@@ -1,6 +1,6 @@
 {
   "name": "@agile-team/wl-skills-ui",
-  "version": "1.11.1",
+  "version": "1.12.0",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 项目通用化妆/原生双模式（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
   "main": "./es/index.js",
@@ -25,6 +25,15 @@
       "import": "./es/presets/security.js",
       "types": "./es/presets/security.d.ts"
     },
+    "./runtime/profiles/native-element": {
+      "import": "./es/profiles/native-element.js"
+    },
+    "./runtime/profiles/legacy-jh-element": {
+      "import": "./es/profiles/legacy-jh-element.js"
+    },
+    "./runtime/profiles/legacy-jh-ag": {
+      "import": "./es/profiles/legacy-jh-ag.js"
+    },
     "./vite": "./runtime/vite/check.mjs",
     "./styles": "./styles/index.scss",
     "./styles/*": "./styles/*",
@@ -46,7 +55,6 @@
   },
   "scripts": {
     "build": "tsup && npm run sync:tokens",
-    "prepare": "npm run build",
     "sync:tokens": "node -e \"import('fs').then(fs=>fs.copyFileSync('design/tokens/base.css','dist/tokens.css'))\"",
     "test": "node --test scanner/__tests__/*.test.mjs runtime/__tests__/*.test.mjs",
     "test:visual": "playwright test --config tests/visual/playwright.config.ts",
@@ -62,13 +70,14 @@
     "all": "node scanner/index.mjs all",
     "standards:init": "npx @robot-admin/git-standards init",
     "cz": "git-cz",
-    "lint": "eslint . --max-warnings 0",
+    "lint": "eslint . --cache --cache-location .eslintcache --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.check.json",
     "verify:package": "node scripts/verify-package.mjs",
-    "verify": "npm run lint && npm test && npm run check:scss && npm run check:compat && npm run docs:check && npm run build && npm run verify:package",
+    "verify": "npm run lint && npm run typecheck && npm run test:coverage && npm run check:scss && npm run check:compat && npm run docs:check && npm run build && npm run verify:package",
     "pack:dry": "npm pack --dry-run --ignore-scripts",
     "release:check": "npm run verify && npm run test:visual:contracts && npm run pack:dry",
     "prepublishOnly": "npm run release:check",
-    "test:coverage": "node --test --experimental-test-coverage scanner/__tests__/*.test.mjs runtime/__tests__/*.test.mjs",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=70 --test-coverage-branches=65 --test-coverage-functions=70 scanner/__tests__/*.test.mjs runtime/__tests__/*.test.mjs",
     "benchmark:runtime": "node scripts/benchmark-observer-hub.mjs"
   },
   "files": [
@@ -94,7 +103,8 @@
   "sideEffects": [
     "*.css",
     "*.scss",
-    "./es/auto.js"
+    "./es/auto.js",
+    "./es/profiles/*.js"
   ],
   "devDependencies": {
     "@commitlint/cli": "^20.5.3",
@@ -155,7 +165,7 @@
     }
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx,vue}": [
+    "{bin,mcp,runtime,scanner,scripts,standards}/**/*.{js,mjs,ts,mts,tsx,vue}": [
       "eslint --fix --no-cache"
     ]
   }

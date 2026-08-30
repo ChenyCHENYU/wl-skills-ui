@@ -19,7 +19,7 @@ applyTo: "**/*.{vue,scss,html}"
 
 ### Phase 0 — 安装/更新 Skill 与 MCP 配置
 ```bash
-npx wl-ui init --project . --mode skin
+npx wl-ui init --project . --profile legacy-jh-element
 npx wl-ui doctor --project .
 ```
 

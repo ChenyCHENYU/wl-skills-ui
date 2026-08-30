@@ -13,7 +13,7 @@ applyTo: "**/*.vue"
 
 1. **遍历 import**：识别所有非 element-plus 的组件标签
 2. **匹配 vendor skill**：
-   - Base* → vendors/base-table（如是表格）/ vendors/base-components
+   - Base* → vendors/base-table
    - jh-* → vendors/jh-components
    - C_*/c_* → vendors/c-components
    - 其他 → vendors/custom-wrappers

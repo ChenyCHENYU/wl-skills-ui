@@ -1,6 +1,6 @@
 # @agile-team/wl-skills-ui
 
-**企业级 UI 一致性与 AI 精确治理工具包 v1.11.1** — 面向 Vue 3 + Element Plus 的设计令牌、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
+**企业级 UI 一致性与 AI 精确治理工具包 v1.12.0** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
 
 它把“视觉统一、问题识别、机械修复、项目适配和样例沉淀”拆成可验证、可组合的工程能力。脚本、规则和 MCP 先完成确定性工作，AI 只处理业务语义与人工决策，从而减少重复读源码、上下文 token 和误修改。
 
@@ -13,9 +13,9 @@
 | --- | --- | --- |
 | 统一新项目视觉 | Design Tokens、Element Plus 原子样式、页面 Layout、Runtime Preset | 颜色、尺寸、间距、圆角、表格和业务状态从同一事实源产生 |
 | 低成本治理老项目 | Skin 模式、Base*/jh-*/C_*/AG Grid 兼容层、定制页豁免 | 不改封装源码也能统一大部分视觉，避免一次性重构风险 |
-| 阻止 UI 回归 | 38 条 R-rule、接入检查、漂移基线、Git 增量扫描、CI 门禁 | 表头/内容不共轴、按钮无图标、日期弹层全屏等问题在提交前暴露 |
-| 安全机械修复 | dry-run、可修复规则、修复前快照、复检与一键回滚 | 自动化只处理可证明安全的属性和 token，不让 AI 猜测批改 |
-| 降低 AI token | compact JSON、changed-only、组件覆盖、意图路由、13 个 MCP Tool | AI 先读取结构化事实和问题摘要，只在必要时打开局部源码 |
+| 阻止 UI 回归 | 39 条 R-rule、接入检查、漂移基线、Git 增量扫描、CI 门禁 | 表头/内容不共轴、按钮无图标、日期弹层全屏等问题在提交前暴露 |
+| 安全机械修复 | Profile、only/skip、dry-run 计划哈希、快照、复检与回滚 | 自动化只处理可证明安全且已批准的动作，不让 AI 猜测批改 |
+| 降低 AI token | summary、compact-v2 分页、changed-only、Skill 路由、13 个 MCP Tool | AI 先读总览和结构化事实，只在必要时获取有界明细或局部源码 |
 | 沉淀领域样例 | `ui-contract` extract / validate / match | 页面转为脱敏语义 JSON，不复制整页代码、接口、字段值或原始文案 |
 | 兼容多代项目 | EP 2.2+jh-ui 与原生 EP 2.7+ DOM 契约、Vite/doctor 检查 | 支持声明有 fixture 和真实浏览器证据，不靠文档口头约定 |
 | 降低运行时开销 | Shared Observer Hub、可选 guard、幂等安装与完整卸载 | 全部 guard 共用 1 个 MutationObserver + 1 个 ResizeObserver |
@@ -31,31 +31,36 @@ pnpm add @agile-team/wl-skills-ui
 # npm i @agile-team/wl-skills-ui
 ```
 
-### 2. 选择接入模式
+### 2. 选择能力 Profile
 
-Native 适合新项目或源码完全可控的项目，启用 L0-L4 全能力：
+Profile 同时决定 vendor adapter、扫描规则、样式入口和 runtime guard。AG Grid 是可选 adapter，不再由 `BaseTable` 隐式推断。
+
+| Profile | 样式入口 | Runtime 入口 | AG Grid |
+| --- | --- | --- | --- |
+| `native-element` | `styles/presets/native-element` | `runtime/profiles/native-element` | 关闭 |
+| `legacy-jh-element` | `styles/presets/legacy-jh-element` | `runtime/profiles/legacy-jh-element` | 关闭 |
+| `legacy-jh-ag` | `styles/presets/legacy-jh-ag` | `runtime/profiles/legacy-jh-ag` | 开启 |
+
+Native 项目：
 
 ```scss
 // src/assets/styles/index.scss
-@use "@agile-team/wl-skills-ui/styles" as *;
+@use "@agile-team/wl-skills-ui/styles/presets/native-element" as *;
 ```
 
 ```ts
 // src/main.ts
-import { installCommonPreset } from "@agile-team/wl-skills-ui/runtime/common-preset";
-
-installCommonPreset();
+import "@agile-team/wl-skills-ui/runtime/profiles/native-element";
 ```
 
-Skin 适合封装多、改源码代价高的老项目，只接管 L0-L2 视觉层：
+不使用 AG Grid 的老项目：
 
 ```scss
-@use "@agile-team/wl-skills-ui/styles/presets/skin" as *;
+@use "@agile-team/wl-skills-ui/styles/presets/legacy-jh-element" as *;
 ```
 
 ```ts
-// 自动安装主题锁、溢出提示、分屏与 AG Grid 空态保护
-import "@agile-team/wl-skills-ui/runtime/auto";
+import "@agile-team/wl-skills-ui/runtime/profiles/legacy-jh-element";
 ```
 
 如需最早稳定 CSS 变量，可在 `index.html` 的 `<head>` 先加载：
@@ -70,12 +75,12 @@ import "@agile-team/wl-skills-ui/runtime/auto";
 ### 3. 安装 AI Skill 并验证
 
 ```bash
-npx wl-ui init --project . --mode native
+npx wl-ui init --project . --profile native-element
 npx wl-ui check --project .
-npx wl-ui scan --target src --output compact
+npx wl-ui scan --target src --output summary
 ```
 
-老项目将 `native` 改为 `skin`。`init` 会识别已存在的 AI 编辑器目录并安装对应规则；`update`、`diff`、`doctor` 和 `clean --dry-run` 负责后续生命周期。
+老项目选择 `legacy-jh-element` 或 `legacy-jh-ag`。`init` 会写入 `.wl-ui-profile.json`；单文件编辑器只维护带边界标记的轻量 Skill 路由块，不覆盖项目自有 `AGENTS.md / CLAUDE.md / .clinerules` 内容。`update`、`diff`、`doctor` 和 `clean --dry-run` 负责后续生命周期。
 
 ## 能力地图
 
@@ -89,12 +94,13 @@ npx wl-ui scan --target src --output compact
 
 Vendor 覆盖顺序是：`Base* > jh-* > C_*/c_* > AG Grid > custom wrappers`。越靠前越接近项目事实源，通用兜底不得覆盖已识别的专用结构。
 
-包提供两种组合：
+旧 `native/skin` 参数仍作为兼容别名；新接入应使用 Profile：
 
-| 模式 | 层级 | 适用场景 | 边界 |
+| Profile | 层级 | 适用场景 | 边界 |
 | --- | --- | --- | --- |
-| `native` | L0-L4 | 新项目、可渐进重构项目 | 可使用 Layout 与 Runtime 统一代码结构 |
-| `skin` | L0-L2 | 老项目、第三方封装无源码 | 只做视觉对齐，不擅自改页面布局与业务逻辑 |
+| `native-element` | L0/L1/L3/L4 | 新项目、可渐进重构项目 | 不加载 legacy vendor 与 AG Grid |
+| `legacy-jh-element` | L0-L2 | Base/jh/C 老项目，Element 表格 | 编译产物不含 `.ag-*` 选择器，不启动 AG observer |
+| `legacy-jh-ag` | L0-L2 | 明确使用 AG Grid 的老项目 | 启用 AG 样式、R021、分屏和空态 guard |
 
 ## 分别使用各项能力
 
@@ -104,6 +110,9 @@ Vendor 覆盖顺序是：`Base* > jh-* > C_*/c_* > AG Grid > custom wrappers`。
 
 ```scss
 @use "@agile-team/wl-skills-ui/styles" as *; // 完整 L0-L3
+@use "@agile-team/wl-skills-ui/styles/presets/native-element" as *; // 无 legacy/AG
+@use "@agile-team/wl-skills-ui/styles/presets/legacy-jh-element" as *; // legacy，无 AG
+@use "@agile-team/wl-skills-ui/styles/presets/legacy-jh-ag" as *; // legacy + AG
 @use "@agile-team/wl-skills-ui/styles/presets/skin" as *; // 老项目 L0-L2
 @use "@agile-team/wl-skills-ui/styles/presets/element-only" as *; // L0-L1
 @use "@agile-team/wl-skills-ui/styles/presets/tokens-only" as *; // 仅 L0
@@ -144,16 +153,17 @@ const columns = defineColumns([
 
 ### Runtime Guard 与共享观察器
 
-默认调用保持向后兼容，四类保护全部开启：
+`installUiRuntimeGuards()` 与旧 `runtime/auto` 为兼容入口，仍开启全部保护；新项目应使用显式 Profile。`installCommonPreset()` 默认使用 `native-element`，不会启动 AG Grid observer：
 
 ```ts
 import {
   getObserverHubStats,
   installUiRuntimeGuards,
+  installUiRuntimeProfile,
   uninstallUiRuntimeGuards,
 } from "@agile-team/wl-skills-ui/runtime";
 
-installUiRuntimeGuards();
+installUiRuntimeProfile("native-element");
 console.log(getObserverHubStats(document));
 
 // 微前端或轻量页面可只启用需要的保护
@@ -176,17 +186,22 @@ Observer Hub 按 Document/Window 隔离：全部 guard 开启时仍只有一个 
 # 人工阅读
 npx wl-ui scan --target src --output markdown --outFile report.md
 
-# AI/MCP 默认格式：按文件压缩公共字段
-npx wl-ui scan --target src --output compact
+# AI/MCP 默认先取总览，不包含逐条问题
+npx wl-ui scan --target src --output summary
 
-# PR 只扫 Git 变更；范围失败会明确提示并安全回退全量
-npx wl-ui scan --target src --changed --base origin/main --output compact
+# 按需取有界明细：规则公共字段只出现一次，可用 nextCursor 翻页
+npx wl-ui scan --target src --output compact-v2 --limit 50 --cursor 0
+
+# PR 只扫 Git 变更；范围失败默认终止，避免意外全量输出
+npx wl-ui scan --target src --changed --base origin/main --output summary
+# 只有明确接受全量时才加：--changed-fallback full
 
 # 只看指定层、vendor 或规则
 npx wl-ui scan --target src --mode skin --layer L0,L1,L2
 npx wl-ui scan --target src --vendor "jh-*,AG Grid"
 npx wl-ui scan --target src --only R001,R005,R041,R042
 npx wl-ui scan --target src --skip R031-R037
+npx wl-ui rules describe R043
 ```
 
 SFC 解析器有三种模式：
@@ -203,10 +218,10 @@ SFC 解析器有三种模式：
 
 ```bash
 # 一定先预览
-npx wl-ui fix --target src --dry-run
+npx wl-ui fix --target src --profile native-element --only R001,R006,R043 --dry-run --output json
 
-# 执行确定性修复；默认先创建 .wl-snapshot
-npx wl-ui fix --target src
+# 使用预览返回的 planHash 执行同一计划；默认先创建 .wl-snapshot
+npx wl-ui fix --target src --profile native-element --only R001,R006,R043 --plan-hash <hash>
 
 # 复检与回滚
 npx wl-ui scan --target src --fail-on-error
@@ -219,7 +234,7 @@ npx wl-ui audit --target src --output json --refresh-baseline
 npx wl-ui drift --baseline .wl-baseline.json --current current.json --fail-on-error
 ```
 
-Fixer 只处理规则目录中声明 `autoFixable` 且已实现的机械变换。涉及业务语义、布局重构、动态 icon 或操作权限的规则只报告，不自动猜测。
+Fixer 只处理规则目录中声明 `autoFixable` 且已实现的机械变换，并让 `profile / only / skip` 同时约束预览、写入和复检。静态已知按钮文案由 R043 的确定映射修复；动态或未知语义仍归 R005 人工确认。计划哈希不一致时拒绝写入。
 
 ### AI Skill
 
@@ -227,7 +242,7 @@ Fixer 只处理规则目录中声明 `autoFixable` 且已实现的机械变换�
 
 ```text
 用 wl-ui 的 legacy-skin-align 流程统一这个老项目，只处理 L0-L2。
-扫描当前 PR 的 UI 变更，先给 compact 摘要，不修改代码。
+扫描当前 PR 的 UI 变更，先给 summary，不修改代码。
 检查这个列表页的表格中心轴、small 图标按钮和日期弹层边界。
 把这个成熟页面提取为 produce 领域的脱敏 ui-contract，并匹配已有模板。
 ```
@@ -235,7 +250,7 @@ Fixer 只处理规则目录中声明 `autoFixable` 且已实现的机械变换�
 生命周期命令：
 
 ```bash
-npx wl-ui init --project . --editor all --mode native
+npx wl-ui init --project . --editor all --profile native-element
 npx wl-ui update --project . --force
 npx wl-ui diff --project .
 npx wl-ui doctor --project . --print-overrides
@@ -341,9 +356,8 @@ Schema 见 [`standards/ui-contract.schema.json`](standards/ui-contract.schema.js
 ### 新项目从零接入
 
 ```text
-wl-ui init --mode native
-→ 导入完整 styles
-→ installCommonPreset
+wl-ui init --profile native-element
+→ 导入 native-element styles/runtime
 → defineColumns + renderOps
 → wl-ui check
 → wl-ui scan --parser sfc
@@ -354,9 +368,9 @@ wl-ui init --mode native
 
 ```text
 wl_ui_detect_skin / wl-ui doctor
-→ wl-ui init --mode skin
-→ 导入 skin.scss + runtime/auto
-→ scan --mode skin --output compact
+→ wl-ui init --profile legacy-jh-element（或 legacy-jh-ag）
+→ 导入对应 profile styles/runtime
+→ scan --profile <id> --output summary
 → fix --dry-run
 → 用户确认后 fix
 → 浏览器契约复查 Picker、Table、AG Grid
@@ -366,14 +380,15 @@ wl_ui_detect_skin / wl-ui doctor
 
 ```text
 wl_ui_route_intent
-→ wl_ui_scan(changedOnly=true, output=compact, parser=auto)
+→ wl_ui_scan(changedOnly=true, output=summary, parser=auto)
 → wl_ui_recommend_flow
-→ AI 只读取命中的局部文件
+→ wl_ui_scan(output=compact-v2, limit=50) 获取有界明细
+→ AI 只读取命中的局部文件与 Skill
 → wl_ui_fix_dry_run
 → 用户确认后 CLI 修复与复扫
 ```
 
-上一轮实测 compact 报告从 44,148 bytes 降到 15,934 bytes，减少约 63.9%；真实节省会随问题重复度变化。更重要的是 changed-only、规则过滤和 ui-contract 让 AI 不再默认读取整项目源码。
+`summary` 不携带逐条描述；`compact-v2` 把 severity/category/suggestion 收进一次性的 `ruleCatalog`，并用 cursor/limit 控制明细上限。单文件编辑器的安装产物也从全量 Skill 拼接改成按需路由。三者共同避免 AI 默认读取整份报告、整套 Skill 或整项目源码。
 
 ### 成熟页面沉淀与复用
 
@@ -410,6 +425,8 @@ npx wl-ui doctor --project . --print-overrides
 
 完整矩阵见 [`docs/compat-matrix.md`](docs/compat-matrix.md)。不要在未升级 jh-ui 的情况下单独把集团 EP 2.2 组合升级到社区新版；DOM 假设不同，尤其会影响 input wrapper、表单状态和复合控件。
 
+本轮的分类模型、门禁、token 预算与 AG Grid 替换路径见 [`docs/optimization-plan-1.12.md`](docs/optimization-plan-1.12.md)，长期分层边界见 [`standards/architecture/01-layer-boundaries.md`](standards/architecture/01-layer-boundaries.md)。
+
 ## CLI 速查
 
 | 命令 | 用途 |
@@ -423,6 +440,8 @@ npx wl-ui doctor --project . --print-overrides
 | `wl-ui drift` | 基线与当前问题漂移 |
 | `wl-ui exempt init` | 生成定制页豁免候选，需人工审核 |
 | `wl-ui contract` | extract/validate/match 脱敏 UI 契约 |
+| `wl-ui rules list/describe` | 查询规则事实源，不读取整份规则文档 |
+| `wl-ui profiles` | 列出 adapter/style/runtime 组合 |
 | `wl-ui add-preset/add-vendor` | 在消费项目脚手架扩展文件 |
 | `wl-ui-mcp` | 启动 stdio MCP Server |
 
@@ -449,7 +468,7 @@ npx wl-ui doctor --project . --print-overrides
 
 ## 版本与进一步阅读
 
-当前 v1.11.1：修复空态守护按初始快照钉死上下分栏全部 pane 导致手柄失去拖动行程的问题，空态表格仍保留内容需求地板。v1.11.0 新增精确 SFC 解析、低 token 增量扫描、共享 Observer Hub、领域 ui-contract、13 个 MCP Tool、日期弹层全屏防护、表格全轴居中与 small 图标按钮确定性治理。
+当前 v1.12.0：新增显式 UI Profile 与 AG adapter 解耦、规则/修复器一致性门禁、R043 确定性 icon 修复、共享 CLI/MCP 扫描引擎、summary/compact-v2 分页协议、fix 计划哈希，以及不覆盖项目内容的托管 Skill 路由块。
 
 - [版本摘要](docs/version-history.md)
 - [完整 Changelog](CHANGELOG.md)

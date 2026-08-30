@@ -81,7 +81,11 @@ function checkImportChain(filePath, visited = new Set()) {
 const entryPoints = [
   join(STYLES, "index.scss"),
   join(STYLES, "presets", "skin.scss"),
+  join(STYLES, "presets", "native-element.scss"),
+  join(STYLES, "presets", "legacy-jh-element.scss"),
+  join(STYLES, "presets", "legacy-jh-ag.scss"),
 ];
+const compiledSizes = new Map();
 
 for (const entry of entryPoints) {
   if (!existsSync(entry)) {
@@ -91,16 +95,39 @@ for (const entry of entryPoints) {
   }
   checkImportChain(entry);
   try {
-    compile(entry, {
+    const result = compile(entry, {
       loadPaths: [ROOT],
       quietDeps: true,
       silenceDeprecations: ["mixed-decls"],
       style: "compressed",
     });
+    compiledSizes.set(basename(entry), Buffer.byteLength(result.css));
+    if (
+      ["native-element.scss", "legacy-jh-element.scss"].includes(
+        basename(entry),
+      ) &&
+      /\.ag-[a-z0-9_-]+/i.test(result.css)
+    ) {
+      console.error(`✖ ${relative(ROOT, entry)}: 非 AG profile 编译产物仍包含 .ag-* 选择器`);
+      errors++;
+    }
   } catch (error) {
     console.error(`❌ SCSS 编译失败 ${entry}: ${error.message}`);
     errors++;
   }
+}
+
+const legacyElementSize = compiledSizes.get("legacy-jh-element.scss");
+const legacyAgSize = compiledSizes.get("legacy-jh-ag.scss");
+if (
+  legacyElementSize &&
+  legacyAgSize &&
+  legacyElementSize >= legacyAgSize
+) {
+  console.error(
+    `✖ legacy-jh-element 应小于 legacy-jh-ag：${legacyElementSize} >= ${legacyAgSize}`,
+  );
+  errors++;
 }
 
 // ── 反模式守门（wl-ui-ep 存量改造踩坑沉淀） ─────────────────────────────────

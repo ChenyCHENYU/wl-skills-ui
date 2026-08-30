@@ -14,7 +14,7 @@ applyTo: "**/*.{ts,vue}"
 3. 状态字段用 `renderTagNode()` / `renderClassifyTag()` — 彩色 Tag，见 tag-status/SKILL.md
 
 Skin/历史项目必须在 `main.ts` 引入一次
-`@agile-team/wl-skills-ui/runtime/auto`。它修复普通纯文本 flex 单元格的省略号，
+`@agile-team/wl-skills-ui/runtime/profiles/legacy-jh-ag`。它修复普通纯文本 flex 单元格的省略号，
 并在未配置平台原生 Tooltip 且真实溢出时兜底完整内容。编辑列、操作列、Tag、
 复选框、自定义 renderer、主动换行列和皮肤豁免区域不会被接管。
 

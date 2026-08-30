@@ -18,3 +18,4 @@ export * from "./split-grid-resize";
 export * from "./ag-grid-empty-state";
 export * from "./observer-hub";
 export * from "./guards";
+export * from "./profiles";

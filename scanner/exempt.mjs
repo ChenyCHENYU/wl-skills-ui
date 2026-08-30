@@ -47,7 +47,7 @@ function matchGlob(filePath, pattern) {
  */
 export function loadExemptConfig(projectRoot, exemptPath) {
   const defaultPath = join(projectRoot, ".wl-exempt.json");
-  const configPath = exemptPath ? resolve(exemptPath) : defaultPath;
+  const configPath = exemptPath ? resolve(projectRoot, exemptPath) : defaultPath;
 
   const empty = {
     exemptPaths: [],

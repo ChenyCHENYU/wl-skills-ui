@@ -2,6 +2,17 @@
 
 本页保留面向使用者的版本能力摘要；逐提交级变更、修复细节和旧版本记录见根目录 [`CHANGELOG.md`](../CHANGELOG.md)。
 
+## v1.12.0 — Profile、确定性门禁与低 token 协议
+
+- 新增 `native-element`、`legacy-jh-element`、`legacy-jh-ag` 三个显式 Profile，统一组合 adapter、规则、样式与 runtime；R021 和 AG observers 只在 AG Profile 启用。
+- 非 AG Profile 的 Sass 编译产物强制零 `.ag-*` 选择器；压缩 CSS 分别为 52,618 / 127,375 bytes，AG Profile 为 145,904 bytes。
+- 39 条规则元数据与实现一一对应，14 条 `autoFixable` 与 fixer 一致；R005/R043 拆分人工语义与确定性静态 icon。
+- CLI/MCP 共用扫描引擎；MCP 默认 `summary`，新增可分页 `compact-v2`，changed-only 解析失败默认终止。
+- Fixer 支持 Profile、only/skip 和 planHash；预览后范围或内容改变会拒绝写入，R021 不再无条件迁移 BaseTable。
+- 单文件编辑器使用托管路由块，不再拼接全量 Skill 或覆盖项目规则；`.mcp.json` 只管理自己的 server key。
+- lint 覆盖 scanner/scripts，新增 typecheck、覆盖率、Profile SCSS、规则引用、包同步和浏览器契约门禁。
+- 报告与豁免统一使用项目根相对路径；MCP 文件访问限制在 `WL_PROJECT_ROOT`，无效 fallback/MCP 配置均安全失败。
+
 ## v1.11.1 — 空态守护不再锁死上下分栏手柄
 
 - 上下分栏（`jh-drag-row`）内任意一侧表格为空时，手柄仍可自由拖动：空态守护只给持有空表格的 pane 设置内容需求地板（非表格内容实测高度 + 160px 最小数据区），不再按初始高度快照钉死全部 pane。
@@ -45,7 +56,7 @@
 pnpm up @agile-team/wl-skills-ui@latest
 npx wl-ui update --project . --force
 npx wl-ui doctor --project .
-npx wl-ui scan --target src --output compact
+npx wl-ui scan --target src --output summary
 ```
 
-从 1.10.x 升级到 1.11.0 无强制破坏性 API 变更：默认 guard 仍全部启用，scanner 默认改为 `auto` 解析但缺 compiler-sfc 会安全回退并在报告中说明。严格 CI 可显式使用 `--parser sfc`。
+从 1.11.x 升级到 1.12.0：旧 `styles`、`skin` 和 `runtime/auto` 入口继续兼容；`installCommonPreset()` 默认改为 `native-element`，不再启动 AG observers。需要 AG Grid 分屏/空态守护的项目应显式迁移到 `legacy-jh-ag` Profile。changed-only 失败默认终止，确需旧回退行为时传 `--changed-fallback full`。

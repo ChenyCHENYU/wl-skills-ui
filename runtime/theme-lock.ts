@@ -114,10 +114,18 @@ function bindObserver(doc: Document): void {
 
   if (unsubscribeMutations) return;
   unsubscribeMutations = subscribeDocumentMutations(doc, (mutations) => {
-    const bodyChanged = mutations.some((mutation) => mutation.type === "childList");
-    enforceOn(doc.documentElement);
-    enforceOn(doc.body);
-    if (bodyChanged) {
+    // 只有 html/body 自身的 style 被改写，或 body 被 html 的 childList 整替
+    // 时才需要重新落锁；深层子树的任何变更都不可能影响两者的内联 token。
+    // 该过滤把每帧 62 token × 2 元素的 CSSOM 读取压缩到真正的越权写场景。
+    const needsEnforce = mutations.some(
+      (mutation) =>
+        (mutation.type === "attributes" &&
+          (mutation.target === doc.documentElement ||
+            mutation.target === doc.body)) ||
+        (mutation.type === "childList" &&
+          mutation.target === doc.documentElement),
+    );
+    if (needsEnforce) {
       enforceOn(doc.documentElement);
       enforceOn(doc.body);
     }

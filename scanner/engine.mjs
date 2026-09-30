@@ -28,7 +28,11 @@ export function expandRuleRange(input = "") {
   return set;
 }
 
-function* walkVue(target, excludes) {
+/**
+ * 递归收集 .vue 文件（目录名排序稳定遍历；target 为单个 .vue 文件时直接返回）。
+ * 扫描与修复共用，保证两边看到同一文件集合。
+ */
+export function* walkVue(target, excludes) {
   if (!existsSync(target)) throw new Error(`扫描目标不存在：${target}`);
   if (statSync(target).isFile()) {
     if (target.endsWith(".vue")) yield target;

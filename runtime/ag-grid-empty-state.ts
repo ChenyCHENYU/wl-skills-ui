@@ -154,6 +154,37 @@ function registerRoot(root: HTMLElement): void {
   if (body) observe(body);
 }
 
+/** 该元素是否仍被其它已跟踪 grid 依赖（宿主/数据区可能被多个 grid 共享）。 */
+function observedByOtherRoots(element: HTMLElement, exclude: HTMLElement): boolean {
+  for (const other of trackedRoots) {
+    if (other === exclude || !other.isConnected) continue;
+    if (other === element) return true;
+    if (resolveGridHost(other) === element) return true;
+    if (resolveGridBody(other) === element) return true;
+  }
+  return false;
+}
+
+/**
+ * grid 断连后同步退订其独占的 resize 监听（root/host/body）。
+ * 不退订会让 observer-hub 与本模块的强引用 Map 持续保留游离 DOM，
+ * 微前端反复挂载/卸载表格页时构成真实内存泄漏。
+ */
+function releaseGridObservers(root: HTMLElement): void {
+  const candidates: (HTMLElement | null)[] = [
+    root,
+    resolveGridHost(root),
+    resolveGridBody(root),
+  ];
+  for (const element of candidates) {
+    if (!element || !resizeUnsubscribers.has(element)) continue;
+    if (observedByOtherRoots(element, root)) continue;
+    resizeUnsubscribers.get(element)?.();
+    resizeUnsubscribers.delete(element);
+    observedElements.delete(element);
+  }
+}
+
 function scanElement(element: Element): void {
   if (element.matches(GRID_ROOT_SELECTOR)) registerRoot(element as HTMLElement);
   for (const root of Array.from(
@@ -322,6 +353,7 @@ function collectActiveGrids(): ActiveEmptyGrid[] {
   for (const root of trackedRoots) {
     if (!root.isConnected) {
       trackedRoots.delete(root);
+      releaseGridObservers(root);
       continue;
     }
     const active = collectActiveGrid(root);
@@ -506,6 +538,11 @@ function scheduleRefresh(): void {
 
 function handleMutations(records: MutationRecord[]): void {
   for (const record of records) {
+    // 属性记录（class/aria-hidden/hidden）只可能影响已注册 grid 的可见
+    // 性与布局，由下方 scheduleRefresh 重新计量即可；新挂 grid 只能来自
+    // childList。跳过 scanElement 的 DOM 查询，把 AG Grid 每帧改写
+    // style/class 的高频路径从"全文档查询"压到 O(1)。
+    if (record.type === "attributes") continue;
     if (record.target.nodeType === 1) scanElement(record.target as Element);
     for (const node of Array.from(record.addedNodes)) {
       if (node.nodeType === 1) scanElement(node as Element);

@@ -176,7 +176,7 @@ function requiredRules(template, components, actions) {
 function tokensFrom(parsed) {
   const tokens = [];
   for (const style of parsed.styles) {
-    for (const match of style.text.matchAll(/var\((--(?:el|wk)-[a-z0-9-]+)/gi)) {
+    for (const match of style.text.matchAll(/var\((--(?:el|wl|wk)-[a-z0-9-]+)/gi)) {
       tokens.push(match[1]);
     }
   }

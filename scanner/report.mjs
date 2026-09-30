@@ -43,21 +43,38 @@ const CATEGORY_LABEL = {
   feedback: "反馈 (empty/result/alert/badge)",
 };
 
-let ruleNameById = null;
+let ruleMetaById = null;
 
-/** Markdown 明细才需要规则标题；compact/json 路径不读取规则目录。 */
-function getRuleNameById() {
-  ruleNameById ??= Object.fromEntries(
-    listRules().map((rule) => [rule.id, rule.title]),
+/** Markdown 明细才需要规则元数据；compact/json 路径不读取规则目录。 */
+function getRuleMetaById() {
+  ruleMetaById ??= Object.fromEntries(
+    listRules().map((rule) => [rule.id, rule]),
   );
-  return ruleNameById;
+  return ruleMetaById;
+}
+
+function getRuleNameById() {
+  const meta = getRuleMetaById();
+  return Object.fromEntries(
+    Object.entries(meta).map(([id, rule]) => [id, rule.title]),
+  );
+}
+
+/** 严重度列取 rules.json 真值，杜绝 R01x 序号启发式失真。 */
+const SEVERITY_ICONS = { error: "🔴", warning: "🟡", info: "🔵", review: "🟣" };
+
+function severityIcon(ruleId) {
+  const meta = getRuleMetaById()[ruleId];
+  return meta ? SEVERITY_ICONS[meta.severity] || "⚪" : "—";
 }
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
 function buildSummary(issues, fileCount) {
   const byRule = {};
-  const bySeverity = { error: 0, warning: 0, info: 0 };
+  // 契约键完整初始化（wl-ui-scan.summary.v1 / compact.v2 字段不可缺），
+  // 未知新级别仍会动态出现，无需在此登记。
+  const bySeverity = { error: 0, warning: 0, info: 0, suggestion: 0, review: 0 };
   const byCategory = {};
   for (const i of issues) {
     byRule[i.rule] = (byRule[i.rule] || 0) + 1;
@@ -215,11 +232,7 @@ function buildRuleSection(summary) {
   );
   for (const [rule, count] of sortedRules) {
     const name = ruleNames[rule] || "";
-    const sev =
-      rule.startsWith("R01") && parseInt(rule.slice(1)) <= 15
-        ? "🔴/🟡"
-        : "🟡/🔵";
-    lines.push(`| ${rule} | ${name} | ${sev} | **${count}** |`);
+    lines.push(`| ${rule} | ${name} | ${severityIcon(rule)} | **${count}** |`);
   }
   lines.push("");
   return lines;

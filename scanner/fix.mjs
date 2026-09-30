@@ -13,22 +13,14 @@
  *   - el-table 普通数据列: 缺 overflow tooltip → 添加
  *   - <style>/<template> 内可映射 hex 颜色      → 替换为 var(--el-color-*)
  */
-import { readFileSync, writeFileSync, readdirSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { readFileSync, writeFileSync } from "node:fs";
+import { relative, resolve } from "node:path";
 import { createHash } from "node:crypto";
 import { createSnapshot } from "./snapshot.mjs";
-import { TOKEN_MAP } from "./rules/_shared.mjs";
-import { STATIC_BUTTON_ICON_BY_LABEL } from "./rules/button.mjs";
+import { TOKEN_MAP, hasTrueBooleanAttr } from "./rules/_shared.mjs";
+import { CREATE_ACTION_LABEL, STATIC_BUTTON_ICON_BY_LABEL } from "./rules/button.mjs";
 import { getRules } from "./rules/index.mjs";
-
-const CREATE_ACTION_LABEL =
-  /(?:新增|新建|添加|创建)(?:申请|记录|数据|客户|项目|任务|明细|行)?/;
-
-function hasTrueBooleanAttr(tagText, attr) {
-  return new RegExp(
-    `(?:^|\\s)(?::${attr}\\s*=\\s*["']true["']|${attr}(?:\\s*=\\s*["'](?:true|)["'])?)(?=\\s|/?>)`,
-  ).test(tagText);
-}
+import { walkVue } from "./engine.mjs";
 
 const FIXES = {
   "el-input": [{ rule: "R006", attr: "size", value: "small" }],
@@ -342,17 +334,6 @@ function fixHexColors(content, enabledRules) {
   return { content: result, changesByRule };
 }
 
-function* walkVue(dir, excludes) {
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
-    if (e.isDirectory()) {
-      if (excludes.some((x) => e.name === x)) continue;
-      yield* walkVue(join(dir, e.name), excludes);
-    } else if (e.name.endsWith(".vue")) {
-      yield join(dir, e.name);
-    }
-  }
-}
-
 /**
  * 执行修复
  * @param {object} opts { target, exclude, dryRun, projectRoot, noSnapshot }
@@ -360,7 +341,7 @@ function* walkVue(dir, excludes) {
  */
 export function runFix({
   target,
-  exclude = ["node_modules", "dist", ".git", "SelectPopupCom"],
+  exclude = ["node_modules", "dist", ".git"],
   dryRun = false,
   projectRoot,
   noSnapshot = false,

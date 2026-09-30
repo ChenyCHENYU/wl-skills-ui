@@ -7,8 +7,10 @@
 - 新增 `native-jh-ag` Profile：平台子应用终态形态（native 运行时 + jh/Base/C 封装 + 联邦或 npm AG Grid）。样式入口 `styles/presets/full`，包根 `styles` 全量写法等价认可；runtime guard 与 `legacy-jh-ag` 同集（分屏 resize + AG 空态），`runtime/auto` 作为等价 runtime 引用被 I003 接受——存量项目声明后零代码改动通过严格校验。
 - **兼容承诺**：`check` / `all` 仅在显式声明 Profile（`--profile`、`.wl-ui-profile.json`、安装清单字段）时按 Profile 严格校验；依赖自动识别只用于 Skill 过滤与建议，未声明项目按 1.11 兼容口径校验，升级不会把存量绿灯判红。
 - `wl-ui init` 仅在显式 `--profile` 时写入 `.wl-ui-profile.json` 与清单 `profile` 字段；自动识别只打印建议，不再落盘固化猜测。
-- 依赖识别支持 Module Federation AG 形态（`@originjs/vite-plugin-federation` 依赖即按 AG 形态建议）；`R003`/`R021` 等规则对 `native-jh-ag` 启用。
-- Profile 配置读取剥 UTF-8 BOM 并对无效配置给出明确错误；新增混合形态夹具与 explicit 语义测试（176→182）。
+- 依赖识别支持 Module Federation AG 形态（`@originjs/vite-plugin-federation` 依赖即按 AG 形态建议）；`R003`/`R021` 等规则对 `native-jh-ag` 启用；MCP 的 profile 枚举由 profiles.json 动态生成。
+- 运行时性能批：theme-lock 仅在 html/body 自身被改写时落锁（原每帧 124 次 CSSOM 读）、AG 空态 guard 高频属性路径 O(1) 化并修复断连退订（游离 DOM 泄漏）、split-grid 支持换 document 重绑、renderers 微分配优化。
+- 修复批：fixer↔规则判定收敛单一实现、walkVue 合一并移除业务目录硬编码、报告严重度读真值、SVG 旧亮蓝 `%23` 编码绕禁门禁、`--wk-` 前缀拼写漂移。
+- Profile 配置读取剥 UTF-8 BOM 并对无效配置给出明确错误；新增混合形态夹具与 explicit 语义测试（176→184）。
 
 ## v1.12.0 — Profile、确定性门禁与低 token 协议
 

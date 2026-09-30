@@ -58,6 +58,16 @@ export function issue(
  *   - layout-* → L3 / —
  *   - runtime-* → L4 / —
  */
+/**
+ * 判定标签文本中布尔属性是否为真（`:attr="true"`、裸 attr、`attr="true"`）。
+ * 规则与 fixer 共用同一实现，避免"扫描报问题但 fix 不修"的判定漂移。
+ */
+export function hasTrueBooleanAttr(tagText, attr) {
+  return new RegExp(
+    `(?:^|\\s)(?::${attr}\\s*=\\s*["']true["']|${attr}(?:\\s*=\\s*["'](?:true|)["'])?)(?=\\s|/?>)`,
+  ).test(tagText);
+}
+
 export function inferMeta(category) {
   if (!category) return { layer: "L1", vendor: "element" };
   if (category === "color" || category === "token" || category === "style")

@@ -51,44 +51,44 @@ export const RATING_LEVEL_COLORS: Record<
   { bg: string; color: string }
 > = {
   一: {
-    bg: "var(--wk-rating-lv1-bg, rgba(16,185,129,0.14))",
-    color: "var(--wk-rating-lv1-color, #065F46)",
+    bg: "var(--wl-rating-lv1-bg, rgba(16,185,129,0.14))",
+    color: "var(--wl-rating-lv1-color, #065F46)",
   },
   二: {
-    bg: "var(--wk-rating-lv2-bg, rgba(59,130,246,0.14))",
-    color: "var(--wk-rating-lv2-color, #1E40AF)",
+    bg: "var(--wl-rating-lv2-bg, rgba(59,130,246,0.14))",
+    color: "var(--wl-rating-lv2-color, #1E40AF)",
   },
   三: {
-    bg: "var(--wk-rating-lv3-bg, rgba(245,158,11,0.14))",
-    color: "var(--wk-rating-lv3-color, #78350F)",
+    bg: "var(--wl-rating-lv3-bg, rgba(245,158,11,0.14))",
+    color: "var(--wl-rating-lv3-color, #78350F)",
   },
   四: {
-    bg: "var(--wk-rating-lv4-bg, rgba(249,115,22,0.14))",
-    color: "var(--wk-rating-lv4-color, #9A3412)",
+    bg: "var(--wl-rating-lv4-bg, rgba(249,115,22,0.14))",
+    color: "var(--wl-rating-lv4-color, #9A3412)",
   },
   五: {
-    bg: "var(--wk-rating-lv5-bg, rgba(239,68,68,0.14))",
-    color: "var(--wk-rating-lv5-color, #991B1B)",
+    bg: "var(--wl-rating-lv5-bg, rgba(239,68,68,0.14))",
+    color: "var(--wl-rating-lv5-color, #991B1B)",
   },
   "1": {
-    bg: "var(--wk-rating-lv1-bg, rgba(16,185,129,0.14))",
-    color: "var(--wk-rating-lv1-color, #065F46)",
+    bg: "var(--wl-rating-lv1-bg, rgba(16,185,129,0.14))",
+    color: "var(--wl-rating-lv1-color, #065F46)",
   },
   "2": {
-    bg: "var(--wk-rating-lv2-bg, rgba(59,130,246,0.14))",
-    color: "var(--wk-rating-lv2-color, #1E40AF)",
+    bg: "var(--wl-rating-lv2-bg, rgba(59,130,246,0.14))",
+    color: "var(--wl-rating-lv2-color, #1E40AF)",
   },
   "3": {
-    bg: "var(--wk-rating-lv3-bg, rgba(245,158,11,0.14))",
-    color: "var(--wk-rating-lv3-color, #78350F)",
+    bg: "var(--wl-rating-lv3-bg, rgba(245,158,11,0.14))",
+    color: "var(--wl-rating-lv3-color, #78350F)",
   },
   "4": {
-    bg: "var(--wk-rating-lv4-bg, rgba(249,115,22,0.14))",
-    color: "var(--wk-rating-lv4-color, #9A3412)",
+    bg: "var(--wl-rating-lv4-bg, rgba(249,115,22,0.14))",
+    color: "var(--wl-rating-lv4-color, #9A3412)",
   },
   "5": {
-    bg: "var(--wk-rating-lv5-bg, rgba(239,68,68,0.14))",
-    color: "var(--wk-rating-lv5-color, #991B1B)",
+    bg: "var(--wl-rating-lv5-bg, rgba(239,68,68,0.14))",
+    color: "var(--wl-rating-lv5-color, #991B1B)",
   },
 };
 
@@ -186,10 +186,11 @@ function autoTagType(value: string | number): string {
   if (!Number.isNaN(n) && n > 0) {
     return AUTO_TAG_PALETTE[(n - 1) % AUTO_TAG_PALETTE.length];
   }
-  // 非数字 value 用简单 hash 轮转
+  // 非数字 value 用简单 hash 轮转（字符串化只做一次，避免循环内重复分配）
+  const text = String(value);
   let hash = 0;
-  for (let i = 0; i < String(value).length; i++) {
-    hash = ((hash << 5) - hash + String(value).charCodeAt(i)) | 0;
+  for (let i = 0; i < text.length; i++) {
+    hash = ((hash << 5) - hash + text.charCodeAt(i)) | 0;
   }
   return AUTO_TAG_PALETTE[Math.abs(hash) % AUTO_TAG_PALETTE.length];
 }
@@ -351,8 +352,8 @@ export function renderRatingLevel(
 ): VNode | null {
   if (!value) return null;
   const clr = RATING_LEVEL_COLORS[value] ?? {
-    bg: "var(--wk-rating-fallback-bg, rgba(107,114,128,0.12))",
-    color: "var(--wk-rating-fallback-color, #374151)",
+    bg: "var(--wl-rating-fallback-bg, rgba(107,114,128,0.12))",
+    color: "var(--wl-rating-fallback-color, #374151)",
   };
   return h(
     "span",
@@ -403,18 +404,19 @@ const KNOWN_OP_TYPES = new Set([
   "link",
 ]);
 const __opWarned = new Set<string>();
-function warnUnknownOpType(item: OpItem): void {
-  // 使用方可能通过 Vite define 注入 process.env；方括号访问可避免被其文本替换误伤。
-  let isDev = true;
+// 开发态探测在进程生命周期内不变，模块顶层只做一次。
+// 方括号访问避免被 Vite define 的 process.env 文本替换误伤。
+const __isDevRuntime = (() => {
   try {
-    const nodeEnv = (globalThis as any)["process"]?.["env"]?.["NODE_ENV"];
-    if (nodeEnv === "production") {
-      isDev = false;
-    }
+    return (
+      (globalThis as any)["process"]?.["env"]?.["NODE_ENV"] !== "production"
+    );
   } catch {
-    /* noop */
+    return true;
   }
-  if (!isDev) return;
+})();
+function warnUnknownOpType(item: OpItem): void {
+  if (!__isDevRuntime) return;
   const t = (item as any).type;
   if (t && KNOWN_OP_TYPES.has(t)) return;
   const key = String(t);

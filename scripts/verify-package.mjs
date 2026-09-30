@@ -177,6 +177,11 @@ function verifyCustomerTheme() {
     /#3865f5/i,
     /#5178f6/i,
     /#7a98f8/i,
+    // URL 编码变体（SVG data-URI 中 # 写作 %23）不得绕过禁色门禁
+    /%232254f4/i,
+    /%233865f5/i,
+    /%235178f6/i,
+    /%237a98f8/i,
     /rgba\(\s*34\s*,\s*84\s*,\s*244\s*,/i,
     /rgba\(\s*122\s*,\s*152\s*,\s*248\s*,/i,
   ];

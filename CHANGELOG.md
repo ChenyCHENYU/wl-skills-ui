@@ -13,6 +13,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - 新增 `native-jh-ag` 能力 Profile，覆盖平台子应用终态形态：native 运行时（`defineColumns`/`renderOps` + common preset）叠加 jh/Base/C 封装组件，AG Grid 经 npm 依赖或 Module Federation 远程提供。样式入口为 `styles/presets/full`（包根 `styles` 全量写法等价认可），runtime guard 与 `legacy-jh-ag` 同集（分屏 resize + AG 空态），`runtime/auto` 作为等价 runtime 引用被 I003 接受。
 - Profile 解析新增 `explicit` 语义：`.wl-skills-ui-manifest.json` 的 `profile` 字段与 `.wl-ui-profile.json`、`--profile` 参数同为显式声明来源。
 - 依赖识别支持 Module Federation AG 形态：存在 `@originjs/vite-plugin-federation` 依赖时按 AG 形态给出建议（平台子应用的 AG Grid 经 `agGridApp` 远程提供，npm 依赖不可见）。
+- MCP 工具的 `profile` 枚举改由 `profiles.json` 事实源动态生成（此前硬编码三处，新增 profile 后 MCP 客户端会被 schema 拒绝）。
+
+### 性能与内存（运行时 guard）
+
+- `theme-lock`：mutation 回调改为仅 html/body 自身 style 改写或 body 整替时重新落锁——原先任意 DOM 批量变更都执行 62 token × 2 元素的 CSSOM 读写（繁忙页面每帧必付），并顺带消除 childList 场景的重复双写。
+- `ag-grid-empty-state`：属性记录（class/aria-hidden/hidden）不再走 `scanElement` 的 DOM 查询（AG Grid 每帧改写 style/class 的高频路径从全文档查询降为 O(1)，可见性与布局由 rAF 刷新统一计量）；grid 断连时同步退订其独占的 root/host/body resize 监听（共享宿主有引用保护），消除微前端反复挂载/卸载的游离 DOM 强引用泄漏。
+- `split-grid-resize`：支持换 document 重绑（与其余 guard 对齐，微前端销毁重建不再残留旧 document 监听）；pane 断连后即时退订 resize 监听。
+- `renderers`：`autoTagType` 哈希循环外提 `String(value)`（原 O(n²) 字符串分配）；`warnUnknownOpType` 的 NODE_ENV 探测提到模块顶层只做一次。
+
+### Fixed
+
+- 修复 fixer 与规则判定复制导致的漂移风险：`CREATE_ACTION_LABEL`、`hasTrueBooleanAttr` 收敛为单一实现（`rules/_shared.mjs` / `button.mjs` 导出），fixer 直接复用，杜绝"扫描报问题但 fix 不修"。
+- 修复两份 `walkVue` 语义分叉：fixer 改用 engine 的稳定排序实现（支持单文件、目标不存在时显式报错），并从共享包默认排除清单中移除业务目录名 `SelectPopupCom`。
+- 修复 Markdown 报告"按规则统计"严重度列的 R01x 序号启发式失真：改读 `rules.json` 真实 severity；`summary` 的 `bySeverity` 补齐 `suggestion`/`review` 契约键。
+- 修复 AG loading 动画 SVG data-URI 中 URL 编码的旧亮蓝色（`%232254F4`/`%237A98F8`）绕过禁色门禁的问题：改用品牌 token 色阶（primary/light-3/light-8/light-9），禁色正则补 `%23` 编码变体。
+- 修复 `--wk-rating-lv*` token 前缀拼写漂移：统一为 `--wl-rating-lv*`（UI 契约扫描同时容忍新旧前缀）；`coverage` 的 `el-pagination → element/el-dialog` 映射补充意图注释（R011 弹窗分页路由，非错误）。
 
 ### Changed
 

@@ -17,7 +17,9 @@ export interface SplitGridResizeDetail {
   width: number;
 }
 
-let installed = false;
+// 与其余 guard 一致：记录安装所在 document，微前端销毁重建换 document
+// 时先卸载再重绑，避免监听残留在旧 document 上。
+let installedDocument: Document | undefined;
 let observedPanes = new WeakSet<Element>();
 let resizeUnsubscribers = new Map<Element, () => void>();
 let unsubscribeMutations: (() => void) | undefined;
@@ -175,11 +177,24 @@ function handleDragEnd(event: Event): void {
   registerSplitRoot(root);
 }
 
+/** 清理已断连 pane 的 resize 订阅，防止强引用 Map 保留游离 DOM。 */
+function pruneDisconnectedPanes(): void {
+  for (const pane of Array.from(resizeUnsubscribers.keys())) {
+    if (pane.isConnected) continue;
+    resizeUnsubscribers.get(pane)?.();
+    resizeUnsubscribers.delete(pane);
+    observedPanes.delete(pane);
+    if (pane instanceof HTMLElement) pendingPanes.delete(pane);
+  }
+}
+
 export function installSplitGridResizeGuard(): void {
-  if (installed || typeof window === "undefined" || typeof document === "undefined") {
+  if (typeof window === "undefined" || typeof document === "undefined") {
     return;
   }
-  installed = true;
+  if (installedDocument === document) return;
+  if (installedDocument) uninstallSplitGridResizeGuard();
+  installedDocument = document;
 
   unsubscribeMutations = subscribeDocumentMutations(
     document,
@@ -187,6 +202,7 @@ export function installSplitGridResizeGuard(): void {
       for (const record of records) {
         for (const node of Array.from(record.addedNodes)) scanNode(node);
       }
+      pruneDisconnectedPanes();
     },
     { childList: true, subtree: true },
   );
@@ -201,8 +217,8 @@ export function installSplitGridResizeGuard(): void {
 }
 
 export function uninstallSplitGridResizeGuard(): void {
-  if (!installed) return;
-  installed = false;
+  if (!installedDocument) return;
+  installedDocument = undefined;
   unsubscribeMutations?.();
   unsubscribeMutations = undefined;
   for (const unsubscribe of resizeUnsubscribers.values()) unsubscribe();

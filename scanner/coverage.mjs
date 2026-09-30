@@ -41,6 +41,8 @@ export const ELEMENT_SKILL_MAP = Object.freeze({
   "el-dialog": "element/el-dialog",
   "el-message-box": "element/el-dialog",
   "el-tag": "element/el-tag",
+  // el-pagination 特有问题场景是弹窗分页（R011：el-pagination 不得位于
+  // #footer 插槽），故路由到 el-dialog skill 而非 el-table。
   "el-pagination": "element/el-dialog",
   "el-card": "element/component-family",
   "el-tabs": "element/component-family",

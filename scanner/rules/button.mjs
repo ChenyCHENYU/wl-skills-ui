@@ -1,7 +1,7 @@
 /** scanner/rules/button.mjs — 按钮规则：R004 R005 R015 R038 R041 */
-import { lineOf, issue, findTags } from "./_shared.mjs";
+import { lineOf, issue, findTags, hasTrueBooleanAttr } from "./_shared.mjs";
 
-const CREATE_ACTION_LABEL = /(?:新增|新建|添加|创建)(?:申请|记录|数据|客户|项目|任务|明细|行)?/;
+export const CREATE_ACTION_LABEL = /(?:新增|新建|添加|创建)(?:申请|记录|数据|客户|项目|任务|明细|行)?/;
 export const STATIC_BUTTON_ICON_BY_LABEL = [
   [/(新增|新建|添加|创建)/, "Plus"],
   [/(编辑|修改)/, "Edit"],
@@ -23,12 +23,6 @@ function buttonContent(template, tag) {
   const tagName = tag.text.match(/^<([A-Za-z][\w-]*)/)?.[1] || "el-button";
   const end = template.indexOf(`</${tagName}>`, start);
   return end < 0 ? "" : template.slice(start, end);
-}
-
-function hasTrueBooleanAttr(tagText, attr) {
-  return new RegExp(
-    `(?:^|\\s)(?::${attr}\\s*=\\s*["']true["']|${attr}(?:\\s*=\\s*["'](?:true|)["'])?)(?=\\s|/?>)`,
-  ).test(tagText);
 }
 
 export const buttonRules = [

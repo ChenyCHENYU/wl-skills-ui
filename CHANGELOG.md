@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-09-30
+
+### Added
+
+- 新增 `native-jh-ag` 能力 Profile，覆盖平台子应用终态形态：native 运行时（`defineColumns`/`renderOps` + common preset）叠加 jh/Base/C 封装组件，AG Grid 经 npm 依赖或 Module Federation 远程提供。样式入口为 `styles/presets/full`（包根 `styles` 全量写法等价认可），runtime guard 与 `legacy-jh-ag` 同集（分屏 resize + AG 空态），`runtime/auto` 作为等价 runtime 引用被 I003 接受。
+- Profile 解析新增 `explicit` 语义：`.wl-skills-ui-manifest.json` 的 `profile` 字段与 `.wl-ui-profile.json`、`--profile` 参数同为显式声明来源。
+- 依赖识别支持 Module Federation AG 形态：存在 `@originjs/vite-plugin-federation` 依赖时按 AG 形态给出建议（平台子应用的 AG Grid 经 `agGridApp` 远程提供，npm 依赖不可见）。
+
+### Changed
+
+- **兼容承诺：严格校验只认显式声明的 Profile。** `wl-ui check` / `wl-ui all` 在未显式声明 profile 时按 1.11 兼容口径校验（全量 `styles` 入口 + 任意 runtime 引用即通过），依赖自动识别仅用于 Skill 过滤与建议输出，不再作为执法依据——修复 1.12 把存量绿灯项目判红的问题。
+- `wl-ui init` 仅在显式 `--profile` 时写入/更新 `.wl-ui-profile.json` 与安装清单的 `profile` 字段；自动识别结果只打印建议（`npx wl-ui init --profile <id>`），不再落盘固化猜测。
+- `R003`、`R021` 等 Base/AG 专属规则同步对 `native-jh-ag` 启用。
+
 ## [1.12.0] - 2026-08-30
 
 ### Added

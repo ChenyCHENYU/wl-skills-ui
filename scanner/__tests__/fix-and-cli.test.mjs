@@ -313,3 +313,95 @@ describe("统一 CLI", () => {
     assert.match(readFileSync(join(root, ".wl-ui-profile.json"), "utf8"), /"owner":"user"/);
   });
 });
+
+describe("profile 兼容承诺（1.13）", () => {
+  function hybridProject() {
+    // 平台子应用形态：native 运行时 + jh 封装依赖 + 联邦 AG Grid +
+    // 全量 styles 引入（包根入口写法）。
+    const root = tempProject();
+    mkdirSync(join(root, "src", "assets", "style"), { recursive: true });
+    writeFileSync(
+      join(root, "package.json"),
+      JSON.stringify({
+        name: "hybrid-fixture",
+        dependencies: {
+          vue: "~3.2.25",
+          "element-plus": "2.2.6-prod.3",
+          "@jhlc/common-core": "3.1.0-prod.14",
+          "@originjs/vite-plugin-federation": "1.4.1-jh.3",
+        },
+      }),
+      "utf8",
+    );
+    writeFileSync(
+      join(root, "index.html"),
+      '<link rel="stylesheet" href="/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css" />\n',
+      "utf8",
+    );
+    writeFileSync(
+      join(root, "src", "assets", "style", "main.scss"),
+      '@use "@agile-team/wl-skills-ui/styles" as *;\n',
+      "utf8",
+    );
+    writeFileSync(
+      join(root, "src", "main.ts"),
+      'import "@agile-team/wl-skills-ui/runtime/auto";\n',
+      "utf8",
+    );
+    return root;
+  }
+
+  it("未显式声明 profile 时按兼容口径校验，全量写法不判红", () => {
+    const root = hybridProject();
+    const check = runCli(["check", "--project", root], root);
+    assert.equal(check.status, 0, check.stderr);
+    assert.match(check.stdout, /I002 — 全局样式入口 .* 已引入/);
+    assert.match(check.stdout, /I003 — runtime 已可用/);
+    assert.doesNotMatch(check.stdout, /未引入 @agile-team\/wl-skills-ui\/styles\/presets/);
+    assert.equal(existsSync(join(root, ".wl-ui-profile.json")), false);
+  });
+
+  it("显式声明 native-jh-ag 后严格校验仍全绿（styles 全量写法与 runtime/auto 别名）", () => {
+    const root = hybridProject();
+    writeFileSync(
+      join(root, ".wl-ui-profile.json"),
+      JSON.stringify({ schema: 1, profile: "native-jh-ag" }),
+      "utf8",
+    );
+    const check = runCli(["check", "--project", root], root);
+    assert.equal(check.status, 0, check.stderr);
+    assert.match(check.stdout, /I002 — 全局样式入口 .* 已引入/);
+    assert.match(check.stdout, /I003 — runtime 已引入/);
+    for (const line of check.stdout.split("\n")) {
+      if (line.includes("I00")) assert.match(line, /✅/);
+    }
+  });
+
+  it("init 自动识别只建议、不落盘 profile 配置；显式 --profile 才写入", () => {
+    const root = hybridProject();
+    const suggest = runCli(
+      ["init", "--project", root, "--editor", "agents-generic", "--skills-only", "--dry-run"],
+      root,
+    );
+    assert.equal(suggest.status, 0, suggest.stderr);
+    assert.match(suggest.stdout, /未写入 \.wl-ui-profile\.json/);
+    assert.doesNotMatch(suggest.stdout, /\[dry-run\] 写入 \.wl-ui-profile\.json/);
+
+    const explicit = runCli(
+      [
+        "init",
+        "--project",
+        root,
+        "--editor",
+        "agents-generic",
+        "--profile",
+        "native-jh-ag",
+        "--skills-only",
+        "--dry-run",
+      ],
+      root,
+    );
+    assert.equal(explicit.status, 0, explicit.stderr);
+    assert.match(explicit.stdout, /\[dry-run\] 写入 \.wl-ui-profile\.json/);
+  });
+});

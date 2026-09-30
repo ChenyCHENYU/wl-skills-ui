@@ -9,6 +9,7 @@ export default defineConfig({
     "profiles/native-element": "runtime/profile-entries/native-element.ts",
     "profiles/legacy-jh-element": "runtime/profile-entries/legacy-jh-element.ts",
     "profiles/legacy-jh-ag": "runtime/profile-entries/legacy-jh-ag.ts",
+    "profiles/native-jh-ag": "runtime/profile-entries/native-jh-ag.ts",
   },
   format: ["esm"],
   dts: true,

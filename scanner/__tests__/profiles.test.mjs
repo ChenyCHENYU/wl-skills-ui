@@ -34,6 +34,73 @@ describe("UI profiles", () => {
     );
   });
 
+  it("联邦插件依赖视为 AG 形态（AG Grid 经 agGridApp 远程提供）", () => {
+    const root = project({
+      dependencies: {
+        "@originjs/vite-plugin-federation": "1.4.1-jh.3",
+        "@jhlc/common-core": "3.1.0-prod.14",
+      },
+    });
+    const resolution = resolveProjectProfile({ projectRoot: root });
+    assert.equal(resolution.profile.id, "legacy-jh-ag");
+    assert.equal(resolution.source, "dependencies");
+  });
+
+  it("native-jh-ag 覆盖平台混合形态（native 运行时 + jh 封装 + AG）", () => {
+    const profile = listProfiles().find((item) => item.id === "native-jh-ag");
+    assert.ok(profile, "native-jh-ag profile 必须存在");
+    assert.equal(profile.mode, "native");
+    for (const adapter of ["element-plus", "base", "jh", "c", "ag-grid"]) {
+      assert.ok(profile.adapters.includes(adapter), `adapters 应含 ${adapter}`);
+    }
+    assert.equal(profile.stylePreset, "styles/presets/full");
+    assert.equal(profile.runtimePreset, "runtime/profiles/native-jh-ag");
+  });
+
+  it("依赖自动识别不作为严格校验依据，显式声明才是", () => {
+    const depsOnly = project({
+      dependencies: { "@jhlc/common-core": "3.1.0-prod.14" },
+    });
+    assert.equal(resolveProjectProfile({ projectRoot: depsOnly }).explicit, false);
+
+    const explicitArg = project({
+      dependencies: { "@jhlc/common-core": "3.1.0-prod.14" },
+    });
+    assert.equal(
+      resolveProjectProfile({
+        projectRoot: explicitArg,
+        profile: "native-jh-ag",
+      }).explicit,
+      true,
+    );
+
+    const withConfig = project({
+      dependencies: { "@jhlc/common-core": "3.1.0-prod.14" },
+    });
+    writeFileSync(
+      join(withConfig, ".wl-ui-profile.json"),
+      JSON.stringify({ profile: "native-jh-ag" }),
+      "utf8",
+    );
+    const configResolution = resolveProjectProfile({ projectRoot: withConfig });
+    assert.equal(configResolution.source, "config");
+    assert.equal(configResolution.explicit, true);
+
+    const withManifest = project({
+      dependencies: { "@jhlc/common-core": "3.1.0-prod.14" },
+    });
+    writeFileSync(
+      join(withManifest, ".wl-skills-ui-manifest.json"),
+      JSON.stringify({ profile: "native-jh-ag" }),
+      "utf8",
+    );
+    const manifestResolution = resolveProjectProfile({
+      projectRoot: withManifest,
+    });
+    assert.equal(manifestResolution.source, "manifest");
+    assert.equal(manifestResolution.explicit, true);
+  });
+
   it("每个 profile 的样式与 runtime 入口都显式声明", () => {
     for (const profile of listProfiles()) {
       assert.ok(profile.adapters.length > 0);
@@ -42,17 +109,20 @@ describe("UI profiles", () => {
     }
   });
 
-  it("只有 legacy-jh-ag 启用 R021，native 不启用 Base 专属规则", () => {
+  it("只有 AG 形态启用 R021，native-jh-ag 同时保留 Base 规则", () => {
     const nativeRules = new Set(getRules({ profile: "native-element" }).map((r) => r.id));
     const elementRules = new Set(
       getRules({ profile: "legacy-jh-element" }).map((r) => r.id),
     );
     const agRules = new Set(getRules({ profile: "legacy-jh-ag" }).map((r) => r.id));
+    const hybridRules = new Set(getRules({ profile: "native-jh-ag" }).map((r) => r.id));
     assert.ok(!nativeRules.has("R003"));
     assert.ok(!nativeRules.has("R021"));
     assert.ok(elementRules.has("R003"));
     assert.ok(!elementRules.has("R021"));
     assert.ok(agRules.has("R021"));
+    assert.ok(hybridRules.has("R003"), "native-jh-ag 应保留 Base 封装规则 R003");
+    assert.ok(hybridRules.has("R021"), "native-jh-ag 应启用 AG 专属规则 R021");
   });
 
   it("推荐 Skill 不会越过 profile adapter 边界", () => {

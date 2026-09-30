@@ -6,7 +6,8 @@ import {
 export type UiRuntimeProfileId =
   | "native-element"
   | "legacy-jh-element"
-  | "legacy-jh-ag";
+  | "legacy-jh-ag"
+  | "native-jh-ag";
 
 export const UI_RUNTIME_PROFILES: Readonly<
   Record<UiRuntimeProfileId, Readonly<UiRuntimeGuardOptions>>
@@ -24,6 +25,15 @@ export const UI_RUNTIME_PROFILES: Readonly<
     agGridEmptyState: false,
   }),
   "legacy-jh-ag": Object.freeze({
+    themeLock: true,
+    overflowTooltip: true,
+    splitGridResize: true,
+    agGridEmptyState: true,
+  }),
+  // 平台子应用终态形态：native 运行时（defineColumns/renderOps + common
+  // preset）叠在 jh/Base/C 封装组件之上，AG Grid 经联邦或 npm 提供。
+  // guard 需求与 legacy-jh-ag 同集（分屏 resize + AG 空态）。
+  "native-jh-ag": Object.freeze({
     themeLock: true,
     overflowTooltip: true,
     splitGridResize: true,

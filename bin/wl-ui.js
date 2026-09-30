@@ -260,7 +260,9 @@ if (subcommand === "init" || subcommand === "update") {
       editor: editors.join(","),
       editors,
       mode,
-      profile: profile.id,
+      // 仅显式 --profile 的安装才把 profile 固化进清单；
+      // 自动识别的安装不写该字段，避免清单反过来触发严格校验。
+      ...(profileResolution.explicit ? { profile: profile.id } : {}),
       installedAt: new Date().toISOString(),
       files: Object.fromEntries(
         installedFiles.map((f) => [f, fileHash(join(projectRoot, f))]),
@@ -707,7 +709,9 @@ function installProfileConfig({ projectRoot, profile, source, owned, dryRun }) {
       console.warn(`  ⚠ 跳过 ${rel}：现有文件不是有效 JSON，未覆盖用户内容`);
       return [];
     }
-    if (config.profile !== profile.id && ["argument", "mode"].includes(source)) {
+    // 只有用户显式 --profile 才允许改写已声明的 profile；
+    // 自动识别结果不落盘，避免把猜测固化为严格校验依据。
+    if (config.profile !== profile.id && source === "argument") {
       const updated = `${JSON.stringify({ ...config, schema: 1, profile: profile.id }, null, 2)}\n`;
       if (dryRun) console.log(`  [dry-run] 更新 ${rel} → ${profile.id}`);
       else {
@@ -716,6 +720,13 @@ function installProfileConfig({ projectRoot, profile, source, owned, dryRun }) {
       }
     }
     return owned ? [rel] : [];
+  }
+  if (source !== "argument") {
+    console.log(
+      `  ℹ️ 检测到疑似 ${profile.id} 形态（${source}），未写入 ${rel}。` +
+        `如需严格校验：npx wl-ui init --profile ${profile.id}`,
+    );
+    return [];
   }
   if (dryRun) {
     console.log(`  [dry-run] 写入 ${rel}`);

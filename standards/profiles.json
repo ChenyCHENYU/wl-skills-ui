@@ -25,6 +25,14 @@
       "adapters": ["element-plus", "base", "jh", "c", "ag-grid", "custom"],
       "stylePreset": "styles/presets/legacy-jh-ag",
       "runtimePreset": "runtime/profiles/legacy-jh-ag"
+    },
+    {
+      "id": "native-jh-ag",
+      "mode": "native",
+      "description": "Native runtime stack (defineColumns/renderOps + common preset) layered on jh/Base/C vendor components; AG Grid via npm dependency or Module Federation remote.",
+      "adapters": ["element-plus", "base", "jh", "c", "ag-grid", "custom"],
+      "stylePreset": "styles/presets/full",
+      "runtimePreset": "runtime/profiles/native-jh-ag"
     }
   ]
 }

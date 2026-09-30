@@ -264,13 +264,20 @@ if (subcommand === "init") {
 
 if (subcommand === "check") {
   const projectRoot = resolve(values.project);
-  const checks = checkIntegration(projectRoot, activeProfile);
+  // 严格校验只认显式声明的 profile（--profile / .wl-ui-profile.json /
+  // 安装清单）；依赖自动识别仅用于建议口径，保证升级不把存量绿灯判红。
+  const enforcedProfile = profileResolution.explicit ? activeProfile : null;
+  const checks = checkIntegration(projectRoot, enforcedProfile);
   if (values.output === "json") {
     console.log(
       JSON.stringify(
         {
           projectRoot,
-          profile: { id: activeProfile.id, source: profileResolution.source },
+          profile: {
+            id: activeProfile.id,
+            source: profileResolution.source,
+            explicit: profileResolution.explicit,
+          },
           checks,
         },
         null,
@@ -280,6 +287,12 @@ if (subcommand === "check") {
   } else {
     console.log(`# wl-skills-ui 接入完整性检查\n`);
     console.log(`项目根目录：${projectRoot}\n`);
+    if (!profileResolution.explicit) {
+      console.log(
+        `ℹ️ 未显式声明 profile（当前按 ${activeProfile.id} 自动识别）。使用兼容口径校验；` +
+          `如需严格校验请创建 .wl-ui-profile.json 或 npx wl-ui init --profile <id>。\n`,
+      );
+    }
     for (const c of checks) {
       const icon = c.ok ? "✅" : c.severity === "error" ? "❌" : "⚠️";
       console.log(`${icon} ${c.id} — ${c.description}`);
@@ -499,7 +512,11 @@ if (subcommand === "fix") {
 if (subcommand === "all") {
   const projectRoot = resolve(values.project);
   const targetDir = resolveTarget(projectRoot, values.target);
-  const integration = checkIntegration(projectRoot, activeProfile);
+  // 与 check 同口径：仅显式声明的 profile 驱动严格接入校验。
+  const integration = checkIntegration(
+    projectRoot,
+    profileResolution.explicit ? activeProfile : null,
+  );
   const exemptConfig = loadExemptConfig(
     projectRoot,
     values.exempt || undefined,

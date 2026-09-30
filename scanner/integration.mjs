@@ -74,8 +74,14 @@ export function checkIntegration(projectRoot, profile) {
     const expectedStyle = profile
       ? `@agile-team/wl-skills-ui/${profile.stylePreset}`
       : "@agile-team/wl-skills-ui/styles";
+    // full preset 的等价写法：包根 styles 入口即 full preset（index.scss
+    // 直接 @forward './presets/full'）。两种写法任一命中即视为已引入，
+    // 避免把存量项目的合法全量引入判红。
+    const isFullPreset = profile?.stylePreset === "styles/presets/full";
     const referenced = profile
-      ? styleHit.content.includes(expectedStyle)
+      ? styleHit.content.includes(expectedStyle) ||
+        (isFullPreset &&
+          /@agile-team\/wl-skills-ui\/styles(?!\/presets)/.test(styleHit.content))
       : /@agile-team\/wl-skills-ui(\/styles)?/.test(styleHit.content) ||
         /wl-skills-ui(\/dist)?/.test(styleHit.content) ||
         /shared\/index/.test(styleHit.content);
@@ -110,13 +116,19 @@ export function checkIntegration(projectRoot, profile) {
   const expectedRuntime = profile
     ? `@agile-team/wl-skills-ui/${profile.runtimePreset}`
     : "@agile-team/wl-skills-ui/runtime";
+  // native-jh-ag 的 guard 选项与 runtime/auto（legacy 全量兼容入口）
+  // 完全同集，import 两者任一即视为已安装 Profile runtime。
+  const runtimeAliases =
+    profile?.id === "native-jh-ag"
+      ? ["@agile-team/wl-skills-ui/runtime/auto"]
+      : [];
+  const acceptedRuntimes = [expectedRuntime, ...runtimeAliases];
   // 也检查 main.ts 是否 import runtime
   for (const entry of ["src/main.ts", "src/main.js", "src/main-core.ts"]) {
     const p = join(projectRoot, entry);
-    if (
-      existsSync(p) &&
-      readFileSync(p, "utf8").includes(expectedRuntime)
-    ) {
+    if (!existsSync(p)) continue;
+    const content = readFileSync(p, "utf8");
+    if (acceptedRuntimes.some((runtime) => content.includes(runtime))) {
       runtimeReferenced = true;
       break;
     }

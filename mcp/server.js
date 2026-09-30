@@ -5,7 +5,11 @@ import { scanProject, expandRuleRange } from "../scanner/engine.mjs";
 import { generateReport } from "../scanner/report.mjs";
 import { checkIntegration } from "../scanner/integration.mjs";
 import { runFix } from "../scanner/fix.mjs";
-import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
+import { listProfiles, resolveProjectProfile } from "../standards/profiles-loader.mjs";
+
+// profile 枚举由 profiles.json 事实源动态生成，新增 profile 无需改这里。
+const PROFILE_ENUM = listProfiles().map((profile) => profile.id);
+const PROFILE_ENUM_DESC = `${PROFILE_ENUM.join("、")}；默认读取配置或按依赖检测`;
 
 const require = createRequire(import.meta.url);
 const PKG = require("../package.json");
@@ -24,8 +28,8 @@ const TOOLS = [
         },
         profile: {
           type: "string",
-          enum: ["native-element", "legacy-jh-element", "legacy-jh-ag"],
-          description: "显式 UI Profile；默认读取配置或按依赖检测",
+          enum: PROFILE_ENUM,
+          description: `显式 UI Profile；${PROFILE_ENUM_DESC}`,
         },
       },
       required: [],
@@ -50,8 +54,8 @@ const TOOLS = [
         },
         profile: {
           type: "string",
-          enum: ["native-element", "legacy-jh-element", "legacy-jh-ag"],
-          description: "native-element、legacy-jh-element 或 legacy-jh-ag",
+          enum: PROFILE_ENUM,
+          description: `显式 UI Profile；${PROFILE_ENUM_DESC}`,
         },
         layer: { type: "string", description: "L0,L1,L2,L3,L4 逗号分隔" },
         vendor: { type: "string", description: "vendor 过滤，逗号分隔" },
@@ -100,8 +104,8 @@ const TOOLS = [
         },
         profile: {
           type: "string",
-          enum: ["native-element", "legacy-jh-element", "legacy-jh-ag"],
-          description: "显式 UI Profile；默认按项目依赖检测",
+          enum: PROFILE_ENUM,
+          description: `显式 UI Profile；${PROFILE_ENUM_DESC}`,
         },
         only: { type: "string", description: "仅预览指定可修复规则" },
         skip: { type: "string", description: "跳过指定可修复规则" },

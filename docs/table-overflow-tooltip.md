@@ -24,6 +24,8 @@ import "@agile-team/wl-skills-ui/runtime/profiles/legacy-jh-element";
 
 // 只有项目确实使用 AG Grid 时改为：
 // import "@agile-team/wl-skills-ui/runtime/profiles/legacy-jh-ag";
+// 平台子应用（native 运行时 + jh/Base 封装 + 联邦 AG Grid）使用：
+// import "@agile-team/wl-skills-ui/runtime/profiles/native-jh-ag";
 ```
 
 不要同时重复调用 `installCommonPreset()` 和引入 Profile。内部安装函数具备幂等保护，但项目应保留单一、清晰的启动入口。`runtime/auto` 仅供尚未迁移的 full legacy 项目兼容，不应作为新接入默认值。

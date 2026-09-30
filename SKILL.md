@@ -41,9 +41,14 @@ Profiles compose capabilities and vendor adapters. Prefer an explicit project
 | `native-element` | Native Element Plus projects without legacy vendor adapters |
 | `legacy-jh-element` | jh/Base legacy projects that do not use AG Grid |
 | `legacy-jh-ag` | jh/Base legacy projects that intentionally use AG Grid |
+| `native-jh-ag` | Platform sub-apps: native runtime on jh/Base vendors, AG Grid via npm or federation remote |
 
 AG Grid is an optional adapter. Rules such as R021 and AG-specific runtime guards
-must not run outside `legacy-jh-ag`.
+must not run outside the AG profiles (`legacy-jh-ag`, `native-jh-ag`).
+
+Strict profile checks only apply to explicitly declared profiles (`--profile`,
+`.wl-ui-profile.json`, or the install manifest); dependency detection is a
+suggestion and never turns a previously green project red.
 
 ## Decision boundary
 

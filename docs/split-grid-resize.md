@@ -18,7 +18,7 @@
 
 ## 实现机制
 
-1. `runtime/profiles/legacy-jh-ag` 安装 `ResizeObserver`，只观察已识别分屏的两个直接 pane。
+1. `runtime/profiles/legacy-jh-ag`（及 `native-jh-ag`）安装 `ResizeObserver`，只观察已识别分屏的两个直接 pane。
 2. 动态路由晚挂载的新分屏通过仅监听 `childList` 的 `MutationObserver` 注册；不监听
    全站 style/class 变化，也不扫描每一帧。
 3. 发现 AG Grid 后，为 pane、必要祖先和 grid host 增加包内结构标记；SCSS 只对这些

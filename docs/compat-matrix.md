@@ -46,7 +46,7 @@
 
 - 集团内 jh 项目：**统一锚定 `element-plus@2.2.6-prod.3` + `@jhlc/jh-ui@3.1.0`**，与 wl-skills-ui v1.11.0 三方对齐。
 - 新的原生 Element Plus 项目使用社区 wrapper DOM；Date/Time Picker 必须保留 `_picker.scss` 与 R042，禁止裸 `.el-date-picker` 几何规则污染 Teleport 面板。
-- 使用 `.wl-ui-profile.json` 显式选择 runtime 入口：`native-element` 和 `legacy-jh-element` 不启动 AG observer，只有 `legacy-jh-ag` 启用。旧 `runtime/auto` 仅保留为 full legacy 兼容入口。
+- 使用 `.wl-ui-profile.json` 显式选择 runtime 入口：`native-element` 和 `legacy-jh-element` 不启动 AG observer，`legacy-jh-ag` 与 `native-jh-ag` 启用。旧 `runtime/auto` 仅保留为 full legacy 兼容入口（其 guard 集与两个 AG Profile 同集）。
 - 升级 `element-plus` 到 2.3+ 前，必须同步升级 `@jhlc/jh-ui` 到对应支持版本，否则 `.com-text` / `.el-input__inner` DOM 与 EP `__wrapper` 体系不兼容。
 - 新项目接入：见 README 「快速接入」章节，默认会按本表声明 peerDependency 范围。
 

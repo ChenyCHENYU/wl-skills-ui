@@ -27,7 +27,7 @@ AG Grid 的 no-rows overlay 在不同版本中可能覆盖整张 Grid。直接�
 
 ## 包内机制
 
-`runtime/ag-grid-empty-state.ts` 只随 `legacy-jh-ag` Profile（以及旧 `runtime/auto` 兼容入口）安装：
+`runtime/ag-grid-empty-state.ts` 只随 `legacy-jh-ag` / `native-jh-ag` Profile（以及旧 `runtime/auto` 兼容入口）安装：
 
 1. 只识别当前可见的 `.ag-overlay-no-rows-wrapper`。
 2. 优先读取 `.ag-body-viewport` 的真实矩形，兼容 AG Grid 29/32；缺少 viewport 时才回退

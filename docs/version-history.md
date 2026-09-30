@@ -2,6 +2,14 @@
 
 本页保留面向使用者的版本能力摘要；逐提交级变更、修复细节和旧版本记录见根目录 [`CHANGELOG.md`](../CHANGELOG.md)。
 
+## v1.13.0 — native-jh-ag 混合形态与兼容承诺
+
+- 新增 `native-jh-ag` Profile：平台子应用终态形态（native 运行时 + jh/Base/C 封装 + 联邦或 npm AG Grid）。样式入口 `styles/presets/full`，包根 `styles` 全量写法等价认可；runtime guard 与 `legacy-jh-ag` 同集（分屏 resize + AG 空态），`runtime/auto` 作为等价 runtime 引用被 I003 接受——存量项目声明后零代码改动通过严格校验。
+- **兼容承诺**：`check` / `all` 仅在显式声明 Profile（`--profile`、`.wl-ui-profile.json`、安装清单字段）时按 Profile 严格校验；依赖自动识别只用于 Skill 过滤与建议，未声明项目按 1.11 兼容口径校验，升级不会把存量绿灯判红。
+- `wl-ui init` 仅在显式 `--profile` 时写入 `.wl-ui-profile.json` 与清单 `profile` 字段；自动识别只打印建议，不再落盘固化猜测。
+- 依赖识别支持 Module Federation AG 形态（`@originjs/vite-plugin-federation` 依赖即按 AG 形态建议）；`R003`/`R021` 等规则对 `native-jh-ag` 启用。
+- Profile 配置读取剥 UTF-8 BOM 并对无效配置给出明确错误；新增混合形态夹具与 explicit 语义测试（176→182）。
+
 ## v1.12.0 — Profile、确定性门禁与低 token 协议
 
 - 新增 `native-element`、`legacy-jh-element`、`legacy-jh-ag` 三个显式 Profile，统一组合 adapter、规则、样式与 runtime；R021 和 AG observers 只在 AG Profile 启用。

@@ -11,7 +11,9 @@ function callMcp(message) {
     cwd: root,
     input: `${JSON.stringify(message)}\n`,
     encoding: "utf8",
-    timeout: 5000,
+    // MCP server 冷启动需加载完整 scanner 引擎；全量套件并发 + 覆盖率
+    // 插桩下首次冷启可能超过 5s（Windows 本机实测），给足负载余量防 flaky。
+    timeout: 30000,
   });
   assert.equal(result.status, 0, result.stderr);
   return JSON.parse(result.stdout.trim());

@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.13.1] - 2026-09-30
+
+### Fixed
+
+- R008 不再漏检 `BaseForm` / `BaseQuery` 的 `label-width`：覆盖原生与封装表单的静态宽度写法，仍为 `info` 且不自动修改；动态宽度及无关节点不误报。
+
+### Docs
+
+- 明确 150px 只是预警下限。长标签须测量实际文本并与列数、至少 160px 的输入区共同核对；禁止为解决局部截断而全局取消 jh/Base 标签省略。补充宽/窄屏浏览器几何验收。
+
 ## [1.13.0] - 2026-09-30
 
 ### Added

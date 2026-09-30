@@ -2,6 +2,11 @@
 
 本页保留面向使用者的版本能力摘要；逐提交级变更、修复细节和旧版本记录见根目录 [`CHANGELOG.md`](../CHANGELOG.md)。
 
+## v1.13.1 — 长标签表单布局治理
+
+- R008 扩展至 `BaseForm` / `BaseQuery` 的静态标签宽度写法，避免封装表单漏检；仍仅提示人工复核。
+- 文档明确按最长标签和列宽预算调整局部表单，保障输入区至少 160px；宽/窄屏检查标签未截断且字段不重叠，不做全局样式覆盖。
+
 ## v1.13.0 — native-jh-ag 混合形态与兼容承诺
 
 - 新增 `native-jh-ag` Profile：平台子应用终态形态（native 运行时 + jh/Base/C 封装 + 联邦或 npm AG Grid）。样式入口 `styles/presets/full`，包根 `styles` 全量写法等价认可；runtime guard 与 `legacy-jh-ag` 同集（分屏 resize + AG 空态），`runtime/auto` 作为等价 runtime 引用被 I003 接受——存量项目声明后零代码改动通过严格校验。

@@ -121,29 +121,30 @@ export const formRules = [
     },
   },
 
-  // R008: el-form labelWidth < 150px
+  // R008: 静态标签宽度小于基础阈值；长标签仍需按实际文本测量。
   {
     id: "R008",
     category: "form",
     severity: "info",
-    name: "el-form labelWidth 偏小（< 150px）",
+    name: "表单静态标签宽度偏小（< 150px）",
     check(template, file, lineOffset) {
       const issues = [];
-      const pattern = /labelWidth="(\d+)px"/g;
-      let m;
-      while ((m = pattern.exec(template)) !== null) {
-        if (parseInt(m[1]) < 150)
+      for (const tagName of ["el-form", "BaseForm", "base-form", "BaseQuery", "base-query"]) {
+        for (const tag of findTags(template, tagName)) {
+          const match = tag.text.match(/(?:^|\s)(?:label-width|labelWidth)\s*=\s*["'](\d+)px["']/);
+          if (!match || Number(match[1]) >= 150) continue;
           issues.push(
             issue(
               file,
-              lineOf(template, m.index, lineOffset),
+              lineOf(template, tag.index, lineOffset),
               "R008",
               "form",
               "info",
-              `labelWidth="${m[1]}px" 偏小，长标签（≥8字）可能换行`,
-              '建议改为 labelWidth="150px"（需人工确认）',
+              `${tagName} 标签宽度 ${match[1]}px 偏小，长标签可能被截断`,
+              "量取最长实际标签并核对控件宽度；必要时增加标签宽度、减少列数（需人工确认）",
             ),
           );
+        }
       }
       return issues;
     },

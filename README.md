@@ -1,6 +1,6 @@
 # @agile-team/wl-skills-ui
 
-**企业级 UI 一致性与 AI 精确治理工具包 v1.13.0** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
+**企业级 UI 一致性与 AI 精确治理工具包 v1.13.1** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
 
 它把“视觉统一、问题识别、机械修复、项目适配和样例沉淀”拆成可验证、可组合的工程能力。脚本、规则和 MCP 先完成确定性工作，AI 只处理业务语义与人工决策，从而减少重复读源码、上下文 token 和误修改。
 
@@ -136,6 +136,7 @@ Vendor 覆盖顺序是：`Base* > jh-* > C_*/c_* > AG Grid > custom wrappers`。
 - `defineColumns()` 默认补齐叶子列和表头居中，并合并业务已有 `cellStyle/cellClass/headerClass`；传 `defaultAlign: null` 可退出。
 - 普通按钮默认要求 `size="small"` 且带语义图标；已声明动态尺寸、link/text 或操作列图标按钮不会被误改。
 - 表单输入、Select、Date/Time Picker 默认 small，日期时间输入根使用 `style="width:100%"`。
+- 长标签布局按实际文本、字体和容器宽度确定：R008 对 `el-form`、`BaseForm`、`BaseQuery` 的静态 `labelWidth` / `label-width` 小于 150px 给出人工复核提示；150px 不是统一修复值。加宽标签时同步保证输入区至少 160px，必要时减少列数；不全局取消 jh/Base 标签省略。详见[表单规范](standards/ui/03-form.md)。
 - 原生 `el-date-picker` / `el-time-picker` 的面板通过 Teleport 渲染，面板同样带 `.el-date-picker` 类。包内 `_picker.scss`、R042 与浏览器契约共同阻止裸几何样式把弹层放大为全屏；输入宽度只作用于 `.el-date-editor` 或组件 style，弹层规则必须从 `.el-picker__popper` 限定。
 
 ```ts
@@ -472,7 +473,7 @@ npx wl-ui doctor --project . --print-overrides
 
 ## 版本与进一步阅读
 
-当前 v1.13.0：新增 `native-jh-ag` 混合形态 Profile（平台子应用终态：native 运行时 + jh/Base 封装 + 联邦/npm AG Grid）、严格校验仅认显式声明的兼容承诺、init 自动识别只建议不落盘、联邦 AG 依赖识别。v1.12.0：显式 UI Profile 与 AG adapter 解耦、规则/修复器一致性门禁、R043 确定性 icon 修复、共享 CLI/MCP 扫描引擎、summary/compact-v2 分页协议、fix 计划哈希，以及不覆盖项目内容的托管 Skill 路由块。
+当前 v1.13.1：R008 覆盖 jh/Base 表单静态标签宽度，补充长标签与输入区的布局预算和浏览器验收口径，保持只提示、不自动改样式。v1.13.0：新增 `native-jh-ag` 混合形态 Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。v1.12.0：显式 UI Profile、规则/修复器一致性门禁、共享 CLI/MCP 扫描引擎与 dry-run 计划哈希。
 
 - [版本摘要](docs/version-history.md)
 - [完整 Changelog](CHANGELOG.md)

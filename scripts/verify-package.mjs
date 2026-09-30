@@ -385,7 +385,11 @@ globalThis.MutationObserver = class {
 runtime.installBrandThemeLock();
 fakeBody.style.setProperty("--el-color-primary", "#4368ff");
 fakeBody.style.setProperty("--el-border-radius-base", "2px");
-observerCallback?.([{ type: "attributes" }]);
+// 合法 MutationRecord 必带 target（theme-lock 仅对 html/body 自身的 style
+// 改写重新落锁，见 1.13 性能批），夹具按真实记录形状构造。
+observerCallback?.([
+  { type: "attributes", attributeName: "style", target: fakeBody },
+]);
 if (
   fakeBody.style.getPropertyValue("--el-color-primary") !== "#002a8f" ||
   fakeBody.style.getPropertyPriority("--el-color-primary") !== "important" ||

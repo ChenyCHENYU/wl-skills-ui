@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Window } from "happy-dom";
+import { findUnknownCompositeRoots } from "../rules/componentStructure.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const registry = JSON.parse(
@@ -17,6 +18,20 @@ function openFixture(relativePath) {
 }
 
 describe("复合控件结构清单", () => {
+  it("自定义 inline stepper 作为未知复合控件进入人工结构审查", () => {
+    const findings = findUnknownCompositeRoots(`
+      <div class="heat-inline-stepper">
+        <el-input />
+        <button>上</button><button>下</button>
+      </div>
+    `);
+    assert.equal(findings.length, 1);
+    assert.equal(
+      findUnknownCompositeRoots('<div class="wizard-stepper"><el-input /></div>').length,
+      0,
+      "普通步骤容器没有双按钮时不应被误报",
+    );
+  });
   it("ID 唯一且每项都声明结构所有者、高度策略、状态和 fixture", () => {
     const ids = new Set();
     for (const contract of registry.contracts) {

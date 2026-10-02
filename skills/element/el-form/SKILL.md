@@ -1,7 +1,7 @@
 ---
+name: el-form
 description: |
-  表单控件规范 Skill — el-input / el-select / el-date-picker / el-form 的尺寸、宽度、labelWidth 标准。
-  覆盖规则：R006 R007 R008。
+  审查和修复 Vue/Element Plus 表单控件尺寸、标签预算与自定义步进输入的布局问题。
 applyTo: "**/*.vue"
 ---
 
@@ -36,14 +36,17 @@ el-date-picker 默认宽度不会自动撑满 el-form-item，必须显式设置�
 
 ## R008 — 表单静态标签宽度预警 【低危】
 
-```diff
-- <el-form :model="form" labelWidth="100px">
-+ <el-form :model="form" labelWidth="150px">
-```
+`label-width="100px"` 等静态小宽度会触发人工检查；不要机械替换成固定 `150px`。
 
 > 扫描覆盖 `el-form`、`BaseForm`、`BaseQuery` 的静态 `labelWidth` / `label-width`；150px 只是预警下限，不是所有表单的最终宽度。`jh-ui` 的 `.com-text` 可能强制单行省略，因此长标签（含单位、中英文混排）需按实际字体测量。
 > 修复时先量最长标签，再同时检查列宽预算：每列至少容纳标签、间距和 160px 可输入区；不足时降低列数并设置响应式断点。只作用于受影响表单，不全局取消省略或强迫所有页面使用同一个宽度。tooltip 不能代替标签可见。该规则**仅提示人工确认**，不自动修改。
 > 浏览器验收至少核对宽屏和窄屏：标签 `scrollWidth <= clientWidth`、输入区 ≥160px、相邻字段不重叠；若业务允许单列移动布局，可在更窄视口单独验收。
+
+## R044 — 密集多列表单超宽固定标签 【人工复核】
+
+静态 `label-width >= 240px`，或动态绑定中含同等宽度的字面量兜底值，且配置多列时，检查是否出现首列大留白、右侧贴边。无法静态判断的动态值不猜测。按实际最长标签缩窄**当前表单**标签宽度，并给卡片两侧同等内边距；不能把某个示例像素值批量写到所有页面。若长标签确实需要 240px 以上，保留并通过减列保障输入区。宽/窄屏几何验收同 R008，规则只提示不自动修复。
+
+字母数字混合的炉号上下键属于复合文字输入，不能改成 `el-input-number`；外壳单独绘制唯一边框，按钮高度各半，统一使用 `--wk-form-control-height` 和 `--wk-form-number-controls-width`。自有根类包含 `stepper` 时 R040 会提醒登记结构契约。详见 `standards/ui/03-form.md`。
 
 ---
 

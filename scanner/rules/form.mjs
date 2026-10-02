@@ -1,4 +1,4 @@
-/** scanner/rules/form.mjs — 表单控件规则：R006 R007 R008 */
+/** scanner/rules/form.mjs — 表单控件规则：R006 R007 R008 R042 R044 */
 import { lineOf, issue, findTags } from "./_shared.mjs";
 
 function isPickerPanelScoped(selector) {
@@ -142,6 +142,45 @@ export const formRules = [
               "info",
               `${tagName} 标签宽度 ${match[1]}px 偏小，长标签可能被截断`,
               "量取最长实际标签并核对控件宽度；必要时增加标签宽度、减少列数（需人工确认）",
+            ),
+          );
+        }
+      }
+      return issues;
+    },
+  },
+
+  // R044: 多列表单的超宽静态标签或动态字面量兜底值会把首列输入推向右侧。
+  // 只做 review：标签文本、列宽和响应式断点都可能使宽标签成为必要配置。
+  {
+    id: "R044",
+    category: "form",
+    severity: "review",
+    name: "多列表单标签宽度过大（≥ 240px）",
+    check(template, file, lineOffset) {
+      const issues = [];
+      for (const tagName of ["el-form", "BaseForm", "base-form"]) {
+        for (const tag of findTags(template, tagName)) {
+          const widthAttribute = tag.text.match(
+            /(?:^|\s)(:)?(?:label-width|labelWidth)\s*=\s*(["'])([\s\S]*?)\2/,
+          );
+          if (!widthAttribute) continue;
+          const widths = widthAttribute[1]
+            ? [...widthAttribute[3].matchAll(/(["'`])(\d+)px\1/g)].map((match) => Number(match[2]))
+            : [Number(/^(\d+)px$/.exec(widthAttribute[3].trim())?.[1])];
+          const wideWidth = widths.find((width) => width >= 240);
+          if (!wideWidth) continue;
+          const columns = tag.text.match(/(?:^|\s)(?::columns|columns)\s*=\s*["']([^"']+)["']/);
+          if (!columns || columns[1].trim() === "1") continue;
+          issues.push(
+            issue(
+              file,
+              lineOf(template, tag.index, lineOffset),
+              "R044",
+              "form",
+              "review",
+              `${tagName} 在多列布局中使用 ${wideWidth}px 标签宽度，可能造成首列大留白`,
+              "核对最长实际标签与输入区≥160px；仅在本表单缩窄标签并设置对称边距，宽/窄屏实测后再应用，不自动改写",
             ),
           );
         }

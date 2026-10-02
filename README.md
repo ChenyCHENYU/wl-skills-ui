@@ -1,6 +1,6 @@
 # @agile-team/wl-skills-ui
 
-**企业级 UI 一致性与 AI 精确治理工具包 v1.13.1** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
+**企业级 UI 一致性与 AI 精确治理工具包 v1.13.2** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
 
 它把“视觉统一、问题识别、机械修复、项目适配和样例沉淀”拆成可验证、可组合的工程能力。脚本、规则和 MCP 先完成确定性工作，AI 只处理业务语义与人工决策，从而减少重复读源码、上下文 token 和误修改。
 
@@ -13,7 +13,7 @@
 | --- | --- | --- |
 | 统一新项目视觉 | Design Tokens、Element Plus 原子样式、页面 Layout、Runtime Preset | 颜色、尺寸、间距、圆角、表格和业务状态从同一事实源产生 |
 | 低成本治理老项目 | Skin 模式、Base*/jh-*/C_*/AG Grid 兼容层、定制页豁免 | 不改封装源码也能统一大部分视觉，避免一次性重构风险 |
-| 阻止 UI 回归 | 39 条 R-rule、接入检查、漂移基线、Git 增量扫描、CI 门禁 | 表头/内容不共轴、按钮无图标、日期弹层全屏等问题在提交前暴露 |
+| 阻止 UI 回归 | 40 条 R-rule、接入检查、漂移基线、Git 增量扫描、CI 门禁 | 表头/内容不共轴、按钮无图标、日期弹层全屏、密集表单失衡等问题在提交前暴露 |
 | 安全机械修复 | Profile、only/skip、dry-run 计划哈希、快照、复检与回滚 | 自动化只处理可证明安全且已批准的动作，不让 AI 猜测批改 |
 | 降低 AI token | summary、compact-v2 分页、changed-only、Skill 路由、13 个 MCP Tool | AI 先读总览和结构化事实，只在必要时获取有界明细或局部源码 |
 | 沉淀领域样例 | `ui-contract` extract / validate / match | 页面转为脱敏语义 JSON，不复制整页代码、接口、字段值或原始文案 |
@@ -137,6 +137,7 @@ Vendor 覆盖顺序是：`Base* > jh-* > C_*/c_* > AG Grid > custom wrappers`。
 - 普通按钮默认要求 `size="small"` 且带语义图标；已声明动态尺寸、link/text 或操作列图标按钮不会被误改。
 - 表单输入、Select、Date/Time Picker 默认 small，日期时间输入根使用 `style="width:100%"`。
 - 长标签布局按实际文本、字体和容器宽度确定：R008 对 `el-form`、`BaseForm`、`BaseQuery` 的静态 `labelWidth` / `label-width` 小于 150px 给出人工复核提示；150px 不是统一修复值。加宽标签时同步保证输入区至少 160px，必要时减少列数；不全局取消 jh/Base 标签省略。详见[表单规范](standards/ui/03-form.md)。
+- 密集多列表单若静态标签宽度或动态绑定中的字面量兜底值达到 240px，R044 提醒人工核对左右留白与输入区宽度；仅在本表单调整标签预算和对称边距。自定义文本步进输入用单外壳边框与控件高度/步进区宽度 token，R040 可审查未登记的 `stepper` 复合结构。两类问题均不做危险的全局自动改写。详见[表单规范](standards/ui/03-form.md)。
 - 原生 `el-date-picker` / `el-time-picker` 的面板通过 Teleport 渲染，面板同样带 `.el-date-picker` 类。包内 `_picker.scss`、R042 与浏览器契约共同阻止裸几何样式把弹层放大为全屏；输入宽度只作用于 `.el-date-editor` 或组件 style，弹层规则必须从 `.el-picker__popper` 限定。
 
 ```ts
@@ -473,7 +474,7 @@ npx wl-ui doctor --project . --print-overrides
 
 ## 版本与进一步阅读
 
-当前 v1.13.1：R008 覆盖 jh/Base 表单静态标签宽度，补充长标签与输入区的布局预算和浏览器验收口径，保持只提示、不自动改样式。v1.13.0：新增 `native-jh-ag` 混合形态 Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。v1.12.0：显式 UI Profile、规则/修复器一致性门禁、共享 CLI/MCP 扫描引擎与 dry-run 计划哈希。
+当前 v1.13.2：R044 审查多列表单超宽静态标签和动态字面量兜底值，R040 增加自定义 `stepper` 复合结构识别；两者仅供人工复核，不自动改写项目样式。v1.13.1：R008 覆盖 jh/Base 表单静态标签宽度，并补充长标签与输入区的布局预算和浏览器验收口径。v1.13.0：新增 `native-jh-ag` 混合形态 Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
 
 - [版本摘要](docs/version-history.md)
 - [完整 Changelog](CHANGELOG.md)

@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.13.2] - 2026-10-02
+
+### Added
+
+- R044 对多列表单静态 `label-width >= 240px` 及动态绑定中的宽字面量兜底值给出局部布局人工复核提示；R040 识别未登记的自定义 `stepper` 复合输入。均不自动改写业务页面。
+- 表单规范与 Skill 增补单外壳文本步进控件、对称边距及宽/窄屏几何验收口径。
+
 ## [1.13.1] - 2026-09-30
 
 ### Fixed

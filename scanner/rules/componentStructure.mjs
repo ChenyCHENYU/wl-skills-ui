@@ -25,13 +25,19 @@ export function findUnknownCompositeRoots(template) {
     const isHybridElementWrapper =
       classes.includes("el-input") && classes.includes("el-input__wrapper");
     const looksComposite = COMPOSITE_NAME.test(classValue);
+    const looksStepper = /stepper/i.test(classValue);
     const nearby = template.slice(match.index, match.index + 1600);
     const containsInputStructure =
       /<el-(?:input|select|autocomplete|cascader)\b|el-(?:input|select)__wrapper/.test(
         nearby,
       );
+    const containsStepButtons =
+      (nearby.match(/<(?:el-)?button\b/g) || []).length >= 2;
 
-    if (isHybridElementWrapper || (looksComposite && containsInputStructure)) {
+    if (
+      isHybridElementWrapper ||
+      ((looksComposite || (looksStepper && containsStepButtons)) && containsInputStructure)
+    ) {
       findings.push({ index: match.index, classValue });
     }
   }

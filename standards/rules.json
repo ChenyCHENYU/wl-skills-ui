@@ -195,6 +195,18 @@
       "skills": ["element/el-form"]
     },
     {
+      "id": "R044",
+      "category": "form",
+      "severity": "review",
+      "title": "多列表单标签宽度过大（≥ 240px）",
+      "rationale": "静态宽度或动态绑定中的宽字面量兜底值会在多列密集表单中制造首列大留白；需要结合真实标签文本、输入区和断点核对。",
+      "appliesTo": ["el-form", "BaseForm"],
+      "autoFixable": false,
+      "manualReason": "无法仅凭静态代码确定最长标签、真实列宽与响应式断点；必须局部实测，不可全局替换。",
+      "scanner": "scanner/rules/form.mjs",
+      "skills": ["element/el-form"]
+    },
+    {
       "id": "R009",
       "category": "tag",
       "severity": "warning",

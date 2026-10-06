@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-10-07
+
+### Added
+
+- 新增 `bin/capabilities.json` 机读能力边界，明确 CLI、安装器和 MCP 独立使用，无需其他 wl-skills 包或统一客户端。
+- `.clinerules` 目录使用独有的 `wl-skills-ui.md`，兼容历史单文件路由和其他包共同安装；安装前检查全部所选编辑器目标路径。
+- 新插入的 HTML tokens link 登记独立贡献边界，清理只移除未修改的本包插入；历史无归属证据的链接和项目已有 SCSS/runtime import 保留。
+
+### Fixed
+
+- 规则文件、支撑文件和本包路由区块按 manifest 已安装哈希更新/清理，用户修改保留；预存相同内容、外来文件与同名 MCP 项仅引用，不取得清理权限。
+- 共享 Markdown 仅替换本包精确区间，保留其他包区块及用户原有 CRLF、空行、尾空格和空文件；有哈希证明的旧整文件路由安全迁移。
+- MCP 使用独立随包发货的 JSONC helper，保留注释和外来键；值或节点原始文本改变均视为本地修改。
+- 共享 Markdown、JSONC、HTML、Profile 与清单使用同目录临时文件原子替换，临时写入或 rename 失败时原文件字节、存在性与权限保持。该保证不包含跨文件安装回滚。
+- 增加真实 CLI 迁移、内容归属、空白保持和故障注入回归；覆盖率统计排除随包附带的第三方 parser。
+
 ## [1.13.2] - 2026-10-02
 
 ### Added

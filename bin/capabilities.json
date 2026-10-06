@@ -1,0 +1,43 @@
+{
+  "boundaryVersion": 1,
+  "package": "@agile-team/wl-skills-ui",
+  "capabilities": [
+    {
+      "id": "ui.visual-alignment",
+      "intents": [
+        "init",
+        "scan",
+        "audit",
+        "fix",
+        "migrate"
+      ],
+      "inputs": [
+        "vue-source",
+        "ui-profile"
+      ],
+      "outputs": [
+        "styles",
+        "runtime-renderers",
+        "visual-findings"
+      ]
+    }
+  ],
+  "standalone": {
+    "requiresSiblingPackages": [],
+    "missingBusinessFacts": "report-unresolved",
+    "projectInputsOwnedBy": "project",
+    "hostRequirements": [
+      "Vue 3",
+      "Element Plus",
+      "explicit or detected UI profile"
+    ]
+  },
+  "composition": {
+    "contributionId": "wl-skills-ui",
+    "protocolVersion": "1.0",
+    "optionalTraceInput": "design-model",
+    "unknownProtocol": "reject-or-explicit-migration",
+    "apiAuthority": "validated-effective-api-manifest",
+    "sharedWrites": "own-block-or-json-entry-only"
+  }
+}

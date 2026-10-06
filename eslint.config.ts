@@ -20,6 +20,7 @@ export default defineConfigWithVueTs(
   {
     name: "app/files-to-ignore",
     ignores: [
+      "bin/vendor/**",
       "**/dist/**",
       "**/dist-ssr/**",
       "**/coverage/**",
@@ -57,6 +58,10 @@ export default defineConfigWithVueTs(
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "error",
     },
+  },
+  {
+    files: ["bin/**/*.cjs"],
+    rules: { "@typescript-eslint/no-require-imports": "off" },
   },
   // 自定义规则组
   {

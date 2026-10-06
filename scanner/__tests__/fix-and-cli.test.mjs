@@ -298,7 +298,7 @@ describe("统一 CLI", () => {
       root,
     );
     assert.equal(init.status, 0, init.stderr);
-    assert.match(init.stderr, /跳过 \.mcp\.json/);
+    assert.match(init.stderr, /(?:跳过|保留) \.mcp\.json/);
     assert.equal(readFileSync(join(root, ".mcp.json"), "utf8"), invalidMcp);
 
     const manifest = JSON.parse(

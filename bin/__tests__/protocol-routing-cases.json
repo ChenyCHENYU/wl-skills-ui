@@ -1,0 +1,15 @@
+[
+  { "task": "统一表格视觉", "skill": "element/el-table" },
+  { "task": "查询表单密集审计", "skill": "element/el-form" },
+  { "task": "弹窗样式对齐", "skill": "element/el-dialog" },
+  { "task": "状态标签颜色统一", "skill": "element/el-tag" },
+  { "task": "列表布局骨架", "skill": "layouts/list-page" },
+  { "task": "AG Grid 适配", "skill": "vendors/ag-grid" },
+  { "task": "UI扫描", "skill": "ops/scan" },
+  { "task": "UI修复统一视觉", "skill": "ops/fix" },
+  { "task": "UI迁移迁移tokens", "skill": "ops/migrate" },
+  { "task": "设计令牌接入消除颜色硬编码", "skill": "runtime/design-tokens" },
+  { "task": "写诗", "skill": null, "status": "not-applicable" },
+  { "task": "生成测试用例", "skill": null, "status": "needs-context" },
+  { "task": "检查", "skill": null, "status": "needs-context" }
+]

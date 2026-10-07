@@ -78,7 +78,7 @@ const SUBCOMMANDS = new Set([
   "contract",
   "rules",
   "profiles",
-  "task", "route", "explain", "status", "doctor-host",
+  "task", "route", "explain", "status", "doctor-host", "protocol",
 ]);
 let subcommand = "help";
 
@@ -95,7 +95,10 @@ if (rawArgs.length > 0 && SUBCOMMANDS.has(rawArgs[0])) {
 }
 
 // 非 init 子命令：直接委托给 scanner/index.mjs
-if (["task", "route", "explain", "status", "doctor-host"].includes(subcommand)) {
+if (subcommand === "protocol") {
+  const { runCli } = await import("./protocol-cli.mjs");
+  process.exitCode = runCli(rawArgs);
+} else if (["task", "route", "explain", "status", "doctor-host"].includes(subcommand)) {
   const { taskCli } = await import("./task-integration.mjs");
   taskCli(subcommand, rawArgs);
   process.exit(0);
@@ -1370,6 +1373,8 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
                 查看本包实际执行、验证、检查范围和过期状态
   wl-ui doctor-host [--host codex|claude|copilot|cursor] [--json]
                 静态入口诊断；宿主发现与读取仍须宿主证据
+  wl-ui protocol describe --json | wl-ui protocol request --input-file <request.json> --json
+                公开集成协议：能力目录与统一判定/状态 JSON 信封
   wl-ui init   [--project <path>] [--editor <editor>] [--profile <id>]
                 [--dry-run] [--skills-only]
                 把 skills/ 写入目标项目的 AI 编辑器规则目录

@@ -2,6 +2,19 @@
 
 本页保留面向使用者的版本能力摘要；逐提交级变更、修复细节和旧版本记录见根目录 [`CHANGELOG.md`](../CHANGELOG.md)。
 
+## v1.15.0 — 任务判定、真实执行回执与原生技能入口
+
+### Added
+
+- 新增 task/route/explain/status/doctor-host CLI 与 5 个 MCP 工具，任务计划与真实执行回执分开；支持跨已安装适用包复用 runId，无兄弟包运行依赖。
+- 新增本包独有 Codex `.agents/skills/wl-skills-ui/SKILL.md` 薄入口，按需读取 canonical Skill；缺资产或未发布显式技能报告 gap，静态入口诊断不冒充宿主实际发现。
+- scan/check/fix/all 与 MCP、Vite 依赖检查记录执行/验证状态、实际检查文件、规则回调次数、规则/配置快照与过期状态。未执行、零文件、跳过或人工复核不会假绿。
+
+### Fixed
+
+- 实际 Vue SFC 解析错误形成不可被 only/skip 隐藏的 SFC_PARSE 诊断；fast/fallback 不声称语法验证，脚本类型编译仍需项目独立 typecheck。
+- 不适用/缺上下文任务不附加全量 UI 约束；Markdown 无问题文件占比不再称为规范覆盖率，零文件明确未检查。Vite 插件成功也明确仅验证依赖组合、源码规则未运行。
+
 ## v1.14.0 — 独立能力与安装贡献保护
 
 - 机读能力边界明确 CLI、安装器与 MCP 独立使用，无需其他 wl-skills 包或统一客户端。

@@ -31,6 +31,7 @@ import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import atomic from "./atomic-write.cjs";
+import { GATEWAY_PATH, taskGateway } from "./task-gateway.mjs";
 import { createState, writeOwnedFile, writeRouter, writeMcp, mcpHasLocalChanges, remove as removeRouter, safeFile, validMarkers, HTML_START, HTML_END, jsonc } from "./install-lifecycle.mjs";
 import { getRule, listRules } from "../standards/rules-loader.mjs";
 import {
@@ -77,6 +78,7 @@ const SUBCOMMANDS = new Set([
   "contract",
   "rules",
   "profiles",
+  "task", "route", "explain", "status", "doctor-host",
 ]);
 let subcommand = "help";
 
@@ -93,6 +95,12 @@ if (rawArgs.length > 0 && SUBCOMMANDS.has(rawArgs[0])) {
 }
 
 // 非 init 子命令：直接委托给 scanner/index.mjs
+if (["task", "route", "explain", "status", "doctor-host"].includes(subcommand)) {
+  const { taskCli } = await import("./task-integration.mjs");
+  taskCli(subcommand, rawArgs);
+  process.exit(0);
+}
+
 const SCANNER_CMDS = new Set([
   "scan",
   "audit",
@@ -242,6 +250,7 @@ if (subcommand === "init" || subcommand === "update") {
   // 2. 安装 skills（按 mode 过滤）
   const state = createState(manifest || {});
   const installedFiles = [];
+  if (writeOwnedFile({ root: projectRoot, rel: GATEWAY_PATH, content: taskGateway(), state, dryRun })) installedFiles.push(GATEWAY_PATH);
   for (const editor of editors) {
     installedFiles.push(
       ...installSkills({ projectRoot, editor, mode, profile, dryRun, state }),
@@ -562,7 +571,7 @@ function transformForEditor(content, editor) {
         ?.slice(2) || "Skill",
     );
 
-  return header + "\n" + body;
+  return header + "\nStart each task with local `wl-ui task \"<task>\" --target <path>`. Read only the selected Skill. Finish actual tools with the same `--run-id` and report `wl-ui status`; model declarations do not prove verification.\n\n" + body;
 }
 
 function selectedSkills(mode, profile) {
@@ -597,7 +606,7 @@ function singleFilePath(projectRoot, target) {
 }
 
 function preflightInstall({ projectRoot, editors, mode, profile, skillsOnly }) {
-  const paths = [MANIFEST_NAME, ".mcp.json", ".wl-ui-profile.json", ".github/wl-skills-ui/TRIGGER_PROMPTS.md", ".github/wl-skills-ui/README.md"];
+  const paths = [MANIFEST_NAME, GATEWAY_PATH, ".mcp.json", ".wl-ui-profile.json", ".github/wl-skills-ui/TRIGGER_PROMPTS.md", ".github/wl-skills-ui/README.md"];
   const skills = selectedSkills(mode, profile);
   for (const editor of editors) {
     const target = EDITOR_TARGETS[editor];
@@ -652,6 +661,8 @@ function buildSingleFileRouter(skills, profile) {
     `> Active profile: \`${profile?.id || "native-element"}\`.`,
     "",
     "Use the package router first, then open only the relevant Skill:",
+    "Start each task with local `wl-ui task \"<task>\" --target <path>`; read only the selected canonical Skill. Finish actual checks with the same `--run-id`, then report `wl-ui status --run-id <id>`. Routing/model declarations do not prove execution or validation. Native discovery: `.agents/skills/wl-skills-ui/SKILL.md`.",
+    "Reuse one `--run-id` / `WL_TASK_RUN_ID` across installed applicable packages for this user task; do not install unused sibling packages.",
     "",
     "- `node_modules/@agile-team/wl-skills-ui/SKILL.md`",
     "",
@@ -1353,6 +1364,12 @@ function printHelp() {
 wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
 
 用法：
+  wl-ui task|route|explain "任务" --target <path> [--run-id <id>] [--skill <id>] [--json]
+                task 保存计划；route/explain 只读判定；未发布的显式 Skill 报告缺口
+  wl-ui status [--run-id <id>] [--json]
+                查看本包实际执行、验证、检查范围和过期状态
+  wl-ui doctor-host [--host codex|claude|copilot|cursor] [--json]
+                静态入口诊断；宿主发现与读取仍须宿主证据
   wl-ui init   [--project <path>] [--editor <editor>] [--profile <id>]
                 [--dry-run] [--skills-only]
                 把 skills/ 写入目标项目的 AI 编辑器规则目录

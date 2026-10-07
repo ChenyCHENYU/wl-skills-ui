@@ -44,6 +44,7 @@ import { collectChangedVueFiles } from "./changed.mjs";
 import { SFC_PARSER_MODES } from "./sfc-parser.mjs";
 import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
 import { scanFiles } from "./engine.mjs";
+import { beginUiCheck, finishUiCheck, scanFacts, integrationFacts, core } from "../bin/task-integration.mjs";
 
 const args = process.argv.slice(2);
 const SUBCOMMANDS = new Set([
@@ -96,6 +97,7 @@ const { values } = parseArgs({
     parser: { type: "string", default: "auto" },
     limit: { type: "string", default: "100" },
     cursor: { type: "string", default: "0" },
+    "run-id": { type: "string" },
   },
   strict: false,
 });
@@ -196,11 +198,23 @@ function applyFilters(issues) {
     const deny = expandRuleRange(values.skip);
     out = out.filter((i) => !deny.has(i.rule));
   }
-  return out;
+  return [...new Set([...out, ...issues.filter((issue) => issue.rule === "SFC_PARSE")])];
 }
 
 // ── 子命令分发 ──────────────────────────────────────────────────────────
 const excludeDirs = values.exclude.split(",").map((s) => s.trim());
+const execution = ["scan", "audit", "check", "all", "fix"].includes(subcommand)
+  ? beginUiCheck(resolve(values.project), [subcommand === "check" ? "." : values.target], subcommand, values["run-id"])
+  : null;
+let executionEvidence;
+function recordUiFacts(facts) {
+  executionEvidence = finishUiCheck(execution, facts);
+  console.error(core.formatStatus(core.readStatus(execution.opts)));
+  return executionEvidence;
+}
+process.once("exit", (code) => {
+  if (execution && !executionEvidence) recordUiFacts({ exitCode: code, validationStatus: "unverified", checks: [], summary: { reason: "Command stopped before checks completed" } });
+});
 let latestChangedInfo = null;
 
 function changedFileFilter(projectRoot, targetDir) {
@@ -268,6 +282,7 @@ if (subcommand === "check") {
   // 安装清单）；依赖自动识别仅用于建议口径，保证升级不把存量绿灯判红。
   const enforcedProfile = profileResolution.explicit ? activeProfile : null;
   const checks = checkIntegration(projectRoot, enforcedProfile);
+  const evidence = recordUiFacts(integrationFacts(checks, values["fail-on-error"] && checks.some((check) => !check.ok && check.severity === "error") ? 1 : 0));
   if (values.output === "json") {
     console.log(
       JSON.stringify(
@@ -279,6 +294,7 @@ if (subcommand === "check") {
             explicit: profileResolution.explicit,
           },
           checks,
+          ...evidence,
         },
         null,
         2,
@@ -489,11 +505,13 @@ if (subcommand === "fix") {
   );
   const remaining = applyFilters(verification.allIssues);
   const remainingErrors = remaining.filter((issue) => issue.severity === "error");
+  const evidence = recordUiFacts({ ...scanFacts(verification, remaining), exitCode: values["fail-on-error"] && remainingErrors.length > 0 ? 1 : 0 });
   if (values.output === "json") {
     console.log(
       JSON.stringify(
         {
           ...result,
+          ...evidence,
           verification: {
             remaining: remaining.length,
             errors: remainingErrors.length,
@@ -528,6 +546,8 @@ if (subcommand === "all") {
     exemptFileCount,
     coverage,
     parsing,
+    ruleExecutions,
+    checkedFiles,
   } = runScan(
       targetDir,
       excludeDirs,
@@ -541,13 +561,19 @@ if (subcommand === "all") {
     coverage,
     profile: activeProfile,
   });
+  const scanResult = { fileCount, exemptFileCount, ruleExecutions, parsing, checkedFiles };
+  const facts = scanFacts(scanResult, filtered);
+  facts.checks.push(...integrationFacts(integration).checks);
+  const evidence = recordUiFacts({ ...facts, exitCode: values["fail-on-error"] && (filtered.some((issue) => issue.severity === "error") || integration.some((check) => !check.ok && check.severity === "error")) ? 1 : 0 });
   const report = generateReport(filtered, fileCount, values.output, {
+    execution: evidence,
     integration,
     exemptFileCount,
     exemptedIssueCount: exemptedIssues.length,
     exemptPaths: exemptConfig.exemptPaths,
     coverage,
     parsing,
+    ruleExecutions,
     recommendations,
     profile: { id: activeProfile.id, source: profileResolution.source },
     changed: latestChangedInfo,
@@ -581,6 +607,8 @@ if (subcommand === "all") {
     exemptFileCount,
     coverage,
     parsing,
+    ruleExecutions,
+    checkedFiles,
   } = runScan(
       targetDir,
       excludeDirs,
@@ -594,7 +622,9 @@ if (subcommand === "all") {
     coverage,
     profile: activeProfile,
   });
+  const evidence = recordUiFacts({ ...scanFacts({ fileCount, exemptFileCount, ruleExecutions, parsing, checkedFiles }, filtered), exitCode: values["fail-on-error"] && filtered.some((issue) => issue.severity === "error") ? 1 : 0 });
   const report = generateReport(filtered, fileCount, values.output, {
+    execution: evidence,
     exemptFileCount,
     exemptedIssueCount: exemptedIssues.length,
     exemptPaths: exemptConfig.exemptPaths,

@@ -12,6 +12,7 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { beginUiCheck, finishUiCheck } from "../../bin/task-integration.mjs";
 import {
   listCompatVendors,
   evaluateVendor,
@@ -45,19 +46,22 @@ export function wlSkillsCheck(options = {}) {
         includeVendors,
         verbose,
         logger: config.logger,
+        runId: options.runId,
+        persist: options.persist,
       });
     },
   };
 }
 
-function runCheck({ projectRoot, enforce, includeVendors, verbose, logger }) {
+function runCheck({ projectRoot, enforce, includeVendors, verbose, logger, runId, persist }) {
+  const execution = beginUiCheck(projectRoot, ["package.json"], "vite-dependency-check", runId, { persist });
   const pkgPath = join(projectRoot, "package.json");
-  if (!existsSync(pkgPath)) return;
+  if (!existsSync(pkgPath)) return skippedCheck(execution, logger, "未找到 package.json");
   let pkg;
   try {
     pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
   } catch {
-    return;
+    return skippedCheck(execution, logger, "package.json 无法解析");
   }
   const deps = { ...pkg.dependencies, ...pkg.devDependencies };
 
@@ -68,12 +72,17 @@ function runCheck({ projectRoot, enforce, includeVendors, verbose, logger }) {
   const mismatches = [];
   const matches = [];
   const evaluations = [];
+  const checks = [];
   for (const compat of vendors) {
     const ev = evaluateVendor(compat, deps);
     evaluations.push(ev);
+    checks.push({ id: `vendor:${compat.vendorId}`, status: ev.verdict === "match" ? "passed" : ev.verdict === "mismatch" ? "failed" : "not-applicable", reason: ev.verdict });
     if (ev.verdict === "match") matches.push({ compat, ev });
     else if (ev.verdict === "mismatch") mismatches.push({ compat, ev });
   }
+  checks.push({ id: "scan", status: "skipped", reason: "This Vite plugin checks dependency combinations only; source UI rules have not run" });
+  const receipt = finishUiCheck(execution, { exitCode: enforce === "error" && mismatches.length > 0 ? 1 : 0, validationStatus: mismatches.length > 0 ? "failed" : "passed", checkedFiles: ["package.json"], checks, summary: { matches: matches.length, mismatches: mismatches.length, sourceRulesVerified: false } });
+  print(logger, "info", `[wl-skills-ui] 依赖检查完成：匹配 ${matches.length} / 偏差 ${mismatches.length}；执行=${receipt.executionStatus} 验证=${receipt.validationStatus} runId=${receipt.runId}；源码UI规则尚未验证；回执=${receipt.receiptPath || "未持久化"}`);
 
   if (verbose && matches.length > 0) {
     const lines = matches.map(
@@ -117,6 +126,11 @@ function runCheck({ projectRoot, enforce, includeVendors, verbose, logger }) {
   } else {
     print(logger, "warn", message);
   }
+}
+
+function skippedCheck(execution, logger, reason) {
+  const receipt = finishUiCheck(execution, { exitCode: 0, validationStatus: "unverified", checks: [{ id: "dependency-check", status: "skipped", reason }] });
+  print(logger, "warn", `[wl-skills-ui] 依赖检查未执行：${reason}；验证=${receipt.validationStatus} runId=${receipt.runId}`);
 }
 
 function print(logger, level, msg) {

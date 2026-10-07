@@ -14,6 +14,8 @@ do not reconstruct them from memory or duplicate their wording.
 
 ## Start here
 
+Start every task with `npx wl-ui task "<task>" --target <path>`. Read the selected canonical Skill and required rules only after resolving ambiguous/gap/needs-context or missing own assets. A match is a plan, not evidence of execution. Use the returned `--run-id` (or `WL_TASK_RUN_ID`) for real CLI/MCP tools and finish with `npx wl-ui status --run-id <id>`. Reuse the same ID across installed applicable packages without installing unused sibling packages. Report execution and validation separately, including skipped checks and stale evidence; host discovery/reading remain unverified without host events.
+
 ```bash
 # Small summary first; does not modify files
 npx wl-ui scan --project . --target src --output summary --parser auto

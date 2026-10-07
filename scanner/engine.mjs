@@ -51,6 +51,15 @@ export function* walkVue(target, excludes) {
   }
 }
 
+function executeRule(rule, method, text, relPath, offset, executions) {
+  const issues = rule[method](text, relPath, offset).map(normalizeIssue);
+  const record = executions.get(rule.id);
+  record.calls += 1;
+  record.issues += issues.length;
+  record.errors += issues.filter((issue) => issue.severity === "error").length;
+  return issues;
+}
+
 export function scanFiles({
   targetDir,
   excludeDirs = ["node_modules", "dist", ".git"],
@@ -72,6 +81,9 @@ export function scanFiles({
   const coverage = createCoverageCollector();
   const parserCounts = { fast: 0, sfc: 0 };
   const parserWarnings = new Set();
+  const parserErrors = [];
+  const checkedFiles = [];
+  const executions = new Map(rules.map((rule) => [rule.id, { id: rule.id, calls: 0, issues: 0, errors: 0 }]));
 
   for (const filePath of walkVue(targetDir, excludeDirs)) {
     if (fileFilter && !fileFilter.has(resolve(filePath))) continue;
@@ -94,12 +106,17 @@ export function scanFiles({
       exemptFileCount++;
       continue;
     }
+    checkedFiles.push(relPath);
+    for (const error of parsed.errors || []) {
+      parserErrors.push({ file: relPath, ...error });
+      allIssues.push({ rule: "SFC_PARSE", file: relPath, line: error.line, severity: "error", category: "parser", layer: "L0", description: error.message, suggestion: "Fix the actual Vue SFC parsing error before treating the UI scan as verified" });
+    }
 
     const fileIssues = [];
     for (const rule of rules) {
       if (typeof rule.check === "function") {
         fileIssues.push(
-          ...rule.check(template, relPath, lineOffset).map(normalizeIssue),
+          ...executeRule(rule, "check", template, relPath, lineOffset, executions),
         );
       }
     }
@@ -107,9 +124,7 @@ export function scanFiles({
       for (const rule of rules) {
         if (typeof rule.checkStyle === "function") {
           fileIssues.push(
-            ...rule
-              .checkStyle(styleBlock.text, relPath, styleBlock.lineOffset)
-              .map(normalizeIssue),
+            ...executeRule(rule, "checkStyle", styleBlock.text, relPath, styleBlock.lineOffset, executions),
           );
         }
       }
@@ -118,9 +133,7 @@ export function scanFiles({
       for (const rule of rules) {
         if (typeof rule.checkScript === "function") {
           fileIssues.push(
-            ...rule
-              .checkScript(scriptBlock.text, relPath, scriptBlock.lineOffset)
-              .map(normalizeIssue),
+            ...executeRule(rule, "checkScript", scriptBlock.text, relPath, scriptBlock.lineOffset, executions),
           );
         }
       }
@@ -139,11 +152,14 @@ export function scanFiles({
     exemptedIssues,
     fileCount,
     exemptFileCount,
+    checkedFiles,
+    ruleExecutions: [...executions.values()],
     coverage: filterCoverageForProfile(coverage.result(), profile),
     parsing: {
       requested: parser,
       used: parserCounts,
       warnings: [...parserWarnings],
+      errors: parserErrors,
     },
   };
 }
@@ -171,7 +187,7 @@ export function filterIssues(issues, { layer, vendor, mode, only, skip } = {}) {
     const denied = expandRuleRange(skip);
     output = output.filter((issue) => !denied.has(issue.rule));
   }
-  return output;
+  return [...new Set([...output, ...issues.filter((issue) => issue.rule === "SFC_PARSE")])];
 }
 
 export function scanProject(options = {}) {

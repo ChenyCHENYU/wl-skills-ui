@@ -17,10 +17,16 @@ wl-ui-mcp
 }
 ```
 
-## 13 个 Tool
+## 18 个 Tool
+
+`wl_ui_task` 保存本包计划；`wl_ui_route` / `wl_ui_explain` 只读判定；`wl_ui_status` 读取真实回执；`wl_ui_doctor_host` 只诊断静态入口。所有实际工具可传 `runId`，与 CLI `--run-id` / `WL_TASK_RUN_ID` 复用同一任务标识。工具返回的执行与验证状态各自独立；计划、匹配和模型陈述不会成为检查成功证据。详见[任务判定与真实检查回执](../docs/task-observability.md)。
 
 | Tool | 作用 |
 | --- | --- |
+| `wl_ui_task` | 保存本包任务计划及检查要求 |
+| `wl_ui_route` / `wl_ui_explain` | 只读任务判定、理由、必要规则与缺口 |
+| `wl_ui_status` | 实际执行/验证回执与过期范围 |
+| `wl_ui_doctor_host` | 静态宿主入口诊断，不证明实际加载 |
 | `wl_ui_check` | 接入完整性检查 |
 | `wl_ui_scan` | UI 规则扫描，默认 summary，支持 profile、changed-only、分页与 auto/fast/sfc parser |
 | `wl_ui_fix_dry_run` | 只预览确定性修复 |

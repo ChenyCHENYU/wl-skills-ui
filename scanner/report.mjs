@@ -138,7 +138,7 @@ function buildOverviewSection(issues, fileCount, extras) {
   const affectedDirs = new Set(issues.map((i) => dirOf(i.file)));
   const cleanFiles = scannedFiles - affectedFiles.size;
   const coverageRate =
-    scannedFiles > 0 ? ((cleanFiles / scannedFiles) * 100).toFixed(1) : "100.0";
+    scannedFiles > 0 ? `${((cleanFiles / scannedFiles) * 100).toFixed(1)}%` : "未检查";
 
   const lines = ["## 二、扫描总览", ""];
   lines.push("| 维度 | 数量 |");
@@ -163,7 +163,7 @@ function buildOverviewSection(issues, fileCount, extras) {
     `| 发现问题总数 | **${summary.total}**（🔴 ${summary.bySeverity.error} / 🟡 ${summary.bySeverity.warning} / 🔵 ${summary.bySeverity.info}） |`,
   );
   lines.push(
-    `| 规范覆盖率（无问题文件占比） | **${coverageRate}%**（${cleanFiles} / ${scannedFiles}） |`,
+    `| 无已报告问题文件占比 | **${coverageRate}**（${cleanFiles} / ${scannedFiles}；不代表全部规范覆盖） |`,
   );
   lines.push(`| 分类数 | **${Object.keys(summary.byCategory).length}** |`);
   if (extras.parsing) {
@@ -406,6 +406,7 @@ export function generateReport(
     const recommendations = extras.recommendations || {};
     return JSON.stringify({
       schema: "wl-ui-scan.summary.v1",
+      ...extras.execution,
       profile: extras.profile || null,
       summary: {
         files: summary.fileCount,
@@ -453,6 +454,7 @@ export function generateReport(
     const recommendations = extras.recommendations || {};
     return JSON.stringify({
       schema: "wl-ui-scan.compact.v2",
+      ...extras.execution,
       profile: extras.profile || null,
       summary: {
         files: summary.fileCount,
@@ -493,6 +495,7 @@ export function generateReport(
     const recommendations = extras.recommendations || {};
     return JSON.stringify({
       schema: "wl-ui-scan.compact.v1",
+      ...extras.execution,
       profile: extras.profile || null,
       summary: {
         files: summary.fileCount,
@@ -530,6 +533,7 @@ export function generateReport(
     return JSON.stringify(
       {
         summary: buildSummary(issues, fileCount),
+        ...extras.execution,
         profile: extras.profile || null,
         integration: extras.integration || null,
         componentCoverage: extras.coverage || null,

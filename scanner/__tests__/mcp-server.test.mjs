@@ -22,7 +22,7 @@ function callMcp(message) {
 describe("stdio MCP", () => {
   it("公开低 token scan 参数", () => {
     const response = callMcp({ jsonrpc: "2.0", id: 1, method: "tools/list" });
-    assert.equal(response.result.tools.length, 13);
+    assert.equal(response.result.tools.length, 18);
     const scan = response.result.tools.find((tool) => tool.name === "wl_ui_scan");
     assert.ok(scan);
     assert.match(scan.inputSchema.properties.output.description, /默认 summary/);

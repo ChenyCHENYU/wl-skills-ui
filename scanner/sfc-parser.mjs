@@ -143,6 +143,7 @@ function parseWithCompiler(source, filename, resolvedCompiler) {
       .filter(Boolean)
       .map((block) => fromCompilerBlock(source, block)),
     warnings,
+    errors: errors.map((error) => ({ message: typeof error === "string" ? error : error.message || String(error), line: error.loc?.start?.line || 1 })),
   };
 }
 
@@ -179,6 +180,7 @@ export function parseVueSfc(
     parser: "fast",
     compilerPath: null,
     ...parseFast(source),
+    errors: [],
     warnings:
       mode === "auto"
         ? ["未找到 @vue/compiler-sfc，已安全回退 fast parser"]

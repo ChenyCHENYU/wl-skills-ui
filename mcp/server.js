@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 import { createRequire } from "node:module";
+import { AsyncLocalStorage } from "node:async_hooks";
 import { isAbsolute, join, relative, resolve } from "node:path";
 import { scanProject, expandRuleRange } from "../scanner/engine.mjs";
 import { generateReport } from "../scanner/report.mjs";
 import { checkIntegration } from "../scanner/integration.mjs";
 import { runFix } from "../scanner/fix.mjs";
 import { listProfiles, resolveProjectProfile } from "../standards/profiles-loader.mjs";
+import { runTaskAction, beginUiCheck, finishUiCheck, scanFacts, integrationFacts } from "../bin/task-integration.mjs";
 
 // profile 枚举由 profiles.json 事实源动态生成，新增 profile 无需改这里。
 const PROFILE_ENUM = listProfiles().map((profile) => profile.id);
@@ -15,6 +17,11 @@ const require = createRequire(import.meta.url);
 const PKG = require("../package.json");
 
 const TOOLS = [
+  ...["task", "route", "explain", "status", "doctor-host"].map((action) => ({
+    name: `wl_ui_${action.replace(/-/g, "_")}`,
+    description: `UI ${action}: task decision, own execution status or static host diagnosis; host loading remains unverified.`,
+    inputSchema: { type: "object", properties: { task: { type: "string" }, targets: { type: "array", items: { type: "string" } }, runId: { type: "string" }, project: { type: "string" }, profile: { type: "string", enum: PROFILE_ENUM }, host: { type: "string" }, skill: { type: "string" } } },
+  })),
   {
     name: "wl_ui_check",
     description:
@@ -266,15 +273,33 @@ const TOOLS = [
   },
 ];
 
+for (const tool of TOOLS) tool.inputSchema.properties.runId ||= { type: "string", description: "Correlate this real tool call with a task run" };
+const executionContext = new AsyncLocalStorage();
+
+function toolEvidence(result) {
+  const active = executionContext.getStore();
+  if (!active) return undefined;
+  if (!active.evidence) active.evidence = finishUiCheck(active.execution, { exitCode: result.isError ? 1 : 0, validationStatus: "unverified", checks: [], summary: { reason: "Tool completed; this tool has no source-rule verification result" } });
+  return active.evidence;
+}
+
+function scannerEvidence(facts) {
+  const active = executionContext.getStore();
+  active.evidence = finishUiCheck(active.execution, facts);
+  return active.evidence;
+}
+
 function send(obj) {
   process.stdout.write(JSON.stringify(obj) + "\n");
 }
 
 function sendResult(id, result) {
-  send({ jsonrpc: "2.0", id, result });
+  const evidence = toolEvidence(result);
+  send({ jsonrpc: "2.0", id, result: evidence ? { ...result, _meta: { wlExecution: evidence } } : result });
 }
 
 function sendError(id, code, message) {
+  toolEvidence({ isError: true });
   send({ jsonrpc: "2.0", id, error: { code, message } });
 }
 
@@ -360,6 +385,7 @@ function runScanner(command, args = {}) {
       mode: args.mode,
     });
     const checks = checkIntegration(root, resolution.profile);
+    const evidence = scannerEvidence(integrationFacts(checks));
     return {
       code: 0,
       text: JSON.stringify({
@@ -367,6 +393,7 @@ function runScanner(command, args = {}) {
         project: root,
         profile: { id: resolution.profile.id, source: resolution.source },
         checks,
+        ...evidence,
       }),
     };
   }
@@ -384,7 +411,8 @@ function runScanner(command, args = {}) {
       only: args.only ? expandRuleRange(args.only) : undefined,
       skip: args.skip ? expandRuleRange(args.skip) : undefined,
     });
-    return { code: 0, text: JSON.stringify(result) };
+    const evidence = scannerEvidence({ exitCode: 0, validationStatus: "unverified", checks: [{ id: "fix-plan", status: "passed", reason: "Actual dry-run plan; no code applied or verified" }], summary: { dryRun: true } });
+    return { code: 0, text: JSON.stringify({ ...result, ...evidence }) };
   }
   const result = scanProject({
     projectRoot: root,
@@ -406,6 +434,7 @@ function runScanner(command, args = {}) {
     result.fileCount,
     String(args.output || "summary"),
     {
+      execution: scannerEvidence(scanFacts(result)),
       exemptFileCount: result.exemptFileCount,
       exemptedIssueCount: result.exemptedIssues.length,
       coverage: result.coverage,
@@ -689,6 +718,20 @@ async function dispatchContractTool(id, name, args) {
 }
 
 async function dispatchTool(id, name, args) {
+  const actions = { wl_ui_task: "task", wl_ui_route: "route", wl_ui_explain: "explain", wl_ui_status: "status", wl_ui_doctor_host: "doctor-host" };
+  try {
+    const root = projectRoot(args);
+    if (actions[name]) return sendResult(id, { content: [{ type: "text", text: JSON.stringify(runTaskAction(actions[name], { ...args, projectRoot: root })) }] });
+    const target = args.target || args.path;
+    const targets = target ? [relative(root, projectPath(root, target, "target")) || "."] : name === "wl_ui_check" ? ["."] : [];
+    const execution = beginUiCheck(root, targets, name, args.runId);
+    return executionContext.run({ execution }, () => dispatchToolBody(id, name, { ...args, runId: execution.handle.metadata.runId }));
+  } catch (error) {
+    return sendResult(id, { content: [{ type: "text", text: `❌ 工具执行异常: ${error.message}` }], isError: true });
+  }
+}
+
+async function dispatchToolBody(id, name, args) {
   try {
     if (name === "wl_ui_check") {
       const result = await runScanner("check", args);

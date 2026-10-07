@@ -1,6 +1,6 @@
 # @agile-team/wl-skills-ui
 
-**企业级 UI 一致性与 AI 精确治理工具包 v1.14.0** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
+**企业级 UI 一致性与 AI 精确治理工具包 v1.15.0** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
 
 它把“视觉统一、问题识别、机械修复、项目适配和样例沉淀”拆成可验证、可组合的工程能力。脚本、规则和 MCP 先完成确定性工作，AI 只处理业务语义与人工决策，从而减少重复读源码、上下文 token 和误修改。
 
@@ -15,12 +15,15 @@
 | 低成本治理老项目 | Skin 模式、Base*/jh-*/C_*/AG Grid 兼容层、定制页豁免 | 不改封装源码也能统一大部分视觉，避免一次性重构风险 |
 | 阻止 UI 回归 | 40 条 R-rule、接入检查、漂移基线、Git 增量扫描、CI 门禁 | 表头/内容不共轴、按钮无图标、日期弹层全屏、密集表单失衡等问题在提交前暴露 |
 | 安全机械修复 | Profile、only/skip、dry-run 计划哈希、快照、复检与回滚 | 自动化只处理可证明安全且已批准的动作，不让 AI 猜测批改 |
-| 降低 AI token | summary、compact-v2 分页、changed-only、Skill 路由、13 个 MCP Tool | AI 先读总览和结构化事实，只在必要时获取有界明细或局部源码 |
+| 降低 AI token | summary、compact-v2 分页、changed-only、Skill 路由、18 个 MCP Tool | AI 先读总览和结构化事实，只在必要时获取有界明细或局部源码 |
 | 沉淀领域样例 | `ui-contract` extract / validate / match | 页面转为脱敏语义 JSON，不复制整页代码、接口、字段值或原始文案 |
 | 兼容多代项目 | EP 2.2+jh-ui 与原生 EP 2.7+ DOM 契约、Vite/doctor 检查 | 支持声明有 fixture 和真实浏览器证据，不靠文档口头约定 |
 | 降低运行时开销 | Shared Observer Hub、可选 guard、幂等安装与完整卸载 | 全部 guard 共用 1 个 MutationObserver + 1 个 ResizeObserver |
 
 适合多项目 Vue 3 企业后台、存量系统视觉治理、AI 辅助开发和领域页面模式沉淀。运行时最低要求：Node.js 22、Vue 3.2、Element Plus 2.2。
+
+
+每次任务先运行 `wl-ui task "任务" --target <path>`，按选定技能执行工具，最后用 `wl-ui status --run-id <id>` 查看实际执行与验证状态；安装或匹配不会自动变成检查通过。详见[任务判定与真实检查回执](docs/task-observability.md)。
 
 ## 快速开始
 
@@ -480,7 +483,7 @@ npx wl-ui doctor --project . --print-overrides
 
 ## 版本与进一步阅读
 
-当前 v1.14.0：明确独立能力边界，安装、更新、清理按本包贡献保护用户及其他包内容；共享文件采用单文件原子替换，支持历史路由与 `.clinerules` 目录迁移。v1.13.2：R044 审查多列表单超宽标签，R040 识别自定义 `stepper`，均供人工复核。v1.13.0：新增 `native-jh-ag` Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
+当前 v1.15.0：任务判定、真实执行/验证回执、实际检查范围和过期检测；Codex 原生薄入口按需加载 canonical Skill。确定性路由覆盖已发布目录与显式缺口，不保证识别所有自然语言。v1.14.0：明确独立能力边界，安装、更新、清理按本包贡献保护用户及其他包内容；共享文件采用单文件原子替换，支持历史路由与 `.clinerules` 目录迁移。v1.13.2：R044 审查多列表单超宽标签，R040 识别自定义 `stepper`，均供人工复核。v1.13.0：新增 `native-jh-ag` Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
 
 - [版本摘要](docs/version-history.md)
 - [完整 Changelog](CHANGELOG.md)

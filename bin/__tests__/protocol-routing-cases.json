@@ -1,15 +1,105 @@
 [
-  { "task": "统一表格视觉", "skill": "element/el-table" },
-  { "task": "查询表单密集审计", "skill": "element/el-form" },
-  { "task": "弹窗样式对齐", "skill": "element/el-dialog" },
-  { "task": "状态标签颜色统一", "skill": "element/el-tag" },
-  { "task": "列表布局骨架", "skill": "layouts/list-page" },
-  { "task": "AG Grid 适配", "skill": "vendors/ag-grid" },
-  { "task": "UI扫描", "skill": "ops/scan" },
-  { "task": "UI修复统一视觉", "skill": "ops/fix" },
-  { "task": "UI迁移迁移tokens", "skill": "ops/migrate" },
-  { "task": "设计令牌接入消除颜色硬编码", "skill": "runtime/design-tokens" },
-  { "task": "写诗", "skill": null, "status": "not-applicable" },
-  { "task": "生成测试用例", "skill": null, "status": "needs-context" },
-  { "task": "检查", "skill": null, "status": "needs-context" }
+  {
+    "task": "统一表格视觉",
+    "skill": "element/el-table"
+  },
+  {
+    "task": "查询表单密集审计",
+    "skill": "element/el-form"
+  },
+  {
+    "task": "弹窗样式对齐",
+    "skill": "element/el-dialog"
+  },
+  {
+    "task": "状态标签颜色统一",
+    "skill": "element/el-tag"
+  },
+  {
+    "task": "列表布局骨架",
+    "skill": "layouts/list-page"
+  },
+  {
+    "task": "AG Grid 适配",
+    "skill": "vendors/ag-grid"
+  },
+  {
+    "task": "UI扫描",
+    "skill": "ops/scan"
+  },
+  {
+    "task": "UI修复统一视觉",
+    "skill": "ops/fix"
+  },
+  {
+    "task": "UI迁移迁移tokens",
+    "skill": "ops/migrate"
+  },
+  {
+    "task": "设计令牌接入消除颜色硬编码",
+    "skill": "runtime/design-tokens"
+  },
+  {
+    "task": "写诗",
+    "skill": null,
+    "status": "not-applicable"
+  },
+  {
+    "task": "生成测试用例",
+    "skill": null,
+    "status": "needs-context"
+  },
+  {
+    "task": "检查",
+    "skill": null,
+    "status": "needs-context"
+  },
+  {
+    "task": "整理页签和卡片组件",
+    "skill": "element/component-family"
+  },
+  {
+    "task": "详情布局整改",
+    "skill": "layouts/detail-page"
+  },
+  {
+    "task": "调整表单弹窗布局",
+    "skill": "layouts/form-dialog"
+  },
+  {
+    "task": "树列表布局",
+    "skill": "layouts/tree-list"
+  },
+  {
+    "task": "做一次UI审计",
+    "skill": "ops/audit"
+  },
+  {
+    "task": "runtime迁移",
+    "skill": "runtime/migration"
+  },
+  {
+    "task": "样式统一风格对齐",
+    "skill": "runtime/style-align"
+  },
+  {
+    "task": "BaseTable 适配",
+    "skill": "vendors/base-table"
+  },
+  {
+    "task": "C组件用法审计",
+    "skill": "vendors/c-components"
+  },
+  {
+    "task": "自定义封装组件治理",
+    "skill": "vendors/custom-wrappers"
+  },
+  {
+    "task": "jh组件接入",
+    "skill": "vendors/jh-components"
+  },
+  {
+    "task": "未知封装组件排查",
+    "skill": "vendors/unknown-wrapper"
+  }
 ]

@@ -25,24 +25,55 @@ const OPERATIONS = [
 
 function buildInventory() {
   const commands = [
-    { name: "init/update", summary: "写入/更新目标项目编辑器规则与 skills（--skills-only 仅技能）", execution: "programmatic" },
-    { name: "scan/audit/check/fix", summary: "R 规则扫描、审计与确定性修复（dry-run/快照/回滚）", execution: "programmatic" },
-    { name: "snapshot/drift/exempt", summary: "漂移基线管理", execution: "programmatic" },
-    { name: "contract", summary: "ui-contract 提取/校验/匹配", execution: "programmatic" },
-    { name: "doctor", summary: "项目接入诊断", execution: "programmatic" },
-    { name: "task/route/explain/status/doctor-host", summary: "任务判定与回执（本协议五操作的原入口）", execution: "programmatic" },
-    { name: "protocol", summary: "本公开集成协议", execution: "programmatic" },
+    { name: "init", args: "[--project <path>] [--editor <id>] [--profile <id>] [--skills-only] [--dry-run]", summary: "写入编辑器规则与技能", execution: "programmatic", sideEffects: "写入目标项目编辑器规则目录" },
+    { name: "update", args: "[--project <path>] [--editor <id|all>] [--force] [--dry-run]", summary: "更新已安装 rules/MCP/提示", execution: "programmatic", sideEffects: "按 manifest 更新" },
+    { name: "diff", args: "[--project <path>]", summary: "对比安装与 manifest", execution: "programmatic", sideEffects: "无" },
+    { name: "clean", args: "[--project <path>] [--dry-run]", summary: "清理本包安装文件", execution: "programmatic", sideEffects: "删除本包登记文件" },
+    { name: "scan", args: "[--project <path>] [--profile <id>]", summary: "R 规则扫描", execution: "programmatic", sideEffects: "无（报告输出）" },
+    { name: "audit", args: "[--project <path>]", summary: "审计汇总", execution: "programmatic", sideEffects: "无" },
+    { name: "check", args: "[--project <path>]", summary: "扫描+回执记录", execution: "programmatic", sideEffects: "写 .wl-skills-ui/runs/" },
+    { name: "fix", args: "--run-id <id> --rule <id> [--confirm]", summary: "确定性修复（快照/回滚）", execution: "programmatic", sideEffects: "写源文件（确认制+快照回滚）" },
+    { name: "snapshot", args: "/ drift / exempt", summary: "漂移基线管理", execution: "programmatic", sideEffects: "写基线文件" },
+    { name: "contract", args: "<extract|validate|match>", summary: "ui-contract 提取/校验/匹配", execution: "programmatic", sideEffects: "extract 写契约文件" },
+    { name: "doctor", args: "[--project <path>]", summary: "项目接入诊断", execution: "programmatic", sideEffects: "无" },
+    { name: "task", args: "\"任务\" [--run-id <id>]", summary: "判定并持久化任务计划", execution: "programmatic", sideEffects: "写 .wl-skills-ui/runs/" },
+    { name: "route", args: "\"任务\"", summary: "只读判定", execution: "programmatic", sideEffects: "无" },
+    { name: "explain", args: "\"任务\"", summary: "只读判定解释", execution: "programmatic", sideEffects: "无" },
+    { name: "status", args: "[--run-id <id>]", summary: "读取本包回执", execution: "programmatic", sideEffects: "无" },
+    { name: "doctor-host", args: "[--host <name>]", summary: "宿主入口静态诊断", execution: "programmatic", sideEffects: "无" },
+    { name: "protocol", args: "describe | request --input-file <file>", summary: "本公开集成协议", execution: "programmatic", sideEffects: "见操作声明" },
   ];
-  let skills = [];
+  const skills = [];
+  const loadErrors = [];
   try {
-    skills = taskCatalog().map((skill) => ({ id: skill.id, description: skill.description, triggers: skill.triggers, status: skill.status, entry: skill.path, execution: "instructional" }));
-  } catch { skills = []; }
-  const mcpTools = ["wl_ui_task", "wl_ui_route", "wl_ui_explain", "wl_ui_status", "wl_ui_doctor_host", "wl_ui_check"].map((name) => ({
-    name,
-    summary: name === "wl_ui_check" ? "执行 UI 检查并记录回执" : "任务判定/状态/宿主诊断（与 protocol 同核）",
-    write: name === "wl_ui_check" ? "guarded" : "readonly",
-  }));
-  return { skills, commands, mcpTools };
+    for (const skill of taskCatalog()) {
+      skills.push({ id: skill.id, description: skill.description, triggers: skill.triggers, status: skill.status, entry: skill.path, execution: "instructional" });
+    }
+  } catch (error) {
+    loadErrors.push(`skills 加载失败：${error.message}`);
+  }
+  // 与 mcp/server.js tools/list 对齐的 18 项（由 readiness 探针持续校验数量与名称一致）
+  const mcpTools = [
+    { name: "wl_ui_task", summary: "判定并持久化 UI 任务计划", write: "persist" },
+    { name: "wl_ui_route", summary: "只读任务判定", write: "readonly" },
+    { name: "wl_ui_explain", summary: "只读判定解释", write: "readonly" },
+    { name: "wl_ui_status", summary: "读取执行回执", write: "readonly" },
+    { name: "wl_ui_doctor_host", summary: "宿主入口静态诊断", write: "readonly" },
+    { name: "wl_ui_check", summary: "执行 UI 检查并记录回执", write: "guarded" },
+    { name: "wl_ui_scan", summary: "R 规则扫描", write: "readonly" },
+    { name: "wl_ui_fix_dry_run", summary: "修复预演（不写盘）", write: "readonly" },
+    { name: "wl_ui_skill_prompt", summary: "技能提示词", write: "readonly" },
+    { name: "wl_ui_route_intent", summary: "意图路由", write: "readonly" },
+    { name: "wl_ui_detect_skin", summary: "皮肤检测", write: "readonly" },
+    { name: "wl_ui_list_rules", summary: "规则清单", write: "readonly" },
+    { name: "wl_ui_describe_rule", summary: "规则详情", write: "readonly" },
+    { name: "wl_ui_drift", summary: "漂移对比", write: "readonly" },
+    { name: "wl_ui_recommend_flow", summary: "推荐流程", write: "readonly" },
+    { name: "wl_ui_contract_extract", summary: "契约提取", write: "guarded" },
+    { name: "wl_ui_contract_validate", summary: "契约校验", write: "readonly" },
+    { name: "wl_ui_contract_match", summary: "契约匹配", write: "readonly" },
+  ];
+  return { skills, commands, mcpTools, loadErrors };
 }
 
 export const protocol = createProtocol({
@@ -63,6 +94,7 @@ export function runOperation(operation, input) {
     skill: input.skill,
     host: input.host,
     profile: input.profile,
+    context: input.context,
   });
 }
 

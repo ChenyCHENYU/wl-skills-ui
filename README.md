@@ -1,6 +1,6 @@
 # @agile-team/wl-skills-ui
 
-**企业级 UI 一致性与 AI 精确治理工具包 v1.15.0** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
+**企业级 UI 一致性与 AI 精确治理工具包 v1.16.0** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
 
 它把“视觉统一、问题识别、机械修复、项目适配和样例沉淀”拆成可验证、可组合的工程能力。脚本、规则和 MCP 先完成确定性工作，AI 只处理业务语义与人工决策，从而减少重复读源码、上下文 token 和误修改。
 
@@ -500,7 +500,7 @@ npx wl-ui doctor --project . --print-overrides
 
 ## 版本与进一步阅读
 
-当前 v1.15.0：任务判定、真实执行/验证回执、实际检查范围和过期检测；Codex 原生薄入口按需加载 canonical Skill。确定性路由覆盖已发布目录与显式缺口，不保证识别所有自然语言。v1.14.0：明确独立能力边界，安装、更新、清理按本包贡献保护用户及其他包内容；共享文件采用单文件原子替换，支持历史路由与 `.clinerules` 目录迁移。v1.13.2：R044 审查多列表单超宽标签，R040 识别自定义 `stepper`，均供人工复核。v1.13.0：新增 `native-jh-ag` Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
+当前 v1.16.0：公开集成协议 describe/request 统一信封（能力清单与路由语料经真实打包产物验证）、输入校验收口与 MCP 目录对齐真实 tools/list。v1.15.0：任务判定、真实执行/验证回执、实际检查范围和过期检测；Codex 原生薄入口按需加载 canonical Skill。确定性路由覆盖已发布目录与显式缺口，不保证识别所有自然语言。v1.14.0：明确独立能力边界，安装、更新、清理按本包贡献保护用户及其他包内容；共享文件采用单文件原子替换，支持历史路由与 `.clinerules` 目录迁移。v1.13.2：R044 审查多列表单超宽标签，R040 识别自定义 `stepper`，均供人工复核。v1.13.0：新增 `native-jh-ag` Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
 
 - [版本摘要](docs/version-history.md)
 - [完整 Changelog](CHANGELOG.md)

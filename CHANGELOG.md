@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.16.0] - 2026-10-08
+
+### Added
+
+- 新增公开集成协议 describe/request 统一信封：能力清单与路由语料经真实打包产物验证，供外部宿主与适配器按公开契约接入。
+
+### Fixed
+
+- 输入校验补齐：context 为 null、targets 为空等边界输入返回可解释拒绝，不再产生歧义结果。
+- MCP 目录对齐真实 `tools/list` 的 18 项，修复目录声明与实际暴露不一致。
+
 ## [1.15.0] - 2026-10-07
 
 ### Added

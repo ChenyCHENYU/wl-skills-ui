@@ -41,7 +41,7 @@ export function taskCatalog() {
   return catalogFiles(join(root, "skills")).map((file) => {
     const id = relative(join(root, "skills"), file).replace(/\\/g, "/").replace(/\/SKILL\.md$/, "");
     const content = readFileSync(file, "utf8");
-    return { id, path: `node_modules/${pkg.name}/skills/${id}/SKILL.md`, description: content.match(/^# (.+)$/m)?.[1] || id, triggers: TRIGGERS[id] || [], rules: POLICY.baselineRules, checks: ["scan"], status: "enabled" };
+    return { id, path: `node_modules/${pkg.name}/skills/${id}/SKILL.md`, description: content.match(/^# (.+)$/m)?.[1] || id, triggers: TRIGGERS[id] || [], rules: getRules().filter((rule) => rule.skills?.includes(id)).map((rule) => rule.id), checks: ["scan"], status: "enabled" };
   });
 }
 
@@ -75,10 +75,15 @@ export function runTaskAction(action, input = {}) {
   if (action === "doctor-host") return hostDiagnostic({ ...opts, host: input.host || "unknown" });
   const profile = resolveProjectProfile({ projectRoot: opts.projectRoot, profile: input.profile }).profile;
   const routed = decideTask({ task: input.task || "", targets: opts.targets, skill: input.skill });
-  const decision = { ...routed, profile: profile.id, applicableConstraints: routed.applicable === true ? getRules({ profile: profile.id }).map((rule) => rule.id) : [] };
+  const applicable = getRules({ profile: profile.id });
+  const enabled = new Set(applicable.map((rule) => rule.id));
+  const decision = { ...routed, profile: profile.id, applicableConstraints: routed.applicable === true ? [...enabled] : [] };
+  decision.baselineRules = decision.baselineRules.filter((id) => enabled.has(id));
+  decision.requiredRules = decision.requiredRules.filter((id) => enabled.has(id));
+  decision.ruleDetails = applicable.filter((rule) => decision.requiredRules.includes(rule.id)).map((rule) => ({ id: rule.id, name: rule.title, source: `node_modules/${pkg.name}/standards/rules.json` }));
   assetReadiness(decision, opts.projectRoot);
-  if (action !== "task") return decision;
-  return { ...decision, ...core.startTask({ ...opts, task: input.task || "", decision }) };
+  if (action !== "task") return core.attachNotice(decision, opts);
+  return core.attachNotice({ ...decision, ...core.startTask({ ...opts, task: input.task || "", decision }) }, opts);
 }
 
 function hostDiagnostic(opts) {

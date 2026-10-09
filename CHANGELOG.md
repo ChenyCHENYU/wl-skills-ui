@@ -4,6 +4,11 @@ All notable changes to **@agile-team/wl-skills-ui** will be documented in this f
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.17.0] - 2026-10-09
+
+- 统一可见 notice（包版本/判定/技能或基础约束/规则/目标/runId/待检查项）、开始与收尾提示、规范与执行器版本漂移诊断；保持单包使用与宿主证据未验证口径。
+- 按本包规则与实际 Profile 映射 Skill，不重复前端注释规则；保留旧入口哈希证明迁移与外来内容保护。
+
 ## [Unreleased]
 
 ## [1.16.0] - 2026-10-08

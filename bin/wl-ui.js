@@ -574,7 +574,7 @@ function transformForEditor(content, editor) {
         ?.slice(2) || "Skill",
     );
 
-  return header + "\nStart each task with local `wl-ui task \"<task>\" --target <path>`. Read only the selected Skill. Finish actual tools with the same `--run-id` and report `wl-ui status`; model declarations do not prove verification.\n\n" + body;
+  return header + "\nStart each task with local `wl-ui task \"<task>\" --target <path>`. Before editing visibly show the returned notice: actual package/version, decision, Skill or baseline, rule IDs/names, targets, runId and unexecuted checks. Report local command failures/version drift. Read only the selected Skill. Finish actual tools with the same `--run-id` and report `wl-ui status`; model declarations do not prove verification.\n\n" + body;
 }
 
 function selectedSkills(mode, profile) {
@@ -664,7 +664,7 @@ function buildSingleFileRouter(skills, profile) {
     `> Active profile: \`${profile?.id || "native-element"}\`.`,
     "",
     "Use the package router first, then open only the relevant Skill:",
-    "Start each task with local `wl-ui task \"<task>\" --target <path>`; read only the selected canonical Skill. Finish actual checks with the same `--run-id`, then report `wl-ui status --run-id <id>`. Routing/model declarations do not prove execution or validation. Native discovery: `.agents/skills/wl-skills-ui/SKILL.md`.",
+    "Start each task with local `wl-ui task \"<task>\" --target <path>`; before editing visibly show notice (actual package/version, decision, Skill or baseline, rule IDs/names, targets, runId, unexecuted checks), including gaps and local command/version failures; read only the selected canonical Skill. Finish actual checks with the same `--run-id`, then report `wl-ui status --run-id <id>`. Routing/model declarations do not prove execution or validation. Native discovery: `.agents/skills/wl-skills-ui/SKILL.md`.",
     "Reuse one `--run-id` / `WL_TASK_RUN_ID` across installed applicable packages for this user task; do not install unused sibling packages.",
     "",
     "- `node_modules/@agile-team/wl-skills-ui/SKILL.md`",

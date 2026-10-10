@@ -3,7 +3,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync } from "node:fs";
+import fs, { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -17,7 +17,9 @@ const pkg = require("../../package.json");
 const BIN = path.join(here, "..", "wl-ui.js");
 
 function tempRoot() {
-  return mkdtempSync(path.join(tmpdir(), "wl-ui-protocol-"));
+  const root = mkdtempSync(path.join(tmpdir(), "wl-ui-protocol-"));
+  fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ devDependencies: { "@agile-team/wl-skills-ui": "*" } }));
+  return root;
 }
 
 test("describe 返回协议版本、能力目录与五个统一操作", () => {

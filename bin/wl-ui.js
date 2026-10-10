@@ -564,7 +564,7 @@ function transformForEditor(content, editor) {
   if (!headerTemplate) return body;
 
   const header = headerTemplate
-    .replace("{SKILL_DESCRIPTION}", description.split("\n")[0])
+    .replace("{SKILL_DESCRIPTION}", `仅用于自身已接入UI包的PC Vue管理端，排除移动端和未接入项目。${description.split("\n")[0]}`)
     .replace("{APPLY_GLOB}", applyTo)
     .replace(
       "{SKILL_NAME}",
@@ -574,7 +574,7 @@ function transformForEditor(content, editor) {
         ?.slice(2) || "Skill",
     );
 
-  return header + "\nStart each task with local `wl-ui task \"<task>\" --target <path>`. Before editing visibly show the returned notice: actual package/version, decision, Skill or baseline, rule IDs/names, targets, runId and unexecuted checks. Report local command failures/version drift. Read only the selected Skill. Finish actual tools with the same `--run-id` and report `wl-ui status`; model declarations do not prove verification.\n\n" + body;
+  return header + "\nOnly apply these rules inside a PC Vue admin project with its own UI manifest/direct dependency or explicit scope opt-in. Parent installations and Vue files do not adopt a project; mobile and unadopted projects receive no UI rules.\n\nStart each task with local `wl-ui task \"<task>\" --target <path>`. Before editing visibly show the returned notice: actual package/version, decision, Skill or baseline, rule IDs/names, targets, runId and unexecuted checks. Report local command failures/version drift. Read only the selected Skill. Finish actual tools with the same `--run-id` and report `wl-ui status`; model declarations do not prove verification.\n\n" + body;
 }
 
 function selectedSkills(mode, profile) {

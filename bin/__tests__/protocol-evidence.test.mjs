@@ -3,14 +3,16 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync } from "node:fs";
+import fs, { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
 const { protocol, runOperation } = await import("../protocol-cli.mjs");
 
 function tempRoot() {
-  return mkdtempSync(path.join(tmpdir(), "wl-ui-evidence-"));
+  const root = mkdtempSync(path.join(tmpdir(), "wl-ui-evidence-"));
+  fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ devDependencies: { "@agile-team/wl-skills-ui": "*" } }));
+  return root;
 }
 
 test("status 严格回查同一 runId：字段精确、不兜底", () => {

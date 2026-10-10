@@ -11,7 +11,7 @@ function fixture() {
   const root = mkdtempSync(join(tmpdir(), "ui-task-"));
   cleanup.push(root);
   mkdirSync(join(root, "src"));
-  writeFileSync(join(root, "package.json"), '{"name":"fixture","private":true}');
+  writeFileSync(join(root, "package.json"), '{"name":"fixture","private":true,"devDependencies":{"@agile-team/wl-skills-ui":"*"}}');
   return root;
 }
 function run(root, args) {

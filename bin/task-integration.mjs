@@ -2,6 +2,7 @@ import { readFileSync, readdirSync, existsSync, realpathSync } from "node:fs";
 import { join, relative, resolve, isAbsolute } from "node:path";
 import { parseArgs } from "node:util";
 import core from "./task-observability.cjs";
+import projectScope from "./project-scope.cjs";
 import { GATEWAY_PATH } from "./task-gateway.mjs";
 import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
 import { getRules } from "../scanner/rules/index.mjs";
@@ -70,14 +71,16 @@ function capabilityGap(decision, reason) {
 }
 
 export function runTaskAction(action, input = {}) {
-  const opts = taskOptions(input.projectRoot || process.env.WL_PROJECT_ROOT || process.cwd(), { runId: input.runId, targets: input.targets || [] });
+  const resolved = projectScope.resolveScope({ projectRoot: input.projectRoot || process.env.WL_PROJECT_ROOT || process.cwd(), packageName: pkg.name, targets: input.targets || [] });
+  const opts = taskOptions(resolved.projectRoot, { runId: input.runId, targets: resolved.targets });
   if (action === "status") return core.readStatus(opts);
   if (action === "doctor-host") return hostDiagnostic({ ...opts, host: input.host || "unknown" });
+  if (resolved.scope.status !== "applicable") return core.attachNotice(projectScope.excludedDecision(resolved.scope), opts);
   const profile = resolveProjectProfile({ projectRoot: opts.projectRoot, profile: input.profile }).profile;
-  const routed = decideTask({ task: input.task || "", targets: opts.targets, skill: input.skill });
+  const routed = decideTask({ task: input.task || "", targets: opts.targets, skill: input.skill, context: input.context });
   const applicable = getRules({ profile: profile.id });
   const enabled = new Set(applicable.map((rule) => rule.id));
-  const decision = { ...routed, profile: profile.id, applicableConstraints: routed.applicable === true ? [...enabled] : [] };
+  const decision = { ...routed, scope: resolved.scope, profile: profile.id, applicableConstraints: routed.applicable === true ? [...enabled] : [] };
   decision.baselineRules = decision.baselineRules.filter((id) => enabled.has(id));
   decision.requiredRules = decision.requiredRules.filter((id) => enabled.has(id));
   decision.ruleDetails = applicable.filter((rule) => decision.requiredRules.includes(rule.id)).map((rule) => ({ id: rule.id, name: rule.title, source: `node_modules/${pkg.name}/standards/rules.json` }));

@@ -3,6 +3,7 @@ import { join, relative, resolve, isAbsolute } from "node:path";
 import { parseArgs } from "node:util";
 import core from "./task-observability.cjs";
 import projectScope from "./project-scope.cjs";
+import taskIntent from "./task-intent.cjs";
 import { GATEWAY_PATH } from "./task-gateway.mjs";
 import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
 import { getRules } from "../scanner/rules/index.mjs";
@@ -15,18 +16,7 @@ const POLICY = {
   baselineRules: ["R001", "R006", "R043"], baselineChecks: ["scan"], minimumScore: 1, minimumMargin: 1,
   unsupportedIntents: ["生成图像", "生成图片", "Figma设计稿导出"],
 };
-const TRIGGERS = {
-  "element/el-table": ["表格", "table", "el-table"], "element/el-form": ["表单", "查询表单", "el-form"],
-  "element/el-dialog": ["弹窗", "dialog", "el-dialog"], "element/el-tag": ["标签颜色", "状态标签", "el-tag"],
-  "element/component-family": ["卡片", "页签", "抽屉", "el-tabs", "上传控件"],
-  "runtime/design-tokens": ["设计令牌", "design tokens", "颜色硬编码", "tokens"],
-  "runtime/style-align": ["样式统一", "风格对齐", "样式不生效"], "runtime/migration": ["runtime迁移", "样式迁移"],
-  "ops/scan": ["UI扫描", "UI检查", "样式扫描"], "ops/audit": ["UI审计", "视觉审计"],
-  "ops/fix": ["UI修复", "修复样式", "统一视觉"], "ops/migrate": ["UI迁移", "迁移tokens"],
-  "layouts/list-page": ["列表布局"], "layouts/detail-page": ["详情布局"], "layouts/form-dialog": ["表单弹窗布局"], "layouts/tree-list": ["树列表布局"],
-  "vendors/ag-grid": ["AG Grid", "ag-grid"], "vendors/base-table": ["BaseTable"], "vendors/jh-components": ["jh组件"],
-  "vendors/c-components": ["C组件"], "vendors/custom-wrappers": ["自定义封装组件"], "vendors/unknown-wrapper": ["未知封装组件"],
-};
+const TRIGGERS = JSON.parse(readFileSync(join(root, "bin/task-triggers.json"), "utf8"));
 
 function catalogFiles(dir, result = []) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -62,7 +52,7 @@ export function decideTask(input) {
   const catalog = taskCatalog();
   const decision = core.evaluateTask({ ...input, catalog, policy: POLICY });
   if (input.skill && !catalog.some((skill) => skill.id === input.skill)) return capabilityGap(decision, `本包未发布专项 Skill：${input.skill}`);
-  if (POLICY.unsupportedIntents.some((intent) => String(input.task).includes(intent))) return capabilityGap(decision, "本包没有图像生成或设计稿导出的执行器");
+  if (POLICY.unsupportedIntents.some((intent) => taskIntent.phraseMatches(input.task, intent))) return capabilityGap(decision, "本包没有图像生成或设计稿导出的执行器");
   return decision;
 }
 

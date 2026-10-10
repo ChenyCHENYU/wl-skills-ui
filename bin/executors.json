@@ -1,0 +1,48 @@
+[
+  {
+    "id": "scan",
+    "command": [
+      "scan"
+    ],
+    "when": {
+      "checks": [
+        "scan"
+      ]
+    },
+    "parameters": {
+      "type": "object",
+      "required": [
+        "targets"
+      ],
+      "properties": {
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^R[0-9]{3}$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "sideEffects": {
+      "business": "none",
+      "records": true,
+      "reports": "stdout"
+    },
+    "authorization": "read-only-business-check",
+    "receipt": "package-execution-record-v1"
+  }
+]

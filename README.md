@@ -510,7 +510,7 @@ npx wl-ui doctor --project . --print-overrides
 
 ## 版本与进一步阅读
 
-当前 v1.18.0：公开集成协议 describe/request 统一信封（能力清单与路由语料经真实打包产物验证）、输入校验收口与 MCP 目录对齐真实 tools/list。v1.15.0：任务判定、真实执行/验证回执、实际检查范围和过期检测；Codex 原生薄入口按需加载 canonical Skill。确定性路由覆盖已发布目录与显式缺口，不保证识别所有自然语言。v1.14.0：明确独立能力边界，安装、更新、清理按本包贡献保护用户及其他包内容；共享文件采用单文件原子替换，支持历史路由与 `.clinerules` 目录迁移。v1.13.2：R044 审查多列表单超宽标签，R040 识别自定义 `stepper`，均供人工复核。v1.13.0：新增 `native-jh-ag` Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
+当前 v1.19.0：公开集成协议 describe/request 统一信封（能力清单与路由语料经真实打包产物验证）、输入校验收口与 MCP 目录对齐真实 tools/list。v1.15.0：任务判定、真实执行/验证回执、实际检查范围和过期检测；Codex 原生薄入口按需加载 canonical Skill。确定性路由覆盖已发布目录与显式缺口，不保证识别所有自然语言。v1.14.0：明确独立能力边界，安装、更新、清理按本包贡献保护用户及其他包内容；共享文件采用单文件原子替换，支持历史路由与 `.clinerules` 目录迁移。v1.13.2：R044 审查多列表单超宽标签，R040 识别自定义 `stepper`，均供人工复核。v1.13.0：新增 `native-jh-ag` Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
 
 - [版本摘要](docs/version-history.md)
 - [完整 Changelog](CHANGELOG.md)
@@ -532,3 +532,15 @@ npm run pack:dry
 ```
 
 视觉测试基线按操作系统管理；如果本机没有对应平台截图，完整 `test:visual` 会明确报告缺失，不应自动生成并提交一套未经评审的新基线。发布门禁使用跨浏览器计算样式契约 `test:visual:contracts`；真实浏览器兼容契约也可以单独执行 `browser-compat.spec.ts`。
+
+### 当前请求、动作边界与 Harness 集成
+
+任务判定保留原始文本，并将当前请求、历史引用和明确否定分开。自然语言判定覆盖已公开语料与规则，不能承诺任意表述都自动命中；遇到歧义或缺口应补充目标/领域或显式指定本包能力，不能静默选择。编辑前显示真实 `notice`，包括版本、技能、规则、目标、runId、动作与待检查项。
+
+`protocol describe --json` 声明 `task-intent-v1`、`result-core-v1`、`executor-catalog-v1`；`schemas.resultCore` 与五操作 `schemas.results` 可供宿主验证。原有结果字段保留，新增 `result.integration`：项目适用范围、动作模式、规则身份、目标、就绪状态、允许执行器和真实执行/验证状态。`ok` 只表示调用成功。未声明使用的输入字段进入 diagnostics，不会转成授权依据。
+
+`action.mode` 为 explain/plan/inspect/apply/unspecified；解释和规划不自动启动检查。`businessWritesAuthorized=false`，任务意图不能替代业务写入授权。`ruleRefs` 为包自有规则身份（包名、规则 ID、版本、来源、性质），自然语言约束有稳定 ID；原规则名称与列表保留。所有规则的机械/语义验证仍以实际回执为准。
+
+`inventory.executors` 声明本包业务只读检查器、目标与参数 Schema；其适用条件由本包判定。外部适配器须核对同项目、同包、同版本、同 runId 的真实计划、新鲜度与允许动作，指定一个目标，不能扩大范围；支持规则子集的执行器不得选择计划外规则。多目标需拆分调用。五包和 Harness 均为可选组合，不新增兄弟包或 Harness 运行时依赖；卸下适配器后原 CLI/MCP 继续独立使用。
+
+样式规则检查使用 `scan`（支持计划内规则子集）；`check` 只核验接入完整性。技能触发词由本包 `bin/task-triggers.json` 维护并接受目录一致性检查。

@@ -16,9 +16,9 @@ const { createProtocol } = require("./integration-protocol.cjs");
 
 const BIN = "wl-ui";
 const OPERATIONS = [
-  { id: "route", summary: "只读任务判定：视觉/样式域技能、约束、歧义与缺口", readOnly: true, required: ["task"], optional: ["targets", "profile", "skill", "projectRoot"], sideEffects: "无写入", mapping: `${BIN} route --text "<task>"` },
-  { id: "explain", summary: "解释本次任务判定（只读，不记录）", readOnly: true, required: ["task"], optional: ["targets", "projectRoot"], sideEffects: "无写入", mapping: `${BIN} explain --text "<task>"` },
-  { id: "task", summary: "判定并持久化任务计划（尚未执行扫描或修复）", readOnly: false, required: ["task"], optional: ["runId", "targets", "profile", "projectRoot"], sideEffects: "写入 .wl-skills-ui/runs/ 下本包任务记录", mapping: `${BIN} task --text "<task>" [--run-id <id>]` },
+  { id: "route", summary: "只读任务判定：视觉/样式域技能、约束、歧义与缺口", readOnly: true, required: ["task"], optional: ["context", "targets", "profile", "skill", "projectRoot"], sideEffects: "无写入", mapping: `${BIN} route --text "<task>"` },
+  { id: "explain", summary: "解释本次任务判定（只读，不记录）", readOnly: true, required: ["task"], optional: ["context", "targets", "projectRoot"], sideEffects: "无写入", mapping: `${BIN} explain --text "<task>"` },
+  { id: "task", summary: "判定并持久化任务计划（尚未执行扫描或修复）", readOnly: false, required: ["task"], optional: ["context", "runId", "targets", "profile", "projectRoot"], sideEffects: "写入 .wl-skills-ui/runs/ 下本包任务记录", mapping: `${BIN} task --text "<task>" [--run-id <id>]` },
   { id: "status", summary: "读取本包执行/校验记录与新鲜度", readOnly: true, required: [], optional: ["runId", "projectRoot"], sideEffects: "无写入", mapping: `${BIN} status [--run-id <id>]` },
   { id: "doctor-host", summary: "宿主入口静态诊断（不证明宿主已加载）", readOnly: true, required: [], optional: ["host", "projectRoot"], sideEffects: "无写入", mapping: `${BIN} doctor-host [--host <host>]` },
 ];
@@ -31,7 +31,7 @@ function buildInventory() {
     { name: "clean", args: "[--project <path>] [--dry-run]", summary: "清理本包安装文件", execution: "programmatic", sideEffects: "删除本包登记文件" },
     { name: "scan", args: "[--project <path>] [--profile <id>]", summary: "R 规则扫描", execution: "programmatic", sideEffects: "无（报告输出）" },
     { name: "audit", args: "[--project <path>]", summary: "审计汇总", execution: "programmatic", sideEffects: "无" },
-    { name: "check", args: "[--project <path>]", summary: "扫描+回执记录", execution: "programmatic", sideEffects: "写 .wl-skills-ui/runs/" },
+    { name: "check", args: "[--project <path>]", summary: "接入完整性检查+回执记录（样式规则使用 scan）", execution: "programmatic", sideEffects: "写 .wl-skills-ui/runs/" },
     { name: "fix", args: "--run-id <id> --rule <id> [--confirm]", summary: "确定性修复（快照/回滚）", execution: "programmatic", sideEffects: "写源文件（确认制+快照回滚）" },
     { name: "snapshot", args: "/ drift / exempt", summary: "漂移基线管理", execution: "programmatic", sideEffects: "写基线文件" },
     { name: "contract", args: "<extract|validate|match>", summary: "ui-contract 提取/校验/匹配", execution: "programmatic", sideEffects: "extract 写契约文件" },
@@ -82,6 +82,7 @@ export const protocol = createProtocol({
   capabilities: capabilitiesDocument.capabilities || [],
   constraints: { projectScope: { config: ".wl-skills-scope.json", schema: "bin/project-scope.schema.json", adoption: "own-manifest-or-direct-dependency-or-explicit-enable", inheritance: "never-across-project-boundaries", excluded: ["mobile", "unadopted-project", "aggregate-workspace"] }, node: (pkg.engines && pkg.engines.node) || null, boundaryVersion: capabilitiesDocument.boundaryVersion || null },
   operations: OPERATIONS,
+  executors: require("./executors.json"),
   inventory: buildInventory(),
 });
 

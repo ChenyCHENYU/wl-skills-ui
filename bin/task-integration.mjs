@@ -4,6 +4,7 @@ import { parseArgs } from "node:util";
 import core from "./task-observability.cjs";
 import projectScope from "./project-scope.cjs";
 import taskIntent from "./task-intent.cjs";
+import resultCore from "./integration-result.cjs";
 import { GATEWAY_PATH } from "./task-gateway.mjs";
 import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
 import { getRules } from "../scanner/rules/index.mjs";
@@ -78,9 +79,9 @@ function capabilityGap(decision, reason) {
 export function runTaskAction(action, input = {}) {
   const resolved = projectScope.resolveScope({ projectRoot: input.projectRoot || process.env.WL_PROJECT_ROOT || process.cwd(), packageName: pkg.name, targets: input.targets || [] });
   const opts = taskOptions(resolved.projectRoot, { runId: input.runId, targets: resolved.targets });
-  if (action === "status") return core.readStatus(opts);
+  if (action === "status") return taskResultReadiness(core.readStatus(opts), opts);
   if (action === "doctor-host") return hostDiagnostic({ ...opts, host: input.host || "unknown" });
-  if (resolved.scope.status !== "applicable") return core.attachNotice(projectScope.excludedDecision(resolved.scope), opts);
+  if (resolved.scope.status !== "applicable") return taskResultReadiness(core.attachNotice(projectScope.excludedDecision(resolved.scope), opts), opts);
   const profile = resolveProjectProfile({ projectRoot: opts.projectRoot, profile: input.profile }).profile;
   const routed = decideTask({ task: input.task || "", targets: opts.targets, skill: input.skill, context: input.context });
   const applicable = getRules({ profile: profile.id });
@@ -90,8 +91,14 @@ export function runTaskAction(action, input = {}) {
   decision.requiredRules = decision.requiredRules.filter((id) => enabled.has(id));
   decision.ruleDetails = applicable.filter((rule) => decision.requiredRules.includes(rule.id)).map((rule) => ({ id: rule.id, name: rule.title, source: `node_modules/${pkg.name}/standards/rules.json` }));
   assetReadiness(decision, opts.projectRoot);
-  if (action !== "task") return core.attachNotice(decision, opts);
-  return core.attachNotice({ ...decision, ...core.startTask({ ...opts, task: input.task || "", decision }) }, opts);
+  if (action !== "task") return taskResultReadiness(core.attachNotice(decision, opts), opts);
+  const record = core.startTask({ ...opts, task: input.task || "", decision });
+  return taskResultReadiness(core.attachNotice({ ...record.decision, ...record }, opts), opts);
+}
+
+function taskResultReadiness(result, opts) {
+  const effective = resultCore.projectResult(result, opts, { packageName: pkg.name, packageVersion: pkg.version }).integration;
+  return { ...result, ready: effective.scope?.status === "applicable" && effective.ready === true };
 }
 
 function hostDiagnostic(opts) {

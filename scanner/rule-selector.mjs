@@ -15,3 +15,10 @@ export function expandRuleSelector(input, registered) {
   if (missing.length) throw new Error(`不存在或格式无效的规则：${missing.join("、") || "空规则"}；请用 wl-ui rules list 核对规则 ID`);
   return selected;
 }
+
+/** Select callbacks before scanning; output filtering alone is not rule scope. */
+export function selectRuleCallbacks(rules, { only, skip } = {}, registered = rules.map(rule => rule.id)) {
+  const allow = only ? expandRuleSelector(only, registered) : null;
+  const deny = skip ? expandRuleSelector(skip, registered) : new Set();
+  return rules.filter(rule => (!allow || allow.has(rule.id)) && !deny.has(rule.id));
+}

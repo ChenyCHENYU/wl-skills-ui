@@ -371,8 +371,9 @@ export function runFix({
   let totalFiles = 0;
 
   // 第一遍：收集所有需要改动的文件及其内容
+  const root = projectRoot || resolve(target, "..");
   const pending = [];
-  for (const filePath of walkVue(target, exclude)) {
+  for (const filePath of walkVue(target, exclude, root)) {
     totalFiles++;
     const original = readFileSync(filePath, "utf8");
     let content = original;
@@ -414,7 +415,6 @@ export function runFix({
   }
 
   pending.sort((a, b) => a.filePath.localeCompare(b.filePath));
-  const root = projectRoot || resolve(target, "..");
   const planHash = createHash("sha256")
     .update(
       JSON.stringify({

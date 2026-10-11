@@ -28,7 +28,7 @@
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve, relative } from "node:path";
 import { parseScannerInput } from "./cli-input.mjs";
-import { expandRuleSelector } from "./rule-selector.mjs";
+import { expandRuleSelector, selectRuleCallbacks } from "./rule-selector.mjs";
 import { getRules } from "./rules/index.mjs";
 import { generateReport } from "./report.mjs";
 import { checkIntegration } from "./integration.mjs";
@@ -136,7 +136,7 @@ if (!["error", "full"].includes(values["changed-fallback"])) {
   process.exit(1);
 }
 const activeProfile = profileResolution.profile;
-const rules = getRules({ profile: activeProfile.id });
+const rules = selectRuleCallbacks(getRules({ profile: activeProfile.id }), values, REGISTERED_RULES);
 
 function resolveTarget(projectRoot, target) {
   return resolve(projectRoot, target || "src");

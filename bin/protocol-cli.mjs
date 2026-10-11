@@ -8,6 +8,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { runTaskAction, taskCatalog } from "./task-integration.mjs";
+import { invokeExecutor } from "./executor-cli.mjs";
 
 const require = createRequire(import.meta.url);
 const pkg = require("../package.json");
@@ -77,6 +78,7 @@ function buildInventory() {
 }
 
 export const protocol = createProtocol({
+  bin: BIN,
   packageName: pkg.name,
   packageVersion: pkg.version,
   capabilities: capabilitiesDocument.capabilities || [],
@@ -103,7 +105,14 @@ function envelopeError(code, message, field) {
   return { protocolVersion: 1, package: pkg.name, packageVersion: pkg.version, operation: null, requestId: null, ok: false, error: { code, message, ...(field ? { field } : {}) }, diagnostics: [] };
 }
 
-export function runCli(argv) {
+async function requestEnvelope(input) {
+  if (input && input.operation === "execute") {
+    return protocol.requestExecute(input, { readStatus: (root, runId) => runOperation("status", { projectRoot: root, runId }), invoke: invokeExecutor });
+  }
+  return protocol.request(input, runOperation);
+}
+
+export async function runCli(argv) {
   const sub = argv[0];
   if (sub === "describe") {
     console.log(JSON.stringify(protocol.describe(), null, 2));
@@ -124,7 +133,7 @@ export function runCli(argv) {
       console.log(JSON.stringify(envelopeError("invalid-input", message, "input-file"), null, 2));
       return 2;
     }
-    const envelope = protocol.request(input, runOperation);
+    const envelope = await requestEnvelope(input);
     console.log(JSON.stringify(envelope, null, 2));
     return envelope.ok ? 0 : 2;
   }

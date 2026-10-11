@@ -97,7 +97,7 @@ if (rawArgs.length > 0 && SUBCOMMANDS.has(rawArgs[0])) {
 // 非 init 子命令：直接委托给 scanner/index.mjs
 if (subcommand === "protocol") {
   const { runCli } = await import("./protocol-cli.mjs");
-  process.exitCode = runCli(rawArgs);
+  process.exitCode = await runCli(rawArgs);
 } else if (["task", "route", "explain", "status", "doctor-host"].includes(subcommand)) {
   const { taskCli } = await import("./task-integration.mjs");
   taskCli(subcommand, rawArgs);

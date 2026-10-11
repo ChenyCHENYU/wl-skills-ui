@@ -1,6 +1,6 @@
 {
   "name": "@agile-team/wl-skills-ui",
-  "version": "1.20.1",
+  "version": "1.21.0",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 双模式、任务路由与真实检查回执（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
   "main": "./es/index.js",
@@ -76,12 +76,14 @@
     "lint": "eslint . --cache --cache-location .eslintcache --max-warnings 0",
     "typecheck": "tsc -p tsconfig.check.json",
     "verify:package": "node scripts/verify-package.mjs",
-    "verify": "npm run lint && npm run typecheck && npm run test:coverage && npm run check:scss && npm run check:compat && npm run docs:check && npm run build && npm run verify:package",
+    "verify": "npm run support:check && npm run lint && npm run typecheck && npm run test:coverage && npm run check:scss && npm run check:compat && npm run docs:check && npm run build && npm run verify:package",
     "pack:dry": "npm pack --dry-run --ignore-scripts",
     "release:check": "npm run verify && npm run test:visual:contracts && npm run pack:dry",
-    "prepublishOnly": "npm run release:check",
+    "prepublishOnly": "npm run support:check && npm run release:check",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-exclude=bin/vendor/** --test-coverage-lines=70 --test-coverage-branches=65 --test-coverage-functions=70 scanner/__tests__/*.test.mjs runtime/__tests__/*.test.mjs bin/__tests__/*.test.mjs",
-    "benchmark:runtime": "node scripts/benchmark-observer-hub.mjs"
+    "benchmark:runtime": "node scripts/benchmark-observer-hub.mjs",
+    "support:check": "node bin/shared-support-check.cjs",
+    "compatibility:check": "node scripts/compatibility-check.cjs"
   },
   "files": [
     "dist",
@@ -171,5 +173,8 @@
     "{bin,mcp,runtime,scanner,scripts,standards}/**/*.{js,mjs,ts,mts,tsx,vue}": [
       "eslint --fix --no-cache"
     ]
+  },
+  "dependencies": {
+    "ajv": "8.17.1"
   }
 }

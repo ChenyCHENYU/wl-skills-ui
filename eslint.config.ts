@@ -60,7 +60,7 @@ export default defineConfigWithVueTs(
     },
   },
   {
-    files: ["bin/**/*.cjs"],
+    files: ["bin/**/*.cjs", "scripts/**/*.cjs"],
     rules: { "@typescript-eslint/no-require-imports": "off" },
   },
   // 自定义规则组

@@ -26,6 +26,7 @@
           "maxItems": 1
         },
         "rules": {
+          "description": "省略时执行当前计划的本包 R 规则；显式值只允许计划内子集。SFC 解析检查独立执行且不能被隐藏。",
           "type": "array",
           "items": {
             "type": "string",

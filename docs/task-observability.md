@@ -25,3 +25,13 @@ UI scan 记录规则真实回调次数及 SFC_PARSE 错误；解析错误不受�
 当前 CLI 检查回执覆盖 scan / audit / check / fix / all 与 Vite 依赖检查，本包 MCP 记录实际调用；其他 CLI snapshot / drift / exempt / contract / 脚手架保留既有产物与日志，不自动等同于 UI 源码检查。未由执行器报告实际文件的操作，其检查范围明确未知；不能用输入目录快照或成功退出补造文件覆盖。
 
 规则选择器来自实际注册表；未知 ID、格式错误和无界范围在扫描前拒绝。CLI 的未知参数、重复值选项、空值与额外位置参数同样不会启动检查或写入回执；JSON/summary/compact-v2 输出返回 `invalid-input` 与 `not-executed`。MCP 的错误调用返回 `isError=true` 与真实失败记录，保留同 runId，`checkedFiles` 与源码检查为空。已注册的规则选择和语法错误检查继续按原有契约执行。
+
+## 稳定协议执行
+
+编排层先调用 `protocol request` 的 `task`，再发送 `operation: "execute"`、当前项目绝对 `projectRoot`、同一 `runId`、`executorId: "scan"` 与 `parameters.targets`。UI 的 `rules` 只接受本次计划内的规则子集；省略时执行当前计划的 R 规则，不扩大到全量规则。SFC 解析检查独立执行且不能被隐藏。请求的执行器必须在当前状态的 `integration.allowedExecutors` 内；目标不能扩大，参数按目录 Schema 校验。解释、规划、禁止检查、未接入/移动项目、缺口、计划过期与已知版本漂移不会启动执行器。
+
+执行接线只保留本包参数映射，复用原 scan CLI，不复制规则或检查器。业务文件只读，原执行器仍写本包真实回执；返回 `result.execution` 和重新回查的 `result.integration`。调用 `ok=true` 不等于检查通过，非零退出、取消信号、实际文件和未验证项须如实展示。稳定接口使本包新版本不要求适配器或兄弟包同步修改；宿主/模型的实际读取和展示仍需独立证据。
+
+`--only/--skip` 在扫描前选择实际规则回调，CLI 与 MCP 使用同一选择器；回执的 ruleExecutions 只记录实际选中的规则。它们不只是过滤问题展示；SFC_PARSE 仍独立验证，不能被规则选择隐藏。
+
+原 scanner 与修复器在读取 Vue 文件前核验实际路径属于本项目；目录目标中的外部符号链接叶子也明确拒绝，不能静默跳过后称检查通过。本项目内合法文件链接继续可读；公开 execute 在启动原 CLI 前另做目标边界预检。

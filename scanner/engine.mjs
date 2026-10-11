@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from "node:fs";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { getRules, normalizeIssue } from "./rules/index.mjs";
 import {
   createCoverageCollector,
@@ -10,7 +10,7 @@ import { loadExemptConfig } from "./exempt.mjs";
 import { collectChangedVueFiles } from "./changed.mjs";
 import { parseVueSfc, SFC_PARSER_MODES } from "./sfc-parser.mjs";
 import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
-import { expandRuleSelector } from "./rule-selector.mjs";
+import { expandRuleSelector, selectRuleCallbacks } from "./rule-selector.mjs";
 
 export function expandRuleRange(input = "") {
   return input === "" ? new Set() : expandRuleSelector(input, getRules().map(rule => rule.id));
@@ -20,9 +20,12 @@ export function expandRuleRange(input = "") {
  * 递归收集 .vue 文件（目录名排序稳定遍历；target 为单个 .vue 文件时直接返回）。
  * 扫描与修复共用，保证两边看到同一文件集合。
  */
-export function* walkVue(target, excludes) {
+export function* walkVue(target, excludes, projectRoot) {
   if (!existsSync(target)) throw new Error(`扫描目标不存在：${target}`);
-  if (statSync(target).isFile()) {
+  const file = statSync(target).isFile();
+  const root = realpathSync(resolve(projectRoot || (file ? dirname(target) : target)));
+  assertVueBoundary(root, target);
+  if (file) {
     if (target.endsWith(".vue")) yield target;
     return;
   }
@@ -32,11 +35,17 @@ export function* walkVue(target, excludes) {
   for (const entry of entries) {
     const full = join(target, entry.name);
     if (entry.isDirectory()) {
-      if (!excludes.includes(entry.name)) yield* walkVue(full, excludes);
+      if (!excludes.includes(entry.name)) yield* walkVue(full, excludes, root);
     } else if (entry.name.endsWith(".vue")) {
+      assertVueBoundary(root, full);
       yield full;
     }
   }
+}
+
+function assertVueBoundary(root, file) {
+  const actual = realpathSync(file);
+  if (actual !== root && !actual.startsWith(root + sep)) throw new Error(`Vue 文件或目录必须位于项目根目录内（含符号链接）：${file}`);
 }
 
 function executeRule(rule, method, text, relPath, offset, executions) {
@@ -73,7 +82,7 @@ export function scanFiles({
   const checkedFiles = [];
   const executions = new Map(rules.map((rule) => [rule.id, { id: rule.id, calls: 0, issues: 0, errors: 0 }]));
 
-  for (const filePath of walkVue(targetDir, excludeDirs)) {
+  for (const filePath of walkVue(targetDir, excludeDirs, projectRoot)) {
     if (fileFilter && !fileFilter.has(resolve(filePath))) continue;
     fileCount++;
     const content = readFileSync(filePath, "utf8");
@@ -193,7 +202,7 @@ export function scanProject(options = {}) {
     mode: options.mode,
   });
   const profile = profileResolution.profile;
-  const rules = getRules({ profile: profile.id });
+  const rules = selectRuleCallbacks(getRules({ profile: profile.id }), options, getRules().map(rule => rule.id));
   let fileFilter = null;
   let changed = { requested: false, fallback: false };
   if (options.changedOnly || options.changed) {

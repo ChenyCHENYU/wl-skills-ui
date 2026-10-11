@@ -23,3 +23,5 @@ wl-ui status --run-id <runId> --json
 UI scan 记录规则真实回调次数及 SFC_PARSE 错误；解析错误不受规则过滤隐藏。fast/fallback 仅提取区块，未验证 SFC 语法；compiler SFC 解析也不替代脚本 TypeScript 类型编译、浏览器视觉和业务语义复核。UI Vite 插件只检查依赖组合，明确列出源码 scan 尚未执行。运行时 guard 的存在不证明静态规范已通过。
 
 当前 CLI 检查回执覆盖 scan / audit / check / fix / all 与 Vite 依赖检查，本包 MCP 记录实际调用；其他 CLI snapshot / drift / exempt / contract / 脚手架保留既有产物与日志，不自动等同于 UI 源码检查。未由执行器报告实际文件的操作，其检查范围明确未知；不能用输入目录快照或成功退出补造文件覆盖。
+
+规则选择器来自实际注册表；未知 ID、格式错误和无界范围在扫描前拒绝。CLI 的未知参数、重复值选项、空值与额外位置参数同样不会启动检查或写入回执；JSON/summary/compact-v2 输出返回 `invalid-input` 与 `not-executed`。MCP 的错误调用返回 `isError=true` 与真实失败记录，保留同 runId，`checkedFiles` 与源码检查为空。已注册的规则选择和语法错误检查继续按原有契约执行。

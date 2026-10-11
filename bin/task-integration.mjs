@@ -44,8 +44,23 @@ export function taskOptions(projectRoot, extra = {}) {
 }
 
 function projectEvidencePaths(projectRoot, candidates) {
-  return candidates.filter((candidate) => existsSync(candidate)).map((candidate) => relative(projectRoot, realpathSync(candidate)).replace(/\\/g, "/"))
-    .filter((rel) => rel && !rel.startsWith("../") && !isAbsolute(rel));
+  return candidates.filter((candidate) => existsSync(candidate)).map((candidate) => projectEvidencePath(projectRoot, candidate)).filter(Boolean);
+}
+
+function evidenceRelative(projectRoot, target) {
+  const value = relative(projectRoot, target);
+  return value && value !== ".." && !value.startsWith("../") && !value.startsWith("..\\") && !isAbsolute(value) ? value.replace(/\\/g, "/") : null;
+}
+
+function projectEvidencePath(projectRoot, candidate) {
+  const physical = realpathSync(candidate);
+  const local = evidenceRelative(projectRoot, physical);
+  if (local) return local;
+  const dependency = join(projectRoot, "node_modules", pkg.name);
+  if (!existsSync(dependency)) return null;
+  const internal = evidenceRelative(realpathSync(dependency), physical);
+  // The shared reader still verifies package identity and its own realpath boundary.
+  return internal ? `node_modules/${pkg.name}/${internal}` : null;
 }
 
 export function decideTask(input) {

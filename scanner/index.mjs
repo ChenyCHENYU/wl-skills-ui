@@ -27,7 +27,8 @@
  */
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve, relative } from "node:path";
-import { parseArgs } from "node:util";
+import { parseScannerInput } from "./cli-input.mjs";
+import { expandRuleSelector } from "./rule-selector.mjs";
 import { getRules } from "./rules/index.mjs";
 import { generateReport } from "./report.mjs";
 import { checkIntegration } from "./integration.mjs";
@@ -67,9 +68,8 @@ if (args.length > 0 && SUBCOMMANDS.has(args[0])) {
 }
 const isAudit = subcommand === "audit";
 
-const { values } = parseArgs({
-  args,
-  options: {
+const REGISTERED_RULES = getRules().map(rule => rule.id);
+const { values, positionals } = parseScannerInput(subcommand, args, {
     target: { type: "string", default: "./src" },
     project: { type: "string", default: "." },
     output: { type: "string", default: "markdown" },
@@ -98,9 +98,17 @@ const { values } = parseArgs({
     limit: { type: "string", default: "100" },
     cursor: { type: "string", default: "0" },
     "run-id": { type: "string" },
+    help: { type: "boolean", short: "h" },
   },
-  strict: false,
-});
+  REGISTERED_RULES);
+
+if (values.help) {
+  console.log(`wl-ui ${subcommand} [--project <root>] [--target <file|directory>]\n` +
+    "scan/audit: --only R001,R006 | --skip R031-R037 | --output json|summary|compact-v2|markdown | --fail-on-error | --run-id <id>\n" +
+    "fix: --dry-run | --plan-hash <hash>; snapshot: list|rollback|diff|clean; exempt: init\n" +
+    "每个值选项只接受一个值；未知参数、操作和规则会在检查或写入前拒绝。");
+  process.exit(0);
+}
 
 // ── 公共：扫描逻辑 ──────────────────────────────────────────────────────
 if (!SFC_PARSER_MODES.includes(values.parser)) {
@@ -155,20 +163,7 @@ function runScan(
 
 // ── 公共：规则范围展开（R031-R037 → R031,R032,...,R037）────────────────────
 function expandRuleRange(input) {
-  const set = new Set();
-  for (const part of input.split(",").map((s) => s.trim())) {
-    const rangeMatch = part.match(/^(R)(\d+)-(R)?(\d+)$/i);
-    if (rangeMatch) {
-      const start = parseInt(rangeMatch[2]);
-      const end = parseInt(rangeMatch[4]);
-      for (let i = Math.min(start, end); i <= Math.max(start, end); i++) {
-        set.add("R" + String(i).padStart(3, "0"));
-      }
-    } else {
-      set.add(part.toUpperCase());
-    }
-  }
-  return set;
+  return expandRuleSelector(input, REGISTERED_RULES);
 }
 
 // ── 公共：按 layer / vendor / mode 过滤 ─────────────────────────────────────
@@ -320,7 +315,7 @@ if (subcommand === "check") {
 }
 
 if (subcommand === "exempt") {
-  const sub = args[0] || "init";
+  const sub = positionals[0] || "init";
   if (sub === "init") {
     const { existsSync } = await import("node:fs");
     const projectRoot = resolve(values.project);
@@ -412,7 +407,7 @@ if (subcommand === "drift") {
 
 if (subcommand === "snapshot") {
   const projectRoot = resolve(values.project);
-  const sub = args[0] || "list";
+  const sub = positionals[0] || "list";
   if (sub === "list") {
     const snaps = listSnapshots(projectRoot);
     if (snaps.length === 0) {

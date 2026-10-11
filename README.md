@@ -510,7 +510,7 @@ npx wl-ui doctor --project . --print-overrides
 
 ## 版本与进一步阅读
 
-当前 v1.19.0：公开集成协议 describe/request 统一信封（能力清单与路由语料经真实打包产物验证）、输入校验收口与 MCP 目录对齐真实 tools/list。v1.15.0：任务判定、真实执行/验证回执、实际检查范围和过期检测；Codex 原生薄入口按需加载 canonical Skill。确定性路由覆盖已发布目录与显式缺口，不保证识别所有自然语言。v1.14.0：明确独立能力边界，安装、更新、清理按本包贡献保护用户及其他包内容；共享文件采用单文件原子替换，支持历史路由与 `.clinerules` 目录迁移。v1.13.2：R044 审查多列表单超宽标签，R040 识别自定义 `stepper`，均供人工复核。v1.13.0：新增 `native-jh-ag` Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
+当前 v1.20.0：公开集成协议 describe/request 统一信封（能力清单与路由语料经真实打包产物验证）、输入校验收口与 MCP 目录对齐真实 tools/list。v1.15.0：任务判定、真实执行/验证回执、实际检查范围和过期检测；Codex 原生薄入口按需加载 canonical Skill。确定性路由覆盖已发布目录与显式缺口，不保证识别所有自然语言。v1.14.0：明确独立能力边界，安装、更新、清理按本包贡献保护用户及其他包内容；共享文件采用单文件原子替换，支持历史路由与 `.clinerules` 目录迁移。v1.13.2：R044 审查多列表单超宽标签，R040 识别自定义 `stepper`，均供人工复核。v1.13.0：新增 `native-jh-ag` Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
 
 - [版本摘要](docs/version-history.md)
 - [完整 Changelog](CHANGELOG.md)
@@ -544,3 +544,11 @@ npm run pack:dry
 `inventory.executors` 声明本包业务只读检查器、目标与参数 Schema；其适用条件由本包判定。外部适配器须核对同项目、同包、同版本、同 runId 的真实计划、新鲜度与允许动作，指定一个目标，不能扩大范围；支持规则子集的执行器不得选择计划外规则。多目标需拆分调用。五包和 Harness 均为可选组合，不新增兄弟包或 Harness 运行时依赖；卸下适配器后原 CLI/MCP 继续独立使用。
 
 样式规则检查使用 `scan`（支持计划内规则子集）；`check` 只核验接入完整性。技能触发词由本包 `bin/task-triggers.json` 维护并接受目录一致性检查。
+
+`scan/audit/fix` 的未知参数、重复值选项、空值、多余位置参数和不存在的规则选择器在检查或写入前拒绝，机读输出返回 `invalid-input`，不会形成成功检查记录。CLI 与 MCP 共用注册规则选择器，支持单个 ID、逗号列表与三位编号范围（例如 `R031-R037`）；用 `wl-ui rules list` 核对实际规则。Vue 解析错误仍不能被 `--only/--skip` 隐藏。`wl-ui scan --help` 只输出帮助，不启动扫描。
+
+### 任务反馈与执行边界
+
+编辑前展示实际 `notice` 的包版本、判定、动作、技能/规则、目标、runId、待检查项与版本对齐信息；解释/规划和明确禁止检查时不自动执行检查。`runtime=mismatch/invalid` 或 `planStale=true` 必须先同步本包或重新判定。只读 `inspect` 输入变化后重新 `task`；`apply` 完成正常业务修改后可用同 runId 做实际复扫，但规则、配置或版本变化仍需重新判定。
+
+单包只读取自身公开能力；多包复用同 runId 并各存各的证据。`matched/ready/ok=true` 仅说明判定或调用成功，是否完成以实际 `executionStatus/validationStatus/checkedFiles` 为准。未接入或不适用的项目不借父目录规则；宿主发现、模型读取、反馈展示没有真实证据时继续标记未验证。

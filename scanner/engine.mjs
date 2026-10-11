@@ -10,22 +10,10 @@ import { loadExemptConfig } from "./exempt.mjs";
 import { collectChangedVueFiles } from "./changed.mjs";
 import { parseVueSfc, SFC_PARSER_MODES } from "./sfc-parser.mjs";
 import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
+import { expandRuleSelector } from "./rule-selector.mjs";
 
 export function expandRuleRange(input = "") {
-  const set = new Set();
-  for (const part of input.split(",").map((value) => value.trim()).filter(Boolean)) {
-    const match = part.match(/^(R)(\d+)-(R)?(\d+)$/i);
-    if (!match) {
-      set.add(part.toUpperCase());
-      continue;
-    }
-    const start = Number.parseInt(match[2], 10);
-    const end = Number.parseInt(match[4], 10);
-    for (let id = Math.min(start, end); id <= Math.max(start, end); id++) {
-      set.add(`R${String(id).padStart(3, "0")}`);
-    }
-  }
-  return set;
+  return input === "" ? new Set() : expandRuleSelector(input, getRules().map(rule => rule.id));
 }
 
 /**
@@ -191,6 +179,8 @@ export function filterIssues(issues, { layer, vendor, mode, only, skip } = {}) {
 }
 
 export function scanProject(options = {}) {
+  // CLI and MCP share the same selector boundary; never scan first and discard errors later.
+  for (const selector of [options.only, options.skip]) if (selector) expandRuleRange(selector);
   const projectRoot = resolve(options.projectRoot || options.project || ".");
   const targetDir = resolve(projectRoot, options.target || "src");
   const changedFallback = options.changedFallback || "error";

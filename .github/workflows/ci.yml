@@ -25,11 +25,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v6
+        with:
+          version: 11.21.0
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm audit --prod --audit-level=moderate
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 22
       - run: npm run support:check
       - run: pnpm verify
       - run: npm pack --dry-run --ignore-scripts
@@ -39,10 +43,16 @@ jobs:
     name: Published baseline upgrade and coexistence
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.21.0
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: npm run build
       - run: npm run compatibility:check -- --output compatibility-evidence
       - uses: actions/upload-artifact@v4
         if: always()

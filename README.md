@@ -2,7 +2,7 @@
 
 > 项目范围：只对目标自身已接入且平台适用的项目判定规则；父工作区安装不启用子项目。移动端与未接入开源项目不套用。详见 [精准触发与范围配置](docs/project-scope.md)。
 
-**企业级 UI 一致性与 AI 精确治理工具包 v1.21.0** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
+**企业级 UI 一致性与 AI 精确治理工具包 v1.22.0** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
 
 它把“视觉统一、问题识别、机械修复、项目适配和样例沉淀”拆成可验证、可组合的工程能力。脚本、规则和 MCP 先完成确定性工作，AI 只处理业务语义与人工决策，从而减少重复读源码、上下文 token 和误修改。
 
@@ -447,13 +447,13 @@ wl_ui_detect_skin / wl-ui doctor
 wl_ui_route_intent
 → wl_ui_scan(changedOnly=true, output=summary, parser=auto)
 → wl_ui_recommend_flow
-→ wl_ui_scan(output=compact-v2, limit=50) 获取有界明细
+→ wl_ui_scan(resultCursor=<response.nextResultCursor>, output=compact-v2, limit=20, maxBytes=12000) 读取原扫描明细
 → AI 只读取命中的局部文件与 Skill
 → wl_ui_fix_dry_run
 → 用户确认后 CLI 修复与复扫
 ```
 
-`summary` 不携带逐条描述；`compact-v2` 把 severity/category/suggestion 收进一次性的 `ruleCatalog`，并用 cursor/limit 控制明细上限。单文件编辑器的安装产物也从全量 Skill 拼接改成按需路由。三者共同避免 AI 默认读取整份报告、整套 Skill 或整项目源码。
+`summary` 不携带逐条描述；`compact-v2` 把 severity/category/suggestion 收进一次性的 `ruleCatalog`，MCP 用 resultCursor/limit/maxBytes 限制明细并避免重复扫描；旧数字 cursor 与 CLI 分页仍启动独立扫描。快照只供历史阅读，修复复验重新扫描。详见 [结果阅读边界](docs/result-reading.md)。单文件编辑器的安装产物也从全量 Skill 拼接改成按需路由。三者共同避免 AI 默认读取整份报告、整套 Skill 或整项目源码。
 
 ### 成熟页面沉淀与复用
 
@@ -533,7 +533,7 @@ npx wl-ui doctor --project . --print-overrides
 
 ## 版本与进一步阅读
 
-当前 v1.21.0：公开集成协议 describe/request 统一信封（能力清单与路由语料经真实打包产物验证）、输入校验收口与 MCP 目录对齐真实 tools/list。v1.15.0：任务判定、真实执行/验证回执、实际检查范围和过期检测；Codex 原生薄入口按需加载 canonical Skill。确定性路由覆盖已发布目录与显式缺口，不保证识别所有自然语言。v1.14.0：明确独立能力边界，安装、更新、清理按本包贡献保护用户及其他包内容；共享文件采用单文件原子替换，支持历史路由与 `.clinerules` 目录迁移。v1.13.2：R044 审查多列表单超宽标签，R040 识别自定义 `stepper`，均供人工复核。v1.13.0：新增 `native-jh-ag` Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
+当前 v1.22.0：CLI/MCP 公开目录共用实际注册源，准确声明参数和条件写入；MCP 输入与契约库递归加载核验实际项目边界，结果分页保留原检查事实。v1.21.0：公开集成协议 describe/request 统一信封（能力清单与路由语料经真实打包产物验证）、输入校验收口与 MCP 目录对齐真实 tools/list。v1.15.0：任务判定、真实执行/验证回执、实际检查范围和过期检测；Codex 原生薄入口按需加载 canonical Skill。确定性路由覆盖已发布目录与显式缺口，不保证识别所有自然语言。v1.14.0：明确独立能力边界，安装、更新、清理按本包贡献保护用户及其他包内容；共享文件采用单文件原子替换，支持历史路由与 `.clinerules` 目录迁移。v1.13.2：R044 审查多列表单超宽标签，R040 识别自定义 `stepper`，均供人工复核。v1.13.0：新增 `native-jh-ag` Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
 
 - [版本摘要](docs/version-history.md)
 - [完整 Changelog](CHANGELOG.md)
@@ -576,4 +576,12 @@ npm run pack:dry
 
 单包只读取自身公开能力；多包复用同 runId 并各存各的证据。`matched/ready/ok=true` 仅说明判定或调用成功，是否完成以实际 `executionStatus/validationStatus/checkedFiles` 为准。未接入或不适用的项目不借父目录规则；宿主发现、模型读取、反馈展示没有真实证据时继续标记未验证。
 
+规范和 canonical Skill 必须是可读文件，目录占位不能证明已安装。stdio MCP 先校验所公布的参数类型、枚举和读取预算，scan/fix 还拒绝未知参数与无效规则选择器；非法请求不会启动检查或生成执行回执。MCP 项目与显式输入路径同时核验物理边界，指向配置项目根以外的符号链接不得作为扫描项目、target、契约文件或豁免配置；保留根内合法链接与显式配置根本身的别名。
+
+契约库匹配逐个核验递归目录和 JSON 叶子的实际项目边界，保留根内链接并对实际文件去重。CLI/MCP 返回 `library.complete/status/skipped/gaps`：外部链接、循环、缺失/不可读文件或损坏的 UI 契约返回 `gap` 和失败调用，不输出完整匹配结果；普通非契约文件明确列为跳过，空库显示 `empty`。此读取保护不构成操作系统文件沙箱，契约匹配也不证明页面规则已验证。
+
 维护边界、结构化执行和防漂移验收：[维护契约](docs/maintenance-contract.md)。
+
+公开命令目录来自实际注册源 `bin/cli-catalog.mjs`（25 个 `wl-ui` 命令、实际 parser 选项及 `wl-scan` 兼容入口）；MCP 的 `tools/list`、参数校验与协议 inventory 共用 `mcp/catalog.mjs`。`readOnly` 表示无磁盘写入：scan/audit/check 会保存回执，报告、基线、修复、快照和契约导出另列条件写入；MCP 业务输入只读的工具也可能保存调用回执。副作用声明不等于实际执行证明，仍以本次回执为准。
+
+MCP 在调度前校验 JSON-RPC 2.0 请求信封；畸形值、版本、方法、ID 或 params 返回协议错误且不生成工具回执。无 ID 的合法通知不应答，显式 `id: null` 的请求正常回复。

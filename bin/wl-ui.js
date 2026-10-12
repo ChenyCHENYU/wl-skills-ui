@@ -32,6 +32,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import atomic from "./atomic-write.cjs";
 import { GATEWAY_PATH, taskGateway } from "./task-gateway.mjs";
+import { cliCommands, cliParser } from "./cli-catalog.mjs";
 import { createState, writeOwnedFile, writeRouter, writeMcp, mcpHasLocalChanges, remove as removeRouter, safeFile, validMarkers, HTML_START, HTML_END, jsonc } from "./install-lifecycle.mjs";
 import { getRule, listRules } from "../standards/rules-loader.mjs";
 import {
@@ -58,28 +59,7 @@ const EDITOR_IDS = Object.keys(EDITOR_TARGETS);
 
 // ── 参数解析 ─────────────────────────────────────────────────────────────────
 const rawArgs = process.argv.slice(2);
-const SUBCOMMANDS = new Set([
-  "init",
-  "update",
-  "diff",
-  "clean",
-  "doctor",
-  "prompts",
-  "scan",
-  "audit",
-  "check",
-  "fix",
-  "all",
-  "add-preset",
-  "add-vendor",
-  "snapshot",
-  "drift",
-  "exempt",
-  "contract",
-  "rules",
-  "profiles",
-  "task", "route", "explain", "status", "doctor-host", "protocol",
-]);
+const SUBCOMMANDS = new Set(cliCommands().map((command) => command.name));
 let subcommand = "help";
 
 if (rawArgs.length > 0 && SUBCOMMANDS.has(rawArgs[0])) {
@@ -98,22 +78,13 @@ if (rawArgs.length > 0 && SUBCOMMANDS.has(rawArgs[0])) {
 if (subcommand === "protocol") {
   const { runCli } = await import("./protocol-cli.mjs");
   process.exitCode = await runCli(rawArgs);
-} else if (["task", "route", "explain", "status", "doctor-host"].includes(subcommand)) {
+} else if (cliCommands("task").some((command) => command.name === subcommand)) {
   const { taskCli } = await import("./task-integration.mjs");
   taskCli(subcommand, rawArgs);
   process.exit(0);
 }
 
-const SCANNER_CMDS = new Set([
-  "scan",
-  "audit",
-  "check",
-  "fix",
-  "all",
-  "snapshot",
-  "drift",
-  "exempt",
-]);
+const SCANNER_CMDS = new Set(cliCommands("scanner").map((command) => command.name));
 if (SCANNER_CMDS.has(subcommand)) {
   const scannerBin = join(PKG_ROOT, "scanner", "index.mjs");
   try {
@@ -188,16 +159,7 @@ if (
 if (subcommand === "init" || subcommand === "update") {
   const { values } = parseArgs({
     args: rawArgs,
-    options: {
-      project: { type: "string", default: "." },
-      editor: { type: "string", default: "" },
-      mode: { type: "string", default: "" }, // compatibility alias
-      profile: { type: "string", default: "" },
-      "dry-run": { type: "boolean", default: false },
-      "skills-only": { type: "boolean", default: false },
-      force: { type: "boolean", default: false },
-    },
-    strict: false,
+    ...cliParser(subcommand),
   });
 
   const projectRoot = resolve(values.project);
@@ -317,8 +279,7 @@ if (subcommand === "init" || subcommand === "update") {
 if (subcommand === "diff") {
   const { values } = parseArgs({
     args: rawArgs,
-    options: { project: { type: "string", default: "." } },
-    strict: false,
+    ...cliParser(subcommand),
   });
   runDiff(resolve(values.project));
   process.exit(0);
@@ -327,11 +288,7 @@ if (subcommand === "diff") {
 if (subcommand === "clean") {
   const { values } = parseArgs({
     args: rawArgs,
-    options: {
-      project: { type: "string", default: "." },
-      "dry-run": { type: "boolean", default: false },
-    },
-    strict: false,
+    ...cliParser(subcommand),
   });
   runClean(resolve(values.project), values["dry-run"]);
   process.exit(0);
@@ -340,11 +297,7 @@ if (subcommand === "clean") {
 if (subcommand === "doctor") {
   const { values } = parseArgs({
     args: rawArgs,
-    options: {
-      project: { type: "string", default: "." },
-      "print-overrides": { type: "boolean", default: false },
-    },
-    strict: false,
+    ...cliParser(subcommand),
   });
   if (values["print-overrides"]) {
     await printOverrides(resolve(values.project));
@@ -370,12 +323,7 @@ if (subcommand === "add-preset") {
   }
   const { values } = parseArgs({
     args: rawArgs.slice(1),
-    options: {
-      project: { type: "string", default: "." },
-      output: { type: "string", default: "src/wl-ui/presets" },
-      "dry-run": { type: "boolean", default: false },
-    },
-    strict: true,
+    ...cliParser(subcommand),
   });
   scaffoldPreset({
     name: presetName,
@@ -397,11 +345,7 @@ if (subcommand === "add-vendor") {
   }
   const { values } = parseArgs({
     args: rawArgs.slice(1),
-    options: {
-      family: { type: "string", default: "" },
-      "dry-run": { type: "boolean", default: false },
-    },
-    strict: false,
+    ...cliParser(subcommand),
   });
   const family = values.family || inferVendorFamily(tag);
   scaffoldVendor({ tag, family, dryRun: values["dry-run"] });

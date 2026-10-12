@@ -1,7 +1,7 @@
 import { parseArgs } from "node:util";
 import { expandRuleSelector } from "./rule-selector.mjs";
+import { SCANNER_ACTIONS as ACTIONS } from "../bin/cli-catalog.mjs";
 
-const ACTIONS = { snapshot: ["list", "rollback", "diff", "clean"], exempt: ["init"] };
 const MACHINE_OUTPUTS = new Set(["json", "summary", "compact-v2"]);
 
 function validatePositionals(command, positionals) {

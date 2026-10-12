@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, existsSync, realpathSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync, realpathSync, statSync, accessSync, constants } from "node:fs";
 import { join, relative, resolve, isAbsolute } from "node:path";
 import { parseArgs } from "node:util";
 import core from "./task-observability.cjs";
@@ -6,6 +6,7 @@ import projectScope from "./project-scope.cjs";
 import taskIntent from "./task-intent.cjs";
 import resultCore from "./integration-result.cjs";
 import { GATEWAY_PATH } from "./task-gateway.mjs";
+import { TASK_OPTIONS } from "./cli-catalog.mjs";
 import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
 import { getRules } from "../scanner/rules/index.mjs";
 
@@ -109,7 +110,7 @@ function hostDiagnostic(opts) {
 function assetReadiness(decision, projectRoot) {
   if (decision.applicable !== true) return;
   const required = [...decision.requiredFiles, `node_modules/${pkg.name}/SKILL.md`, `node_modules/${pkg.name}/standards/rules.json`];
-  const missing = required.filter((rel) => !existsSync(join(projectRoot, rel)));
+  const missing = required.filter((rel) => !isReadableAsset(join(projectRoot, rel)));
   decision.ready = decision.ready !== false && missing.length === 0;
   decision.missingInputs = missing;
   if (missing.length) {
@@ -121,11 +122,16 @@ function assetReadiness(decision, projectRoot) {
   }
 }
 
+function isReadableAsset(file) {
+  try {
+    if (!statSync(file).isFile()) return false;
+    accessSync(file, constants.R_OK);
+    return true;
+  } catch { return false; }
+}
+
 export function taskCli(action, args) {
-  const { values, positionals } = parseArgs({ args, allowPositionals: true, options: {
-    target: { type: "string", multiple: true }, project: { type: "string" }, text: { type: "string" },
-    "run-id": { type: "string" }, host: { type: "string" }, skill: { type: "string" }, profile: { type: "string" }, json: { type: "boolean" },
-  } });
+  const { values, positionals } = parseArgs({ args, allowPositionals: true, options: TASK_OPTIONS });
   const result = runTaskAction(action, { projectRoot: values.project, task: values.text || positionals.join(" "), targets: values.target, runId: values["run-id"], host: values.host, profile: values.profile, skill: values.skill });
   if (values.json || action === "doctor-host") console.log(JSON.stringify(result));
   else if (action === "status") console.log(core.formatStatus(result));

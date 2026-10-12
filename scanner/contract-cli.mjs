@@ -2,9 +2,10 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
+import { CONTRACT_OPTIONS } from "../bin/cli-catalog.mjs";
 import {
   extractUiContractFromFile,
-  loadUiContractLibrary,
+  readUiContractLibrary,
   matchUiContracts,
   validateUiContract,
 } from "./ui-contract.mjs";
@@ -13,22 +14,7 @@ const args = process.argv.slice(2);
 const action = args.shift() || "help";
 const { values } = parseArgs({
   args,
-  options: {
-    confirm: { type: "boolean", default: false },
-    domain: { type: "string", default: "" },
-    help: { type: "boolean", default: false },
-    id: { type: "string", default: "" },
-    input: { type: "string", default: "" },
-    json: { type: "boolean", default: false },
-    library: { type: "string", default: "" },
-    limit: { type: "string", default: "5" },
-    mode: { type: "string", default: "native" },
-    "output-file": { type: "string", default: "" },
-    parser: { type: "string", default: "auto" },
-    path: { type: "string", default: "" },
-    project: { type: "string", default: "." },
-    scenario: { type: "string", default: "" },
-  },
+  options: CONTRACT_OPTIONS,
   strict: true,
 });
 
@@ -99,23 +85,24 @@ try {
     if (!validation.ok) {
       throw new Error(`查询契约无效：${validation.errors.join("；")}`);
     }
-    const candidates = loadUiContractLibrary(values.library);
-    const matches = matchUiContracts(query, candidates, {
+    const { contracts: candidates, ...library } = readUiContractLibrary(values.library, { projectRoot: resolve(values.project) });
+    const matches = library.complete ? matchUiContracts(query, candidates, {
       limit: Number.parseInt(values.limit, 10),
-    });
+    }) : [];
     console.log(
       JSON.stringify(
         {
           schema: "wl-ui-contract-match.v1",
           query: query.id,
           candidates: candidates.length,
+          library,
           matches,
         },
         null,
         2,
       ),
     );
-    process.exit(0);
+    process.exit(library.complete ? 0 : 1);
   }
 
   throw new Error(`未知 contract 命令：${action}`);

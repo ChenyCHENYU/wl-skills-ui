@@ -16,9 +16,21 @@ const cases = JSON.parse((await import("node:fs")).readFileSync(path.join(here, 
 const PKG_ROOT = path.join(here, "..", "..");
 
 const state = { installedRoot: null, tarball: null };
+const temporaryRoots = new Set();
 
 function tempRoot() {
-  return mkdtempSync(path.join(tmpdir(), "wl-ui-routing-"));
+  const root = mkdtempSync(path.join(tmpdir(), "wl-ui-routing-"));
+  temporaryRoots.add(root);
+  return root;
+}
+
+function routeInstalled(projectRoot, task) {
+  const input = path.join(projectRoot, "route-request.json");
+  fs.writeFileSync(input, JSON.stringify({ operation: "route", projectRoot, task }));
+  const installedCli = path.join(projectRoot, "node_modules/@agile-team/wl-skills-ui/bin/wl-ui.js");
+  const called = spawnSync(process.execPath, [installedCli, "protocol", "request", "--input-file", input, "--json"], { cwd: projectRoot, encoding: "utf8", timeout: 30000 });
+  assert.equal(called.status, 0, called.error?.message || called.stderr || called.stdout);
+  return JSON.parse(called.stdout);
 }
 
 function routeAt(projectRoot, task) {
@@ -34,7 +46,7 @@ before(() => {
   state.installedRoot = tempRoot();
   assert.equal(spawnSync("npm", ["init", "-y"], { cwd: state.installedRoot, encoding: "utf8" }).status, 0);
   const install = spawnSync("npm", ["i", state.tarball], { cwd: state.installedRoot, encoding: "utf8", timeout: 180000 });
-  assert.equal(install.status, 0, install.stderr);
+  assert.equal(install.status, 0, install.error?.message || install.stderr);
 }, 600000);
 
 for (const item of cases) {
@@ -51,7 +63,7 @@ for (const item of cases) {
   });
 
   test(`已安装（真实打包产物）：「${item.task}」→ ${expectedInstalled}${item.skill ? ` + ${item.skill}` : ""}`, () => {
-    const envelope = routeAt(state.installedRoot, item.task);
+    const envelope = routeInstalled(state.installedRoot, item.task);
     assert.equal(envelope.ok, true);
     const decision = envelope.result.decision || envelope.result;
     assert.equal(decision.status, expectedInstalled);
@@ -60,5 +72,5 @@ for (const item of cases) {
 }
 
 test.after(() => {
-  if (state.tarball) rmSync(path.dirname(state.tarball), { recursive: true, force: true });
+  for (const root of temporaryRoots) rmSync(root, { recursive: true, force: true });
 });

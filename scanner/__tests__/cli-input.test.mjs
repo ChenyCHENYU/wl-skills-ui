@@ -60,18 +60,16 @@ test("help and unknown suboperations do not start checks or create files", () =>
   assert.equal(readFileSync(join(root, "src/Demo.vue"), "utf8"), source);
 }));
 
-test("MCP uses the same registered selector boundary and records rejection as failed", () => fixture((root, source, run) => {
+test("MCP uses the same registered selector boundary before execution or records", () => fixture((root, source) => {
   for (const tool of ["wl_ui_scan", "wl_ui_fix_dry_run"]) {
     const runId = tool + "-invalid-rule";
-    const request = { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: tool, arguments: { target: "src", only: "R999", output: "summary", runId } } };
+    const request = { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: tool, arguments: { target: "src", only: "R999", ...(tool === "wl_ui_scan" ? { output: "summary" } : {}), runId } } };
     const called = spawnSync(process.execPath, [mcp], { cwd: root, encoding: "utf8", timeout: 30000, env: { ...process.env, WL_PROJECT_ROOT: root }, input: JSON.stringify(request) + "\n" });
     assert.equal(called.status, 0, called.stderr);
-    const result = JSON.parse(called.stdout).result;
-    assert.equal(result.isError, true);assert.match(result.content[0].text, /规则.*R999/);
-    assert.equal(result._meta.wlExecution.executionStatus, "failed");
-    const status = JSON.parse(run(["status", "--run-id", runId, "--json"]).stdout);
-    assert.deepEqual(status.tools[0].checkedFiles, []);
-    assert.deepEqual(status.tools[0].checks, []);
+    const response = JSON.parse(called.stdout);
+    assert.equal(response.error.code, -32602);assert.match(response.error.message, /规则.*R999/);
+    assert.equal(response.result, undefined);
+    assert.equal(existsSync(join(root, ".wl-skills-ui/runs")), false);
     assert.equal(readFileSync(join(root, "src/Demo.vue"), "utf8"), source);
   }
 }));

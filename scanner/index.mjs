@@ -28,6 +28,7 @@
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve, relative } from "node:path";
 import { parseScannerInput } from "./cli-input.mjs";
+import { scannerCommands, SCANNER_OPTIONS } from "../bin/cli-catalog.mjs";
 import { expandRuleSelector, selectRuleCallbacks } from "./rule-selector.mjs";
 import { getRules } from "./rules/index.mjs";
 import { generateReport } from "./report.mjs";
@@ -48,17 +49,7 @@ import { scanFiles } from "./engine.mjs";
 import { beginUiCheck, finishUiCheck, scanFacts, integrationFacts, core } from "../bin/task-integration.mjs";
 
 const args = process.argv.slice(2);
-const SUBCOMMANDS = new Set([
-  "scan",
-  "audit",
-  "check",
-  "fix",
-  "all",
-  "init",
-  "drift",
-  "exempt",
-  "snapshot",
-]);
+const SUBCOMMANDS = new Set(scannerCommands().map((command) => command.name));
 let subcommand = "scan";
 if (args.length > 0 && SUBCOMMANDS.has(args[0])) {
   subcommand = args.shift();
@@ -69,37 +60,7 @@ if (args.length > 0 && SUBCOMMANDS.has(args[0])) {
 const isAudit = subcommand === "audit";
 
 const REGISTERED_RULES = getRules().map(rule => rule.id);
-const { values, positionals } = parseScannerInput(subcommand, args, {
-    target: { type: "string", default: "./src" },
-    project: { type: "string", default: "." },
-    output: { type: "string", default: "markdown" },
-    exclude: { type: "string", default: "node_modules,dist,.git" },
-    outFile: { type: "string", default: "" },
-    "dry-run": { type: "boolean", default: false },
-    "fail-on-error": { type: "boolean", default: false },
-    layer: { type: "string", default: "" },
-    vendor: { type: "string", default: "" },
-    mode: { type: "string", default: "" },
-    profile: { type: "string", default: "" },
-    id: { type: "string", default: "" },
-    keep: { type: "string", default: "5" },
-    "no-snapshot": { type: "boolean", default: false },
-    "plan-hash": { type: "string", default: "" },
-    "refresh-baseline": { type: "boolean", default: false },
-    exempt: { type: "string", default: "" },
-    baseline: { type: "string", default: "" },
-    current: { type: "string", default: "" },
-    only: { type: "string", default: "" },
-    skip: { type: "string", default: "" },
-    changed: { type: "boolean", default: false },
-    "changed-fallback": { type: "string", default: "error" },
-    base: { type: "string", default: "HEAD" },
-    parser: { type: "string", default: "auto" },
-    limit: { type: "string", default: "100" },
-    cursor: { type: "string", default: "0" },
-    "run-id": { type: "string" },
-    help: { type: "boolean", short: "h" },
-  },
+const { values, positionals } = parseScannerInput(subcommand, args, SCANNER_OPTIONS,
   REGISTERED_RULES);
 
 if (values.help) {

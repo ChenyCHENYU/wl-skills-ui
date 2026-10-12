@@ -43,6 +43,6 @@ wl-ui-mcp
 
 `wl_ui_scan` 默认返回不含逐条问题的 `wl-ui-scan.summary.v1`，适合先判断是否需要继续。需要修复明细时传 `output: "compact-v2"`，它会去重规则目录并通过 `limit` / `cursor` 稳定分页；只有调试时才使用 `output: "json"`，人工审阅使用 `output: "markdown"`。`changedOnly: true` 无法解析 Git 范围时默认失败关闭，如明确接受全量扫描才设置 `changedFallback: "full"`。
 
-MCP 只编排确定性 scanner、dry-run、规则事实源和契约工具，不让模型重新阅读全项目后猜测 UI 问题。三个 contract 工具均只读，path/library 必须位于项目根目录内；契约不会返回源码、真实接口、业务字段值或按钮原始文案。
+MCP 只编排确定性 scanner、dry-run、规则事实源和契约工具，不让模型重新阅读全项目后猜测 UI 问题。三个 contract 工具均只读，path/library 及递归库输入须位于实际项目根目录内；契约不会返回源码、真实接口、业务字段值或按钮原始文案。库匹配返回 `library.complete/status/skipped/gaps`；外部链接、循环、缺失/不可读或损坏契约使调用失败且 `matches=[]`，普通非契约文件列为跳过，空库标记 `empty`。保留根内目录/文件链接并按实际输入去重；匹配仍不等于页面规则验证，也不提供操作系统级文件沙箱。
 
 真正修改业务文件仍通过 CLI `wl-ui fix`，修复前先运行 `wl_ui_fix_dry_run`，并由使用者确认范围。CLI 实际修复默认创建快照并自动复检。

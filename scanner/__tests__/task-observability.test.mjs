@@ -49,6 +49,23 @@ describe("UI real execution evidence", () => {
       assert.ok(decision.gaps.length > 0);
     }
   });
+  it("requires canonical assets to be files, preserving route as a read-only asset diagnostic", () => {
+    const root = fixture();
+    const installed = join(root, "node_modules/@agile-team/wl-skills-ui");
+    mkdirSync(installed, { recursive: true });
+    for (const dir of ["skills", "standards"]) cpSync(join(packageRoot, dir), join(installed, dir), { recursive: true });
+    cpSync(join(packageRoot, "SKILL.md"), join(installed, "SKILL.md"));
+    const initial = JSON.parse(run(root, ["route", "修复样式", "--json"]).stdout);
+    const asset = initial.requiredFiles[0];
+    rmSync(join(root, asset));
+    mkdirSync(join(root, asset));
+    const decision = JSON.parse(run(root, ["route", "修复样式", "--json"]).stdout);
+    assert.equal(decision.routingStatus, "matched");
+    assert.equal(decision.status, "gap");
+    assert.equal(decision.ready, false);
+    assert.ok(decision.missingInputs.includes(asset));
+    assert.equal(readdirSync(root).includes(".wl-skills-ui"), false);
+  });
   it("routes baseline and negative cases without declaring execution", () => {
     const root = fixture();
     const initial = readdirSync(root);

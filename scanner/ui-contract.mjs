@@ -1,10 +1,11 @@
 import { createHash } from "node:crypto";
 import {
-  existsSync,
+  realpathSync,
   readFileSync,
   readdirSync,
+  statSync,
 } from "node:fs";
-import { basename, extname, join, resolve } from "node:path";
+import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { createCoverageCollector } from "./coverage.mjs";
 import { parseVueSfc } from "./sfc-parser.mjs";
 import { getRules } from "./rules/index.mjs";
@@ -349,26 +350,101 @@ export function matchUiContracts(query, candidates, { limit = 5 } = {}) {
     .slice(0, Math.max(1, Number(limit) || 5));
 }
 
-export function loadUiContractLibrary(directory) {
-  const root = resolve(directory);
-  if (!existsSync(root)) throw new Error(`ui-contract library 不存在：${root}`);
-  const contracts = [];
-  function walk(current) {
-    for (const entry of readdirSync(current, { withFileTypes: true })) {
-      const path = join(current, entry.name);
-      if (entry.isDirectory()) walk(path);
-      else if (extname(entry.name) === ".json") {
-        try {
-          const contract = JSON.parse(readFileSync(path, "utf8"));
-          if (contract.schema === UI_CONTRACT_SCHEMA && validateUiContract(contract).ok) {
-            contracts.push(contract);
-          }
-        } catch {
-          // 非 ui-contract JSON 或损坏文件不进入候选库。
-        }
-      }
-    }
+export function readUiContractLibrary(directory, options = {}) {
+  const report = { root: resolve(directory), status: "empty", complete: true, contracts: [], readFiles: [], skipped: [], gaps: [] };
+  try {
+    const boundary = realpathSync(resolve(options.projectRoot || directory));
+    const state = { report, boundary, active: new Set(), directories: new Set(), files: new Set() };
+    const actual = boundedLibraryPath(report.root, state);
+    if (!statSync(actual).isDirectory()) {
+      libraryGap(state, report.root, "not-directory");
+    } else walkLibraryNode(report.root, state);
+  } catch (error) {
+    report.gaps.push({ path: report.root, code: libraryErrorCode(error) });
   }
-  walk(root);
-  return contracts;
+  report.complete = report.gaps.length === 0;
+  report.status = report.contracts.length > 0 ? "complete" : "empty";
+  if (!report.complete) report.status = "gap";
+  return report;
+}
+
+export function loadUiContractLibrary(directory, options = {}) {
+  const report = readUiContractLibrary(directory, options);
+  if (!report.complete) {
+    const error = new Error(`ui-contract library 加载不完整：${report.gaps.map((gap) => `${gap.code}: ${gap.path}`).join("；")}`);
+    error.code = "ui-contract-library-gap";
+    const library = { ...report };
+    delete library.contracts;
+    error.library = library;
+    throw error;
+  }
+  return report.contracts;
+}
+
+function boundedLibraryPath(path, state) {
+  const actual = realpathSync(path);
+  const rel = relative(state.boundary, actual);
+  if (rel === ".." || rel.startsWith("../") || rel.startsWith("..\\") || isAbsolute(rel)) {
+    const error = new Error("契约库输入必须位于实际项目根内");
+    error.code = "outside-project";
+    throw error;
+  }
+  return actual;
+}
+
+function libraryErrorCode(error) {
+  if (error.code === "ENOENT" || error.code === "ENOTDIR") return "missing-input";
+  if (error.code === "ELOOP") return "symlink-cycle";
+  if (error.code === "EACCES" || error.code === "EPERM") return "unreadable-input";
+  return error.code || "unreadable-input";
+}
+
+function libraryGap(state, path, code) {
+  state.report.gaps.push({ path: relative(state.report.root, path) || ".", code });
+}
+
+function walkLibraryNode(path, state) {
+  try {
+    const actual = boundedLibraryPath(path, state);
+    const stat = statSync(actual);
+    if (stat.isDirectory()) walkLibraryDirectory(path, actual, state);
+    else if (stat.isFile()) readLibraryFile(path, actual, state);
+    else libraryGap(state, path, "unsupported-entry");
+  } catch (error) { libraryGap(state, path, libraryErrorCode(error)); }
+}
+
+function walkLibraryDirectory(path, actual, state) {
+  if (state.active.has(actual)) return libraryGap(state, path, "symlink-cycle");
+  if (state.directories.has(actual)) {
+    state.report.skipped.push({ path: relative(state.report.root, path) || ".", reason: "duplicate-directory" });
+    return;
+  }
+  state.directories.add(actual);
+  state.active.add(actual);
+  try {
+    for (const entry of readdirSync(actual).sort()) walkLibraryNode(join(path, entry), state);
+  } finally { state.active.delete(actual); }
+}
+
+function readLibraryFile(path, actual, state) {
+  const local = relative(state.report.root, path);
+  if (extname(path) !== ".json") {
+    state.report.skipped.push({ path: local, reason: "not-json" });
+    return;
+  }
+  if (state.files.has(actual)) {
+    state.report.skipped.push({ path: local, reason: "duplicate-file" });
+    return;
+  }
+  state.files.add(actual);
+  const text = readFileSync(actual, "utf8");
+  state.report.readFiles.push(relative(state.boundary, actual));
+  let contract;
+  try { contract = JSON.parse(text); } catch { return libraryGap(state, path, "invalid-json"); }
+  if (contract?.schema !== UI_CONTRACT_SCHEMA) {
+    state.report.skipped.push({ path: local, reason: "not-ui-contract" });
+    return;
+  }
+  if (!validateUiContract(contract).ok) return libraryGap(state, path, "invalid-contract");
+  state.report.contracts.push(contract);
 }

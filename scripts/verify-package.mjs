@@ -17,7 +17,9 @@ function requireFile(relPath, label = relPath) {
 function verifyVersions() {
   const readme = readFileSync(join(root, "README.md"), "utf8");
   const changelog = readFileSync(join(root, "CHANGELOG.md"), "utf8");
-  if (!readme.includes(`v${pkg.version}`)) errors.push(`README 未声明 v${pkg.version}`);
+  if (!readme.includes("https://img.shields.io/npm/v/@agile-team/wl-skills-ui")) {
+    errors.push("README 缺少自动显示已发布版本的 npm 徽章");
+  }
   if (!changelog.includes(`[${pkg.version}]`)) errors.push(`CHANGELOG 未声明 ${pkg.version}`);
 }
 

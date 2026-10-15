@@ -1,68 +1,53 @@
-# @agile-team/wl-skills-ui
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ChenyCHENYU/wl-skills-ui/main/assets/wl-ui-logo-dark.svg">
+    <img alt="WL · World Leading · skills-ui" src="https://raw.githubusercontent.com/ChenyCHENYU/wl-skills-ui/main/assets/wl-ui-logo.svg" width="100%">
+  </picture>
+</p>
 
-> 项目范围：只对目标自身已接入且平台适用的项目判定规则；父工作区安装不启用子项目。移动端与未接入开源项目不套用。详见 [精准触发与范围配置](docs/project-scope.md)。
+<p align="center"><strong>让 Vue 管理端的颜色、布局和组件表现保持一致，把可检查的 UI 问题变成定位明确、可预览修复、可复验的工程反馈。</strong></p>
 
-**企业级 UI 一致性与 AI 精确治理工具包 v1.22.0** — 面向 Vue 3 + Element Plus 的设计令牌、能力 Profile、样式皮肤、页面骨架、运行时能力、静态扫描、确定性修复、AI Skill、MCP 与脱敏 UI 模板契约。
+<p align="center">
+  <a href="https://www.npmjs.com/package/@agile-team/wl-skills-ui"><img src="https://img.shields.io/npm/v/@agile-team/wl-skills-ui?color=7053A7" alt="npm" /></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node-%E2%89%A522-526A81.svg" alt="Node" /></a>
+  <a href="https://element-plus.org/"><img src="https://img.shields.io/badge/Vue-3.2%2B%20%7C%20Element%20Plus%202.2%2B-7053A7.svg" alt="Vue / Element Plus" /></a>
+</p>
 
-它把“视觉统一、问题识别、机械修复、项目适配和样例沉淀”拆成可验证、可组合的工程能力。脚本、规则和 MCP 先完成确定性工作，AI 只处理业务语义与人工决策，从而减少重复读源码、上下文 token 和误修改。
+## 解决什么问题
 
-[![npm version](https://img.shields.io/npm/v/@agile-team/wl-skills-ui.svg)](https://www.npmjs.com/package/@agile-team/wl-skills-ui)
-[![Node](https://img.shields.io/badge/node-%3E%3D22-green.svg)]()
-
-## 如何确认本包正在起作用
-
-每次适用任务先运行项目本地 `wl-ui task "修改目标文件" --target src/Foo.vue --json`。编辑前展示真实 `notice`：包名与版本、判定、选中 Skill 或基础约束、具体规则、目标、runId 和尚未执行的检查。普通修改也需要基础约束提醒；相关但未覆盖的意图显示 gap 与建议；没有目标依据显示 needs-context，职责外显示 not-applicable，不强行匹配。
-
-执行实际检查时复用 `--run-id`，结束读取 `wl-ui status --run-id <id> --json`，分别报告执行和验证、实际检查文件、过期证据与未执行项。`notice.displayEvidence=unverified` 表示工具回执不能证明聊天界面展示；安装、路由或模型自报不能证明宿主加载/模型读取。
-
-`wl-ui doctor-host --json` 对比已分发规范、本地执行器和正在运行的版本，漂移会显式报告。规范更新不会替代依赖升级：同步本包依赖、锁文件和受管入口；未使用的兄弟包无需安装。重开/刷新宿主加载后仍需观察真实任务调用，不能宣称所有 AI 自动触发。
-
-`task/route/explain/status` 的旧顶层 `ready` 与公开协议的 `result.integration.ready` 表示本次工作流的有效就绪状态：当前项目必须已接入且 `scope=applicable`，判定为 matched/baseline，所需资产完整、版本没有已知漂移、计划尚未过期。gap、歧义、缺上下文、未接入/移动项目均为 false，不能只因规范文件存在就称 ready。漂移时旧顶层 task 的 status/ready 与嵌套 decision、notice 保持一致；状态回查以当前 scope 和新鲜度为准。ready=true 不证明宿主读取、自动检查权限、工具执行或业务验证通过，执行仍需核对动作许可和 allowedExecutors。
-
-## 你能获得什么
-
-| 目标 | 包提供的能力 | 带来的效果 |
+| 场景 | 提供的能力 | 你能看到的结果 |
 | --- | --- | --- |
-| 统一新项目视觉 | Design Tokens、Element Plus 原子样式、页面 Layout、Runtime Preset | 颜色、尺寸、间距、圆角、表格和业务状态从同一事实源产生 |
-| 低成本治理老项目 | Skin 模式、Base*/jh-*/C_*/AG Grid 兼容层、定制页豁免 | 不改封装源码也能统一大部分视觉，避免一次性重构风险 |
-| 阻止 UI 回归 | 40 条 R-rule、接入检查、漂移基线、Git 增量扫描、CI 门禁 | 表头/内容不共轴、按钮无图标、日期弹层全屏、密集表单失衡等问题在提交前暴露 |
-| 安全机械修复 | Profile、only/skip、dry-run 计划哈希、快照、复检与回滚 | 自动化只处理可证明安全且已批准的动作，不让 AI 猜测批改 |
-| 降低 AI token | summary、compact-v2 分页、changed-only、Skill 路由、18 个 MCP Tool | AI 先读总览和结构化事实，只在必要时获取有界明细或局部源码 |
-| 沉淀领域样例 | `ui-contract` extract / validate / match | 页面转为脱敏语义 JSON，不复制整页代码、接口、字段值或原始文案 |
-| 兼容多代项目 | EP 2.2+jh-ui 与原生 EP 2.7+ DOM 契约、Vite/doctor 检查 | 支持声明有 fixture 和真实浏览器证据，不靠文档口头约定 |
-| 降低运行时开销 | Shared Observer Hub、可选 guard、幂等安装与完整卸载 | 全部 guard 共用 1 个 MutationObserver + 1 个 ResizeObserver |
+| 新页面风格不统一 | Design Tokens、Element Plus 样式、布局与运行时预设 | 间距、尺寸、颜色和组件行为有共同基准 |
+| 老项目封装多、难以改造 | Base / jh / C 组件与可选 AG Grid 适配 | 按项目现有技术接入皮肤，逐步治理 |
+| UI 问题反复出现 | 源码扫描、增量检查、规则解释 | 文件、行号、规则、建议和问题数量 |
+| 重复机械调整成本高 | 确定性修复、计划哈希、快照与复扫 | 确认可修复项后执行脚本，保留前后差异 |
 
-适合多项目 Vue 3 企业后台、存量系统视觉治理、AI 辅助开发和领域页面模式沉淀。运行时最低要求：Node.js 22、Vue 3.2、Element Plus 2.2。
+适用于**已接入的 PC Vue 3 + Element Plus 管理端**。UniApp、小程序、App/PDA、移动 H5 不套用本包规则。工具独立可用；工程目录与接口约定由 Kit 管，Git 钩子和 CI 门禁由 Gate 编排。
 
+## 三步接入
 
-每次任务先运行 `wl-ui task "任务" --target <path>`，按选定技能执行工具，最后用 `wl-ui status --run-id <id>` 查看实际执行与验证状态；安装或匹配不会自动变成检查通过。详见[任务判定与真实检查回执](docs/task-observability.md)。
+以下命令在**实际业务项目根目录**执行。Node.js 22+ 用于工具；项目仍使用自己的 Vue 和 Element Plus。
 
-## 快速开始
-
-### 1. 安装
+### 1. 安装并选对模式
 
 ```bash
 pnpm add @agile-team/wl-skills-ui
-# npm i @agile-team/wl-skills-ui
+pnpm exec wl-ui init --project . --profile native-element
 ```
 
-### 2. 选择能力 Profile
+| 模式 | Profile | 适用项目 |
+| --- | --- | --- |
+| Native：统一样式并使用布局、运行时能力 | `native-element` | 原生 Element Plus，无 AG Grid |
+| Native：叠加现有封装与 AG Grid | `native-jh-ag` | 使用 Base / jh / C 封装，保留原生运行时能力 |
+| Skin：保留存量结构，接入皮肤与保护 | `legacy-jh-element` | 老项目封装，使用 Element 表格 |
+| Skin：保留存量结构，启用 AG Grid 适配 | `legacy-jh-ag` | 明确使用 AG Grid 的老项目 |
 
-Profile 同时决定 vendor adapter、扫描规则、样式入口和 runtime guard。AG Grid 是可选 adapter，不再由 `BaseTable` 隐式推断。
+`init` 安装 AI 入口、规范与 MCP 配置，记录所选 Profile；不自动改写项目已有 SCSS 和 runtime import。下面以 `native-element` 为例。
 
-| Profile | 样式入口 | Runtime 入口 | AG Grid |
-| --- | --- | --- | --- |
-| `native-element` | `styles/presets/native-element` | `runtime/profiles/native-element` | 关闭 |
-| `legacy-jh-element` | `styles/presets/legacy-jh-element` | `runtime/profiles/legacy-jh-element` | 关闭 |
-| `legacy-jh-ag` | `styles/presets/legacy-jh-ag` | `runtime/profiles/legacy-jh-ag` | 开启 |
-| `native-jh-ag` | `styles/presets/full`（等价包根 `styles` 全量入口） | `runtime/profiles/native-jh-ag`（`runtime/auto` 同集别名） | 开启 |
-
-> **兼容承诺（1.13 起）**：只有显式声明（`--profile` / `.wl-ui-profile.json` / 安装清单）的 profile 才驱动严格校验；依赖自动识别仅用于 Skill 过滤与建议。未声明 profile 的项目按 1.11 兼容口径校验（全量 `styles` 入口 + 任意 runtime 引用即通过），升级不会把存量绿灯判红。
-
-Native 项目：
+### 2. 接入样式和运行时
 
 ```scss
-// src/assets/styles/index.scss
+// 项目全局样式入口，在项目基础样式之后引入
 @use "@agile-team/wl-skills-ui/styles/presets/native-element" as *;
 ```
 
@@ -71,517 +56,66 @@ Native 项目：
 import "@agile-team/wl-skills-ui/runtime/profiles/native-element";
 ```
 
-不使用 AG Grid 的老项目：
+其他 Profile 的对应入口用 `pnpm exec wl-ui profiles` 查询；只选一组，AG Grid 按项目实际使用开启。
 
-```scss
-@use "@agile-team/wl-skills-ui/styles/presets/legacy-jh-element" as *;
-```
-
-```ts
-import "@agile-team/wl-skills-ui/runtime/profiles/legacy-jh-element";
-```
-
-如需最早稳定 CSS 变量，可在 `index.html` 的 `<head>` 先加载：
-
-```html
-<link
-  rel="stylesheet"
-  href="/node_modules/@agile-team/wl-skills-ui/design/tokens/base.css"
-/>
-```
-
-### 3. 安装 AI Skill 并验证
+### 3. 检查接入，看到第一份反馈
 
 ```bash
-npx wl-ui init --project . --profile native-element
-npx wl-ui check --project .
-npx wl-ui scan --target src --output summary
+pnpm exec wl-ui check --project . --fail-on-error
+pnpm exec wl-ui scan --target src --output summary
 ```
 
-老项目选择 `legacy-jh-element` 或 `legacy-jh-ag`；平台子应用（native 运行时 + jh/Base 封装 + 联邦 AG Grid）选择 `native-jh-ag`。`init` 仅在显式 `--profile` 时写入 `.wl-ui-profile.json`，自动识别只打印建议；单文件编辑器只维护带边界标记的轻量 Skill 路由块，不覆盖项目自有 `AGENTS.md / CLAUDE.md / .clinerules` 内容。`update`、`diff`、`doctor` 和 `clean --dry-run` 负责后续生命周期。
+`check` 验证样式、运行时等接入项；`scan` 返回实际文件数、问题数量和规则分布。启动业务项目，打开列表、表单与弹窗确认实际效果；静态扫描不能代替浏览器验收。
 
-CLI、安装器和 MCP 无需安装其他 wl-skills 包或统一客户端即可使用，机读边界见 [`bin/capabilities.json`](bin/capabilities.json)。共享入口只维护 `<!-- wl-skills-ui:begin -->` / `<!-- wl-skills-ui:end -->`；`.clinerules` 为目录时改写独有的 `.clinerules/wl-skills-ui.md`。manifest 证明归属的旧整文件路由会迁移成轻量区块。
+## 一个场景：列表页调整后如何闭环
 
-编辑器规则、支撑文件和本包托管区块在安装、更新、清理时均检查已安装哈希；本地修改会保留，`--force` 不抢占外来文件或同名 MCP 项。MCP 使用包内 JSONC helper，保留其他服务器和注释，键的值或原始文本改变均视为本地修改。预存相同文件与入口配置只引用、不取得清理权限。
-
-`init` 新插入的 HTML tokens link 使用独立边界标记并登记贡献，`clean` 只移除未修改的本包链接，保留项目其他 HTML。历史未标记的链接缺少归属证据，升级时仍作为项目配置保留；SCSS 与 runtime 接入只给出建议，不自动修改或认领项目已有 import。
-
-## 公开集成协议 v1
-
-供 harness、客户端或其他编排层以统一 JSON 入口判定、查询并调用本包声明的业务只读检查器。业务执行复用本包原 CLI，参数映射由本包维护；不新增兄弟包或 Harness 运行时依赖。
+假设修改了 `src/views/order/index.vue`，出现按钮尺寸、控件宽度或表格对齐问题。已接入的 AI 按下面流程调用工具；技术经理也可直接复现。
 
 ```bash
-wl-ui protocol describe --json                      # 能力目录、六操作映射、请求/响应 Schema、错误码
-wl-ui protocol request --input-file request.json --json
+# 1. 识别本次任务、目标和待检查项，取得 runId
+pnpm exec wl-ui task "修复样式：订单列表页" --target src/views/order/index.vue --json
+
+# 2. 使用返回的 runId 检查同一目标
+pnpm exec wl-ui scan --target src/views/order/index.vue --run-id <runId> --output summary
+
+# 3. 修复后复扫，并回查实际结果
+pnpm exec wl-ui scan --target src/views/order/index.vue --run-id <runId> --fail-on-error
+pnpm exec wl-ui status --run-id <runId> --json
 ```
 
-- 操作：`route` / `explain`（只读判定）、`task`（判定并持久化计划，尚未执行）、`status`（回查本包执行回执）、`doctor-host`（宿主入口静态诊断）、`execute`（按有效计划调用本包声明的业务只读检查器）。
-- 判定与查询请求字段：`protocolVersion`(1)、`operation`、`requestId`、`runId`、`projectRoot`、`task`、`targets`、`skill`、`host`+ `profile`。
-- 统一信封：`{ ok, result | error, diagnostics }`；机器结果与诊断分离；非法输入在触达执行器前拒绝（基础请求为 `invalid-input`，执行参数为 `invalid-executor-input`），不写入任何记录。
-- 基础错误码：`unsupported-protocol` / `unknown-operation` / `missing-input` / `invalid-input` / `internal-error`；执行请求另区分计划、授权、范围与参数拒绝，完整错误码见 `describe.errorCodes`。请求失败（exit 2）时 stdout 仍为可解析 JSON 信封。
-- **`ok=true` 只表示协议调用成功，不代表业务验证通过**；业务状态以 `result` 内 `validationStatus` / `executionStatus` 为准（仅计划时为 `unverified` / `not-executed`）。
-- 副作用：`task` 保存计划，`execute` 复用原执行器写本包自己的 runs 回执并输出报告；均不通过本接口修改业务文件。其他操作只读，见 describe 中各操作 `sideEffects`。
-- 协议实现为本包内置的同源快照 `integration-protocol.cjs`，当前源码分发一致性由 conformance 验收。各包独立保留自己的快照与版本；已发布版本按协议、feature 和 Schema 判断兼容，不要求每次同步发版。
-
-### 稳定执行入口
-
-先用 `task` 创建当前项目的计划，核对 `result.integration.allowedExecutors`，再通过同一个 `protocol request` 发送：
-
-```json
-{
-  "protocolVersion": 1,
-  "operation": "execute",
-  "projectRoot": "/absolute/path/to/adopted-pc-project",
-  "runId": "task-returned-run-id",
-  "executorId": "scan",
-  "parameters": {"targets": ["src/views/example/index.vue"], "rules": ["R001"]}
-}
-```
-
-`projectRoot`、`runId`、`executorId`、`parameters` 必填；执行目标放在 `parameters.targets`，不接受顶层 `targets`。UI 的 `rules` 只接受本次计划内的规则子集；省略时执行当前计划的 R 规则，不扩大到全量规则。SFC 解析检查独立执行且不能被隐藏。未知执行器、非法参数、计划外目标/规则、未接入或不适用项目、禁止检查、过期或版本漂移的计划在启动业务 CLI 前拒绝。当前本包执行器为 `scan`；以 `describe.inventory.executors` 的实际目录与 Schema 为准。
-
-返回 `result.execution` 的真实 `exitCode`、`signal`、stdout/stderr，并重新读取同 runId 的包内状态形成 `result.integration`。`ok=true` 表示调用已完成，即使业务检查退出非零仍保留真实失败；宿主须查看执行与验证状态、实际检查文件和未验证项。输出有界，取消会终止本次业务 CLI 及其进程树。协议不代替真实宿主加载、模型读取或界面展示证据。
-
-适配器只发送执行器 ID 与结构化参数，无需维护本包 CLI argv。增加检查器时由本包更新目录、Schema 与原 CLI 映射；兼容接口下其他包与 Harness 不必同步发版。原 CLI/MCP 继续可独立使用。
-
-## 能力地图
-
-| 层级 | 能力 | 典型内容 | 是否需要业务源码 |
-| --- | --- | --- | --- |
-| L0 | Design Tokens | 品牌色、功能色、字号、间距、圆角、阴影 | 否 |
-| L1 | Element Plus | Button、Form、Table、Picker、Dialog、Pagination 等 | 否 |
-| L2 | Vendor Skin | Base*、jh-*、C_*/c-*、AG Grid、custom wrappers | 否 |
-| L3 | Page Layout | list-page、tree-list、form-dialog、detail-page | 是 |
-| L4 | Runtime | defineColumns、renderOps、自动状态 Tag、Preset、Guard | 是 |
-
-Vendor 覆盖顺序是：`Base* > jh-* > C_*/c_* > AG Grid > custom wrappers`。越靠前越接近项目事实源，通用兜底不得覆盖已识别的专用结构。
-
-旧 `native/skin` 参数仍作为兼容别名；新接入应使用 Profile：
-
-| Profile | 层级 | 适用场景 | 边界 |
-| --- | --- | --- | --- |
-| `native-element` | L0/L1/L3/L4 | 新项目、可渐进重构项目 | 不加载 legacy vendor 与 AG Grid |
-| `legacy-jh-element` | L0-L2 | Base/jh/C 老项目，Element 表格 | 编译产物不含 `.ag-*` 选择器，不启动 AG observer |
-| `legacy-jh-ag` | L0-L2 | 明确使用 AG Grid 的老项目 | 启用 AG 样式、R021、分屏和空态 guard |
-| `native-jh-ag` | L0-L4 | 平台子应用终态：native 运行时叠 jh/Base 封装，AG 经联邦或 npm | full 样式全集 + Base/AG 规则（R003/R021）+ 分屏与空态 guard |
-
-## 分别使用各项能力
-
-### 样式与 Design Tokens
-
-按控制范围选择一个入口，不要重复导入：
-
-```scss
-@use "@agile-team/wl-skills-ui/styles" as *; // 完整 L0-L3
-@use "@agile-team/wl-skills-ui/styles/presets/native-element" as *; // 无 legacy/AG
-@use "@agile-team/wl-skills-ui/styles/presets/legacy-jh-element" as *; // legacy，无 AG
-@use "@agile-team/wl-skills-ui/styles/presets/legacy-jh-ag" as *; // legacy + AG
-@use "@agile-team/wl-skills-ui/styles/presets/skin" as *; // 老项目 L0-L2
-@use "@agile-team/wl-skills-ui/styles/presets/element-only" as *; // L0-L1
-@use "@agile-team/wl-skills-ui/styles/presets/tokens-only" as *; // 仅 L0
-```
-
-定制登录页、大屏或设计器可使用显式边界退出强覆盖：
-
-```html
-<section class="wl-ui-skin-exempt">...</section>
-<!-- 或 -->
-<section data-wl-ui-skin="off">...</section>
-```
-
-### Table、Form、Picker 与 Button 的默认契约
-
-- Element Table 与 AG Grid 的表头、分组表头、普通 cell、renderer 使用同一中心轴；显式 `left/right` 仍优先。
-- `defineColumns()` 默认补齐叶子列和表头居中，并合并业务已有 `cellStyle/cellClass/headerClass`；传 `defaultAlign: null` 可退出。
-- 普通按钮默认要求 `size="small"` 且带语义图标；已声明动态尺寸、link/text 或操作列图标按钮不会被误改。
-- 表单输入、Select、Date/Time Picker 默认 small，日期时间输入根使用 `style="width:100%"`。
-- 长标签布局按实际文本、字体和容器宽度确定：R008 对 `el-form`、`BaseForm`、`BaseQuery` 的静态 `labelWidth` / `label-width` 小于 150px 给出人工复核提示；150px 不是统一修复值。加宽标签时同步保证输入区至少 160px，必要时减少列数；不全局取消 jh/Base 标签省略。详见[表单规范](standards/ui/03-form.md)。
-- 密集多列表单若静态标签宽度或动态绑定中的字面量兜底值达到 240px，R044 提醒人工核对左右留白与输入区宽度；仅在本表单调整标签预算和对称边距。自定义文本步进输入用单外壳边框与控件高度/步进区宽度 token，R040 可审查未登记的 `stepper` 复合结构。两类问题均不做危险的全局自动改写。详见[表单规范](standards/ui/03-form.md)。
-- 原生 `el-date-picker` / `el-time-picker` 的面板通过 Teleport 渲染，面板同样带 `.el-date-picker` 类。包内 `_picker.scss`、R042 与浏览器契约共同阻止裸几何样式把弹层放大为全屏；输入宽度只作用于 `.el-date-editor` 或组件 style，弹层规则必须从 `.el-picker__popper` 限定。
-
-```ts
-import { defineColumns, renderOps } from "@agile-team/wl-skills-ui/runtime";
-
-const columns = defineColumns([
-  { field: "name", headerName: "名称" },
-  {
-    field: "operations",
-    headerName: "操作",
-    defaultSlot: ({ row }) =>
-      renderOps([
-        { type: "view", onClick: () => view(row.id) },
-        { type: "edit", onClick: () => edit(row.id) },
-      ]),
-  },
-]);
-```
-
-### Runtime Guard 与共享观察器
-
-`installUiRuntimeGuards()` 与旧 `runtime/auto` 为兼容入口，仍开启全部保护；新项目应使用显式 Profile。`installCommonPreset()` 默认使用 `native-element`，不会启动 AG Grid observer：
-
-```ts
-import {
-  getObserverHubStats,
-  installUiRuntimeGuards,
-  installUiRuntimeProfile,
-  uninstallUiRuntimeGuards,
-} from "@agile-team/wl-skills-ui/runtime";
-
-installUiRuntimeProfile("native-element");
-console.log(getObserverHubStats(document));
-
-// 微前端或轻量页面可只启用需要的保护
-installUiRuntimeGuards({
-  themeLock: true,
-  overflowTooltip: true,
-  splitGridResize: false,
-  agGridEmptyState: false,
-});
-
-// 应用卸载时完整清理监听、订阅、target 和结构标记
-uninstallUiRuntimeGuards();
-```
-
-Observer Hub 按 Document/Window 隔离：全部 guard 开启时仍只有一个 MutationObserver 和一个 ResizeObserver。仓库基准命令 `npm run benchmark:runtime` 会验证 500 批 DOM 变更、实例复用和卸载清零；相对旧结构，观察器实例数分别减少 66.7% 和 50%。
-
-### Scanner：精确、增量、低 token
-
-```bash
-# 人工阅读
-npx wl-ui scan --target src --output markdown --outFile report.md
-
-# AI/MCP 默认先取总览，不包含逐条问题
-npx wl-ui scan --target src --output summary
-
-# 按需取有界明细：规则公共字段只出现一次，可用 nextCursor 翻页
-npx wl-ui scan --target src --output compact-v2 --limit 50 --cursor 0
-
-# PR 只扫 Git 变更；范围失败默认终止，避免意外全量输出
-npx wl-ui scan --target src --changed --base origin/main --output summary
-# 只有明确接受全量时才加：--changed-fallback full
-
-# 只看指定层、vendor 或规则
-npx wl-ui scan --target src --mode skin --layer L0,L1,L2
-npx wl-ui scan --target src --vendor "jh-*,AG Grid"
-npx wl-ui scan --target src --only R001,R005,R041,R042
-npx wl-ui scan --target src --skip R031-R037
-npx wl-ui rules describe R043
-```
-
-SFC 解析器有三种模式：
-
-| 参数 | 行为 | 适用 |
-| --- | --- | --- |
-| `--parser auto` | 默认；优先目标项目自己的 `@vue/compiler-sfc`，缺失时回退 fast 并报告 | 日常扫描与 MCP |
-| `--parser fast` | 零依赖；支持嵌套 slot template、多个 style/script | 极简 CI、超大范围预扫 |
-| `--parser sfc` | 强制精确编译器；缺依赖或语法错误直接失败 | 严格 CI、复杂 SFC |
-
-使用目标项目本地 compiler 可以与该项目 Vue 版本保持一致，避免工具包强绑另一版编译器。报告中的 `parsing.requested / used / warnings` 会显示实际路径，不会静默降级。
-
-### Fix、快照与漂移
-
-```bash
-# 一定先预览
-npx wl-ui fix --target src --profile native-element --only R001,R006,R043 --dry-run --output json
-
-# 使用预览返回的 planHash 执行同一计划；默认先创建 .wl-snapshot
-npx wl-ui fix --target src --profile native-element --only R001,R006,R043 --plan-hash <hash>
-
-# 复检与回滚
-npx wl-ui scan --target src --fail-on-error
-npx wl-ui snapshot list
-npx wl-ui snapshot diff --id <id>
-npx wl-ui snapshot rollback --id <id>
-
-# PR 漂移门禁
-npx wl-ui audit --target src --output json --refresh-baseline
-npx wl-ui drift --baseline .wl-baseline.json --current current.json --fail-on-error
-```
-
-Fixer 只处理规则目录中声明 `autoFixable` 且已实现的机械变换，并让 `profile / only / skip` 同时约束预览、写入和复检。静态已知按钮文案由 R043 的确定映射修复；动态或未知语义仍归 R005 人工确认。计划哈希不一致时拒绝写入。
-
-### AI Skill
-
-包内含 22 个 Skill 和 4 条组合 Flow，覆盖 Element、vendor、layout、runtime 与 scan/fix/migrate 操作。安装后可直接描述：
-
-```text
-用 wl-ui 的 legacy-skin-align 流程统一这个老项目，只处理 L0-L2。
-扫描当前 PR 的 UI 变更，先给 summary，不修改代码。
-检查这个列表页的表格中心轴、small 图标按钮和日期弹层边界。
-把这个成熟页面提取为 produce 领域的脱敏 ui-contract，并匹配已有模板。
-```
-
-生命周期命令：
-
-```bash
-npx wl-ui init --project . --editor all --profile native-element
-npx wl-ui update --project . --force
-npx wl-ui diff --project .
-npx wl-ui doctor --project . --print-overrides
-npx wl-ui clean --project . --dry-run
-npx wl-ui prompts
-```
-
-支持 GitHub Copilot、Cursor、Windsurf、Kiro、Trae、Claude Code、Cline、Agents、Qoder 等目录格式。
-
-### MCP：让 AI 调用确定性能力
-
-stdio 入口：
-
-```bash
-wl-ui-mcp
-```
-
-通用 MCP 配置示例：
-
-```json
-{
-  "mcpServers": {
-    "wl-skills-ui": {
-      "command": "wl-ui-mcp",
-      "env": { "WL_PROJECT_ROOT": "/absolute/path/to/project" }
-    }
-  }
-}
-```
-
-13 个 Tool：
-
-| Tool | 作用 | 是否写入 |
-| --- | --- | --- |
-| `wl_ui_check` | 检查 tokens/styles/runtime 接入 | 否 |
-| `wl_ui_scan` | compact/json/markdown 扫描，支持 changed 与 parser | 否 |
-| `wl_ui_fix_dry_run` | 预览确定性修复 | 否 |
-| `wl_ui_skill_prompt` | 输出 Skill 触发建议 | 否 |
-| `wl_ui_route_intent` | 将自然语言路由到 flow/skill/tool | 否 |
-| `wl_ui_detect_skin` | 检查 jh-ui/Element Plus 配对与 overrides | 否 |
-| `wl_ui_list_rules` | 从 `standards/rules.json` 列出规则摘要 | 否 |
-| `wl_ui_describe_rule` | 返回单条规则定义 | 否 |
-| `wl_ui_drift` | 比较基线与当前扫描结果 | 否 |
-| `wl_ui_recommend_flow` | 根据 compact 结果给出下一步 | 否 |
-| `wl_ui_contract_extract` | 从 Vue 文件提取脱敏 UI 契约 | 否 |
-| `wl_ui_contract_validate` | 校验 schema、fingerprint 与脱敏边界 | 否 |
-| `wl_ui_contract_match` | 匹配项目内领域契约库，只返回摘要 | 否 |
-
-真正写业务文件仍由 CLI `wl-ui fix` 执行，并保留快照；MCP 不提供绕过确认的写入工具。
-
-## 领域 ui-contract：用 JSON 沉淀页面样例
-
-`wl-ui-contract.v1` 保存页面“是什么、有哪些区域、用了哪些组件能力、动作遵守什么约束”，不保存页面代码。
-
-```bash
-# 默认只预览 JSON，不写文件
-wl-ui contract extract \
-  --path src/views/produce/order/list.vue \
-  --domain produce --scenario query-table --mode native
-
-# 明确确认后才写入项目私有模板库
-wl-ui contract extract \
-  --path src/views/produce/order/list.vue \
-  --domain produce --scenario query-table \
-  --output-file .wl-ui/contracts/produce/order-list.json --confirm
-
-wl-ui contract validate \
-  --input .wl-ui/contracts/produce/order-list.json
-
-wl-ui contract match \
-  --input .wl-ui/contracts/produce/order-list.json \
-  --library .wl-ui/contracts --limit 5
-```
-
-契约主要包含：
-
-- `domain / scenario / mode / visibility`；
-- layout kind 与 query、toolbar、table、pagination 等区域；
-- 组件 family、通用 implementation、数量与能力；
-- create/search/edit 等动作语义、位置、small/icon 状态；
-- required/observed R-rule、使用到的公开 token、约束；
-- 来源内容 hash 与排除来源元数据后的语义 fingerprint。
-
-明确不包含：
-
-- Vue/JS/SCSS 源码与模板片段；
-- 真实 API、URL、请求响应与权限值；
-- 业务字段、字段值、客户数据；
-- 按钮原始文案或任意可还原业务逻辑的正文。
-
-模板建议分层：
-
-| 层级 | 用途 | 建议位置 |
-| --- | --- | --- |
-| Project-private | 客户/项目特有页面模式，默认层 | 业务仓库 `.wl-ui/contracts/` |
-| Domain-private | 生产、销售、主数据等领域模式 | 受控领域仓库或私有包 |
-| Shared-reviewed | 跨项目稳定通用模式 | 完成脱敏审计后进入公共模板库 |
-
-Schema 见 [`standards/ui-contract.schema.json`](standards/ui-contract.schema.json)，完整说明见 [`docs/ui-contract.md`](docs/ui-contract.md)，示例见 [`examples/ui-contract.example.json`](examples/ui-contract.example.json)。
-
-## 推荐组合工作流
-
-### 新项目从零接入
-
-```text
-wl-ui init --profile native-element
-→ 导入 native-element styles/runtime
-→ defineColumns + renderOps
-→ wl-ui check
-→ wl-ui scan --parser sfc
-→ CI fail-on-error
-```
-
-### 老项目低风险化妆
-
-```text
-wl_ui_detect_skin / wl-ui doctor
-→ wl-ui init --profile legacy-jh-element（或 legacy-jh-ag）
-→ 导入对应 profile styles/runtime
-→ scan --profile <id> --output summary
-→ fix --dry-run
-→ 用户确认后 fix
-→ 浏览器契约复查 Picker、Table、AG Grid
-```
-
-### PR 级低 token 治理
-
-```text
-wl_ui_route_intent
-→ wl_ui_scan(changedOnly=true, output=summary, parser=auto)
-→ wl_ui_recommend_flow
-→ wl_ui_scan(resultCursor=<response.nextResultCursor>, output=compact-v2, limit=20, maxBytes=12000) 读取原扫描明细
-→ AI 只读取命中的局部文件与 Skill
-→ wl_ui_fix_dry_run
-→ 用户确认后 CLI 修复与复扫
-```
-
-`summary` 不携带逐条描述；`compact-v2` 把 severity/category/suggestion 收进一次性的 `ruleCatalog`，MCP 用 resultCursor/limit/maxBytes 限制明细并避免重复扫描；旧数字 cursor 与 CLI 分页仍启动独立扫描。快照只供历史阅读，修复复验重新扫描。详见 [结果阅读边界](docs/result-reading.md)。单文件编辑器的安装产物也从全量 Skill 拼接改成按需路由。三者共同避免 AI 默认读取整份报告、整套 Skill 或整项目源码。
-
-### 成熟页面沉淀与复用
-
-```text
-选定已上线成熟页面
-→ contract extract（只预览）
-→ validate（schema + 脱敏 + fingerprint）
-→ 人工确认 domain/scenario/visibility
-→ --confirm 写入 project-private 库
-→ match 找最接近模式
-→ AI 只读取选中的契约或局部源码
-```
-
-## 兼容边界与证据
-
-| Profile | 版本组合 | 核心 DOM 假设 | 证据 |
-| --- | --- | --- | --- |
-| jh Skin | `element-plus@2.2.6-prod.3` + `@jhlc/jh-ui@3.1.0` | `.el-input > .el-input__inner` 旧结构 | legacy fixture、结构契约、SCSS 测试 |
-| Native | Element Plus 2.7+ | `.el-input__wrapper`、Teleport Picker panel | fixture、结构契约、Chrome/Edge 计算样式测试 |
-
-`skills/_meta/_compat/vendors.json` 是结构化事实源，`npm run check:compat` 会验证每个 profile 的 peer 声明、fixture、结构契约和浏览器证据都存在。消费项目可用三种方式检查：
-
-```ts
-// vite.config.ts
-import { wlSkillsCheck } from "@agile-team/wl-skills-ui/vite";
-
-export default { plugins: [wlSkillsCheck({ enforce: "warn" })] };
-```
-
-```bash
-npx wl-ui check --project .
-npx wl-ui doctor --project . --print-overrides
-```
-
-完整矩阵见 [`docs/compat-matrix.md`](docs/compat-matrix.md)。不要在未升级 jh-ui 的情况下单独把集团 EP 2.2 组合升级到社区新版；DOM 假设不同，尤其会影响 input wrapper、表单状态和复合控件。
-
-本轮的分类模型、门禁、token 预算与 AG Grid 替换路径见 [`docs/optimization-plan-1.12.md`](docs/optimization-plan-1.12.md)，长期分层边界见 [`standards/architecture/01-layer-boundaries.md`](standards/architecture/01-layer-boundaries.md)。
-
-## CLI 速查
-
-| 命令 | 用途 |
+| 环节 | 验收点 |
 | --- | --- |
-| `wl-ui init/update/diff/clean` | Skill、配置和 manifest 生命周期 |
-| `wl-ui doctor/prompts` | 项目体检、适配建议与 AI 触发语 |
-| `wl-ui check` | 接入完整性和 vendor 配对 |
-| `wl-ui scan/audit/all` | 风格扫描、基线审计、接入+扫描组合 |
-| `wl-ui fix` | dry-run、快照、确定性修复和复检 |
-| `wl-ui snapshot` | list/diff/rollback/clean |
-| `wl-ui drift` | 基线与当前问题漂移 |
-| `wl-ui exempt init` | 生成定制页豁免候选，需人工审核 |
-| `wl-ui contract` | extract/validate/match 脱敏 UI 契约 |
-| `wl-ui rules list/describe` | 查询规则事实源，不读取整份规则文档 |
-| `wl-ui profiles` | 列出 adapter/style/runtime 组合 |
-| `wl-ui add-preset/add-vendor` | 在消费项目脚手架扩展文件 |
-| `wl-ui-mcp` | 启动 stdio MCP Server |
+| 识别 | `notice` 显示版本、目标、Skill、规则与未检查项 |
+| 定位 | 报告给出实际问题；需要明细时再读 `compact-v2` 或 Markdown |
+| 修复 | 自动可修复项先 `fix --dry-run` 预览，确认后携带同一 `--plan-hash` 执行；其他问题按建议处理 |
+| 复验 | 同目标复扫，核对 `status` 的执行、验证和实际检查范围，再在浏览器验收 |
 
-完整参数以 `npx wl-ui --help` 为准。旧入口 `wl-scan` 仍保留兼容。
+脚本负责确定性扫描与机械修复，AI 处理布局语义和业务取舍。修复默认保留快照；命令与回滚见 [任务与检查回执](docs/task-observability.md)、`pnpm exec wl-ui --help`。
 
-## 安全与治理边界
+## 自动执行放在哪里
 
-- `scan/check/audit/drift/contract validate/match` 只读。
-- `contract extract` 默认只向 stdout 输出；写文件必须 `--output-file ... --confirm`。
-- `fix` 应先 dry-run，实际执行前创建快照，执行后自动复检。
-- MCP 只提供只读扫描、dry-run 和契约预览，不提供真实写入捷径。
-- `.wl-exempt.json` 只用于明确的登录页、大屏、设计器等边界，不应成为隐藏普通页面问题的白名单。
-- `ui-contract` 默认 `project-private`；进入领域库或公共包前必须进行脱敏审计和人工评审。
-- 包不会保存 npm token、业务凭据或后端连接信息，也不需要读取项目 `.env` 才能完成 UI 扫描。
+把 `wl-ui scan --target src --changed --base origin/main --fail-on-error` 接入已配置的 Git 钩子或 CI，开发者提交时获得反馈；`origin/main` 替换为项目实际基线分支。交付阶段保留完整扫描和浏览器验收。使用 Gate 时由 Gate 配置调用本包，统一汇总结果。
 
-## 与 wl-skills-kit 的职责边界
+本包的 `init` 提供工具与 AI 入口，实际自动调用取决于宿主、钩子和流水线接线。首次接入用一处可定位的问题验证“触发 → 报告 → 修复 → 复扫”，安装成功本身不代表检查已经执行。
 
-| 包 | 负责 | 不负责 |
-| --- | --- | --- |
-| `wl-skills-ui` | 视觉绝对管控、组件/布局样式、UI Runtime、R-rule、浏览器契约、UI 语义模板 | 菜单/字典/权限同步、业务 API 契约、整页业务代码生成 |
-| `wl-skills-kit` | 项目理解、原型/详设、API 契约、页面生成、AST 校验、菜单字典权限与 Page Blueprint | 取代 UI 包的视觉事实源和多代组件皮肤 |
+## 按需深入
 
-推荐顺序：先由 `wl-skills-ui` 识别项目皮肤、版本和视觉偏差；涉及 BaseTable 结构、页面生成、API 或后台配置时，再桥接 `wl-skills-kit validate-page / doctor-ui`。两包的 JSON 模板互补：UI contract 关注视觉与组件能力，Kit Blueprint 关注页面业务结构和交付契约。
+| 需要 | 入口 |
+| --- | --- |
+| 项目范围、未触发与版本漂移 | [范围配置](docs/project-scope.md) · [任务与回执](docs/task-observability.md) |
+| 组件兼容、架构分层与规则 | [兼容矩阵](docs/compat-matrix.md) · [架构边界](standards/architecture/01-layer-boundaries.md) · `wl-ui rules list` |
+| 浏览器视觉验收与页面样例沉淀 | [视觉回归](docs/visual-regression.md) · [UI 契约](docs/ui-contract.md) |
+| AI / MCP、协议与维护 | [MCP](mcp/README.md) · [维护契约](docs/maintenance-contract.md) · `wl-ui protocol describe --json` |
 
-## 版本与进一步阅读
+## WL 系列
 
-当前 v1.22.0：CLI/MCP 公开目录共用实际注册源，准确声明参数和条件写入；MCP 输入与契约库递归加载核验实际项目边界，结果分页保留原检查事实。v1.21.0：公开集成协议 describe/request 统一信封（能力清单与路由语料经真实打包产物验证）、输入校验收口与 MCP 目录对齐真实 tools/list。v1.15.0：任务判定、真实执行/验证回执、实际检查范围和过期检测；Codex 原生薄入口按需加载 canonical Skill。确定性路由覆盖已发布目录与显式缺口，不保证识别所有自然语言。v1.14.0：明确独立能力边界，安装、更新、清理按本包贡献保护用户及其他包内容；共享文件采用单文件原子替换，支持历史路由与 `.clinerules` 目录迁移。v1.13.2：R044 审查多列表单超宽标签，R040 识别自定义 `stepper`，均供人工复核。v1.13.0：新增 `native-jh-ag` Profile、显式 Profile 兼容承诺与联邦 AG 依赖识别。
+**WL · World Leading**。各包按职责独立接入，已接且适用的包可共享任务 `runId`。
 
-- [版本摘要](docs/version-history.md)
-- [完整 Changelog](CHANGELOG.md)
-- [ui-contract 设计与安全边界](docs/ui-contract.md)
-- [依赖兼容矩阵](docs/compat-matrix.md)
-- [复合组件结构契约](standards/component-structures.json)
-- [R-rule 单一事实源](standards/rules.json)
-- [MCP 接入](mcp/README.md)
-- [根 Skill](SKILL.md)
-
-仓库维护门禁：
-
-```bash
-npm run verify
-npm run benchmark:runtime
-npm run test:visual
-npm run test:visual:contracts
-npm run pack:dry
-```
-
-视觉测试基线按操作系统管理；如果本机没有对应平台截图，完整 `test:visual` 会明确报告缺失，不应自动生成并提交一套未经评审的新基线。发布门禁使用跨浏览器计算样式契约 `test:visual:contracts`；真实浏览器兼容契约也可以单独执行 `browser-compat.spec.ts`。
-
-### 当前请求、动作边界与 Harness 集成
-
-任务判定保留原始文本，并将当前请求、历史引用和明确否定分开。自然语言判定覆盖已公开语料与规则，不能承诺任意表述都自动命中；遇到歧义或缺口应补充目标/领域或显式指定本包能力，不能静默选择。编辑前显示真实 `notice`，包括版本、技能、规则、目标、runId、动作与待检查项。
-
-`protocol describe --json` 声明 `task-intent-v1`、`result-core-v1`、`executor-catalog-v1`、`executor-invoke-v1`；`schemas.resultCore` 与六操作 `schemas.results` 可供宿主验证。原有结果字段保留，新增 `result.integration`：项目适用范围、动作模式、规则身份、目标、就绪状态、允许执行器和真实执行/验证状态。`ok` 只表示调用成功。判定与查询的未声明字段进入 diagnostics，不会转成授权依据；execute 的额外字段按 Schema 拒绝。
-
-`action.mode` 为 explain/plan/inspect/apply/unspecified；解释和规划不自动启动检查。`businessWritesAuthorized=false`，任务意图不能替代业务写入授权。`ruleRefs` 为包自有规则身份（包名、规则 ID、版本、来源、性质），自然语言约束有稳定 ID；原规则名称与列表保留。所有规则的机械/语义验证仍以实际回执为准。
-
-`inventory.executors` 声明本包业务只读检查器、目标与参数 Schema；其适用条件由本包判定。外部适配器须核对同项目、同包、同版本、同 runId 的真实计划、新鲜度与允许动作，指定一个目标，不能扩大范围；支持规则子集的执行器不得选择计划外规则。当前执行入口一次只接受与本包计划一致的一个目标；多目标应先拆分计划，再逐个执行。五包和 Harness 均为可选组合，不新增兄弟包或 Harness 运行时依赖；卸下适配器后原 CLI/MCP 继续独立使用。
-
-样式规则检查使用 `scan`（支持计划内规则子集；`--only/--skip` 在扫描前选择实际规则回调）；`check` 只核验接入完整性。技能触发词由本包 `bin/task-triggers.json` 维护并接受目录一致性检查。
-
-`scan/audit/fix` 的未知参数、重复值选项、空值、多余位置参数和不存在的规则选择器在检查或写入前拒绝，机读输出返回 `invalid-input`，不会形成成功检查记录。CLI 与 MCP 共用注册规则选择器，支持单个 ID、逗号列表与三位编号范围（例如 `R031-R037`）；用 `wl-ui rules list` 核对实际规则。Vue 解析错误仍不能被 `--only/--skip` 隐藏。`wl-ui scan --help` 只输出帮助，不启动扫描。
-
-### 任务反馈与执行边界
-
-编辑前展示实际 `notice` 的包版本、判定、动作、技能/规则、目标、runId、待检查项与版本对齐信息；解释/规划和明确禁止检查时不自动执行检查。`runtime=mismatch/invalid` 或 `planStale=true` 必须先同步本包或重新判定。只读 `inspect` 输入变化后重新 `task`；`apply` 完成正常业务修改后可用同 runId 做实际复扫，但规则、配置或版本变化仍需重新判定。
-
-单包只读取自身公开能力；多包复用同 runId 并各存各的证据。`matched/ready/ok=true` 仅说明判定或调用成功，是否完成以实际 `executionStatus/validationStatus/checkedFiles` 为准。未接入或不适用的项目不借父目录规则；宿主发现、模型读取、反馈展示没有真实证据时继续标记未验证。
-
-规范和 canonical Skill 必须是可读文件，目录占位不能证明已安装。stdio MCP 先校验所公布的参数类型、枚举和读取预算，scan/fix 还拒绝未知参数与无效规则选择器；非法请求不会启动检查或生成执行回执。MCP 项目与显式输入路径同时核验物理边界，指向配置项目根以外的符号链接不得作为扫描项目、target、契约文件或豁免配置；保留根内合法链接与显式配置根本身的别名。
-
-契约库匹配逐个核验递归目录和 JSON 叶子的实际项目边界，保留根内链接并对实际文件去重。CLI/MCP 返回 `library.complete/status/skipped/gaps`：外部链接、循环、缺失/不可读文件或损坏的 UI 契约返回 `gap` 和失败调用，不输出完整匹配结果；普通非契约文件明确列为跳过，空库显示 `empty`。此读取保护不构成操作系统文件沙箱，契约匹配也不证明页面规则已验证。
-
-维护边界、结构化执行和防漂移验收：[维护契约](docs/maintenance-contract.md)。
-
-公开命令目录来自实际注册源 `bin/cli-catalog.mjs`（25 个 `wl-ui` 命令、实际 parser 选项及 `wl-scan` 兼容入口）；MCP 的 `tools/list`、参数校验与协议 inventory 共用 `mcp/catalog.mjs`。`readOnly` 表示无磁盘写入：scan/audit/check 会保存回执，报告、基线、修复、快照和契约导出另列条件写入；MCP 业务输入只读的工具也可能保存调用回执。副作用声明不等于实际执行证明，仍以本次回执为准。
-
-MCP 在调度前校验 JSON-RPC 2.0 请求信封；畸形值、版本、方法、ID 或 params 返回协议错误且不生成工具回执。无 ID 的合法通知不应答，显式 `id: null` 的请求正常回复。
+| 包 | 职责 |
+| --- | --- |
+| [skills-gate](https://github.com/ChenyCHENYU/wl-skills-gate) | 项目接入、钩子与 CI 门禁、报告闭环 |
+| [skills-kit](https://github.com/ChenyCHENYU/wl-skills-kit) | PC 前端工程与代码规范 |
+| **skills-ui** | UI 一致性、扫描与确定性修复 |
+| [skills-bd](https://github.com/ChenyCHENYU/wl-skills-bd) | Java 后端契约、生成与质量检查 |
+| [skills-test](https://github.com/ChenyCHENYU/wl-skills-test) | 测试规划、执行与验收证据 |
+| [skills-design](https://github.com/ChenyCHENYU/wl-skills-design) | 需求、设计与交付文档 |

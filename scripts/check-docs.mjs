@@ -77,10 +77,9 @@ for (const file of walk(root)) {
   }
 }
 
-// vendor 优先级一致性：README / architecture / styles/vendors/index.scss 必须一致
+// vendor 优先级属于架构契约；入口 README 只保留接入与场景导航。
 const VENDOR_PRIORITY = "Base* > jh-* > C_*/c_* > AG Grid > custom wrappers";
 const vendorPriorityFiles = [
-  "README.md",
   "standards/architecture/01-layer-boundaries.md",
   "styles/vendors/index.scss",
 ];
@@ -128,10 +127,8 @@ if (existsSync(compatMatrixPath)) {
   errors.push("docs/compat-matrix.md: 文件不存在，无法校验适配矩阵");
 }
 
-if (!readme.includes(`当前 v${pkg.version}`)) {
-  errors.push(
-    `README.md: 当前版本文案未同步 package.json version ${pkg.version}`,
-  );
+if (!readme.includes("https://img.shields.io/npm/v/@agile-team/wl-skills-ui")) {
+  errors.push("README.md: 缺少自动显示已发布版本的 npm 徽章");
 }
 
 if (!changelog.includes(`## [${pkg.version}]`)) {

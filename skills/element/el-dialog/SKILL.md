@@ -7,29 +7,9 @@ applyTo: "**/*.vue"
 
 # 弹窗组件规范
 
-## R011 — 分页器必须放在 `<template #footer>` 中 【高危】
+## R011 — 分页放在内容区 【高危】
 
-弹窗内的 `el-pagination` 必须在 `#footer` slot 内，不得放在内容区（会导致布局溢出）。
-
-```diff
-<el-dialog v-model="visible" title="选择记录">
-  <el-table :data="list" empty-text="暂无数据">
-    <!-- 表格内容 -->
-  </el-table>
-- <el-pagination ... />
-
-+ <template #footer>
-+   <div class="dialog-footer-pagination">
-+     <el-pagination
-+       v-model:current-page="page.current"
-+       v-model:page-size="page.size"
-+       :total="page.total"
-+       layout="total, sizes, prev, pager, next"
-+     />
-+   </div>
-+ </template>
-</el-dialog>
-```
+原生弹窗的 `el-pagination` 紧跟内容区的表格。底部插槽放确认和取消等操作。平台封装的分页以其组件约定为准，核对窄窗口下分页和按钮均可到达。详见[弹窗内分页](../../../standards/ui/05-dialog-pagination.md)。
 
 ---
 
@@ -95,6 +75,7 @@ applyTo: "**/*.vue"
   title="选择记录"
   width="900px"
   :close-on-click-modal="false"
+  :close-on-press-escape="false"
 >
   <!-- 搜索区（可选） -->
   <div class="search-bar">...</div>
@@ -110,10 +91,13 @@ applyTo: "**/*.vue"
     ...列定义...
   </el-table>
 
-  <!-- Footer：分页 + 操作按钮 -->
+  <div class="popup-pagination">
+    <el-pagination :total="total" layout="total, prev, pager, next" />
+  </div>
+
+  <!-- Footer：操作按钮 -->
   <template #footer>
     <div class="dialog-footer">
-      <el-pagination ... />
       <div class="footer-btns">
         <el-button size="small" icon="Close" @click="visible = false">取消</el-button>
         <el-button type="primary" size="small" icon="Check" @click="handleConfirm">确定</el-button>

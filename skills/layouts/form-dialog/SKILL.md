@@ -31,10 +31,10 @@ applyTo: "**/*.vue"
 | 问题 | 规则 | 说明 |
 |---|---|---|
 | el-dialog 缺 `.form-dialog` class | L-201 | 应加 `class="form-dialog"` 便于全局覆盖 |
-| el-form 缺 `labelWidth="150px"` | R008 | 统一 label 宽度 |
+| 静态标签宽度偏小 | R008 | 按最长标签、输入区和列数核对，150px 为预警线 |
 | el-input/el-select 缺 `size="small"` | R006 | 表单控件统一 small |
 | el-date-picker 缺 `style="width:100%"` | R007 | 日期控件需撑满容器 |
-| footer 中含分页组件 | R011 | 分页不应在 footer 内 |
+| 原生弹窗 footer 中含 `el-pagination` | R011 | 分页留在内容区并紧跟表格，操作按钮放 footer |
 | 弹窗内嵌套 el-table 操作列用文字按钮 | R015 | 应用 jh-op-btn 图标 |
 | 详情态（optr=view）没有禁用所有输入 | L-202 | 应统一用 `:disabled="optr==='view'"` |
 
@@ -52,6 +52,7 @@ applyTo: "**/*.vue"
     :title="title"
     width="700px"
     :close-on-click-modal="false"
+    :close-on-press-escape="false"
     @closed="reset"
   >
     <el-form
@@ -114,6 +115,8 @@ defineExpose({ add, edit, view });
 ```
 
 ### 三态最佳实践
+
+窄窗口、遮罩、Esc、二级选择及失败后的草稿保留按[存量页面布局与交互验收](../../../standards/ui/07-runtime-acceptance.md)复核。
 
 | 态 | optr | 输入控件 | footer 按钮 |
 |---|---|---|---|

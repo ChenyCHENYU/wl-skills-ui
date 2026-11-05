@@ -107,8 +107,8 @@ export const semanticRules = [
               "R026",
               "form",
               "warning",
-              `${reason}，建议替换为 <${el}>`,
-              `将 <${nativeTag}> 替换为 <${el}>，确保纳入 wl-skills-ui 风格体系`,
+              reason,
+              `普通控件可换成 <${el}>。自定义结构先复核布局、焦点和原交互，再决定迁移或记录保留依据`,
             ),
           );
         }

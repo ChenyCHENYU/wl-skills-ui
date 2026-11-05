@@ -12,8 +12,8 @@ applyTo: "**"
 对目标项目做**完整只读扫描**，产出：
 
 1. 接入完整性报告（I001-I005：tokens/styles/runtime/skills 是否接入）
-2. 风格合规报告（R001-R018：按 layer/vendor 分组）
-3. 优先级建议（高危 → 中危 → 低危 三层）
+2. 风格合规报告（按规则、层和组件分组）
+3. 修复优先级（区分已确认的偏差、可复现缺陷、待验证提示与业务保留项）
 
 **本 skill 不修改任何文件，仅审计和报告。**
 
@@ -67,12 +67,13 @@ npx wl-ui scan --target src --vendor element
 
 1. `npx wl-ui check --project .` → 接入完整性（I001-I005）
 2. `npx wl-ui scan --target src --output json --outFile /tmp/audit.json` → JSON 格式结果
-3. 读取 JSON，按如下格式汇报：
+3. 读取 JSON，按[存量页面布局与交互验收](../../../standards/ui/07-runtime-acceptance.md)给出结论。报告区分静态命中数量和浏览器实际复现结果，并注明未执行的动态项。按如下格式汇报：
 
 ```markdown
 ## 审计摘要
 - 扫描文件数：XX
-- 发现问题数：XX（高危 X / 中危 X / 低危 X）
+- 静态命中数：XX（按实际严重级别列出）
+- 已复现的运行时缺陷与待验证项分别列出
 - 接入完整性：✅ X 项通过 / ❌ X 项缺失
 
 ### 高危（直接影响视觉一致性）

@@ -65,6 +65,8 @@ gridHost.addEventListener("wl-ui:split-grid-resize", () => {
 
 ## 验收
 
+包内负责实际尺寸变化后的表格重布局。初始比例、空白回收策略、下区最小可见行数及手动位置保留时机由消费项目定义，按[存量页面布局与交互验收](../standards/ui/07-runtime-acceptance.md)复核。
+
 - 有数据时，拖动前后 `.drager_top/.drager_bottom` 仍为 `overflow:hidden`；完整空态不足
   160px 时仅 `.drager_row` 临时纵向滚动。
 - `.ag-grid-table` 的实际高度随 pane 收缩，并带

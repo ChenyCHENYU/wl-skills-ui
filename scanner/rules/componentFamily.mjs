@@ -50,7 +50,7 @@ export const componentFamilyRules = [
             "tabs",
             "info",
             "el-tabs 未标识 detail/config 等业务场景，复杂详情页 Tab 风格可能漂移",
-            "建议添加 detail-tabs/config-tabs/wk-tabs，或通过 wl-skills-ui tabs 覆盖层统一视觉",
+            "先复核页签密度、切换与分栏高度。需要统一时再局部应用场景类",
           ),
         );
       }
@@ -172,8 +172,8 @@ export const componentFamilyRules = [
               "R037",
               "feedback",
               "info",
-              `${tagName} 未提供统一操作入口，空/异常状态可恢复性不足`,
-              "建议根据业务补充操作按钮或 extra/default slot，并加载 wl-skills-ui feedback 覆盖层",
+              `${tagName} 未在当前模板识别到反馈操作入口，需结合状态复核`,
+              "区分未选择、无结果与可恢复异常。确需恢复时优先复用现有查询或重试入口",
             ),
           );
         }

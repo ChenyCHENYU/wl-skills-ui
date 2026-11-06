@@ -127,7 +127,7 @@ test("real MCP reports recursive library gaps and emits no matches or passed ver
   for (const [index, response] of responses.entries()) {
     assert.equal(response.result.isError, true, JSON.stringify(response));
     assert.doesNotMatch(response.result.content[0].text, /^❌/, JSON.stringify(response));
-    const result = JSON.parse(response.result.content[0].text);
+    const result = response.result.structuredContent;
     assert.equal(result.library.status, "gap");
     assert.equal(result.library.complete, false);
     assert.ok(result.library.gaps.some((gap) => gap.code === inputs[index].expectedCode));
@@ -165,7 +165,7 @@ test("real MCP accepts contained library aliases through the configured root ali
   assert.equal(called.status, 0, called.stderr);
   const response = JSON.parse(called.stdout.trim());
   assert.equal(response.result.isError, false, JSON.stringify(response));
-  const result = JSON.parse(response.result.content[0].text);
+  const result = response.result.structuredContent;
   assert.equal(result.candidates, 1);
   assert.equal(result.library.complete, true);
   assert.deepEqual(result.library.gaps, []);

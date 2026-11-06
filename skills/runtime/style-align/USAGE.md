@@ -47,6 +47,6 @@ AI 执行：
 
 ## 相关 Skills
 
-- 首次接入新项目 → [core/migration/SKILL.md](../migration/SKILL.md)
-- 仅修复颜色 Token → [core/design-tokens/SKILL.md](../design-tokens/SKILL.md)
-- 仅修复表格问题 → [components/table/SKILL.md](../../components/table/SKILL.md)
+- 首次接入新项目 → [runtime/migration](../migration/SKILL.md)
+- 仅修复颜色 Token → [runtime/design-tokens](../design-tokens/SKILL.md)
+- Element Plus表格 → [element/el-table](../../element/el-table/SKILL.md)；BaseTable封装 → [vendors/base-table](../../vendors/base-table/SKILL.md)

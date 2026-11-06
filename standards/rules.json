@@ -540,6 +540,41 @@
       "manualReason": "必须核对真实 DOM，明确边框所有者、高度策略、内部无描边层与 Teleport 出口",
       "scanner": "scanner/rules/componentStructure.mjs",
       "skills": ["vendors/jh-components"]
+    },
+    {
+      "id": "R045",
+      "category": "vendor-base",
+      "severity": "error",
+      "title": "平台表单字段必须关闭文本冒号注入",
+      "rationale": "BaseForm/BaseQuery原生控件分支可按字段showColon拼接冒号，CSS只能移除伪元素，不能消除文本；公共字段构造器须明确输出false。",
+      "appliesTo": [
+        "BaseFormItemDesc",
+        "BaseQueryItemDesc",
+        "BaseForm :items",
+        "BaseQuery :items"
+      ],
+      "profiles": [
+        "legacy-jh-element",
+        "legacy-jh-ag",
+        "native-jh-ag"
+      ],
+      "sourceExtensions": [
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx",
+        ".mts",
+        ".cts",
+        ".mjs",
+        ".cjs"
+      ],
+      "autoFixable": true,
+      "manualReason": "只自动修复静态可证明的平台字段对象缺省/true和静态label末尾冒号；动态值、未知展开和文本拼接须人工确认，不改未知封装。",
+      "scanner": "scanner/rules/formColon.mjs",
+      "references": ["standards/ui/03-form.md"],
+      "skills": [
+        "element/el-form"
+      ]
     }
   ]
 }

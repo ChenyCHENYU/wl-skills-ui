@@ -122,7 +122,7 @@ test("execute 需要本项目有效检查计划：解释、过期、禁用与未
   fs.writeFileSync(path.join(root, ".wl-skills-scope.json"), JSON.stringify({ schemaVersion: 1, projectType: "pc", packages: { ui: false } }));
   assert.equal(execute(root, "disabled").ok, false);
   assert.equal(execute(root, "unknown-run").ok, false);
-  assert.equal(fs.existsSync(path.join(root, ".wl-skills-ui/runs/unknown-run")), false);
+  assert.equal(fs.existsSync(path.join(root, ".wl-skills/state/ui/runs/unknown-run")), false);
 }));
 
 test("公开 execute 在原 scanner 前拒绝目录中越界的 Vue 叶子，任务回执零新增", () => fixture(root => {

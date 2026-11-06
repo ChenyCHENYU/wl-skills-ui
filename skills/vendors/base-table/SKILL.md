@@ -5,7 +5,7 @@ description: |
 applyTo: "**/*.vue"
 ---
 
-# Skill: vendors/base-table
+# BaseTable 封装表格样式适配
 
 > Layer L2 · Vendor priority **#1**（Base > jh > C_/c_ > custom）
 

@@ -5,7 +5,7 @@ description: |
 applyTo: "**/*.{vue,scss,css}"
 ---
 
-# 设计 Token 使用规范
+# 颜色间距与字体设计变量
 
 ## 核心原则
 

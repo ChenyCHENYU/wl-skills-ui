@@ -24,6 +24,21 @@
 
 适用于**已接入的 PC Vue 3 + Element Plus 管理端**。UniApp、小程序、App/PDA、移动 H5 不套用本包规则。工具独立可用；工程目录与接口约定由 Kit 管，Git 钩子和 CI 门禁由 Gate 编排。
 
+**确认技能是否生效：**
+
+- GPT、GLM 等模型由 Codex、Claude Code 或具体 VS Code 插件读取项目入口；模型名称本身不代表已加载技能。
+- 先在实际项目根运行 `pnpm exec wl-ui doctor-host --host codex --json`，按实际宿主调整 `--host`；这是入口诊断，不能代替一次真实调用。
+- 支持原生技能时可说：`$wl-skills-ui 请在 <项目绝对路径> 中 <完整任务>`；不支持该语法时，让 Agent 先读取 `.agents/skills/wl-skills-ui/SKILL.md`。
+- 首条进度应展示真实 `notice.summary`（旧版 `notice`），交付用 `pnpm exec wl-ui status --run-id <runId> --json` 核对执行与待检查项；自动选择取决于宿主，不能据安装承诺每次隐式任务都会触发。
+
+`doctor-host` 的 `discoveryCoverage` 会并列展示当前项目五包的安装版本、原生入口候选、需复核项与缺失入口。候选表示元数据可解析；本地修改、执行器版本、宿主加载和真实执行分别核验，未接入的兄弟包不会自动安装。
+
+同时使用多个宿主时，在项目 `wlSkills.hosts` 或安装命令 `--hosts codex,claude,zcode` 中明确选择实际宿主；模型名不参与目录选择。五包各保留一个任务网关，具体 Skill 按需读取，不复制整套技能到每个编辑器。Qoder 使用 `.qoder/skills` 原生目录；Trae 当前仅核实规则引导和手动导入，不把 `.agents` 文件存在当作原生发现成功。
+
+四个 MCP 服务会先显示简短中文调用回执，保留实际 `runId`、工具名与执行/验证状态；部分验证会说明未完成原因。机器调用方优先读取 `structuredContent`，兼容 JSON 保留在后续文本块，不再固定对 `content[0].text` 做 `JSON.parse`。仅工具返回、计划建立、检查通过分别展示；没有关联检查记录时明确说明。
+
+ZCode 用户请使用 `--host zcode`，打开实际项目，在 Settings → Skills 刷新并核对启用；仍未出现时用新会话验证。ZCode 不会递归发现所有子项目，也不会合并子项目 AGENTS；不要为显示五包而复制同名入口。每包说明应把具体用途放在前 250 字符，超 1024 字符会被丢弃。显式选择和自然语言自动选择共用技能清单，自动选择还受元数据预算、当前 Agent 的工具开关与任务匹配影响。[官方技能说明](https://zcode.z.ai/en/docs/skill)
+
 ## 三步接入
 
 以下命令在**实际业务项目根目录**执行。Node.js 22+ 用于工具；项目仍使用自己的 Vue 和 Element Plus。
@@ -42,7 +57,42 @@ pnpm exec wl-ui init --project . --profile native-element
 | Skin：保留存量结构，接入皮肤与保护 | `legacy-jh-element` | 老项目封装，使用 Element 表格 |
 | Skin：保留存量结构，启用 AG Grid 适配 | `legacy-jh-ag` | 明确使用 AG Grid 的老项目 |
 
-`init` 安装 AI 入口、规范与 MCP 配置，记录所选 Profile；不自动改写项目已有 SCSS 和 runtime import。下面以 `native-element` 为例。
+`init` 默认使用 compact 接入，只安装所选宿主的短入口，规范与技能正文保留在 npm 包内，MCP 使用 `--mcp` 按需启用。记录所选 Profile；不自动改写项目已有 SCSS 和 runtime import。下面以 `native-element` 为例。
+
+### 安装目录与宿主配置
+
+`npx` 临时执行 init 只生成入口，不代替本项目依赖安装。使用前先安装本包的明确版本并保留 lockfile；缺少本地依赖时入口与 CLI 会提示未就绪，不自动下载 latest。
+
+首次安装默认共用 `.agents/skills/wl-skills-ui/SKILL.md` 和 `AGENTS.md` 的本包短区块，不根据已有 `.cursor`、`.kiro` 等目录推测宿主。默认不生成叶技能副本、旧 Windsurf 规则或 MCP 配置。
+
+```json
+{
+  "wlSkills": {
+    "schemaVersion": 1,
+    "integration": "compact",
+    "hosts": ["codex", "zcode", "kilo"],
+    "mcp": false
+  }
+}
+```
+
+在项目 `package.json` 合并上述字段；没有 `package.json` 时使用 `.wl-skills/config.json`。三个宿主共用一份发现入口。配置优先级为 `--hosts` > `--editor` 兼容参数 > 项目配置 > 上次安装选择 > 通用默认 Codex 入口；目录存在不构成选择或宿主已加载的证据。
+
+```bash
+pnpm exec wl-ui update --hosts codex,zcode,kilo --integration compact --dry-run
+pnpm exec wl-ui update --hosts codex,zcode,kilo --integration compact
+pnpm exec wl-ui update --mcp       # 按需合并本包 MCP；--no-mcp 关闭本包贡献
+```
+
+安装清单与新任务回执统一在 `.wl-skills/state/ui/manifest.json`、`.wl-skills/state/ui/runs/`。旧清单可读取并迁移；更新只退休清单证明属于本包且未修改的贡献，保留项目指令、其他包区块、用户规则与 MCP 节点。整个安装计划失败时恢复文件与配置。`clean` 不删除项目的统一配置和历史执行证据。
+
+`--mcp` 使用选中宿主的原生项目配置：Codex 为 `.codex/config.toml`，ZCode 为 `.zcode/config.json`（已有有效 `.agents/mcp.json` 回退配置会复用），Kilo 复用唯一现有配置，Copilot 复用 `.mcp.json` 或已有 `.vscode/mcp.json`；其他已验证宿主使用对应目录。没有已验证项目契约的宿主给出手动接入诊断。配置使用本地脚本绝对路径与 `WL_PROJECT_ROOT`，从其他工作目录启动仍指向本项目，不自动下载依赖。
+
+未显式选择宿主且没有项目配置或历史选择时，默认 `codex`。共用的 `.agents/skills` 可供兼容宿主发现技能；需要 ZCode MCP 时明确使用 `--hosts zcode --mcp`，技能目录兼容不代表已经生成该宿主的 MCP 配置。
+
+`doctor` 读取真实配置内容，区分缺失、禁用、启动参数不同和依赖缺失，连接仍须宿主实测。切换宿主、`update --no-mcp` 或 `clean` 仅移除本包未修改节点；同名外来服务、用户注释和修改保留，`--force` 不接管它们。旧 `.mcp.json` 节点归属迁入清单的 `managedMcp`，共享原生文件不按整文件删除；更新和清理出现写入失败会回滚配置、入口与清单。
+
+确需旧式叶技能输出时，显式使用 `--integration expanded --hosts <宿主>`；`all` 仅在显式选择时生效，不作为默认安装。规则、模板与适配源继续随独立 npm 包发布，无需另装公共运行时包。
 
 ### 2. 接入样式和运行时
 
@@ -91,6 +141,8 @@ pnpm exec wl-ui status --run-id <runId> --json
 | 复验 | 同目标复扫，核对 `status` 的执行、验证和实际检查范围，再在浏览器验收 |
 
 脚本负责确定性扫描与机械修复，AI 处理布局语义和业务取舍。修复默认保留快照；命令与回滚见 [任务与检查回执](docs/task-observability.md)、`pnpm exec wl-ui --help`。
+
+CLI、协议与 MCP 使用同一任务路由。旧 `wl_ui_route_intent` 仅映射兼容字段；“只解释”“不要扫描”等动作边界不会被旧入口绕过。路由与入口说明只读，不产生扫描回执；只有 `ready` 和 `action.checksAllowed` 允许时才建议运行检查。
 
 ## 自动执行放在哪里
 

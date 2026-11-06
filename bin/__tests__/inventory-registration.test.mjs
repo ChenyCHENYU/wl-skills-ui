@@ -72,6 +72,7 @@ test("CLI protocol describe and actual MCP tools/list expose identical schemas, 
   for (const actual of tools) {
     const published = described.inventory.mcpTools.find((tool) => tool.name === actual.name);
     assert.deepEqual(published.inputSchema, actual.inputSchema);
+    assert.deepEqual(published.outputSchema, actual.outputSchema);
     assert.equal(published.summary, actual.description);
     assert.equal(published.readOnly, actual.annotations.readOnlyHint);
   }
@@ -84,12 +85,17 @@ test("CLI protocol describe and actual MCP tools/list expose identical schemas, 
 
 test("MCP query annotations distinguish pure task routing from actual recorded rule queries and scans", () => fixture((project) => {
   const routed = runMcp(project, "wl_ui_route", { task: "修复表格样式" });
+  assert.ok(routed.result.structuredContent.notice);
   assert.equal(routed.result._meta, undefined);
   assert.equal(existsSync(join(project, ".wl-skills-ui")), false);
   const rules = runMcp(project, "wl_ui_list_rules");
   assert.equal(rules.result._meta.wlExecution.executionStatus, "completed");
   assert.equal(rules.result._meta.wlExecution.validationStatus, "unverified");
-  assert.equal(existsSync(join(project, ".wl-skills-ui/runs")), true);
+  assert.equal(existsSync(join(project, ".wl-skills/state/ui/runs")), true);
+  const planned = runMcp(project, "wl_ui_task", { task: "修复表格样式", runId: "typed-ui-run" });
+  const status = runMcp(project, "wl_ui_status", { runId: "typed-ui-run" });
+  assert.equal(planned.result.structuredContent.notice.executionStatus, "not-executed");
+  assert.equal(status.result.structuredContent.notice.runId, "typed-ui-run");
   const scan = runMcp(project, "wl_ui_scan", { target: "src", profile: "native-element", parser: "fast" });
   assert.equal(scan.result._meta.wlExecution.executionStatus, "completed");
   const metadata = publicMcpInventory().find((tool) => tool.name === "wl_ui_scan");
@@ -104,7 +110,7 @@ test("actual scanner consumes registered defaults/options and records conditiona
   const report = join(project, "report.json");
   runCli(project, ["scan", "--project", project, "--target", "src", "--profile", "native-element", "--parser", "fast", "--outFile", report, "--output", "json"]);
   assert.equal(existsSync(report), true);
-  assert.equal(existsSync(join(project, ".wl-skills-ui/runs")), true);
+  assert.equal(existsSync(join(project, ".wl-skills/state/ui/runs")), true);
   runCli(project, ["audit", "--project", project, "--target", "src", "--profile", "native-element", "--parser", "fast", "--refresh-baseline", "--output", "json"]);
   assert.equal(existsSync(join(project, ".wl-baseline.json")), true);
   assert.equal(readFileSync(join(project, "src/Demo.vue"), "utf8"), "<template><el-button>新增</el-button></template>");

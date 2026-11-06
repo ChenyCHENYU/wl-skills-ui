@@ -20,13 +20,17 @@ export function expandRuleRange(input = "") {
  * 递归收集 .vue 文件（目录名排序稳定遍历；target 为单个 .vue 文件时直接返回）。
  * 扫描与修复共用，保证两边看到同一文件集合。
  */
-export function* walkVue(target, excludes, projectRoot) {
+export function sourceExtensions(rules) { return [...new Set([".vue", ...rules.flatMap(rule => rule.sourceExtensions || [])])]; }
+
+export function* walkVue(target, excludes, projectRoot) { yield* walkSourceFiles(target, excludes, projectRoot); }
+
+export function* walkSourceFiles(target, excludes, projectRoot, extensions = [".vue"]) {
   if (!existsSync(target)) throw new Error(`扫描目标不存在：${target}`);
   const file = statSync(target).isFile();
   const root = realpathSync(resolve(projectRoot || (file ? dirname(target) : target)));
   assertVueBoundary(root, target);
   if (file) {
-    if (target.endsWith(".vue")) yield target;
+    if (extensions.some(extension => target.endsWith(extension)) && !/\.d\.[cm]?ts$/.test(target)) yield target;
     return;
   }
   const entries = readdirSync(target, { withFileTypes: true }).sort((a, b) =>
@@ -35,8 +39,8 @@ export function* walkVue(target, excludes, projectRoot) {
   for (const entry of entries) {
     const full = join(target, entry.name);
     if (entry.isDirectory()) {
-      if (!excludes.includes(entry.name)) yield* walkVue(full, excludes, root);
-    } else if (entry.name.endsWith(".vue")) {
+      if (!excludes.includes(entry.name)) yield* walkSourceFiles(full, excludes, root, extensions);
+    } else if (extensions.some(extension => entry.name.endsWith(extension)) && !/\.d\.[cm]?ts$/.test(entry.name)) {
       assertVueBoundary(root, full);
       yield full;
     }
@@ -48,8 +52,8 @@ function assertVueBoundary(root, file) {
   if (actual !== root && !actual.startsWith(root + sep)) throw new Error(`Vue 文件或目录必须位于项目根目录内（含符号链接）：${file}`);
 }
 
-function executeRule(rule, method, text, relPath, offset, executions) {
-  const issues = rule[method](text, relPath, offset).map(normalizeIssue);
+function executeRule(rule, method, text, relPath, offset, executions, context) {
+  const issues = rule[method](text, relPath, offset, context).map(normalizeIssue);
   const record = executions.get(rule.id);
   record.calls += 1;
   record.issues += issues.length;
@@ -76,28 +80,29 @@ export function scanFiles({
   let exemptFileCount = 0;
   const exempt = exemptConfig || { isExempt: () => false, exemptPaths: [] };
   const coverage = createCoverageCollector();
-  const parserCounts = { fast: 0, sfc: 0 };
+  const parserCounts = { fast: 0, sfc: 0, script: 0 };
   const parserWarnings = new Set();
   const parserErrors = [];
   const checkedFiles = [];
   const executions = new Map(rules.map((rule) => [rule.id, { id: rule.id, calls: 0, issues: 0, errors: 0 }]));
 
-  for (const filePath of walkVue(targetDir, excludeDirs, projectRoot)) {
+  for (const filePath of walkSourceFiles(targetDir, excludeDirs, projectRoot, sourceExtensions(rules))) {
     if (fileFilter && !fileFilter.has(resolve(filePath))) continue;
     fileCount++;
     const content = readFileSync(filePath, "utf8");
     // 报告、豁免和 changed-only 必须共享“项目根相对路径”。以 target 为基准时，
     // `--target src` 无法命中 `src/**` 豁免，扫描单文件还会得到空文件名。
     const relPath = relative(resolve(projectRoot), filePath).replace(/\\/g, "/");
-    const parsed = parseVueSfc(content, {
+    const isVue = filePath.endsWith(".vue");
+    const parsed = isVue ? parseVueSfc(content, {
       filename: relPath,
       mode: parser,
       projectRoot,
-    });
+    }) : { parser: "script", template: { text: "", lineOffset: 0 }, styles: [], scripts: [], warnings: [], errors: [] };
     parserCounts[parsed.parser] += 1;
     for (const warning of parsed.warnings) parserWarnings.add(warning);
     const { text: template, lineOffset } = parsed.template;
-    coverage.addFile(relPath, template, content);
+    if (isVue) coverage.addFile(relPath, template, content);
 
     if (exempt.isExempt(relPath)) {
       exemptFileCount++;
@@ -111,11 +116,12 @@ export function scanFiles({
 
     const fileIssues = [];
     for (const rule of rules) {
-      if (typeof rule.check === "function") {
+      if (isVue && typeof rule.check === "function") {
         fileIssues.push(
           ...executeRule(rule, "check", template, relPath, lineOffset, executions),
         );
       }
+      if (typeof rule.checkSource === "function") fileIssues.push(...executeRule(rule, "checkSource", content, relPath, 0, executions, { parsed: isVue ? parsed : undefined }));
     }
     for (const styleBlock of parsed.styles) {
       for (const rule of rules) {
@@ -210,6 +216,7 @@ export function scanProject(options = {}) {
       projectRoot,
       targetDir,
       base: options.base || "HEAD",
+      extensions: sourceExtensions(rules),
     });
     if (result.fallback) {
       changed = { requested: true, fallback: true, reason: result.reason };

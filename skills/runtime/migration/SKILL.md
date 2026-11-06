@@ -5,7 +5,7 @@ description: |
 applyTo: "**"
 ---
 
-# 历史项目 UI 迁移 Skill
+# 历史 UI 运行时兼容迁移
 
 ## 适用场景
 

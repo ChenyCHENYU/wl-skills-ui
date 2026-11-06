@@ -143,7 +143,7 @@ function buildOverviewSection(issues, fileCount, extras) {
   const lines = ["## 二、扫描总览", ""];
   lines.push("| 维度 | 数量 |");
   lines.push("|------|------|");
-  lines.push(`| 扫描 .vue 文件总数 | **${fileCount}** |`);
+  lines.push(`| 扫描源文件总数（按已选规则） | **${fileCount}** |`);
   if (extras.profile) {
     lines.push(
       `| UI Profile | **${extras.profile.id}**（${extras.profile.source || "explicit"}） |`,

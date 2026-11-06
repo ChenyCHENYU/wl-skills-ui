@@ -25,6 +25,22 @@ function buttonContent(template, tag) {
   return end < 0 ? "" : template.slice(start, end);
 }
 
+function tableColumnRanges(template) {
+  const openings = findTags(template, "el-table-column")
+    .filter((tag) => !/\/\s*>$/.test(tag.text))
+    .map((tag) => ({ index: tag.index + tag.text.length, opening: true }));
+  const closings = [...template.matchAll(/<\/el-table-column\s*>/g)]
+    .map((match) => ({ index: match.index, opening: false }));
+  const boundaries = [...openings, ...closings].sort((left, right) => left.index - right.index);
+  const stack = [];
+  const ranges = [];
+  for (const boundary of boundaries) {
+    if (boundary.opening) stack.push(boundary.index);
+    else if (stack.length) ranges.push({ start: stack.pop(), end: boundary.index });
+  }
+  return ranges;
+}
+
 export const buttonRules = [
   // R004: 操作列文字按钮
   {
@@ -212,21 +228,15 @@ export const buttonRules = [
     check(template, file, lineOffset) {
       const issues = [];
       if (!file.endsWith("modal.vue")) return issues;
-      const pattern = /<el-button[\s\S]*?link[\s\S]*?<\/el-button>/g;
-      let m;
-      while ((m = pattern.exec(template)) !== null) {
-        const btnText = m[0];
-        if (/取消|确认|确定|关闭|保存|提交/.test(btnText)) continue;
-        if (
-          !/<el-table-column/.test(
-            template.slice(Math.max(0, m.index - 500), m.index),
-          )
-        )
-          continue;
+      const ranges = tableColumnRanges(template);
+      for (const tag of findTags(template, "el-button")) {
+        if (!hasTrueBooleanAttr(tag.text, "link")) continue;
+        if (!ranges.some(({ start, end }) => start <= tag.index && tag.index < end)) continue;
+        if (/取消|确认|确定|关闭|保存|提交/.test(buttonContent(template, tag))) continue;
         issues.push(
           issue(
             file,
-            lineOf(template, m.index, lineOffset),
+            lineOf(template, tag.index, lineOffset),
             "R015",
             "button",
             "error",

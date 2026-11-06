@@ -123,3 +123,26 @@ test("targets 空数组与 Schema 一致（运行时接受空范围）", () => {
   const described = protocol.describe();
   assert.equal(described.schemas.request.properties.targets.minItems, undefined, "Schema 不得要求非空 targets");
 });
+
+
+test("公开inventory的全部22个Skill声明当前包绝对resourcePath，不读取调用项目override", t => {
+  const packageRoot = fs.realpathSync(path.resolve(here, "../.."));
+  const described = protocol.describe();
+  const skills = described.inventory.skills;
+  assert.deepEqual(described.inventory.loadErrors, []);
+  assert.equal(skills.length, 22);
+  for (const skill of skills) {
+    assert.ok(path.isAbsolute(skill.resourcePath), skill.id);
+    assert.ok(fs.realpathSync(skill.resourcePath).startsWith(packageRoot + path.sep), skill.id);
+    assert.ok(fs.statSync(skill.resourcePath).isFile(), skill.id);
+    assert.equal(skill.resourceId, skill.entry, "logical entry remains a stable resource identifier");
+  }
+  const caller = fs.mkdtempSync(path.join(tmpdir(), "wl-public-inventory-caller-"));
+  t.after(() => fs.rmSync(caller, { recursive: true, force: true }));
+  const override = path.join(caller, skills[0].entry);
+  fs.mkdirSync(path.dirname(override), { recursive: true });
+  fs.writeFileSync(override, "# Caller override must not replace package-owned public inventory\n");
+  const cli = spawnSync(process.execPath, [BIN, "protocol", "describe", "--json"], { cwd: caller, encoding: "utf8" });
+  assert.equal(cli.status, 0, cli.stderr);
+  assert.deepEqual(JSON.parse(cli.stdout).inventory.skills, skills);
+});

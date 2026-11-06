@@ -4,7 +4,7 @@ description: |
 applyTo: "**"
 ---
 
-# 扫描器使用指南
+# 样式违规扫描与定位
 
 ## 命令速查
 
@@ -33,7 +33,7 @@ npx wl-ui scan --target src --changed --base origin/main --output compact-v2 --l
 | `--target`        | `./src`                  | Vue 文件扫描根目录                             |
 | `--project`       | `.`                      | 项目根目录（用于接入完整性检查）               |
 | `--output`        | `markdown`               | `summary` \| `compact-v2` \| `compact` \| `json` \| `markdown` |
-| `--changed`       | `false`                  | 仅扫描 Git 变更 Vue 文件，解析失败默认终止       |
+| `--changed`       | `false`                  | 仅扫描 Git 变更且当前所选规则支持的源码文件，解析失败默认终止 |
 | `--changed-fallback` | `error`               | 只有显式设为 `full` 才允许扩大到全量             |
 | `--profile`       | 自动检测                 | `native-element` / `legacy-jh-element` / `legacy-jh-ag` |
 | `--limit/cursor`  | `100/0`                  | `compact-v2` 的有界分页                          |

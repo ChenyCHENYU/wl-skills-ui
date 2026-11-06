@@ -5,7 +5,7 @@ description: |
 applyTo: "**/*.vue"
 ---
 
-# layouts/tree-list SKILL
+# 左树右表与伸缩布局
 
 ## 适用场景
 

@@ -83,8 +83,7 @@ export function resolveProjectProfile({ projectRoot = ".", profile, mode } = {})
 
   // 安装清单里的 profile 由 wl-ui init 在用户显式 --profile 时写入，
   // 同样视为显式声明；自动识别的安装不写该字段。
-  const manifestProfile = readJson(join(root, ".wl-skills-ui-manifest.json"))
-    ?.profile;
+  const manifestProfile = (readJson(join(root, ".wl-skills/state/ui/manifest.json")) || readJson(join(root, ".wl-skills-ui-manifest.json")))?.profile;
   if (manifestProfile) {
     const selected = getProfile(manifestProfile);
     if (!selected) {

@@ -1,17 +1,35 @@
 /** MCP registrations: server tools/list, validation, recording and protocol inventory use this module. */
+import { createRequire } from "node:module";
 import { listProfiles } from "../standards/profiles-loader.mjs";
 
+const require = createRequire(import.meta.url);
+const receipt = require("../bin/task-observability.schema.json");
+const { runId, executionStatus, validationStatus } = receipt.properties;
+const text = { type: "string", minLength: 1 };
+const taskResult = {
+  type: "object", required: ["notice", "ready"],
+  properties: { notice: receipt.definitions.notice, ready: { type: "boolean" }, records: { type: "array", items: { type: "object" } } },
+  definitions: { scope: receipt.definitions.scope },
+};
+const checkReceipt = { runId, executionStatus, validationStatus, receiptPath: text };
+const scanResult = {
+  type: "object", required: Object.keys(checkReceipt),
+  properties: { ...checkReceipt, summary: { type: "object" }, response: { type: "object", properties: {
+    nextResultCursor: { type: ["string", "null"] }, snapshotAt: text,
+  } } },
+};
 const PROFILE_ENUM = listProfiles().map((profile) => profile.id);
 const PROFILE_ENUM_DESC = `${PROFILE_ENUM.join("、")}；默认读取配置或按依赖检测`;
-const RECEIPT_ONLY = { write: "persist", readOnly: false, sideEffects: "只读业务输入；写 .wl-skills-ui/runs/ 本包执行回执", effects: { business: "none", records: true } };
+const RECEIPT_ONLY = { write: "persist", readOnly: false, sideEffects: "只读业务输入；写 .wl-skills/state/ui/runs/ 本包执行回执", effects: { business: "none", records: true } };
 
 export const MCP_TOOLS = [
   ...["task", "route", "explain", "status", "doctor-host"].map((action) => ({
     name: `wl_ui_${action.replace(/-/g, "_")}`,
     taskAction: action, write: action === "task" ? "persist" : "readonly", readOnly: action !== "task",
-    sideEffects: action === "task" ? "适用任务写 .wl-skills-ui/runs/ 计划；不执行检查" : "无写入",
+    sideEffects: action === "task" ? "适用任务写 .wl-skills/state/ui/runs/ 计划；不执行检查" : "无写入",
     effects: { business: "none", records: action === "task" },
     description: `UI ${action}: task decision, own execution status or static host diagnosis; host loading remains unverified.`,
+    ...(action === "doctor-host" ? {} : { outputSchema: taskResult }),
     inputSchema: { type: "object", properties: { task: { type: "string" }, targets: { type: "array", items: { type: "string" } }, runId: { type: "string" }, project: { type: "string" }, profile: { type: "string", enum: PROFILE_ENUM }, host: { type: "string" }, skill: { type: "string" } } },
   })),
   {
@@ -37,6 +55,7 @@ export const MCP_TOOLS = [
   },
   {
     name: "wl_ui_scan",
+    outputSchema: scanResult,
     ...RECEIPT_ONLY,
     sideEffects: "首次扫描写本包执行回执并保存内存快照；resultCursor 续取只读、不重扫或新增回执",
     description:
@@ -69,7 +88,7 @@ export const MCP_TOOLS = [
         exempt: { type: "string", description: "豁免配置文件路径" },
         changedOnly: {
           type: "boolean",
-          description: "仅扫描 Git 变更 Vue 文件；默认解析失败即报错，避免意外全量输出",
+          description: "仅扫描 Git 变更且当前所选规则支持的源码文件；默认解析失败即报错，避免意外全量输出",
         },
         base: {
           type: "string",
@@ -85,7 +104,7 @@ export const MCP_TOOLS = [
           enum: ["error", "full"],
           description: "error（默认）或 full",
         },
-        only: { type: "string", description: "仅扫描指定规则，支持 R031-R037" },
+        only: { type: "string", description: "仅扫描当前规则目录中的指定规则 ID 或范围，逗号分隔" },
         skip: { type: "string", description: "跳过指定规则" },
         limit: { type: "integer", minimum: 1, maximum: 500, description: "compact-v2 每页最多条数，默认 20；字节预算可能减少实际返回数" },
         cursor: { type: "string", pattern: "^[0-9]+$", description: "旧数字位置，每次仍独立扫描；原快照续取使用 resultCursor" },
@@ -121,16 +140,16 @@ export const MCP_TOOLS = [
   },
   {
     name: "wl_ui_skill_prompt",
-    ...RECEIPT_ONLY,
+    write: "readonly", readOnly: true, sideEffects: "只读入口说明；不执行扫描或写回执", effects: { business: "none", records: false },
     description:
       "输出 wl-skills-ui 推荐触发语和下一步操作，引导 AI 加载正确 Skill/Flow。",
     inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
     name: "wl_ui_route_intent",
-    ...RECEIPT_ONLY,
+    write: "readonly", readOnly: true, sideEffects: "复用统一任务路由；无写入", effects: { business: "none", records: false },
     description:
-      "根据用户自然语言判断 UI 样式治理意图，并推荐 wl-skills-ui flow/tool/skill。",
+      "兼容旧调用名：复用 wl_ui_route 的技能、动作与范围判定；禁止或仅解释时不推荐扫描。",
     inputSchema: {
       type: "object",
       properties: {
@@ -216,7 +235,7 @@ export const MCP_TOOLS = [
     name: "wl_ui_recommend_flow",
     ...RECEIPT_ONLY,
     description:
-      "根据 wl_ui_scan 的 compact（默认）或 json 扫描结果推荐后续 flow、tool 和 wl-skills-kit 桥接动作。",
+      "根据 wl_ui_scan 的 summary（默认）、compact-v2、compact 或 json 扫描结果推荐后续流程、工具和 wl-skills-kit 桥接动作。",
     inputSchema: {
       type: "object",
       properties: {
@@ -287,12 +306,14 @@ for (const tool of MCP_TOOLS) tool.inputSchema.properties.runId ||= { type: "str
 for (const tool of MCP_TOOLS.filter((entry) => ["wl_ui_scan", "wl_ui_fix_dry_run"].includes(entry.name))) tool.inputSchema.additionalProperties = false;
 
 export function publicMcpTools() {
-  return MCP_TOOLS.map(({ name, description, inputSchema, readOnly }) => ({ name, description, inputSchema, annotations: { readOnlyHint: readOnly, destructiveHint: false } }));
+  return MCP_TOOLS.map(({ name, description, inputSchema, outputSchema, readOnly }) => ({ name, description, inputSchema,
+    ...(outputSchema ? { outputSchema } : {}), annotations: { readOnlyHint: readOnly, destructiveHint: false } }));
 }
 
 export function publicMcpInventory() {
-  return MCP_TOOLS.map(({ name, description, inputSchema, write, readOnly, sideEffects, effects }) => ({
+  return MCP_TOOLS.map(({ name, description, inputSchema, outputSchema, write, readOnly, sideEffects, effects }) => ({
     name, summary: description, write, readOnly, sideEffects, effects, inputSchema,
+    ...(outputSchema ? { outputSchema } : {}),
     execution: "programmatic", mapping: `wl-ui-mcp tools/call ${name}`,
   }));
 }

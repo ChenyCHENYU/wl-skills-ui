@@ -15,17 +15,22 @@ export function hash(content) {
   return createHash("sha256").update(content).digest("hex");
 }
 
-export function safeFile(root, rel) {
+export function safeFile(root, rel, { manifestRecord = false } = {}) {
   if (!rel || isAbsolute(rel) || rel.split(/[\\/]/).includes("..")) throw new Error(`Unsafe install path: ${rel}`);
   const base = realpathSync(root);
   const full = resolve(root, rel);
   let ancestor = full;
   while (!existsSync(ancestor)) ancestor = dirname(ancestor);
-  if (ancestor !== full && !lstatSync(ancestor).isDirectory()) throw new Error(`Install parent is not a directory: ${rel}`);
+  const info = lstatSync(ancestor);
   const actual = realpathSync(ancestor);
   const within = relative(base, actual);
   if (within.startsWith("..") || isAbsolute(within)) throw new Error(`Install path escapes project: ${rel}`);
-  if (existsSync(full) && (lstatSync(full).isSymbolicLink() || !lstatSync(full).isFile())) throw new Error(`Install path is not a regular file: ${rel}`);
+  // Historical ownership can outlive a host changing between file and directory
+  // layouts. Forget that stale entry without treating the new path as ours.
+  if (manifestRecord && actual === resolve(base, relative(root, ancestor))
+    && (ancestor === full ? info.isDirectory() : info.isFile())) return null;
+  if (ancestor !== full && !info.isDirectory()) throw new Error(`Install parent is not a directory: ${rel}`);
+  if (ancestor === full && !info.isFile()) throw new Error(`Install path is not a regular file: ${rel}`);
   return join(root, rel);
 }
 
@@ -52,7 +57,7 @@ export function remove(content, affixes = {}) {
 }
 
 export function createState(old = {}) {
-  return { old, files: { ...old.files }, managedBlocks: { ...old.managedBlocks }, blockAffixes: { ...old.blockAffixes }, managedJson: { ...old.managedJson }, managedJsonText: { ...old.managedJsonText }, contributions: { ...old.contributions }, references: { ...old.references } };
+  return { old, files: { ...old.files }, managedBlocks: { ...old.managedBlocks }, blockAffixes: { ...old.blockAffixes }, managedJson: { ...old.managedJson }, managedJsonText: { ...old.managedJsonText }, managedMcp: { layoutVersion: 1, records: { ...old.managedMcp?.records } }, contributions: { ...old.contributions }, references: { ...old.references } };
 }
 
 function preserve(state, rel, reason) {
@@ -123,38 +128,6 @@ export function writeRouter({ root, rel, block, state, dryRun, legacyHeader = ""
   }
   state.files[rel] = hash(content);
   state.managedBlocks[rel] = hash(block);
-  return true;
-}
-
-export function mcpHasLocalChanges(text, baseline, textBaseline) {
-  const raw = jsonc.getJsoncNodeText(text, ["mcpServers", "wl-skills-ui"]);
-  const current = jsonc.getJsoncValue(text, ["mcpServers", "wl-skills-ui"]);
-  if (hash(JSON.stringify(current)) !== baseline) return true;
-  if (textBaseline) return hash(raw) !== textBaseline;
-  return /\/\/|\/\*/.test(raw.replace(/"(?:\\.|[^"\\])*"/g, ""));
-}
-
-export function writeMcp({ root, state, dryRun }) {
-  const rel = ".mcp.json";
-  let full;
-  try { full = safeFile(root, rel); } catch (error) { return preserve(state, rel, error.message); }
-  let text = existsSync(full) ? readFileSync(full, "utf8") : "{}\n";
-  const key = ["mcpServers", "wl-skills-ui"];
-  const desired = { command: "node", args: ["node_modules/@agile-team/wl-skills-ui/mcp/server.js"] };
-  let current;
-  try { current = jsonc.getJsoncValue(text, key); } catch (error) { return preserve(state, rel, error.message); }
-  const baseline = state.old.managedJson?.[rel];
-  const oldWholeMatches = state.old.files?.[rel] && hash(text) === state.old.files[rel];
-  if (current !== undefined && (!baseline && !oldWholeMatches || baseline && mcpHasLocalChanges(text, baseline, state.old.managedJsonText?.[rel]))) {
-    if (baseline) state.managedJson[rel] = baseline;
-    return preserve(state, rel, baseline ? "MCP 项有本地修改" : "已有 MCP 项由项目拥有");
-  }
-  text = jsonc.setJsoncValue(text, key, desired);
-  if (dryRun) console.log(`  [dry-run] 合并 ${rel}`);
-  else atomicWriteFile(full, text);
-  state.files[rel] = hash(text);
-  state.managedJson[rel] = hash(JSON.stringify(desired));
-  state.managedJsonText[rel] = hash(jsonc.getJsoncNodeText(text, key));
   return true;
 }
 

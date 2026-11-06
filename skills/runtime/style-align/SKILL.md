@@ -6,7 +6,7 @@ description: |
 applyTo: "**/*.vue"
 ---
 
-# UI 风格对齐 Skill
+# 跨模块视觉风格对齐
 
 ## 一、工作流程（严格按顺序，不得跳过）
 

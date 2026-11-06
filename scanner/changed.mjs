@@ -22,7 +22,7 @@ function gitPaths(projectRoot, args) {
  * 收集相对指定 base、新工作区和未跟踪文件中的 Vue 变更。
  * Git 不可用或 base 无效时返回 fallback=true，调用方必须退回全量扫描，避免漏检。
  */
-export function collectChangedVueFiles({ projectRoot, targetDir, base = "HEAD" }) {
+export function collectChangedVueFiles({ projectRoot, targetDir, base = "HEAD", extensions = [".vue"] }) {
   const commands = [];
   if (base && base !== "HEAD") {
     commands.push([
@@ -46,7 +46,7 @@ export function collectChangedVueFiles({ projectRoot, targetDir, base = "HEAD" }
   const targetRoot = resolve(targetDir);
   const files = new Set();
   for (const file of relativePaths) {
-    if (!file.toLowerCase().endsWith(".vue")) continue;
+    if (!extensions.some(extension => file.toLowerCase().endsWith(extension)) || /\.d\.[cm]?ts$/i.test(file)) continue;
     const absolute = resolve(projectRoot, file);
     const rel = relative(targetRoot, absolute);
     if (rel === "" || (!rel.startsWith("..") && !isAbsolute(rel))) files.add(absolute);

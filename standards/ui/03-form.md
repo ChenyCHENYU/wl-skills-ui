@@ -147,9 +147,27 @@ textarea 不强制 26px 高度，只继承统一圆角、字体和状态样式�
 
 ---
 
-## 规则：表单 label 不强制冒号
+## 规则 R045：平台字段从配置层关闭冒号
 
 Element Plus 原生控件、picker 类控件和 jh-\* 封装控件的 label 后不强制追加 `:`。`@jhlc/jh-ui` 的 `.has-colon .com-text:after` / `.text-line-2:after` 冒号注入由 wl-skills-ui 统一屏蔽，避免 input / select / picker 之间出现有的带冒号、有的不带冒号。
+
+冒号有**两条注入路径，CSS 屏蔽只覆盖第一条**，必须双保险：
+
+1. **CSS 伪元素注入**：`.has-colon .el-form-item__label .com-text::after`——已由 `styles/vendors/_jh-ui.scss` 通杀。
+2. **组件文本拼接注入**：BaseForm **原生控件分支**按字段级 `showColon`（`BaseFormItemDesc` / `BaseQueryItemDesc` 可选项，**平台默认 `true`**）把 `：` 直接拼进 label 文本节点——CSS 杀不掉文本，残留即此因（案例：wl-ui-produce 炼钢 `runtime.ts` 构造器未配，2026-10-30 修复）。
+
+**硬性要求**：
+- 公共 item 构造器（如各域 page-factory 的 `toQueryItems` / `toFormItems`）必须显式输出 `showColon: false`，禁止依赖 CSS 屏蔽兜底；
+- 新封装表单组件禁止在 label 文本内自带 `：`；
+- 平台 `showColon` 默认值翻转（默认 false）之前，新页面唯一合规写法是配置层关闭。
+
+R045 对采用 jh/Base 平台 Profile 的项目执行 AST 检查，覆盖 Vue 及独立 JS/TS
+字段构造器，不能只扫描 `.vue` 后宣称公共 `runtime.ts` 已验证。缺省/静态 true 和
+静态 label 尾部冒号可经 `wl-ui fix --only R045 --dry-run` 预演，再按计划应用并复扫。
+动态值、未知展开和动态文本后缀仅提示人工复核；不自动覆盖业务分支，不扩到未知封装
+或原生 Element 项目。CSS 屏蔽与配置层检查分别验证，读规范或扫描通过均不代替真实
+宽/窄屏 DOM 中的 label 文本验收。
+
 
 ---
 

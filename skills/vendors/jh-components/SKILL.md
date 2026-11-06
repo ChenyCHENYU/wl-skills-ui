@@ -5,7 +5,7 @@ description: |
 applyTo: "**/*.vue"
 ---
 
-# Skill: vendors/jh-components
+# jh 系列平台组件样式适配
 
 > Layer L2 · Vendor priority **#2**
 

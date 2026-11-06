@@ -1,6 +1,6 @@
 {
   "name": "@agile-team/wl-skills-ui",
-  "version": "1.22.3",
+  "version": "1.22.4",
   "description": "企业级 UI 风格对齐框架 — Vue + Element Plus 双模式、任务路由与真实检查回执（tokens / element / vendors / layouts / runtime / scanner / fixer / skills）",
   "type": "module",
   "main": "./es/index.js",
@@ -79,11 +79,12 @@
     "verify": "npm run support:check && npm run lint && npm run typecheck && npm run test:coverage && npm run check:scss && npm run check:compat && npm run docs:check && npm run build && npm run verify:package",
     "pack:dry": "npm pack --dry-run --ignore-scripts",
     "release:check": "npm run verify && npm run test:visual:contracts && npm run pack:dry",
-    "prepublishOnly": "npm run support:check && npm run release:check",
+    "prepublishOnly": "npm run support:check && npm run support:pack-check && npm run release:check",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-exclude=bin/vendor/** --test-coverage-lines=70 --test-coverage-branches=65 --test-coverage-functions=70 scanner/__tests__/*.test.mjs runtime/__tests__/*.test.mjs bin/__tests__/*.test.mjs",
     "benchmark:runtime": "node scripts/benchmark-observer-hub.mjs",
     "support:check": "node bin/shared-support-check.cjs",
-    "compatibility:check": "node scripts/compatibility-check.cjs"
+    "compatibility:check": "node scripts/compatibility-check.cjs",
+    "support:pack-check": "node scripts/pack-integrity-check.cjs"
   },
   "files": [
     "assets/",
@@ -176,7 +177,8 @@
     ]
   },
   "dependencies": {
-    "ajv": "8.20.0"
+    "ajv": "8.20.0",
+    "@babel/parser": "7.29.9"
   },
   "repository": {
     "type": "git",

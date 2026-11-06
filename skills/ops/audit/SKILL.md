@@ -5,7 +5,7 @@ description: |
 applyTo: "**"
 ---
 
-# ops/audit SKILL
+# 只读视觉规范审计与报告
 
 ## 一、审计目标
 

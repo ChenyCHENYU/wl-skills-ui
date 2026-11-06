@@ -247,6 +247,7 @@ export function diffSnapshot(projectRoot, snapshotId) {
  * @returns {number} 删除数量
  */
 export function cleanSnapshots(projectRoot, keep = 5) {
+  if (!Number.isSafeInteger(keep) || keep < 0) throw new Error("--keep 必须是安全范围内的非负整数");
   const snapshots = listSnapshots(projectRoot);
   let removed = 0;
   for (let i = keep; i < snapshots.length; i++) {

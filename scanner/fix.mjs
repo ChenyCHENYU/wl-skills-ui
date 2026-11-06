@@ -20,7 +20,10 @@ import { createSnapshot } from "./snapshot.mjs";
 import { TOKEN_MAP, hasTrueBooleanAttr } from "./rules/_shared.mjs";
 import { CREATE_ACTION_LABEL, STATIC_BUTTON_ICON_BY_LABEL } from "./rules/button.mjs";
 import { getRules } from "./rules/index.mjs";
-import { walkVue } from "./engine.mjs";
+import { walkSourceFiles, sourceExtensions } from "./engine.mjs";
+import { fixFormColon } from "./rules/formColon.mjs";
+import { loadExemptConfig } from "./exempt.mjs";
+import { parseVueSfc } from "./sfc-parser.mjs";
 
 const FIXES = {
   "el-input": [{ rule: "R006", attr: "size", value: "small" }],
@@ -67,6 +70,7 @@ export const FIXED_RULE_IDS = Object.freeze([
   "R038",
   "R039",
   "R041",
+  "R045",
 ]);
 
 function incrementRule(changesByRule, rule, amount = 1) {
@@ -323,12 +327,16 @@ function fixHexColors(content, enabledRules) {
     });
   }
 
-  // Template 中 scanner 可识别的映射色全部替换；script 颜色需业务色板语义，不自动改。
+  // 使用扫描器的外层块范围，避免嵌套插槽截断模板或命中模板外的 script。
   if (enabledRules.has("R017")) {
-    result = result.replace(
-      /<template[^>]*>([\s\S]*?)<\/template>/g,
-      (full, body) => full.replace(body, replaceMappedHex(body, "R017")),
-    );
+    const { template } = parseVueSfc(result, { mode: "fast" });
+    if (template.offset > 0) {
+      const tags = /<!--[\s\S]*?-->|<[a-zA-Z][\w.:-]*(?:[^"'<>]|"[^"]*"|'[^']*')*>/g;
+      const attributes = /\s+([^\s=/>]+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s>]+))?/g;
+      const body = template.text.replace(tags, (tag) => tag.startsWith("<!--") ? tag : tag.replace(attributes, (attribute, name) =>
+        ["color", "style", ":style"].includes(name) ? replaceMappedHex(attribute, "R017") : attribute));
+      result = result.slice(0, template.offset) + body + result.slice(template.offset + template.text.length);
+    }
   }
 
   return { content: result, changesByRule };
@@ -349,9 +357,11 @@ export function runFix({
   only,
   skip,
   expectedPlanHash,
+  exemptConfig,
 }) {
   const enabledRules = new Set(FIXED_RULE_IDS);
-  const profileRules = new Set(getRules({ profile }).map(({ id }) => id));
+  const applicableRules = getRules({ profile });
+  const profileRules = new Set(applicableRules.map(({ id }) => id));
   for (const rule of [...enabledRules]) {
     if (!profileRules.has(rule)) enabledRules.delete(rule);
   }
@@ -372,9 +382,14 @@ export function runFix({
 
   // 第一遍：收集所有需要改动的文件及其内容
   const root = projectRoot || resolve(target, "..");
+  const exempt = exemptConfig || loadExemptConfig(root);
   const pending = [];
-  for (const filePath of walkVue(target, exclude, root)) {
+  const extensions = sourceExtensions(applicableRules.filter(rule => enabledRules.has(rule.id)));
+  for (const filePath of walkSourceFiles(target, exclude, root, extensions)) {
     totalFiles++;
+    const relPath = relative(root, filePath).replace(/\\/g, "/");
+    if (exempt.isExempt(relPath)) continue;
+    const activeRules = new Set([...enabledRules].filter(rule => !exempt.isExempt(relPath, rule)));
     const original = readFileSync(filePath, "utf8");
     let content = original;
     let changes = 0;
@@ -391,23 +406,24 @@ export function runFix({
       }
     };
 
-    const r1 = fixTemplateAttrs(content, enabledRules);
-    collect(r1);
+    if (filePath.endsWith(".vue")) {
+      collect(fixTemplateAttrs(content, activeRules));
 
-    if (enabledRules.has("R012")) {
-      collect(fixDialogTableEmpty(content), "R012");
+      if (activeRules.has("R012")) {
+        collect(fixDialogTableEmpty(content), "R012");
+      }
+
+      if (activeRules.has("R038")) {
+        collect(fixPrimaryActionButtons(content), "R038");
+      }
+
+      if (activeRules.has("R043")) {
+        collect(fixSemanticButtonIcons(content), "R043");
+      }
+
+      collect(fixHexColors(content, activeRules));
     }
-
-    if (enabledRules.has("R038")) {
-      collect(fixPrimaryActionButtons(content), "R038");
-    }
-
-    if (enabledRules.has("R043")) {
-      collect(fixSemanticButtonIcons(content), "R043");
-    }
-
-    const r4 = fixHexColors(content, enabledRules);
-    collect(r4);
+    if (activeRules.has("R045")) collect(fixFormColon(content, { filename: relPath }), "R045");
     if (changes > 0 && content !== original) {
       pending.push({ filePath, original, content, changes, rules: fileRules });
       changedAbsPaths.push(filePath);
@@ -456,7 +472,7 @@ export function runFix({
         written.push({ filePath, original });
       }
       changedFiles.push({
-        file: relative(target, filePath).replace(/\\/g, "/"),
+        file: relative(target, filePath).replace(/\\/g, "/") || relative(root, filePath).replace(/\\/g, "/"),
         changes,
         rules,
       });

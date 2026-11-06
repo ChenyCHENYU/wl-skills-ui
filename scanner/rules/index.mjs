@@ -12,6 +12,7 @@
  */
 import { tableRules } from "./table.mjs";
 import { formRules } from "./form.mjs";
+import { formColonRule } from "./formColon.mjs";
 import { buttonRules } from "./button.mjs";
 import { colorRules } from "./color.mjs";
 import { dialogRules } from "./dialog.mjs";
@@ -26,6 +27,7 @@ import { ruleEnabledForProfile } from "../../standards/profiles-loader.mjs";
 const IMPLEMENTATIONS = [
   ...tableRules,
   ...formRules,
+  formColonRule,
   ...buttonRules,
   ...colorRules,
   ...dialogRules,
@@ -100,7 +102,7 @@ export function normalizeIssue(issue) {
   return {
     ...issue,
     category: metadata.category,
-    severity: metadata.severity,
+    severity: issue.manualReview === true ? "review" : metadata.severity,
     layer: metadata.layer ?? inferred.layer,
     vendor: metadata.vendor ?? inferred.vendor,
   };

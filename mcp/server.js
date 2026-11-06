@@ -8,7 +8,7 @@ import { generateReport } from "../scanner/report.mjs";
 import { checkIntegration } from "../scanner/integration.mjs";
 import { runFix } from "../scanner/fix.mjs";
 import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
-import { runTaskAction, beginUiCheck, finishUiCheck, scanFacts, integrationFacts } from "../bin/task-integration.mjs";
+import { core, runTaskAction, beginUiCheck, finishUiCheck, scanFacts, integrationFacts } from "../bin/task-integration.mjs";
 
 import { MCP_TOOLS as TOOLS, publicMcpTools } from "./catalog.mjs";
 
@@ -23,14 +23,19 @@ const executionContext = new AsyncLocalStorage();
 
 function toolEvidence(result) {
   const active = executionContext.getStore();
-  if (!active) return undefined;
-  if (!active.evidence) active.evidence = finishUiCheck(active.execution, { exitCode: result.isError ? 1 : 0, validationStatus: "unverified", checks: [], summary: { reason: "Tool completed; this tool has no source-rule verification result" } });
+  if (!active?.execution) return undefined;
+  if (active.receiptError) return undefined;
+  if (!active.evidence) {
+    try { active.evidence = finishUiCheck(active.execution, { exitCode: result.isError ? 1 : 0, validationStatus: "unverified", checks: [], summary: { reason: "Tool completed; this tool has no source-rule verification result" } }); }
+    catch (error) { active.receiptError = error.message; }
+  }
   return active.evidence;
 }
 
 function scannerEvidence(facts) {
   const active = executionContext.getStore();
-  active.evidence = finishUiCheck(active.execution, facts);
+  try { active.evidence = finishUiCheck(active.execution, facts); }
+  catch (error) { active.receiptError = error.message; throw error; }
   return active.evidence;
 }
 
@@ -38,9 +43,37 @@ function send(obj) {
   process.stdout.write(JSON.stringify(obj) + "\n");
 }
 
-function sendResult(id, result) {
+function sendResult(id, result, preserveTextBlock = false) {
   const evidence = toolEvidence(result);
-  send({ jsonrpc: "2.0", id, result: evidence ? { ...result, _meta: { wlExecution: evidence } } : result });
+  const active = executionContext.getStore();
+  if (!active?.tool) return send({ jsonrpc: "2.0", id, result });
+  if (active.receiptError) result = { ...result, isError: true };
+  let payload = result.structuredContent;
+  if (!payload) {
+    try { payload = JSON.parse(result.content?.[0]?.text); } catch { /* Human-readable tool output stays intact. */ }
+  }
+  if (!result.isError && active.outputSchema && !validateSchema(active.outputSchema, payload).valid) {
+    const runId = evidence?.runId || payload?.notice?.runId;
+    const text = `MCP 输出契约验证失败；如操作可能已执行，请查询状态后再重试${runId ? `（runId=${runId}）` : ""}`;
+    result = { isError: true, content: [{ type: "text", text }] };
+    payload = undefined;
+  }
+  let record = payload || {};
+  let unavailable = active.receiptError ? `\n执行回执不可用：${active.receiptError}` : "";
+  if (evidence) {
+    try { record = core.readStatus({ ...active.execution.opts, runId: evidence.runId }); }
+    catch (error) { record = evidence; unavailable = `\n执行回执状态不可用：${error.message}`; }
+  }
+  const mcpOutcome = result.isError === true ? "failed" : active.continuation ? "continuation" : active.tool === "wl_ui_fix_dry_run" ? "preview" : "returned";
+  const summary = core.formatExecutionReceipt(record, { tool: active.tool, packageName: PKG.name, packageVersion: PKG.version, mcpOutcome });
+  const jsonBody = !preserveTextBlock && payload && typeof payload === "object";
+  const content = jsonBody ? [{ type: "text", text: summary + unavailable }, ...(result.content || [])]
+    : [{ type: "text", text: `${summary}${unavailable}\n\n${result.content?.[0]?.text || ""}` }, ...(result.content || []).slice(1)];
+  send({ jsonrpc: "2.0", id, result: { ...result,
+    content,
+    ...(payload && typeof payload === "object" && !Array.isArray(payload) ? { structuredContent: payload } : {}),
+    ...(evidence ? { _meta: { wlExecution: evidence } } : {}),
+  } });
 }
 
 function sendError(id, code, message) {
@@ -216,7 +249,7 @@ function runScanner(command, args = {}) {
     return renderScanSnapshot(snapshot, args, output);
   }
   const text = generateReport(result.issues, result.fileCount, output, extras);
-  return { code: 0, text };
+  return { code: 0, text, ...(output === "markdown" ? { structuredContent: extras.execution } : {}) };
 }
 
 function renderScanSnapshot(snapshot, args, output) {
@@ -243,15 +276,17 @@ function renderScanSnapshot(snapshot, args, output) {
         (issuesByFile[issue.file] ||= []).push([issue.line, issue.rule, shorten(issue.description)]);
       }
       const nextOffset = snapshot.offset + returned;
+      if (returned === 0 && nextOffset < issues.length) detailsTruncated = true;
       parsed = { ...parsed, schema: "wl-ui-scan.compact.v2",
         summary: { files: summary.summary.files, total: summary.summary.total, ...summary.summary.bySeverity },
-        page: { cursor: snapshot.offset, limit, returned, nextCursor: nextOffset < issues.length ? String(nextOffset) : null },
+        page: { cursor: snapshot.offset, limit, returned, nextCursor: returned > 0 && nextOffset < issues.length ? String(nextOffset) : null },
         ruleCatalog, issuesByFile, next: summary.next.actions };
     }
     const next = output === "summary" ? snapshot.offset : snapshot.offset + returned;
     parsed.displayOnly = true;
+    const canContinue = output === "summary" ? args.resultCursor === undefined : next > snapshot.offset;
     parsed.response = { snapshotAt, expiresAt: snapshot.expiresAt || null, maxBytes, detailsTruncated,
-      nextResultCursor: snapshot.id && next < issues.length ? `${snapshot.id}:${next}` : null };
+      nextResultCursor: canContinue && snapshot.id && next < issues.length ? `${snapshot.id}:${next}` : null };
     return { text: JSON.stringify(parsed), page: { returned } };
   }, count, maxBytes);
   return { code: 0, text: view.text };
@@ -260,92 +295,35 @@ function renderScanSnapshot(snapshot, args, output) {
 function skillPrompt() {
   return `# wl-skills-ui 路由
 
-1. 调用 wl_ui_scan，默认 summary；需要明细时用 compact-v2 + resultCursor（response.nextResultCursor），直接读取原扫描快照。
-2. 使用返回的 profile 与 recommendedSkills，只打开命中的局部 Skill。
-3. 单条规则用 wl_ui_describe_rule 查询事实源。
-4. 修复先调用 wl_ui_fix_dry_run；CLI 应使用同一 profile/only/skip 与 planHash 应用。
+1. 先调用 wl_ui_route 判定完整任务；需要建立执行链时调用 wl_ui_task，并复用同一 runId。
+2. 展示真实 notice，按 selectedSkills 与 requiredFiles 读取局部规范，遵循返回的 profile、scope 与 action。
+3. action.checksAllowed=false、只解释、仅计划、禁止扫描、未接入或上下文不足时，不自动扫描或修复。先补齐任务与目标。
+4. 只有任务允许检查时才调用 wl_ui_scan，默认 summary；需要明细时用 compact-v2 + resultCursor 读取原扫描快照。
+5. 单条规则用 wl_ui_describe_rule 查询。修复先调用 wl_ui_fix_dry_run；CLI 应使用同一 profile/only/skip 与 planHash 应用。结束读取同 runId 的 wl_ui_status。
 
-Profile：native-element（无 legacy/AG）、legacy-jh-element（legacy 无 AG）、legacy-jh-ag（显式 AG）。不要因 BaseTable 存在而推断或迁移 AG Grid。changed-only 失败默认终止，不静默扩大上下文。动态按钮、权限、状态字典、业务颜色、未知复合控件和表格技术迁移保留给 AI/人工确认。`;
+Profile 以本次路由返回值为准。不要因 BaseTable 存在而推断或迁移 AG Grid。changed-only 失败默认终止，不静默扩大上下文。动态按钮、权限、状态字典、业务颜色、未知复合控件和表格技术迁移保留给 AI/人工确认。`;
 }
 
+// Compatibility projection only: scoring, exclusions, project scope and action come from the task router.
 function routeIntent(args = {}) {
-  const text = String(args.text || "").toLowerCase();
-  const matchedComponents = [];
-  const recommendedSkills = [];
-  const recommendedTools = ["wl_ui_scan"];
-  let intent = "full-audit";
-  let recommendedFlow = "full-audit";
-
-  const componentRules = [
-    [/表格|table|basetable|aggrid|ag-grid/, "el-table", "element/el-table"],
-    [
-      /表单|输入|查询|筛选|form|input|select|date/,
-      "el-form",
-      "element/el-form",
-    ],
-    [/弹窗|dialog|modal/, "el-dialog", "element/el-dialog"],
-    [/卡片|card/, "el-card", "element/component-family"],
-    [/tab|标签页|页签/, "el-tabs", "element/component-family"],
-    [/详情|描述|descriptions/, "el-descriptions", "element/component-family"],
-    [/树|tree/, "el-tree", "element/component-family"],
-    [/抽屉|drawer/, "el-drawer", "element/component-family"],
-    [/上传|附件|upload/, "el-upload", "element/component-family"],
-    [/步骤|流程|审批|steps/, "el-steps", "element/component-family"],
-    [
-      /下拉|更多|popover|tooltip|dropdown|提示/,
-      "el-overlay",
-      "element/component-family",
-    ],
-    [
-      /菜单|面包屑|导航|menu|breadcrumb/,
-      "el-navigation",
-      "element/component-family",
-    ],
-    [
-      /空状态|异常|警告|角标|empty|result|alert|badge/,
-      "el-feedback",
-      "element/component-family",
-    ],
-  ];
-
-  for (const [pattern, component, skill] of componentRules) {
-    if (pattern.test(text)) {
-      matchedComponents.push(component);
-      recommendedSkills.push(skill);
-    }
-  }
-
-  if (/老项目|旧项目|样式乱|不统一|化妆|统一视觉|skin/.test(text)) {
-    intent = "legacy-skin-align";
-    recommendedFlow = "legacy-skin-align";
-    recommendedTools.push("wl_ui_fix_dry_run");
-  } else if (/迁移|runtime|token|硬编码|颜色/.test(text)) {
-    intent = "progressive-migrate";
-    recommendedFlow = "progressive-migrate";
-  } else if (/新项目|初始化|接入/.test(text)) {
-    intent = "new-project-init";
-    recommendedFlow = "new-project-init";
-    recommendedTools.unshift("wl_ui_check");
-  }
-
-  const shouldUseKit =
-    /生成|重构|规范化|菜单|权限|字典|validate|doctor|kit|basetable|renderops/.test(
-      text,
-    );
+  const decision = runTaskAction("route", { projectRoot: projectRoot(args), task: args.text || "" });
+  const skills = decision.selectedSkills || [];
+  const permitted = decision.ready === true && decision.action?.checksAllowed === true;
+  const flowBySkill = { "ops/fix": "legacy-skin-align", "ops/migrate": "progressive-migrate", "runtime/migration": "progressive-migrate", "runtime/design-tokens": "progressive-migrate" };
+  const componentBySkill = { "element/el-table": "el-table", "element/el-form": "el-form", "element/el-dialog": "el-dialog", "element/el-tag": "el-tag" };
+  const flow = permitted ? skills.map((skill) => flowBySkill[skill]).find(Boolean) || "full-audit" : decision.action?.mode === "explain" ? "explain" : decision.status;
   return {
-    intent,
-    matchedComponents: [...new Set(matchedComponents)],
-    recommendedFlow,
-    recommendedSkills: [...new Set(recommendedSkills)],
-    recommendedTools: [...new Set(recommendedTools)],
-    shouldUseKit,
-    nextActions: [
-      "先执行 wl_ui_scan（默认 summary）确认 profile、规则分布与 recommendedSkills",
-      "如需明细，用 compact-v2 + limit/cursor；如需修复，先执行 wl_ui_fix_dry_run",
-      shouldUseKit
-        ? "若要规范化页面结构，再桥接 wl-skills-kit validate-page / doctor-ui"
-        : "优先由 wl-skills-ui 当前 Profile 完成视觉统一",
-    ],
+    intent: flow,
+    matchedComponents: skills.map((skill) => componentBySkill[skill]).filter(Boolean),
+    recommendedFlow: flow,
+    recommendedSkills: skills,
+    recommendedTools: permitted && decision.requiredChecks.includes("scan") ? ["wl_ui_scan"] : [],
+    shouldUseKit: false,
+    status: decision.status, ready: decision.ready, action: decision.action, profile: decision.profile, scope: decision.scope,
+    requiredChecks: decision.requiredChecks, requiredFiles: decision.requiredFiles, notice: decision.notice,
+    nextActions: permitted ? ["使用同一 runId 执行本次允许的检查；扫描后按真实结果决定是否预演修复"]
+      : [decision.action?.checksAllowed === false ? "本次仅解释或计划；不要自动扫描或修复" : "先解决本次 notice 中的范围、前置条件或任务缺口"],
+    compatibility: "wl_ui_route_intent projects wl_ui_route; it does not maintain a separate intent or authorization model",
   };
 }
 
@@ -540,19 +518,23 @@ async function dispatchTool(id, name, args) {
       if (name === "wl_ui_scan") checkedInteger(args.cursor, 0, 0, Number.MAX_SAFE_INTEGER, "cursor");
     } catch (error) { return sendError(id, -32602, `参数校验失败: ${error.message}`); }
   }
-  try {
+  return core.withMcpInvocation(name, () => executionContext.run({ tool: name, outputSchema: tool.outputSchema, continuation: name === "wl_ui_scan" && args.resultCursor !== undefined }, async () => { try {
     const root = projectRoot(args);
-    if (tool.taskAction) return sendResult(id, { content: [{ type: "text", text: JSON.stringify(runTaskAction(tool.taskAction, { ...args, projectRoot: root })) }] });
+    if (tool.taskAction) {
+      const result = runTaskAction(tool.taskAction, { ...args, projectRoot: root });
+      return sendResult(id, { content: [{ type: "text", text: JSON.stringify(result) }], structuredContent: result });
+    }
     if (name === "wl_ui_scan" && args.resultCursor !== undefined) return dispatchToolBody(id, name, args);
     const target = args.target || args.path;
     const targets = target ? [relative(root, projectPath(root, target, "target")) || "."] : name === "wl_ui_check" ? ["."] : [];
     for (const key of ["exempt", "library"]) if (args[key]) projectPath(root, args[key], key);
     if (!tool.effects.records) return dispatchToolBody(id, name, args);
     const execution = beginUiCheck(root, targets, name, args.runId);
-    return executionContext.run({ execution }, () => dispatchToolBody(id, name, { ...args, runId: execution.handle.metadata.runId }));
+    executionContext.getStore().execution = execution;
+    return dispatchToolBody(id, name, { ...args, runId: execution.handle.metadata.runId });
   } catch (error) {
     return sendResult(id, { content: [{ type: "text", text: `❌ 工具执行异常: ${error.message}` }], isError: true });
-  }
+  } }));
 }
 
 async function dispatchToolBody(id, name, args) {
@@ -569,8 +551,9 @@ async function dispatchToolBody(id, name, args) {
       const result = await runScanner("scan", args);
       sendResult(id, {
         content: [{ type: "text", text: result.text }],
+        ...(result.structuredContent ? { structuredContent: result.structuredContent } : {}),
         isError: result.code !== 0,
-      });
+      }, args.output === "markdown");
       return;
     }
     if (name === "wl_ui_fix_dry_run") {
@@ -726,6 +709,7 @@ process.stdin.on("data", (chunk) => {
         protocolVersion: "2024-11-05",
         capabilities: { tools: {} },
         serverInfo: { name: "wl-skills-ui", version: PKG.version },
+        instructions: core.MCP_RECEIPT_GUIDANCE,
       });
     } else if (method === "tools/list") {
       sendResult(id, { tools: publicMcpTools() });

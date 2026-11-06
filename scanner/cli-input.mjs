@@ -35,6 +35,9 @@ export function parseScannerInput(command, args, options, registered) {
     const parsed = parseArgs({ args, options, strict: true, allowPositionals: true, tokens: true });
     validatePositionals(command, parsed.positionals);
     validateValues(parsed.values, parsed.tokens, options);
+    if (command === "snapshot" && parsed.positionals[0] === "clean" && !/^\d+$/.test(parsed.values.keep)) {
+      throw new Error("--keep 必须是非负整数");
+    }
     for (const name of ["only", "skip"]) if (parsed.values[name]) expandRuleSelector(parsed.values[name], registered);
     return parsed;
   } catch (error) {

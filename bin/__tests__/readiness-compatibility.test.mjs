@@ -9,7 +9,7 @@ const repo = path.resolve(import.meta.dirname, '../..');
 const pkg = JSON.parse(fs.readFileSync(path.join(repo, "package.json"), "utf8"));
 const cli = path.join(repo, "bin", 'wl-ui.js');
 const key = 'ui';
-const manifestName = key === "kit" ? ".wl-skills-manifest.json" : ".wl-skills-ui-manifest.json";
+const manifestName = key === "kit" ? ".wl-skills-manifest.json" : ".wl-skills/state/ui/manifest.json";
 const selected = "src/views/Example/index.vue";
 
 function fixture() {
@@ -51,6 +51,45 @@ function readiness(result, ready, status, runtime) {
     if (!ready) assert.deepEqual(result.integration.allowedExecutors, []);
   }
 }
+
+test("legacy update retires an unreachable child record but refuses an escaping host directory", t => {
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "wl-ui-legacy-host-"));
+  t.after(() => fs.rmSync(scratch, { recursive: true, force: true }));
+  const outside = path.join(scratch, "external");
+  fs.mkdirSync(outside);
+  const staleEntry = ".clinerules/wl-skills-ui.md";
+  const userRules = "User-owned host settings\n";
+  const externalFile = path.join(outside, "wl-skills-ui.md");
+  fs.writeFileSync(externalFile, userRules);
+  const update = (root, ...args) => spawnSync(process.execPath, [cli, "update", "--hosts", "codex",
+    "--profile", "native-element", "--skills-only", ...args], { cwd: root, encoding: "utf8", timeout: 30000 });
+  for (const escaping of [false, true]) {
+    const root = path.join(scratch, escaping ? "unsafe" : "safe");
+    fs.mkdirSync(root);
+    fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ private: true }));
+    const legacy = path.join(root, ".wl-skills-ui-manifest.json");
+    const legacyBytes = JSON.stringify({ version: "1.18.0", files: { [staleEntry]: "0".repeat(64) } });
+    fs.writeFileSync(legacy, legacyBytes);
+    const host = path.join(root, ".clinerules");
+    if (escaping) fs.symlinkSync(outside, host, process.platform === "win32" ? "junction" : "dir");
+    else fs.writeFileSync(host, userRules);
+    const preview = update(root, "--dry-run");
+    assert.equal(fs.readFileSync(legacy, "utf8"), legacyBytes);
+    if (escaping) {
+      assert.notEqual(preview.status, 0);
+      assert.notEqual(update(root).status, 0);
+      assert.equal(fs.readFileSync(externalFile, "utf8"), userRules);
+      assert.equal(fs.existsSync(path.join(root, manifestName)), false);
+      continue;
+    }
+    assert.equal(preview.status, 0, preview.stderr || preview.stdout);
+    const applied = update(root);
+    assert.equal(applied.status, 0, applied.stderr || applied.stdout);
+    assert.equal(fs.readFileSync(host, "utf8"), userRules);
+    assert.equal(fs.existsSync(legacy), false);
+    assert.equal(Object.hasOwn(JSON.parse(fs.readFileSync(path.join(root, manifestName), "utf8")).files, staleEntry), false);
+  }
+});
 
 test("legacy 与公开协议：真实版本漂移拒绝且 task/status/route/explain 的 ready 一致", () => {
   const root = fixture();
@@ -127,7 +166,7 @@ test("未接入和移动项目即使有Vue任务对象也不准入，不新建�
         readiness(result, false, "not-applicable");
         assert.deepEqual(result.requiredRules, []);
       }
-      assert.equal(fs.existsSync(path.join(root, key === "kit" ? ".wl-skills/runs" : ".wl-skills-ui/runs")), false);
+      assert.equal(fs.existsSync(path.join(root, key === "kit" ? ".wl-skills/runs" : ".wl-skills/state/ui/runs")), false);
     } finally {fs.rmSync(root, {recursive: true, force: true});}
   }
 });

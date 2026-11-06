@@ -30,5 +30,173 @@
       "ops/migrate"
     ],
     "mode": "apply"
+  },
+  {
+    "task": "美化登录页面",
+    "status": "baseline",
+    "skills": [],
+    "mode": "apply",
+    "checksAllowed": true
+  },
+  {
+    "task": "优化交互体验",
+    "status": "baseline",
+    "skills": [],
+    "mode": "apply",
+    "checksAllowed": true
+  },
+  {
+    "task": "beautify the login page",
+    "status": "baseline",
+    "skills": [],
+    "mode": "apply",
+    "checksAllowed": true
+  },
+  {
+    "task": "切换深色主题",
+    "status": "baseline",
+    "skills": [],
+    "mode": "apply",
+    "checksAllowed": true
+  },
+  {
+    "task": "适配暗色模式",
+    "status": "baseline",
+    "skills": [],
+    "mode": "apply",
+    "checksAllowed": true
+  },
+  {
+    "task": "修正弹窗对齐",
+    "status": "matched",
+    "skills": ["element/el-dialog"],
+    "mode": "apply",
+    "checksAllowed": true
+  },
+  {
+    "task": "调整文字排版",
+    "status": "baseline",
+    "skills": [],
+    "mode": "apply",
+    "checksAllowed": true
+  },
+  {
+    "task": "统一间距",
+    "status": "baseline",
+    "skills": [],
+    "mode": "apply",
+    "checksAllowed": true
+  },
+  {
+    "task": "优化滚动体验",
+    "status": "baseline",
+    "skills": [],
+    "mode": "apply",
+    "checksAllowed": true
+  },
+  {
+    "task": "不要美化页面，只解释主题配置",
+    "status": "baseline",
+    "skills": [],
+    "mode": "explain",
+    "checksAllowed": false
+  },
+  {
+    "task": "不要切换主题，只解释暗色配置",
+    "status": "baseline",
+    "skills": [],
+    "mode": "explain",
+    "checksAllowed": false
+  },
+  {
+    "task": "只解释如何美化登录页面",
+    "status": "baseline",
+    "skills": [],
+    "mode": "explain",
+    "checksAllowed": false
+  },
+  {
+    "task": "只列出美化页面的步骤",
+    "status": "baseline",
+    "skills": [],
+    "mode": "plan",
+    "checksAllowed": false
+  },
+  {
+    "task": "帮我美化页面，不要扫描",
+    "status": "baseline",
+    "skills": [],
+    "mode": "apply",
+    "checksAllowed": false
+  },
+  {
+    "task": "上次要求美化页面，本次只解释布局",
+    "status": "baseline",
+    "skills": [],
+    "mode": "explain",
+    "checksAllowed": false
+  },
+  {
+    "task": "不要创建菜单，只美化页面",
+    "status": "baseline",
+    "skills": [],
+    "mode": "apply",
+    "checksAllowed": true
+  },
+  {
+    "task": "我不想美化页面，只解释布局",
+    "status": "baseline",
+    "skills": [],
+    "mode": "explain",
+    "checksAllowed": false
+  },
+  {
+    "task": "我暂时不想切换主题，只解释实现思路",
+    "status": "needs-context",
+    "skills": [],
+    "mode": "explain",
+    "checksAllowed": false
+  },
+  {
+    "task": "不是让你修复样式，只解释布局",
+    "status": "baseline",
+    "skills": [],
+    "mode": "explain",
+    "checksAllowed": false
+  },
+  {
+    "task": "我并不是让你修复样式，只解释布局",
+    "status": "baseline",
+    "skills": [],
+    "mode": "explain",
+    "checksAllowed": false
+  },
+  {
+    "task": "并不是要美化页面，只了解主题规范",
+    "status": "baseline",
+    "skills": [],
+    "mode": "explain",
+    "checksAllowed": false
+  },
+  {
+    "task": "我不需要你创建菜单，只介绍主题配置",
+    "status": "baseline",
+    "skills": [],
+    "mode": "explain",
+    "checksAllowed": false
+  },
+  {
+    "task": "不是只解释，而是修复样式",
+    "status": "matched",
+    "skills": ["ops/fix"],
+    "mode": "apply",
+    "checksAllowed": true
+  },
+  {
+    "task": "不要美化页面，帮我写诗",
+    "status": "not-applicable",
+    "skills": [],
+    "mode": "apply",
+    "checksAllowed": true
   }
 ]

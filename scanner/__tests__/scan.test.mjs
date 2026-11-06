@@ -117,6 +117,23 @@ describe("R042 选择器分支边界", () => {
   });
 });
 
+describe("R015 弹窗操作列作用域", () => {
+  const rule = rules.find((item) => item.id === "R015");
+
+  it("不跨按钮或列边界，识别前置普通按钮后的实际 link 操作", () => {
+    const template = `<el-button>新增</el-button>
+<el-table-column label="操作"><template #default>
+  <el-button :link="true">编辑</el-button>
+  <el-button :link="false">删除</el-button>
+  <el-button link>确认</el-button>
+</template></el-table-column>
+<el-button link>关闭窗口</el-button>
+<el-button link>查看帮助</el-button>`;
+    assert.deepEqual(rule.check(template, "edit.modal.vue", 0).map((finding) => finding.line), [3]);
+    assert.deepEqual(rule.check(template, "ordinary.vue", 0), []);
+  });
+});
+
 // ── drift 模块测试 ──────────────────────────────────────────────────────────
 const { drift } = await import("../drift.mjs");
 

@@ -5,7 +5,7 @@ description: |
 applyTo: "**/*.vue"
 ---
 
-# layouts/detail-page SKILL
+# 详情页分组与操作区布局
 
 ## 适用场景
 

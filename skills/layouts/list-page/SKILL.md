@@ -5,7 +5,7 @@ description: |
 applyTo: "**/*.vue"
 ---
 
-# layouts/list-page SKILL
+# 查询列表与分页布局
 
 ## 适用场景
 

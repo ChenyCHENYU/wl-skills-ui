@@ -1,11 +1,11 @@
 ---
 description: |
-  野路子自封装组件（src/components/XxxxXxxx 这类无规律前缀）的探测和兜底修复策略。
+  项目自有封装组件（src/components/XxxxXxxx 这类无规律前缀）的探测和兜底修复策略。
   Layer L2，优先级 #4（兜底）。
 applyTo: "**/*.vue"
 ---
 
-# Skill: vendors/custom-wrappers
+# 项目自有封装组件探测
 
 > Layer L2 · Vendor priority **#4**（兜底）
 

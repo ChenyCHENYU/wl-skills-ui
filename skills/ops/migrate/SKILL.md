@@ -5,7 +5,7 @@ description: |
 applyTo: "**"
 ---
 
-# ops/migrate SKILL
+# 旧皮肤到统一样式的渐进迁移
 
 ## 一、迁移目标
 

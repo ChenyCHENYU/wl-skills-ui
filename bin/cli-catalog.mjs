@@ -31,10 +31,10 @@ export const CONTRACT_OPTIONS = {
 };
 
 const PROJECT = { project: { type: "string", default: "." } };
-const INSTALL = { ...PROJECT, editor: { type: "string", default: "" }, mode: { type: "string", default: "" },
+const INSTALL = { ...PROJECT, hosts: { type: "string" }, integration: { type: "string" }, mcp: { type: "boolean" }, "no-mcp": { type: "boolean" }, editor: { type: "string", default: "" }, mode: { type: "string", default: "" },
   profile: { type: "string", default: "" }, "dry-run": { type: "boolean", default: false },
   "skills-only": { type: "boolean", default: false }, force: { type: "boolean", default: false } };
-const RECORDS = "写入 .wl-skills-ui/runs/ 执行回执";
+const RECORDS = "写入 .wl-skills/state/ui/runs/ 执行回执";
 const NONE = "无写入";
 
 export const SCANNER_ACTIONS = {
@@ -64,7 +64,7 @@ export const CLI_COMMANDS = [
     actionEffects: { extract: "仅 --output-file 与 --confirm 同时设置时写契约文件", validate: NONE, match: NONE }, sideEffects: "extract 仅显式 --output-file + --confirm 写契约；validate/match 只读", readOnly: false },
   { name: "rules", family: "local", options: {}, strict: false, actions: ["list", "describe"], positionals: "[list|describe <ruleId>]", summary: "读取注册规则", sideEffects: NONE, readOnly: true },
   { name: "profiles", family: "local", options: {}, strict: false, summary: "读取注册 Profile", sideEffects: NONE, readOnly: true },
-  { name: "task", family: "task", options: TASK_OPTIONS, positionals: '"任务"', summary: "判定并持久化任务计划", sideEffects: "适用任务写入 .wl-skills-ui/runs/ 计划；不执行检查", readOnly: false },
+  { name: "task", family: "task", options: TASK_OPTIONS, positionals: '"任务"', summary: "判定并持久化任务计划", sideEffects: "适用任务写入 .wl-skills/state/ui/runs/ 计划；不执行检查", readOnly: false },
   { name: "route", family: "task", options: TASK_OPTIONS, positionals: '"任务"', summary: "只读任务判定", sideEffects: NONE, readOnly: true },
   { name: "explain", family: "task", options: TASK_OPTIONS, positionals: '"任务"', summary: "只读判定解释", sideEffects: NONE, readOnly: true },
   { name: "status", family: "task", options: TASK_OPTIONS, summary: "读取本包执行回执与新鲜度", sideEffects: NONE, readOnly: true },

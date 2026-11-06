@@ -45,7 +45,7 @@ import { loadExemptConfig } from "./exempt.mjs";
 import { collectChangedVueFiles } from "./changed.mjs";
 import { SFC_PARSER_MODES } from "./sfc-parser.mjs";
 import { resolveProjectProfile } from "../standards/profiles-loader.mjs";
-import { scanFiles } from "./engine.mjs";
+import { scanFiles, sourceExtensions } from "./engine.mjs";
 import { beginUiCheck, finishUiCheck, scanFacts, integrationFacts, core } from "../bin/task-integration.mjs";
 
 const args = process.argv.slice(2);
@@ -182,6 +182,7 @@ function changedFileFilter(projectRoot, targetDir) {
     projectRoot,
     targetDir,
     base: values.base,
+    extensions: sourceExtensions(rules),
   });
   if (result.fallback) {
     latestChangedInfo = {
@@ -203,7 +204,7 @@ function changedFileFilter(projectRoot, targetDir) {
     files: result.files.size,
     base: values.base,
   };
-  console.error(`[wl-scan] 增量模式：扫描 ${result.files.size} 个变更 Vue 文件`);
+  console.error(`[wl-scan] 增量模式：扫描 ${result.files.size} 个当前所选规则支持的变更源码文件`);
   return result.files;
 }
 
@@ -403,7 +404,7 @@ if (subcommand === "snapshot") {
       console.log(`  ${icon} ${d.file} — ${d.status}`);
     }
   } else if (sub === "clean") {
-    const removed = cleanSnapshots(projectRoot, parseInt(values.keep) || 5);
+    const removed = cleanSnapshots(projectRoot, Number(values.keep));
     console.log(`清理完成，删除 ${removed} 个旧快照。`);
   }
   process.exit(0);
@@ -424,6 +425,7 @@ if (subcommand === "fix") {
       only: values.only ? expandRuleRange(values.only) : undefined,
       skip: values.skip ? expandRuleRange(values.skip) : undefined,
       expectedPlanHash: values["plan-hash"] || undefined,
+      exemptConfig: loadExemptConfig(projectRoot, values.exempt || undefined),
     });
   } catch (error) {
     console.error(`[wl-scan] ${error.message}`);

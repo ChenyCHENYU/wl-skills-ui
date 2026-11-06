@@ -1,11 +1,31 @@
 ---
 name: el-form
 description: |
-  审查和修复 Vue/Element Plus 表单控件尺寸、标签预算与自定义步进输入的布局问题。
-applyTo: "**/*.vue"
+  审查和修复 Vue/Element Plus 表单控件尺寸、标签预算，以及平台 BaseForm/BaseQuery 字段冒号注入。
+applyTo: "**/*.{vue,ts,js,tsx,jsx}"
 ---
 
-# 表单控件规范
+# 表单控件与校验布局规范
+
+## R045 — 平台字段冒号必须从配置层关闭
+
+仅在项目采用 `legacy-jh-element`、`legacy-jh-ag` 或 `native-jh-ag` 时检查平台
+`BaseFormItemDesc` / `BaseQueryItemDesc` 对象和 `BaseForm` / `BaseQuery` 的 `items`。
+读取 `standards/ui/03-form.md` 的两条注入路径：CSS 只能屏蔽伪元素，不能删除组件拼进
+label 文本的冒号。公共构造器在 Vue 或独立 `runtime.ts` 内均须明确输出 `showColon:false`。
+
+```bash
+# 同一 runId：读到规则 → 查实际源码 → 预演 → 按计划应用 → 复扫/状态
+wl-ui scan --target src --only R045 --output summary --run-id <id>
+wl-ui fix --target src --only R045 --dry-run --output json --run-id <id>
+wl-ui fix --target src --only R045 --plan-hash <preview.planHash> --run-id <id>
+wl-ui status --run-id <id>
+```
+
+AST 只自动处理可确定的平台字段：缺省/静态 `true` 改为 `false`，去除静态 label
+末尾冒号；保留其他属性和行为。动态 `showColon`、未明展开及文本拼接只报人工复核，
+不能覆盖它们来消除报告。未知自定义封装、未关联的平台字段和纯 Element 项目不套此约束。
+扫描不写文件；MCP 的修复入口仍只预演；实际 fix 复用计划哈希、快照、回退和自动复扫。
 
 ## R006 — el-input / el-select 必须 `size="small"` 【中危】
 

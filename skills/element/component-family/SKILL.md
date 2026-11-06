@@ -1,4 +1,9 @@
-# Skill: element/component-family
+---
+description: 统一 Element Plus 组件族的高度、圆角、禁用态与视觉样式；覆盖卡片、页签、抽屉、树、上传和反馈组件，按真实组件结构选择规则。
+applyTo: "**/*.vue"
+---
+
+# Element 组件族视觉一致性
 
 ## 定位
 

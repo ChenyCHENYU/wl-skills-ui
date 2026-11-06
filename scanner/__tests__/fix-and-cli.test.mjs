@@ -13,6 +13,7 @@ import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { runFix } from "../fix.mjs";
+import { scanProject } from "../engine.mjs";
 import {
   createSnapshot,
   listSnapshots,
@@ -44,6 +45,21 @@ afterEach(() => {
 });
 
 describe("fixer 闭环", () => {
+  it("R017 在嵌套插槽后仍能修复，保留模板外脚本颜色", () => {
+    const root = tempProject();
+    const file = join(root, "src", "Nested.vue");
+    const script = '<script setup>const chartColor = "#409eff";</script>';
+    const literal = '<div title="#409eff">#409eff</div>';
+    writeFileSync(file, `<template><el-table><el-table-column><template #default><span /></template></el-table-column></el-table><div style="color:#409eff" />${literal}</template>\n${script}`);
+    const scan = () => scanProject({ projectRoot: root, target: "src/Nested.vue", profile: "native-element", parser: "fast", only: "R017" });
+    assert.equal(scan().issues.length, 1);
+    const result = runFix({ projectRoot: root, target: file, profile: "native-element", only: new Set(["R017"]) });
+    assert.equal(result.totalChanges, 1);
+    assert.equal(scan().issues.length, 0);
+    assert.ok(readFileSync(file, "utf8").includes(script));
+    assert.ok(readFileSync(file, "utf8").includes(literal));
+  });
+
   it("修复与目录声明一致，并自动创建可回退快照", () => {
     const root = tempProject();
     const file = join(root, "src", "Demo.vue");
@@ -190,6 +206,22 @@ describe("fixer 闭环", () => {
 });
 
 describe("统一 CLI", () => {
+  it("snapshot clean --keep 0 真正删除全部快照，无效数量不修改快照", () => {
+    const root = tempProject();
+    const targetDir = join(root, "src");
+    const file = join(targetDir, "Demo.vue");
+    writeFileSync(file, "<template><div /></template>");
+    createSnapshot({ projectRoot: root, targetDir, filePaths: [file] });
+    assert.equal(listSnapshots(root).length, 1);
+    const invalid = runCli(["snapshot", "clean", "--keep=-1"], root);
+    assert.equal(invalid.status, 1);
+    assert.match(invalid.stderr, /非负整数/);
+    assert.equal(listSnapshots(root).length, 1);
+    const cleared = runCli(["snapshot", "clean", "--keep", "0"], root);
+    assert.equal(cleared.status, 0, cleared.stderr);
+    assert.equal(listSnapshots(root).length, 0);
+    assert.equal(readFileSync(file, "utf8"), "<template><div /></template>");
+  });
   it("提供版本、拒绝未知命令并转发 audit/drift/exempt", () => {
     const root = tempProject();
     writeFileSync(join(root, "src", "Clean.vue"), "<template><div /></template>\n", "utf8");
@@ -242,6 +274,7 @@ describe("统一 CLI", () => {
         "init",
         "--project",
         root,
+        "--mcp",
         "--editor",
         "agents-generic",
         "--profile",
@@ -258,7 +291,7 @@ describe("统一 CLI", () => {
     assert.ok(installed.length < 12_000, `router too large: ${installed.length}`);
 
     const update = runCli(
-      ["update", "--project", root, "--editor", "agents-generic", "--force"],
+      ["update", "--mcp", "--project", root, "--editor", "agents-generic", "--force"],
       root,
     );
     assert.equal(update.status, 0, update.stderr);
@@ -289,6 +322,9 @@ describe("统一 CLI", () => {
         "init",
         "--project",
         root,
+        "--mcp",
+        "--hosts",
+        "claude",
         "--editor",
         "agents-generic",
         "--profile",
@@ -302,7 +338,7 @@ describe("统一 CLI", () => {
     assert.equal(readFileSync(join(root, ".mcp.json"), "utf8"), invalidMcp);
 
     const manifest = JSON.parse(
-      readFileSync(join(root, ".wl-skills-ui-manifest.json"), "utf8"),
+      readFileSync(join(root, ".wl-skills/state/ui/manifest.json"), "utf8"),
     );
     assert.equal(manifest.files[".mcp.json"], undefined);
     assert.equal(manifest.managedJson[".mcp.json"], undefined);
@@ -392,6 +428,7 @@ describe("profile 兼容承诺（1.13）", () => {
         "init",
         "--project",
         root,
+        "--mcp",
         "--editor",
         "agents-generic",
         "--profile",

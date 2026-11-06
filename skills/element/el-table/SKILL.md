@@ -5,7 +5,7 @@ description: |
 applyTo: "**/*.vue"
 ---
 
-# 表格组件规范
+# 表格对齐与空状态规范
 
 ## R001 — el-table-column 必须 `align="center"` 【高危】
 

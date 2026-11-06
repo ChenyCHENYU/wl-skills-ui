@@ -9,3 +9,6 @@ bash.exe.stackdump
 # npm pack 产物不入库
 *.tgz
 .wl-skills-ui/runs/
+
+# compact integration execution evidence
+.wl-skills/state/ui/runs/

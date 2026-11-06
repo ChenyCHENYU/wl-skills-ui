@@ -5,7 +5,7 @@ description: |
 applyTo: "**/*.{ts,vue}"
 ---
 
-# AG Grid 列渲染规范
+# AG Grid 列渲染与样式适配
 
 ## 核心原则
 

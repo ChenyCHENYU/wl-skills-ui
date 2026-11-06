@@ -1,6 +1,6 @@
 /**
  * protocol-routing.test.mjs — ui 路由准确性逐技能语料（预期经人工复核冻结）
- * ui 是依赖型包：安装态通过真实打包产物 npm 安装到隔离项目验证。
+ * ui 是依赖型包：安装态通过真实打包产物解包到隔离项目，复用已冻结依赖，验证过程不访问 registry。
  */
 import { test, before } from "node:test";
 import assert from "node:assert/strict";
@@ -44,9 +44,16 @@ before(() => {
   assert.equal(pack.status, 0, pack.stderr);
   state.tarball = path.join(packDir, pack.stdout.trim().split("\n").pop());
   state.installedRoot = tempRoot();
-  assert.equal(spawnSync("npm", ["init", "-y"], { cwd: state.installedRoot, encoding: "utf8" }).status, 0);
-  const install = spawnSync("npm", ["i", state.tarball], { cwd: state.installedRoot, encoding: "utf8", timeout: 180000 });
-  assert.equal(install.status, 0, install.error?.message || install.stderr);
+  const installedPackage = path.join(state.installedRoot, "node_modules/@agile-team/wl-skills-ui");
+  fs.mkdirSync(installedPackage, { recursive: true });
+  const unpacked = spawnSync("tar", ["-xzf", state.tarball, "--strip-components=1", "-C", installedPackage], { encoding: "utf8", timeout: 30000 });
+  assert.equal(unpacked.status, 0, unpacked.stderr);
+  // Test the packed runtime/resources rather than a source-checkout package link.
+  // Only its already-frozen third-party dependencies come from this checkout.
+  fs.symlinkSync(path.join(PKG_ROOT, "node_modules"), path.join(installedPackage, "node_modules"), "dir");
+  const packedMetadata = JSON.parse(fs.readFileSync(path.join(installedPackage, "package.json"), "utf8"));
+  fs.writeFileSync(path.join(state.installedRoot, "package.json"), JSON.stringify({ private: true, dependencies: { [packedMetadata.name]: packedMetadata.version, vue: "^3.4.0" } }));
+
 }, 600000);
 
 for (const item of cases) {

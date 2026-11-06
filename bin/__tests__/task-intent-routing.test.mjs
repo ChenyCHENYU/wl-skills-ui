@@ -31,11 +31,13 @@ test('当前请求、否定、历史引用与只讨论：公开协议精确回�
       if(row.rules)assert.deepEqual(d.requiredRules,row.rules,row.task);
       assert.equal(d.action.mode,row.mode,row.task);assert.equal(d.action.businessWritesAuthorized,false);
       if(row.mode === 'explain')assert.equal(d.action.checksAllowed,false);
+      if(row.checksAllowed !== undefined)assert.equal(d.action.checksAllowed,row.checksAllowed,row.task);
       const core = envelope.result.integration;assert.equal(core.packageName,pkg.name);assert.equal(core.packageVersion,pkg.version);
       assert.equal(core.contractVersion,1);assert.equal(core.runId,null);
+      if(row.status === 'not-applicable'){assert.equal(core.ready,false);assert.deepEqual(d.requiredChecks,[]);}
       assert.ok(core.ruleRefs.every(rule => rule.packageName === pkg.name && rule.ruleVersion === pkg.version));
     }
-    const storage = {kit:'.wl-skills',ui:'.wl-skills-ui',bd:'.wl-skills-bd',design:'.wl-skills-design',test:'.wl-skills-test'}[key];
+    const storage = {kit:'.wl-skills',ui:'.wl-skills/state/ui',bd:'.wl-skills-bd',design:'.wl-skills-design',test:'.wl-skills-test'}[key];
     assert.equal(fs.existsSync(path.join(project,storage,'runs')),false,'route 不写任务记录');
   } finally {fs.rmSync(temporary,{recursive:true,force:true});}
 });

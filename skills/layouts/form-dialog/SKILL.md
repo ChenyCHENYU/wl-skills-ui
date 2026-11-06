@@ -5,7 +5,7 @@ description: |
 applyTo: "**/*.vue"
 ---
 
-# layouts/form-dialog SKILL
+# 新增编辑表单弹窗布局
 
 ## 适用场景
 

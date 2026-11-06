@@ -6,6 +6,8 @@ import { tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import jsonc from "../../bin/shared-jsonc.cjs";
+import hostProfiles from "../../bin/host-profiles.cjs";
+import { taskGateway } from "../../bin/task-gateway.mjs";
 
 const cli = resolve(import.meta.dirname, "../../bin/wl-ui.js");
 const cleanup = [];
@@ -16,6 +18,7 @@ function project() {
   return root;
 }
 function run(root, args) {
+  if (["init", "update"].includes(args[0])) args = [...args, "--integration", "expanded", "--mcp"];
   const result = spawnSync(process.execPath, [cli, ...args, "--project", root], { cwd: root, encoding: "utf8", timeout: 30000 });
   assert.equal(result.status, 0, result.stderr);
   return result;
@@ -40,10 +43,29 @@ fs.writeFileSync = function (file, ...args) {
 afterEach(() => cleanup.splice(0).forEach((root) => rmSync(root, { recursive: true, force: true })));
 
 describe("UI install ownership", () => {
+  it("installs native host gateways without copying all rules and retains customized or preexisting gateways", () => {
+    const root = project();
+    const preexisting = ".claude/skills/wl-skills-ui/SKILL.md";
+    mkdirSync(join(root, ".claude/skills/wl-skills-ui"), { recursive: true });
+    writeFileSync(join(root, preexisting), taskGateway());
+    run(root, ["init", "--editor", "agents-generic", "--skills-only"]);
+    for (const rel of hostProfiles.gatewayInstallPaths("@agile-team/wl-skills-ui", { projectRoot: root })) assert.equal(readFileSync(join(root, rel), "utf8"), taskGateway());
+    assert.equal(existsSync(join(root, ".cursor/rules/element-el-table.mdc")), false);
+    const customized = ".agents/skills/wl-skills-ui/SKILL.md";
+    const current = taskGateway() + "\nProject customization.\n";
+    writeFileSync(join(root, customized), current);
+    run(root, ["update", "--editor", "agents-generic", "--skills-only"]);
+    assert.equal(readFileSync(join(root, customized), "utf8"), current);
+    run(root, ["clean"]);
+    assert.equal(readFileSync(join(root, customized), "utf8"), current);
+    assert.equal(readFileSync(join(root, preexisting), "utf8"), taskGateway());
+    assert.equal(existsSync(join(root, ".cline/skills/wl-skills-ui/SKILL.md")), false);
+  });
+
   it("keeps Markdown, MCP, HTML and Profile originals intact when CLI temporary writes fail", () => {
     const targets = [
       ["AGENTS.md", "# Team  \r\n\r\nTail \t", ["--skills-only"]],
-      [".mcp.json", '{"mcpServers":{"team":{"command":"team"}}}\n', ["--skills-only"]],
+      [".mcp.json", '{"mcpServers":{"team":{"command":"team"}}}\n', ["--skills-only", "--mcp", "--hosts", "claude"]],
       ["index.html", "<html><head></head><body>Team  </body></html>\r\n", []],
       [".wl-ui-profile.json", '{"schema":1,"profile":"legacy-jh-element","extra":"Team"}\n', ["--skills-only", "--profile", "native-element"]],
     ];
@@ -88,7 +110,7 @@ describe("UI install ownership", () => {
     assert.equal(readFileSync(file, "utf8"), modified);
     run(root, ["clean"]);
     assert.equal(readFileSync(file, "utf8"), modified);
-    const manifest = JSON.parse(readFileSync(join(root, ".wl-skills-ui-manifest.json")));
+    const manifest = JSON.parse(readFileSync(join(root, ".wl-skills/state/ui/manifest.json")));
     assert.ok(manifest.files[".cursor/rules/element-el-table.mdc"]);
   });
 
@@ -98,7 +120,7 @@ describe("UI install ownership", () => {
     const support = join(root, ".github/wl-skills-ui/README.md");
     writeFileSync(support, "User readme.\n");
     writeFileSync(join(root, ".mcp.json"), '{"mcpServers":{"wl-skills-ui":{"command":"user-owned"}}}\n');
-    run(root, ["init", "--editor", "agents-generic", "--skills-only", "--force"]);
+    run(root, ["init", "--hosts", "claude", "--editor", "agents-generic", "--skills-only", "--force"]);
     run(root, ["clean"]);
     assert.equal(readFileSync(support, "utf8"), "User readme.\n");
     assert.equal(JSON.parse(readFileSync(join(root, ".mcp.json"))).mcpServers["wl-skills-ui"].command, "user-owned");
@@ -113,7 +135,7 @@ describe("UI install ownership", () => {
     mkdirSync(join(root, ".cursor/rules"), { recursive: true });
     writeFileSync(join(root, rel), original);
     run(root, ["init", "--editor", "cursor", "--skills-only"]);
-    const manifest = JSON.parse(readFileSync(join(root, ".wl-skills-ui-manifest.json")));
+    const manifest = JSON.parse(readFileSync(join(root, ".wl-skills/state/ui/manifest.json")));
     assert.equal(manifest.files[rel], undefined);
     assert.match(manifest.references[rel], /相同/);
     run(root, ["clean"]);
@@ -123,7 +145,7 @@ describe("UI install ownership", () => {
   it("preserves JSONC comments and removes only its server", () => {
     const root = project();
     writeFileSync(join(root, ".mcp.json"), '{\n // team configuration\n "mcpServers": {"team":{"command":"team"},},\n "extra": true,\n}\n');
-    run(root, ["init", "--editor", "agents-generic", "--skills-only"]);
+    run(root, ["init", "--hosts", "claude", "--editor", "agents-generic", "--skills-only"]);
     assert.ok(jsonc.parseJsonc(readFileSync(join(root, ".mcp.json"), "utf8")).mcpServers["wl-skills-ui"]);
     run(root, ["clean"]);
     const text = readFileSync(join(root, ".mcp.json"), "utf8");
@@ -133,11 +155,11 @@ describe("UI install ownership", () => {
 
   it("preserves comments added inside its own MCP entry on update and clean", () => {
     const root = project();
-    run(root, ["init", "--editor", "agents-generic", "--skills-only"]);
+    run(root, ["init", "--hosts", "claude", "--editor", "agents-generic", "--skills-only"]);
     const file = join(root, ".mcp.json");
     const modified = readFileSync(file, "utf8").replace('"command":', '// user execution note\n"command":');
     writeFileSync(file, modified);
-    run(root, ["update", "--force", "--editor", "agents-generic", "--skills-only"]);
+    run(root, ["update", "--hosts", "claude", "--force", "--editor", "agents-generic", "--skills-only"]);
     assert.equal(readFileSync(file, "utf8"), modified);
     run(root, ["clean"]);
     assert.equal(readFileSync(file, "utf8"), modified);

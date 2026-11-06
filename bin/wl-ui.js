@@ -4,7 +4,7 @@
  *
  * 子命令：
  *   wl-ui init   [--project <path>] [--editor <editor|all>] [--dry-run]
- *                把 skills/ 写入目标项目的 AI 编辑器规则目录
+ *                默认 compact：按选定宿主写入短入口，技能正文保留在 npm 包
  *   wl-ui scan   → 委托给 scanner/index.mjs
  *   wl-ui check  → 委托给 scanner/index.mjs
  *   wl-ui fix    → 委托给 scanner/index.mjs
@@ -21,6 +21,7 @@ import {
   readFileSync,
   writeFileSync,
   rmSync,
+  rmdirSync,
   unlinkSync,
   statSync,
 } from "node:fs";
@@ -31,9 +32,13 @@ import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import atomic from "./atomic-write.cjs";
-import { GATEWAY_PATH, taskGateway } from "./task-gateway.mjs";
+import { taskGateway } from "./task-gateway.mjs";
+import hostProfiles from "./host-profiles.cjs";
+import integrationPolicy from "./project-integration.cjs";
+import { beginInstallTransaction } from "./install-transaction.mjs";
 import { cliCommands, cliParser } from "./cli-catalog.mjs";
-import { createState, writeOwnedFile, writeRouter, writeMcp, mcpHasLocalChanges, remove as removeRouter, safeFile, validMarkers, HTML_START, HTML_END, jsonc } from "./install-lifecycle.mjs";
+import { createState, writeOwnedFile, writeRouter, remove as removeRouter, safeFile, validMarkers, HTML_START, HTML_END } from "./install-lifecycle.mjs";
+import { prepareMcpManifest, planMcpInstall, applyMcpInstall, inspectMcpInstall } from "./mcp-install.mjs";
 import { getRule, listRules } from "../standards/rules-loader.mjs";
 import {
   listProfiles,
@@ -46,7 +51,9 @@ const PKG_ROOT = resolve(__dirname, "..");
 const require = createRequire(import.meta.url);
 const PKG = require("../package.json");
 const { atomicWriteFile } = atomic;
-const MANIFEST_NAME = ".wl-skills-ui-manifest.json";
+const MANIFEST_NAME = ".wl-skills/state/ui/manifest.json";
+const LEGACY_MANIFEST_NAME = ".wl-skills-ui-manifest.json";
+const MANIFEST_SOURCE = Symbol("manifestSource");
 const MANAGED_BLOCK_START = "<!-- wl-skills-ui:begin -->";
 const MANAGED_BLOCK_END = "<!-- wl-skills-ui:end -->";
 
@@ -55,7 +62,6 @@ const MANAGED_BLOCK_END = "<!-- wl-skills-ui:end -->";
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const EDITOR_TARGETS = loadEditorTargets();
-const EDITOR_IDS = Object.keys(EDITOR_TARGETS);
 
 // ── 参数解析 ─────────────────────────────────────────────────────────────────
 const rawArgs = process.argv.slice(2);
@@ -80,8 +86,8 @@ if (subcommand === "protocol") {
   process.exitCode = await runCli(rawArgs);
 } else if (cliCommands("task").some((command) => command.name === subcommand)) {
   const { taskCli } = await import("./task-integration.mjs");
-  taskCli(subcommand, rawArgs);
-  process.exit(0);
+  const result = taskCli(subcommand, rawArgs);
+  process.exitCode = subcommand === "doctor-host" && result.entryReadiness !== "ready" ? 1 : 0;
 }
 
 const SCANNER_CMDS = new Set(cliCommands("scanner").map((command) => command.name));
@@ -173,19 +179,25 @@ if (subcommand === "init" || subcommand === "update") {
   const profile = profileResolution.profile;
   const mode = profile.mode;
 
-  const manifest = readManifest(projectRoot);
-  if (
-    subcommand === "update" &&
-    manifest?.version === PKG.version &&
-    !values.force && manifest.managedBlocks && manifest.contributions
-  ) {
-    console.log(
-      `\n[wl-ui update] 当前项目已安装 v${PKG.version}，无需重复操作。`,
-    );
-    console.log("如需强制更新：npx wl-ui update --force\n");
-    process.exit(0);
+  const manifest = prepareMcpManifest(projectRoot, readManifest(projectRoot));
+  if (!manifest && [MANIFEST_NAME, LEGACY_MANIFEST_NAME].some((rel) => existsSync(join(projectRoot, rel)))) {
+    throw new Error("本包安装清单无效或路径不安全，已保留原文件且未写入；请先修复清单再更新。");
   }
-
+  const policy = integrationPolicy.resolveIntegration({
+    projectRoot, hosts: values.hosts || undefined, editor: values.editor || undefined,
+    integration: values.integration || undefined, recorded: manifest,
+  });
+  if (values.mcp && values["no-mcp"]) throw new Error("--mcp 与 --no-mcp 不能同时使用");
+  if (values.mcp) policy.mcp = true;
+  if (values["no-mcp"]) policy.mcp = false;
+  const mcpPlan = planMcpInstall(projectRoot, policy, manifest);
+  const editors = policy.integration === "expanded" ? expandedEditors(policy.hosts) : [];
+  const gatewayPaths = hostProfiles.gatewayInstallPaths(PKG.name, policy);
+  const entryFiles = policy.entryFiles.map((rel) => resolveEntryFile(projectRoot, rel.replace("<skill>", PKG.name.replace("@agile-team/", ""))));
+  const paths = installPaths({ projectRoot, editors, entryFiles, gatewayPaths, mode, profile, skillsOnly, policy, mcpPlan });
+  // Resolve config and every write boundary before the first mutation. Directory
+  // presence does not select a host or grant ownership of its files.
+  integrationPolicy.readProjectConfig(projectRoot);
   console.log(`\n[wl-ui ${subcommand}] 目标项目：${projectRoot}`);
   console.log(
     `[wl-ui ${subcommand}] 模式：${mode === "skin" ? "化妆 (skin)" : "原生 (native)"}`,
@@ -196,66 +208,77 @@ if (subcommand === "init" || subcommand === "update") {
   if (dryRun)
     console.log(`[wl-ui ${subcommand}] DRY-RUN 模式：不实际写入文件\n`);
 
-  // 1. 检测编辑器
-  const editors = resolveEditorsForInstall({
-    projectRoot,
-    subcommand,
-    requestedEditor: values.editor,
-    manifest,
-  });
-  console.log(`[wl-ui ${subcommand}] 目标编辑器：${editors.join(", ")}\n`);
-
-  // Validate every selected editor before the first write.
-  try { preflightInstall({ projectRoot, editors, mode, profile, skillsOnly }); }
+  console.log(`[wl-ui ${subcommand}] 接入：${policy.integration}；宿主：${policy.hosts.join(", ")}`);
+  console.log(`[wl-ui ${subcommand}] 安装计划：${paths.length} 个候选路径；正文从 npm 包按需读取。`);
+  try { for (const rel of paths) safeFile(projectRoot, rel); }
   catch (error) {
     console.error(`[wl-ui ${subcommand}] 安装预检失败，未写入任何文件：${error.message}`);
     process.exit(2);
   }
-
-  // 2. 安装 skills（按 mode 过滤）
-  const state = createState(manifest || {});
-  const installedFiles = [];
-  if (writeOwnedFile({ root: projectRoot, rel: GATEWAY_PATH, content: taskGateway(), state, dryRun })) installedFiles.push(GATEWAY_PATH);
-  for (const editor of editors) {
+  const transaction = dryRun ? null : beginInstallTransaction(projectRoot, [...paths, ...Object.keys(manifest?.files || {}), ...Object.keys(manifest?.contributions || {}), MANIFEST_NAME, LEGACY_MANIFEST_NAME, relative(projectRoot, policy.configPath || join(projectRoot, "package.json"))]);
+  try {
+    // 2. 安装 skills（按 mode 过滤）
+    const state = createState(manifest || {});
+    const installedFiles = [];
+    for (const rel of gatewayPaths) {
+      if (writeOwnedFile({ root: projectRoot, rel, content: taskGateway(), state, dryRun })) installedFiles.push(rel);
+    }
+    for (const rel of entryFiles.filter((rel) => !editors.some((editor) => EDITOR_TARGETS[editor].singleFile === rel))) {
+      if (writeRouter({ root: projectRoot, rel, block: compactRouter(profile), state, dryRun, legacyHeader: legacyHeaderForEntry(rel) })) installedFiles.push(rel);
+    }
+    for (const editor of editors) {
+      installedFiles.push(
+        ...installSkills({ projectRoot, editor, mode, profile, dryRun, state }),
+      );
+    }
+    if (policy.integration === "expanded") installedFiles.push(...installSupportFiles({ projectRoot, dryRun, state }));
+    retireContributions({ projectRoot, desired: new Set(paths), state, dryRun });
+    applyMcpInstall(projectRoot, mcpPlan, state, dryRun);
+    installedFiles.push(...Object.keys(mcpPlan.records));
     installedFiles.push(
-      ...installSkills({ projectRoot, editor, mode, profile, dryRun, state }),
+      ...installProfileConfig({
+        projectRoot,
+        profile,
+        source: profileResolution.source,
+        owned: Boolean(manifest?.files?.[".wl-ui-profile.json"]),
+        dryRun,
+        state,
+      }),
     );
-  }
-  installedFiles.push(...installSupportFiles({ projectRoot, dryRun, state }));
-  installedFiles.push(
-    ...installProfileConfig({
-      projectRoot,
-      profile,
-      source: profileResolution.source,
-      owned: Boolean(manifest?.files?.[".wl-ui-profile.json"]),
-      dryRun,
-      state,
-    }),
-  );
 
-  // 3. 安装接入配置（非 --skills-only 时）
-  if (!skillsOnly) {
-    installStyleSetup({ projectRoot, mode, profile, dryRun, state });
-  }
+    // 3. 安装接入配置（非 --skills-only 时）
+    if (!skillsOnly) {
+      installStyleSetup({ projectRoot, mode, profile, dryRun, state });
+    }
 
-  if (!dryRun) {
-    writeManifest(projectRoot, {
-      version: PKG.version,
-      editor: editors.join(","),
-      editors,
-      mode,
-      // 仅显式 --profile 的安装才把 profile 固化进清单；
-      // 自动识别的安装不写该字段，避免清单反过来触发严格校验。
-      ...(profileResolution.explicit ? { profile: profile.id } : {}),
-      installedAt: new Date().toISOString(),
-      files: state.files,
-      managedBlocks: state.managedBlocks,
-      blockAffixes: state.blockAffixes,
-      managedJson: state.managedJson,
-      managedJsonText: state.managedJsonText,
-      contributions: state.contributions,
-      references: state.references,
-    });
+    if (!dryRun) {
+      integrationPolicy.saveProjectConfig(projectRoot, policy);
+    integrationPolicy.ensureStateIgnore(projectRoot);
+      writeManifest(projectRoot, {
+        version: PKG.version,
+        schemaVersion: 2, integration: policy.integration, hosts: policy.hosts, mcp: policy.mcp,
+        editor: editors.join(","),
+        editors,
+        mode,
+        // 仅显式 --profile 的安装才把 profile 固化进清单；
+        // 自动识别的安装不写该字段，避免清单反过来触发严格校验。
+        ...(profileResolution.explicit ? { profile: profile.id } : {}),
+        installedAt: new Date().toISOString(),
+        files: state.files,
+        managedBlocks: state.managedBlocks,
+        blockAffixes: state.blockAffixes,
+        managedJson: state.managedJson,
+        managedJsonText: state.managedJsonText,
+        managedMcp: state.managedMcp,
+        contributions: state.contributions,
+        references: state.references,
+      });
+      retireLegacyManifest(projectRoot, manifest);
+    }
+  transaction?.commit();
+  } catch (error) {
+    transaction?.rollback();
+    throw error;
   }
 
   console.log(`\n✅ wl-ui ${subcommand} 完成！\n`);
@@ -263,7 +286,9 @@ if (subcommand === "init" || subcommand === "update") {
     projectRoot,
     mode,
     profile: profile.id,
-    editor: editors.join(", "),
+    editor: policy.hosts.join(", "),
+    mcp: policy.mcp,
+    mcpPlan,
   });
   console.log("下一步：");
   if (mode === "skin") {
@@ -358,20 +383,6 @@ if (subcommand === "add-vendor") {
 
 /** 工具函数 */
 
-/** 检测目标项目使用哪个 AI 编辑器 */
-function detectEditor(projectRoot) {
-  if (existsSync(join(projectRoot, ".cursor"))) return "cursor";
-  if (existsSync(join(projectRoot, ".windsurf"))) return "windsurf";
-  if (existsSync(join(projectRoot, ".kiro"))) return "kiro";
-  if (existsSync(join(projectRoot, ".trae"))) return "trae";
-  if (existsSync(join(projectRoot, "CLAUDE.md"))) return "claude-code";
-  if (existsSync(join(projectRoot, ".clinerules"))) return "cline";
-  if (existsSync(join(projectRoot, "AGENTS.md"))) return "agents-generic";
-  if (existsSync(join(projectRoot, ".qoder"))) return "qoder";
-  // 默认 Copilot（最常见）
-  return "github-copilot";
-}
-
 function loadEditorTargets() {
   const configPath = join(
     PKG_ROOT,
@@ -399,56 +410,63 @@ function normalizeInstallDir(installPath) {
   return normalized === "." || normalized === "" ? "." : normalized;
 }
 
-function detectInstalledEditors(projectRoot) {
-  return EDITOR_IDS.filter((editor) => {
-    const target = EDITOR_TARGETS[editor];
-    if (target.singleFile)
-      return existsSync(join(projectRoot, target.singleFile));
-    return existsSync(join(projectRoot, target.dir));
-  });
+function expandedEditors(hosts) {
+  const aliases = { codex: "agents-generic", zcode: "agents-generic", kilo: "agents-generic", roo: "agents-generic", claude: "claude-code", copilot: "github-copilot", devin: "windsurf" };
+  return [...new Set(hosts.map((host) => aliases[host] || host))].filter((editor) => EDITOR_TARGETS[editor]);
 }
 
-function normalizeManifestEditors(manifest) {
-  if (Array.isArray(manifest?.editors)) return manifest.editors;
-  if (typeof manifest?.editor === "string") {
-    return manifest.editor
-      .split(",")
-      .map((editor) => editor.trim())
-      .filter(Boolean);
-  }
-  return [];
+function resolveEntryFile(projectRoot, rel) {
+  return rel === ".clinerules" && existsSync(join(projectRoot, rel)) && statSync(join(projectRoot, rel)).isDirectory() ? ".clinerules/wl-skills-ui.md" : rel;
 }
 
-function uniqueValidEditors(editors) {
-  return [...new Set(editors)].filter((editor) => EDITOR_TARGETS[editor]);
+function legacyHeaderForEntry(rel) {
+  const editor = Object.values(EDITOR_TARGETS).find((target) => target.singleFile === rel);
+  const file = editor?.headerFile && join(PKG_ROOT, "skills/_meta/_compat", editor.headerFile);
+  return file && existsSync(file) ? readFileSync(file, "utf8").trim() : "";
 }
 
-function resolveEditorsForInstall({
-  projectRoot,
-  subcommand,
-  requestedEditor,
-  manifest,
-}) {
-  if (requestedEditor) {
-    if (requestedEditor === "all") return EDITOR_IDS;
-    const editors = uniqueValidEditors(
-      requestedEditor.split(",").map((editor) => editor.trim()),
-    );
-    if (editors.length > 0) return editors;
-    console.error(`[wl-ui ${subcommand}] 不支持的编辑器：${requestedEditor}`);
-    console.error(`支持：${EDITOR_IDS.join(" | ")} | all`);
-    process.exit(1);
-  }
+function compactRouter(profile) {
+  return [MANAGED_BLOCK_START, "# wl-skills-ui", "",
+    `UI 风格、设计令牌、组件与确定性扫描修复；当前 Profile：${profile.id}。`,
+    "仅用于自身已接入本包的 PC Vue 管理端。先调用本地 `wl-ui task \"<任务>\" --target <路径> --json`，展示真实 notice；按返回路径读取包内必要技能。",
+    "先读取 `node_modules/@agile-team/wl-skills-ui/SKILL.md`，技能正文与规则保留在包内。完成实际检查后以同 runId 调用 `wl-ui status --run-id <id>`；安装记录不证明宿主已加载或检查通过。",
+    "与其他已安装适用包共用同一 runId；不自动安装兄弟包。", MANAGED_BLOCK_END].join("\n");
+}
 
-  if (subcommand === "update") {
-    const editors = uniqueValidEditors([
-      ...normalizeManifestEditors(manifest),
-      ...detectInstalledEditors(projectRoot),
-    ]);
-    if (editors.length > 0) return editors;
+function installPaths({ projectRoot, editors, entryFiles, gatewayPaths, mode, profile, skillsOnly, policy, mcpPlan }) {
+  const paths = [MANIFEST_NAME, ".wl-skills/state/.gitignore", ...gatewayPaths, ...entryFiles, ".wl-ui-profile.json", relative(projectRoot, policy.configPath || join(projectRoot, "package.json"))];
+  paths.push(...mcpPlan.files.map((item) => item.path));
+  if (policy.integration === "expanded") {
+    paths.push(".github/wl-skills-ui/TRIGGER_PROMPTS.md", ".github/wl-skills-ui/README.md");
+    const skills = selectedSkills(mode, profile);
+    for (const editor of editors) {
+      const target = EDITOR_TARGETS[editor];
+      if (target.singleFile) paths.push(singleFilePath(projectRoot, target));
+      else paths.push(...skills.map((skill) => join(target.dir, skill.path.replace(/\//g, "-") + target.ext)));
+    }
   }
+  if (!skillsOnly) paths.push(...["index.html", "public/index.html"].filter((rel) => existsSync(join(projectRoot, rel))));
+  return [...new Set(paths)];
+}
 
-  return [detectEditor(projectRoot)];
+function retireContributions({ projectRoot, desired, state, dryRun }) {
+  for (const rel of Object.keys(state.old.files || {})) {
+    if (desired.has(rel)) continue;
+    const existed = existsSync(join(projectRoot, rel));
+    const removed = removeFileContribution(projectRoot, rel, state.old, dryRun);
+    if (!removed) { console.warn(`  保留旧贡献 ${rel}：本地修改或所有权不明`); continue; }
+    for (const key of ["files", "managedBlocks", "blockAffixes", "managedJson", "managedJsonText", "references"]) delete state[key][rel];
+    if (!dryRun && existed && !existsSync(join(projectRoot, rel))) pruneEmptyContributionDirs(projectRoot, rel);
+  }
+}
+
+function pruneEmptyContributionDirs(projectRoot, rel) {
+  // rmdir only: never recursively delete a host directory or foreign contents.
+  let parent = dirname(join(projectRoot, rel));
+  while (parent !== projectRoot && relative(projectRoot, parent) && !isAbsolute(relative(projectRoot, parent)) && !relative(projectRoot, parent).startsWith("..")) {
+    try { rmdirSync(parent); } catch { break; }
+    parent = dirname(parent);
+  }
 }
 
 /** 读取 skills/ 目录下所有 SKILL.md 文件 */
@@ -550,18 +568,6 @@ function selectedSkills(mode, profile) {
 function singleFilePath(projectRoot, target) {
   return target.singleFile === ".clinerules" && existsSync(join(projectRoot, ".clinerules")) && statSync(join(projectRoot, ".clinerules")).isDirectory()
     ? ".clinerules/wl-skills-ui.md" : target.singleFile;
-}
-
-function preflightInstall({ projectRoot, editors, mode, profile, skillsOnly }) {
-  const paths = [MANIFEST_NAME, GATEWAY_PATH, ".mcp.json", ".wl-ui-profile.json", ".github/wl-skills-ui/TRIGGER_PROMPTS.md", ".github/wl-skills-ui/README.md"];
-  const skills = selectedSkills(mode, profile);
-  for (const editor of editors) {
-    const target = EDITOR_TARGETS[editor];
-    if (target.singleFile) paths.push(singleFilePath(projectRoot, target));
-    else paths.push(...skills.map((skill) => join(target.dir, skill.path.replace(/\//g, "-") + target.ext)));
-  }
-  if (!skillsOnly) paths.push(...["index.html", "public/index.html"].filter((rel) => existsSync(join(projectRoot, rel))));
-  for (const rel of paths) safeFile(projectRoot, rel);
 }
 
 /** 安装 skills 到目标项目（按 mode 过滤）*/
@@ -967,7 +973,6 @@ function installSupportFiles({ projectRoot, dryRun, state }) {
   for (const f of files) {
     if (writeOwnedFile({ root: projectRoot, rel: f.rel, content: f.content, state, dryRun })) installed.push(f.rel);
   }
-  if (writeMcp({ root: projectRoot, state, dryRun })) installed.push(".mcp.json");
   return installed;
 }
 
@@ -1029,21 +1034,20 @@ wl-skills-kit 可选安装，两者分工独立、不强耦合。
 }
 
 function readManifest(projectRoot) {
-  const manifestPath = join(projectRoot, MANIFEST_NAME);
-  if (!existsSync(manifestPath)) return null;
+  const manifestPath = [MANIFEST_NAME, LEGACY_MANIFEST_NAME].map((rel) => join(projectRoot, rel)).find((file) => existsSync(file));
+  if (!manifestPath) return null;
   try {
     const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
     if (!manifest || !manifest.files || typeof manifest.files !== "object" || Array.isArray(manifest.files)) return null;
     for (const rel of [...Object.keys(manifest.files), ...Object.keys(manifest.contributions || {})]) {
-      if (isAbsolute(rel) || rel.split(/[\\/]/).includes("..")) return null;
-      if (existsSync(join(projectRoot, rel)) && statSync(join(projectRoot, rel)).isDirectory()) {
+      if (safeFile(projectRoot, rel, { manifestRecord: true }) === null) {
         delete manifest.files[rel];
         delete manifest.managedBlocks?.[rel];
+        delete manifest.blockAffixes?.[rel];
         delete manifest.contributions?.[rel];
-        continue;
       }
-      safeFile(projectRoot, rel);
     }
+    Object.defineProperty(manifest, MANIFEST_SOURCE, { value: { path: manifestPath, hash: fileHash(manifestPath) } });
     return manifest;
   } catch {
     return null;
@@ -1051,10 +1055,17 @@ function readManifest(projectRoot) {
 }
 
 function writeManifest(projectRoot, data) {
+  mkdirSync(dirname(safeFile(projectRoot, MANIFEST_NAME)), { recursive: true });
   atomicWriteFile(
     join(projectRoot, MANIFEST_NAME),
     `${JSON.stringify(data, null, 2)}\n`,
   );
+}
+
+function retireLegacyManifest(projectRoot, manifest) {
+  const source = manifest?.[MANIFEST_SOURCE];
+  const legacy = safeFile(projectRoot, LEGACY_MANIFEST_NAME);
+  if (source?.path === legacy && existsSync(legacy) && fileHash(legacy) === source.hash) unlinkSync(legacy);
 }
 
 function fileHash(filePath) {
@@ -1067,7 +1078,7 @@ function contentHash(content) {
 }
 
 function runDiff(projectRoot) {
-  const manifest = readManifest(projectRoot);
+  const manifest = prepareMcpManifest(projectRoot, readManifest(projectRoot));
   if (!manifest) {
     console.log(
       `\n[wl-ui diff] 未找到 ${MANIFEST_NAME}，请先执行 wl-ui init。\n`,
@@ -1077,25 +1088,26 @@ function runDiff(projectRoot) {
   const changed = [];
   const missing = [];
   const same = [];
+  const preserved = [];
+  const policy = integrationPolicy.resolveIntegration({ projectRoot, recorded: manifest });
+  const mcpPlan = planMcpInstall(projectRoot, policy, manifest);
+  const mcpPaths = new Set(mcpPlan.files.map((item) => item.path));
   for (const [rel, hash] of Object.entries(manifest.files || {})) {
+    if (mcpPaths.has(rel)) continue;
     const full = join(projectRoot, rel);
     if (!existsSync(full)) missing.push(rel);
     else if (manifest.managedBlocks?.[rel]) {
       const current = extractManagedBlock(readFileSync(full, "utf8"));
       if (contentHash(current) !== manifest.managedBlocks[rel]) changed.push(rel);
       else same.push(rel);
-    } else if (manifest.managedJson?.[rel] && rel === ".mcp.json") {
-      let current = null;
-      try {
-        current = jsonc.getJsoncValue(readFileSync(full, "utf8"), ["mcpServers", "wl-skills-ui"]);
-      } catch {
-        current = null;
-      }
-      if (!current || mcpHasLocalChanges(readFileSync(full, "utf8"), manifest.managedJson[rel], manifest.managedJsonText?.[rel])) {
-        changed.push(rel);
-      } else same.push(rel);
     } else if (fileHash(full) !== hash) changed.push(rel);
     else same.push(rel);
+  }
+  for (const item of mcpPlan.files) {
+    if (item.action === "preserve") preserved.push(item.path);
+    else if (item.action === "write" && item.before === null) missing.push(item.path);
+    else if (["write", "remove"].includes(item.action)) changed.push(item.path);
+    else same.push(item.path);
   }
   for (const [rel, contribution] of Object.entries(manifest.contributions || {})) {
     const full = join(projectRoot, rel);
@@ -1107,8 +1119,10 @@ function runDiff(projectRoot) {
   console.log(`缺失: ${missing.length}`);
   console.log(`内容不同: ${changed.length}`);
   console.log(`相同: ${same.length}\n`);
+  console.log(`MCP 本地保留: ${preserved.length}`);
   printList("缺失文件", missing);
   printList("内容不同", changed);
+  printList("MCP 本地保留", preserved);
 }
 
 function extractManagedHtml(content) {
@@ -1120,6 +1134,8 @@ function extractManagedHtml(content) {
 function removeFileContribution(projectRoot, rel, manifest, dryRun) {
   const full = safeFile(projectRoot, rel);
   if (!existsSync(full)) return true;
+  // Native shared files are removed by the planner, never as whole owned files.
+  if (manifest.managedMcp?.records?.[rel]) return true;
   const content = readFileSync(full, "utf8");
   const blockHash = manifest.managedBlocks?.[rel];
   if (blockHash) {
@@ -1134,21 +1150,7 @@ function removeFileContribution(projectRoot, rel, manifest, dryRun) {
     return true;
   }
   if (rel === ".mcp.json") {
-    const baseline = manifest.managedJson?.[rel];
-    // Legacy manifests may prove whole-file ownership; otherwise shared JSON is read-only.
-    if (!baseline && contentHash(content) !== manifest.files[rel]) return false;
-    const current = jsonc.getJsoncValue(content, ["mcpServers", "wl-skills-ui"]);
-    if (current === undefined) return true;
-    if (baseline && mcpHasLocalChanges(content, baseline, manifest.managedJsonText?.[rel])) return false;
-    if (dryRun) console.log(`  移除 MCP 配置项 ${rel}`);
-    else {
-      let updated = jsonc.setJsoncValue(content, ["mcpServers", "wl-skills-ui"], undefined);
-      const servers = jsonc.getJsoncValue(updated, ["mcpServers"]);
-      if (servers && Object.keys(servers).length === 0) updated = jsonc.setJsoncValue(updated, ["mcpServers"], undefined);
-      // Retain comments and all foreign keys even when this was the last server.
-      atomicWriteFile(full, updated);
-    }
-    return true;
+    return false;
   }
   if (contentHash(content) !== manifest.files[rel]) return false;
   if (dryRun) console.log(`  删除 ${rel}`);
@@ -1172,11 +1174,15 @@ function removeHtmlContribution(projectRoot, rel, contribution, dryRun) {
 }
 
 function runClean(projectRoot, dryRun) {
-  const manifest = readManifest(projectRoot);
+  const manifest = prepareMcpManifest(projectRoot, readManifest(projectRoot));
   if (!manifest) {
     console.log(`\n[wl-ui clean] 未找到有效 ${MANIFEST_NAME}，无需清理。\n`);
     return;
   }
+  const policy = integrationPolicy.resolveIntegration({ projectRoot, recorded: manifest });
+  const mcpPlan = planMcpInstall(projectRoot, policy, manifest, true);
+  const transaction = dryRun ? null : beginInstallTransaction(projectRoot, [...Object.keys(manifest.files), ...Object.keys(manifest.contributions || {}), ...mcpPlan.files.map((item) => item.path), MANIFEST_NAME, LEGACY_MANIFEST_NAME]);
+  try {
   const retained = createState();
   for (const rel of Object.keys(manifest.files)) {
     let removed = false;
@@ -1199,11 +1205,18 @@ function runClean(projectRoot, dryRun) {
       console.warn(`  保留 ${rel}：tokens 托管区块有本地修改`);
     }
   }
+  applyMcpInstall(projectRoot, mcpPlan, retained, dryRun);
   if (!dryRun) {
     if (Object.keys(retained.files).length || Object.keys(retained.contributions).length) {
-      writeManifest(projectRoot, { ...manifest, files: retained.files, managedBlocks: retained.managedBlocks, blockAffixes: retained.blockAffixes, managedJson: retained.managedJson, managedJsonText: retained.managedJsonText, contributions: retained.contributions });
-    } else unlinkSync(join(projectRoot, MANIFEST_NAME));
+      writeManifest(projectRoot, { ...manifest, files: retained.files, managedBlocks: retained.managedBlocks, blockAffixes: retained.blockAffixes, managedJson: retained.managedJson, managedJsonText: retained.managedJsonText, managedMcp: retained.managedMcp, contributions: retained.contributions });
+      retireLegacyManifest(projectRoot, manifest);
+    } else {
+      const source = manifest[MANIFEST_SOURCE];
+      if (source && fileHash(source.path) === source.hash) unlinkSync(source.path);
+    }
   }
+  transaction?.commit();
+  } catch (error) { transaction?.rollback(); throw error; }
   console.log(dryRun ? "\n[DRY-RUN] 未实际删除。\n" : "\n✅ 已清理本包未修改的安装贡献。\n");
 }
 
@@ -1257,9 +1270,17 @@ function runDoctor(projectRoot) {
   console.log(
     `${readManifest(projectRoot) ? "✔" : "⚠"} wl-skills-ui manifest — ${readManifest(projectRoot)?.version || "未安装"}`,
   );
-  console.log(
-    `${existsSync(join(projectRoot, ".mcp.json")) ? "✔" : "⚠"} MCP config — .mcp.json`,
-  );
+  const policy = integrationPolicy.resolveIntegration({ projectRoot, recorded: readManifest(projectRoot) });
+  console.log(`✔ 接入配置 — ${policy.integration}；${policy.hosts.join(", ")}`);
+  for (const rel of hostProfiles.gatewayInstallPaths(PKG.name, policy)) {
+    console.log(`${existsSync(join(projectRoot, rel)) ? "✔" : "⚠"} 技能发现入口 — ${rel}（宿主加载仍需实测）`);
+  }
+  if (policy.mcp) {
+    for (const host of policy.hosts) {
+      const inspected = inspectMcpInstall(projectRoot, host);
+      console.log(`${inspected.status === "configured" ? "✔" : "⚠"} MCP ${host} — ${inspected.status}；${inspected.files.join(", ")}；内容已检查=${inspected.contentsInspected === true}；连接未验证`);
+    }
+  } else console.log("ℹ MCP — 未启用；需要时使用 --mcp");
   console.log(
     `${deps["@agile-team/wl-skills-kit"] || existsSync(join(projectRoot, ".wl-skills-manifest.json")) ? "✔" : "ℹ"} wl-skills-kit bridge — 可选，不强耦合`,
   );
@@ -1277,15 +1298,18 @@ function hasGitStandards(projectRoot, pkg) {
   );
 }
 
-function printInstallSummary({ projectRoot, mode, profile, editor }) {
+function printInstallSummary({ projectRoot, mode, profile, editor, mcp, mcpPlan }) {
+  if (!existsSync(join(projectRoot, "node_modules", PKG.name, "package.json"))) {
+    console.log(`⚠ 入口已生成，但本项目尚未安装本包依赖；请先执行 pnpm add ${PKG.name}@${PKG.version}。任务与样式接入仍待验证，不自动下载 latest。`);
+  }
   console.log("已安装能力：");
   console.log(`  - 编辑器规则：${editor}`);
   console.log(
     `  - UI Skill：${mode === "skin" ? "skin 模式" : "native 全量模式"}`,
   );
   console.log(`  - UI Profile：${profile}`);
-  console.log("  - MCP：wl-skills-ui");
-  console.log("  - 触发提示：.github/wl-skills-ui/TRIGGER_PROMPTS.md");
+  console.log(`  - MCP：${mcp ? `${Object.keys(mcpPlan.records).length} 个宿主配置记录；本地修改或不支持项见诊断；连接未验证` : "按需启用（--mcp）"}`);
+  console.log("  - 使用提示：wl-ui prompts；技能正文按需读取 npm 包");
   if (existsSync(join(projectRoot, ".wl-skills-manifest.json"))) {
     console.log("  - 桥接提醒：检测到 wl-skills-kit，两包独立分工，可组合使用");
   } else {
@@ -1321,7 +1345,7 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
                 公开集成协议：能力目录与统一判定/状态 JSON 信封
   wl-ui init   [--project <path>] [--editor <editor>] [--profile <id>]
                 [--dry-run] [--skills-only]
-                把 skills/ 写入目标项目的 AI 编辑器规则目录
+                默认 compact：按选定宿主写入短入口，技能正文保留在 npm 包
   wl-ui update [--project <path>] [--editor <editor|all>] [--force] [--dry-run]
                 更新已安装编辑器 rules / MCP / 触发提示
   wl-ui diff   [--project <path>]
@@ -1367,7 +1391,11 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
 
 参数：
   --project       项目根目录（默认 .）
-  --editor        指定编辑器：github-copilot | cursor | windsurf | kiro | trae | claude-code | cline | agents-generic | qoder | all
+  --hosts         选择实际宿主（逗号分隔）；优先于 --editor；默认 codex
+                  .agents 技能入口兼容 ZCode；生成 ZCode MCP 须显式 --hosts zcode --mcp
+  --editor        --hosts 的兼容别名；all 必须显式指定
+  --integration   compact（默认）| expanded（显式旧式叶技能副本）
+  --mcp           按需合并本包 MCP；--no-mcp 关闭本包贡献
   --profile       native-element | legacy-jh-element | legacy-jh-ag
   --mode          兼容别名；新接入请使用 --profile
   --layer         scan 过滤：L0/L1/L2/L3/L4（逗号分隔）
@@ -1382,7 +1410,7 @@ wl-ui — @agile-team/wl-skills-ui 统一 CLI v${PKG.version}
 示例：
   npx wl-ui init
   npx wl-ui update --force
-  npx wl-ui update --editor all --force
+  npx wl-ui update --hosts codex,zcode,kilo --force
   npx wl-ui doctor
   npx wl-ui prompts
   npx wl-ui init --profile legacy-jh-element --project /path/to/legacy-project

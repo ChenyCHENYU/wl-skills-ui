@@ -31,7 +31,7 @@ test("scan rejects unknown rules, flags and conflicting scope before checks or r
     assert.equal(report.ok, false);assert.equal(report.error.code, "invalid-input");
     assert.equal(report.executionStatus, "not-executed");assert.equal(report.validationStatus, "unverified");
     assert.deepEqual(report.checkedFiles, []);
-    assert.equal(existsSync(join(root, ".wl-skills-ui/runs")), false, JSON.stringify(args));
+    assert.equal(existsSync(join(root, ".wl-skills/state/ui/runs")), false, JSON.stringify(args));
     assert.equal(readFileSync(join(root, "src/Demo.vue"), "utf8"), source);
   }
 }));
@@ -43,7 +43,7 @@ test("registered single/range rules still expose real failures with caller runId
     const report = JSON.parse(checked.stdout);
     assert.equal(report.runId, "registered-rule");assert.equal(report.validationStatus, "failed");
     assert.ok(report.issues.some(issue => issue.rule === "R038"));
-    assert.equal(existsSync(join(root, ".wl-skills-ui/runs/registered-rule")), true);
+    assert.equal(existsSync(join(root, ".wl-skills/state/ui/runs/registered-rule")), true);
     assert.equal(readFileSync(join(root, "src/Demo.vue"), "utf8"), source);
   }
 }));
@@ -69,7 +69,7 @@ test("MCP uses the same registered selector boundary before execution or records
     const response = JSON.parse(called.stdout);
     assert.equal(response.error.code, -32602);assert.match(response.error.message, /规则.*R999/);
     assert.equal(response.result, undefined);
-    assert.equal(existsSync(join(root, ".wl-skills-ui/runs")), false);
+    assert.equal(existsSync(join(root, ".wl-skills/state/ui/runs")), false);
     assert.equal(readFileSync(join(root, "src/Demo.vue"), "utf8"), source);
   }
 }));

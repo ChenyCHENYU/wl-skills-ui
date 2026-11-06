@@ -10,10 +10,10 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 const SERVER = fileURLToPath(new URL("../../mcp/server.js", import.meta.url));
 const TOOL = "wl_ui_scan";
-const RECORDS = ".wl-skills-ui/runs";
+const RECORDS = ".wl-skills/state/ui/runs";
 const FIRST = { target: "src/views", profile: "native-element", parser: "fast", only: "R005", output: "summary", limit: 1, maxBytes: 4096 };
 const CHANGED = { target: "src/views" };
-const unpack = (r) => JSON.parse(r.result.content[0].text);
+const unpack = (r) => r.result.structuredContent;
 const total = (v) => v.summary.total;
 const next = (v) => v.response.nextResultCursor;
 const stamp = (v) => v.response.snapshotAt;
@@ -70,7 +70,12 @@ test("真实 MCP 续页只读同次快照，不新增回执；重新扫描产生
     const initial = unpack(first);
     assert.ok(total(initial) > 1);
     assert.ok(next(initial));
-    assert.ok(Buffer.byteLength(JSON.stringify({ text: first.result.content[0].text })) <= 4096);
+    assert.ok(Buffer.byteLength(JSON.stringify({ text: first.result.content[1].text })) <= 4096);
+    assert.match(first.result.content[0].text, /本次工具=wl_ui_scan/);
+    assert.doesNotMatch(first.result.content[0].text, /结果续页：/);
+    const summary = unpack(await server.call({ resultCursor: next(initial), output: "summary" }));
+    assert.equal(summary.runId, initial.runId);
+    assert.equal(next(summary), null);
     const before = recordDigest(root, RECORDS);
     for (let i = 0; i < 12; i++) {
       const dir = path.join(root, "src", "views", "page" + i);
@@ -81,11 +86,13 @@ test("真实 MCP 续页只读同次快照，不新增回执；重新扫描产生
     const readPages = async (cursor) => {
       if (!cursor) return 0;
       const response = await server.call({ resultCursor: cursor, limit: 2, maxBytes: 4096 });
+      assert.match(response.result.content[0].text, /结果续页：只读取原快照，未重新执行或新增检查/);
       assert.equal(response.result._meta, undefined);
       const view = unpack(response);
       assert.equal(view.displayOnly, true); assert.equal(total(view), total(initial));
+      assert.equal(view.runId, initial.runId); assert.equal(view.receiptPath, initial.receiptPath);
       assert.equal(stamp(view), stamp(initial));
-      assert.ok(Buffer.byteLength(JSON.stringify({ text: response.result.content[0].text })) <= 4096);
+      assert.ok(Buffer.byteLength(JSON.stringify({ text: response.result.content[1].text })) <= 4096);
       pages++;
       assert.ok(pages < 100);
       return returned(view) + await readPages(next(view));

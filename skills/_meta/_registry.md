@@ -28,7 +28,7 @@ L4 runtime  → 业务渲染 API（defineColumns / renderOps / preset）
 | Skill | 覆盖规则 | 说明 |
 | --- | --- | --- |
 | `element/el-table` | R001 R002 R003 R014 | el-table / 列定义统一 |
-| `element/el-form` | R006 R007 R008 | 表单控件 size、宽度、labelWidth |
+| `element/el-form` | R006 R007 R008 R044 R045 | 表单控件、标签预算、平台字段冒号（含 JS/TS 构造器） |
 | `element/el-dialog` | R011 R015 | 弹窗分页 + 嵌套表格按钮 |
 | `element/el-tag` | R009 R010 R019 R020 | 状态/分类/编号/字典列 |
 | `element/component-family` | R031–R037 | 首批 B 端高频组件族聚合治理（card/tabs/descriptions/tree/drawer/upload/steps/overlay/navigation/feedback） |
@@ -84,7 +84,7 @@ L4 runtime  → 业务渲染 API（defineColumns / renderOps / preset）
 
 ## 多编辑器适配
 
-详见 [`_compat/README`](../_compat/README.md)：支持 GitHub Copilot / Cursor / Windsurf / Kiro / Trae 等。
+详见 [`_compat/README`](_compat/README.md)：支持 GitHub Copilot / Cursor / Windsurf / Kiro / Trae 等。
 
 ## 扩展机制
 

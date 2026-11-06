@@ -148,7 +148,7 @@ export default defineConfig({
 
 **目标**：在 AI 写出新代码的那一刻就让它**对齐 rules.json**，而不是事后扫描。
 
-- 编辑器接入：`npx wl-ui init` 会把 `.cursor/rules` / `.windsurf/rules` 等指向 `skills/` 目录
+- 编辑器接入：`npx wl-ui init` 默认 compact，只为配置选定的宿主生成短入口，技能正文从包内 `skills/` 按需读取；旧式叶技能输出需显式 `--integration expanded`
 - AI 强约束（写入 SKILL 头部）：
   - 任何样式相关结论必须先通过 MCP `wl_ui_describe_rule` 查 `standards/rules.json`
   - **禁止**在业务 SFC 的 `<style scoped>` 中覆盖 `.el-*` / `.jh-*` 全局选择器；样式补丁全部归 wl-skills-ui 升级

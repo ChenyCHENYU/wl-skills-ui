@@ -36,7 +36,7 @@ test("raw JSON-RPC envelopes, explicit null IDs and notifications preserve stdio
     }
     assert.deepEqual(replies.at(-2), { jsonrpc: "2.0", id: null, result: {} });
     assert.deepEqual(replies.at(-1), { jsonrpc: "2.0", id: "alive", result: {} });
-    assert.equal(existsSync(join(root, ".wl-skills-ui/runs")), false);
+    assert.equal(existsSync(join(root, ".wl-skills/state/ui/runs")), false);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
@@ -51,7 +51,7 @@ test("MCP dispatch rejects non-string and prototype tool names without execution
     for (let index = 0; index < names.length; index++) assert.deepEqual({ id: replies[index].id, code: replies[index].error?.code }, { id: index, code: index < 8 ? -32602 : -32601 });
     assert.equal(replies.at(-2).error?.code, -32601);
     assert.deepEqual(replies.at(-1), { jsonrpc: "2.0", id: "alive", result: {} });
-    assert.equal(existsSync(join(root, ".wl-skills-ui/runs")), false);
+    assert.equal(existsSync(join(root, ".wl-skills/state/ui/runs")), false);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
@@ -75,7 +75,7 @@ test("stdio MCP rejects declared input violations and malformed requests before 
       const expected = response.id === 23 ? -32601 : response.id === null ? -32600 : -32602;
       assert.equal(response.error?.code, expected, JSON.stringify(response));
     }
-    assert.equal(existsSync(join(root, ".wl-skills-ui/runs")), false);
+    assert.equal(existsSync(join(root, ".wl-skills/state/ui/runs")), false);
     assert.equal(existsSync(join(root, ".wl-snapshot")), false);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
@@ -105,7 +105,7 @@ test("stdio MCP rejects project, target and exempt links outside its physical ro
       assert.match(response.result.content[0].text, /必须位于项目根目录内/);
       assert.equal(response.result._meta, undefined);
     }
-    for (const directory of [root, outside]) assert.equal(existsSync(join(directory, ".wl-skills-ui/runs")), false);
+    for (const directory of [root, outside]) assert.equal(existsSync(join(directory, ".wl-skills/state/ui/runs")), false);
     assert.equal(readFileSync(join(outside, "src/Outside.vue"), "utf8"), source);
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
@@ -123,9 +123,9 @@ test("stdio MCP accepts an explicitly configured root alias and project aliases 
     const responses = callTools(join(base, "configured-root"), [scanMessage(1, { project: "app-alias" }), scanMessage(2, { project: "..notes" })]);
     for (const response of responses) {
       assert.equal(response.result?.isError, false, JSON.stringify(response));
-      assert.equal(JSON.parse(response.result.content[0].text).summary.fileCount, 1);
+      assert.equal(response.result.structuredContent.summary.fileCount, 1);
       assert.equal(response.result._meta.wlExecution.executionStatus, "completed");
     }
-    assert.equal(existsSync(join(root, "app/.wl-skills-ui/runs")), true);
+    assert.equal(existsSync(join(root, "app/.wl-skills/state/ui/runs")), true);
   } finally { rmSync(base, { recursive: true, force: true }); }
 });

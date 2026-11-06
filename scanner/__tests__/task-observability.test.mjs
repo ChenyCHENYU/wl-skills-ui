@@ -139,11 +139,17 @@ describe("UI real execution evidence", () => {
     const response = spawnSync(process.execPath, [join(packageRoot, "mcp/server.js")], { cwd: root, encoding: "utf8", timeout: 30000, env: { ...process.env, WL_PROJECT_ROOT: root }, input: `${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "wl_ui_scan", arguments: { target: "src", runId: "mcp-real-check", output: "summary" } } })}\n` });
     assert.equal(response.status, 0, response.stderr);
     const result = JSON.parse(response.stdout).result;
-    const report = JSON.parse(result.content[0].text);
+    const report = result.structuredContent;
     assert.equal(result.isError, false);
     assert.equal(report.executionStatus, "completed");
     assert.equal(report.validationStatus, "failed");
     assert.equal(report.runId, "mcp-real-check");
     assert.equal(result._meta.wlExecution.runId, report.runId);
+    assert.match(result.content[0].text, /ui@/);
+    assert.match(result.content[0].text, /本次工具=wl_ui_scan/);
+    assert.match(result.content[0].text, /实际工具：MCP wl_ui_scan/u);
+    assert.match(result.content[0].text, /runId=mcp-real-check/);
+    assert.match(result.content[0].text, /验证=failed/);
+    assert.deepEqual(JSON.parse(result.content[1].text), result.structuredContent);
   });
 });

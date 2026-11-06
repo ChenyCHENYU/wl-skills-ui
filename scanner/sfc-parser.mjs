@@ -61,6 +61,7 @@ function parseFast(source) {
     const attributes = parseAttributes(match[0]);
     const block = {
       text: source.slice(opening.lastIndex, end.contentEnd),
+      offset: opening.lastIndex,
       lineOffset: lineOffsetAt(source, opening.lastIndex),
       ...attributes,
     };
@@ -73,6 +74,7 @@ function parseFast(source) {
   if (!blocks.template) {
     blocks.template = {
       text: source,
+      offset: 0,
       lineOffset: 0,
       lang: null,
       scoped: false,
@@ -112,6 +114,7 @@ function fromCompilerBlock(source, block) {
   const offset = block.loc?.start?.offset ?? source.indexOf(block.content);
   return {
     text: block.content,
+    offset: Math.max(0, offset),
     lineOffset: lineOffsetAt(source, Math.max(0, offset)),
     lang: block.lang || null,
     scoped: Boolean(block.scoped),
@@ -133,6 +136,7 @@ function parseWithCompiler(source, filename, resolvedCompiler) {
     template:
       fromCompilerBlock(source, descriptor.template) || {
         text: source,
+        offset: 0,
         lineOffset: 0,
         lang: null,
         scoped: false,

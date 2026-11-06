@@ -5,7 +5,7 @@ description: |
 applyTo: "**/*.vue"
 ---
 
-# Skill: vendors/unknown-wrapper
+# 未知组件的 DOM 探测与诊断
 
 > 兜底探测器 — 当组件不属于已知任何 vendor 时启用
 

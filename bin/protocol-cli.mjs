@@ -21,7 +21,7 @@ const BIN = "wl-ui";
 const OPERATIONS = [
   { id: "route", summary: "只读任务判定：视觉/样式域技能、约束、歧义与缺口", readOnly: true, required: ["task"], optional: ["context", "targets", "profile", "skill", "projectRoot"], sideEffects: "无写入", mapping: `${BIN} route --text "<task>"` },
   { id: "explain", summary: "解释本次任务判定（只读，不记录）", readOnly: true, required: ["task"], optional: ["context", "targets", "projectRoot"], sideEffects: "无写入", mapping: `${BIN} explain --text "<task>"` },
-  { id: "task", summary: "判定并持久化任务计划（尚未执行扫描或修复）", readOnly: false, required: ["task"], optional: ["context", "runId", "targets", "profile", "projectRoot"], sideEffects: "写入 .wl-skills-ui/runs/ 下本包任务记录", mapping: `${BIN} task --text "<task>" [--run-id <id>]` },
+  { id: "task", summary: "判定并持久化任务计划（尚未执行扫描或修复）", readOnly: false, required: ["task"], optional: ["context", "runId", "targets", "profile", "projectRoot"], sideEffects: "写入 .wl-skills/state/ui/runs/ 下本包任务记录", mapping: `${BIN} task --text "<task>" [--run-id <id>]` },
   { id: "status", summary: "读取本包执行/校验记录与新鲜度", readOnly: true, required: [], optional: ["runId", "projectRoot"], sideEffects: "无写入", mapping: `${BIN} status [--run-id <id>]` },
   { id: "doctor-host", summary: "宿主入口静态诊断（不证明宿主已加载）", readOnly: true, required: [], optional: ["host", "projectRoot"], sideEffects: "无写入", mapping: `${BIN} doctor-host [--host <host>]` },
 ];
@@ -32,7 +32,7 @@ function buildInventory() {
   const loadErrors = [];
   try {
     for (const skill of taskCatalog()) {
-      skills.push({ id: skill.id, description: skill.description, triggers: skill.triggers, status: skill.status, entry: skill.path, execution: "instructional" });
+      skills.push({ id: skill.id, name: skill.name, description: skill.description, triggers: skill.triggers, status: skill.status, entry: skill.path, resourceId: skill.path, resourcePath: skill.resourcePath, execution: "instructional" });
     }
   } catch (error) {
     loadErrors.push(`skills 加载失败：${error.message}`);
